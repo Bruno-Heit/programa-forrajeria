@@ -1,0 +1,14 @@
+# carpetas
+__pycache__/
+
+# archivos .py
+test.py
+
+# archivos de compilación
+*.o
+*.pyc
+*.class
+
+# archivos temporales/de tiempos de ejecución
+*.log
+*.tmp
