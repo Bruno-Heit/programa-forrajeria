@@ -9,12 +9,19 @@ El principal objetivo del programa es serle útil al usuario -obviamente- y al m
 
 
 ## TABLA DE CONTENIDOS
+  - [INSTALACIÓN](#-INSTALACIÓN)
+  - [USO](#-USO)
+    - [INVENTARIO](#-INVENTARIO)
+    - [VENTAS](#-VENTAS)
+  - [INFORMACIÓN DEL DESARROLLO](#-INFORMACIÓN-DEL-DESARROLLO)
+  - [FUNCIONES A FUTURO](#-FUNCIONES-A-FUTURO)
+  - [LICENCIA](#-LICENCIA)
 
 ### INSTALACIÓN
 
 ### USO
 El software se divide en 3 partes principales:
-  - **INVENTARIO**  
+  #### **INVENTARIO**  
   La sección de Inventario sirve para mostrar los productos disponibles junto con algunos datos de interés como se muestra en la imagen siguiente.
   ![inventario ejemplo prueba datos tabla](images/sct_inventory.png)
     - **MUESTRA DE DATOS**:  
@@ -28,8 +35,8 @@ El software se divide en 3 partes principales:
     - **AGREGADO DE DATOS**:
       Por el contrario, para agregar datos nuevos es necesario presionar el botón azul *"Nuevo producto"*, lo que hará que se muestre un diálogo que pida varios datos
       sobre el nuevo producto. Para finalizar, simplemente presionar *"Aceptar"* y, ¡listo!. El producto fue creado exitosamente.
-  - **VENTAS**  
-  - **CUENTAS CORRIENTES** (aún no en funcionamiento)
+  #### **VENTAS**  
+  #### **CUENTAS CORRIENTES** (aún no en funcionamiento)
 
 
 ### INFORMACIÓN DEL DESARROLLO
