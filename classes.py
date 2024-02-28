@@ -311,6 +311,8 @@ class SaleDialog(QDialog):
         self.saleDialog_ui = Ui_saleDialog()
         self.saleDialog_ui.setupUi(self)
 
+        self.setWindowTitle("Nueva venta")
+
         self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setText("Aceptar")
         # desactiva desde el principio el botón "Aceptar"
         self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
