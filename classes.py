@@ -2,11 +2,11 @@ from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QLineEdit, QCompleter,
                                QWidget, QVBoxLayout)
 from PySide6.QtCore import (QRegularExpression, QObject, Qt, Signal, QSize)
 from PySide6.QtGui import (QRegularExpressionValidator, QIntValidator, QIcon)
-from ui_productDialog import Ui_Dialog
-from ui_saleDialog import Ui_saleDialog
-from ui_listproduct import Ui_listProduct
-from ui_debtorDataDialog import Ui_debtorDataDialog
-from ui_debtsTable_debtorDetails import Ui_debtorDetails
+from ui.ui_productDialog import Ui_Dialog
+from ui.ui_saleDialog import Ui_saleDialog
+from ui.ui_listproduct import Ui_listProduct
+from ui.ui_debtorDataDialog import Ui_debtorDataDialog
+from ui.ui_debtsTable_debtorDetails import Ui_debtorDetails
 from re import (search, Match, sub)
 from functionutils import *
 
