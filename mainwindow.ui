@@ -661,7 +661,7 @@ QCalendarWidget QToolButton:pressed {
           <enum>QTabWidget::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>1</number>
          </property>
          <property name="elideMode">
           <enum>Qt::ElideMiddle</enum>
@@ -1946,8 +1946,8 @@ border-right: 1px solid #111;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>155</width>
-                <height>184</height>
+                <width>756</width>
+                <height>498</height>
                </rect>
               </property>
               <attribute name="label">

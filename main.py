@@ -126,7 +126,7 @@ class MainWindow(QMainWindow):
         # así que en cada caso se debe verificar si se está llenando la tabla con ó sin el uso de esa barra de búsqueda.
 
         # desactiva el ordenamiento (causa que los valores se inserten mal)
-        tableWidget.setSortingEnabled(False)
+        # tableWidget.setSortingEnabled(False)
 
         match tableWidget.objectName():
             case "displayTable":
@@ -194,7 +194,7 @@ class MainWindow(QMainWindow):
                 self.__fillDebtsTable()
     
         # vuelve a activar el ordenamiento
-        tableWidget.setSortingEnabled(True)
+        # tableWidget.setSortingEnabled(True)
         return None
 
 
@@ -305,7 +305,7 @@ class MainWindow(QMainWindow):
         # remueve los widgets de las celdas (para que se puedan modificar sólo una vez al mismo tiempo las comboboxes)
         removeTableCellsWidgets(tableWidget)
         # vuelve a activar el ordenamiento de la tabla
-        tableWidget.setSortingEnabled(True)
+        # tableWidget.setSortingEnabled(True)
         return None
 
 
@@ -392,7 +392,7 @@ class MainWindow(QMainWindow):
         
         removeTableCellsWidgets(tableWidget)
         # vuelvo a activar el ordenamiento de la tabla
-        tableWidget.setSortingEnabled(True)
+        # tableWidget.setSortingEnabled(True)
         return None
 
 
@@ -420,7 +420,7 @@ class MainWindow(QMainWindow):
         combobox:QComboBox
         lineedit:QLineEdit
         # desactivo el ordenamiento de la tabla
-        tableWidget.setSortingEnabled(False)
+        # tableWidget.setSortingEnabled(False)
 
         if tableWidget.editTriggers() != QAbstractItemView.EditTrigger.NoEditTriggers:
             curr_text = tableWidget.item(curr_index.row(), curr_index.column()).text()
