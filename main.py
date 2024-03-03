@@ -1,10 +1,10 @@
 import sys
 from PySide6.QtWidgets import (QApplication, QMainWindow, QLineEdit, 
                                QCheckBox, QAbstractItemView, QDateTimeEdit, 
-                               QTabWidget, QListWidgetItem)
+                               QListWidgetItem)
 from PySide6.QtCore import (QModelIndex, Qt)
 from PySide6.QtGui import (QIntValidator, QRegularExpressionValidator)
-from ui_mainwindow import Ui_MainWindow
+from ui.ui_mainwindow import Ui_MainWindow
 from functionutils import *
 from classes import (ProductDialog, SaleDialog, ListItem, DebtorDataDialog, DebtsTablePersonData)
 from time import perf_counter

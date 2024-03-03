@@ -2,11 +2,11 @@ from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QLineEdit, QCompleter,
                                QWidget, QVBoxLayout)
 from PySide6.QtCore import (QRegularExpression, QObject, Qt, Signal, QSize)
 from PySide6.QtGui import (QRegularExpressionValidator, QIntValidator, QIcon)
-from ui_productDialog import Ui_Dialog
-from ui_saleDialog import Ui_saleDialog
-from ui_listproduct import Ui_listProduct
-from ui_debtorDataDialog import Ui_debtorDataDialog
-from ui_debtsTable_debtorDetails import Ui_debtorDetails
+from ui.ui_productDialog import Ui_Dialog
+from ui.ui_saleDialog import Ui_saleDialog
+from ui.ui_listproduct import Ui_listProduct
+from ui.ui_debtorDataDialog import Ui_debtorDataDialog
+from ui.ui_debtsTable_debtorDetails import Ui_debtorDetails
 from re import (search, Match, sub)
 from functionutils import *
 
@@ -311,6 +311,8 @@ class SaleDialog(QDialog):
         self.saleDialog_ui = Ui_saleDialog()
         self.saleDialog_ui.setupUi(self)
 
+        self.setWindowTitle("Nueva venta")
+
         self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setText("Aceptar")
         # desactiva desde el principio el botón "Aceptar"
         self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
@@ -398,7 +400,7 @@ class SaleDialog(QDialog):
     def __getProductTotalCost(self, productName:str, quantity:int, is_comercial_price:bool) -> float:
         '''Hace una consulta SELECT a la base de datos y obtiene el precio (unitario o comercial) del producto. 
         Retorna un 'float'.'''
-        conn = createConnection("inventario.db")
+        conn = createConnection("database/inventario.db")
         if not conn:
             return None
         cursor = conn.cursor()
@@ -421,7 +423,7 @@ class SaleDialog(QDialog):
         stock:int | float
         measurement_unit:str
 
-        conn = createConnection("inventario.db")
+        conn = createConnection("database/inventario.db")
         if not conn:
             return None
         cursor = conn.cursor()
