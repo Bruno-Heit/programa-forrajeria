@@ -400,7 +400,7 @@ class SaleDialog(QDialog):
     def __getProductTotalCost(self, productName:str, quantity:int, is_comercial_price:bool) -> float:
         '''Hace una consulta SELECT a la base de datos y obtiene el precio (unitario o comercial) del producto. 
         Retorna un 'float'.'''
-        conn = createConnection("inventario.db")
+        conn = createConnection("database/inventario.db")
         if not conn:
             return None
         cursor = conn.cursor()
@@ -423,7 +423,7 @@ class SaleDialog(QDialog):
         stock:int | float
         measurement_unit:str
 
-        conn = createConnection("inventario.db")
+        conn = createConnection("database/inventario.db")
         if not conn:
             return None
         cursor = conn.cursor()
