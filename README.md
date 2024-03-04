@@ -23,6 +23,7 @@ El principal objetivo del programa es serle útil al usuario -obviamente💢- y 
 
 ### <ins>INSTALACIÓN</ins>
 
+<hr>
 <br>
 
 ### <ins>USO</ins>
@@ -30,7 +31,7 @@ El software se divide en 3 partes principales:
   #### <ins>**INVENTARIO**</ins>  
   La sección de **INVENTARIO** sirve para mostrar los productos disponibles junto con algunos datos de interés como se muestra en la imagen siguiente.
   ![inventario ejemplo prueba datos tabla](images/sct_inventory.png)  
-    - <ins>**MUESTRA DE DATOS**:</ins>  
+    - **<ins>MUESTRA DE DATOS</ins>**:  
       Se pueden mostrar los datos principalmente de 2 formas:  
         1. usando la barra de búsqueda que hay encima de la tabla de inventario.  
         2. desde el menú desplegable, al cual se puede acceder haciendo *click* sobre las 3 líneas de la parte superior izquierda.
@@ -45,6 +46,8 @@ El software se divide en 3 partes principales:
     - <ins>**MODIFICACIÓN DE DATOS**:</ins>  
       Para modificar datos sobre algún producto sólo hace falta hacer *doble click* sobre la celda donde esté el dato que se quiere cambiar e ingresar el nuevo valor.  
       Además, se incluye en la sección de **INVENTARIO** un menú desplegable que permite seleccionar uno o más productos e incrementar/decrementar su precio (normal o comercial) a partir de un cierto porcentaje(%) sin necesidad de calcularlos individualmente y de forma manual.
+      Ejemplo de modificación de precios usando porcentajes:  
+      ![modificación precio inventario porcentaje producto](images/sct_inventory_change_perc.png)
   <br>
   
   #### <ins>**VENTAS**</ins>  
@@ -63,12 +66,14 @@ El software se divide en 3 partes principales:
   
   #### <ins>**CUENTAS CORRIENTES**</ins> (aún no en funcionamiento)
 
+<hr>
 <br>
 
 ### <ins>INFORMACIÓN DEL DESARROLLO</ins>
 El programa está desarrollado en ***Python*** en su versión 3.11, usando el framework para desarrollo de *GUIs* ***PySide6***.
 El manejo de bases de datos es llevado a cabo con ***SQLite*** para lograr una mayor rapidez en la ejecución de las consultas.
 
+<hr>
 <br>
 
 ### <ins>FUNCIONES A FUTURO</ins>
@@ -77,8 +82,8 @@ El manejo de bases de datos es llevado a cabo con ***SQLite*** para lograr una m
 - [ ] Implementación de un **sistema de facturación** que permita crear facturas y distribuirlas a los clientes. **(a considerar)**
 - [ ] Implementación de un sistema de pedidos a proveedores y registro de pedidos. **(a considerar)**
 
-<br>
 <hr>
+<br>
 
 ### <ins>LICENCIA</ins>
 Software bajo licencia Apache v2.0.
