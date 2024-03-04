@@ -30,22 +30,18 @@ El software se divide en 3 partes principales:
   #### <ins>**INVENTARIO**</ins>  
   La sección de **INVENTARIO** sirve para mostrar los productos disponibles junto con algunos datos de interés como se muestra en la imagen siguiente.
   ![inventario ejemplo prueba datos tabla](images/sct_inventory.png)  
-  <br>
     - <ins>**MUESTRA DE DATOS**:</ins>  
       Se pueden mostrar los datos principalmente de 2 formas:  
-       1. usando la barra de búsqueda que hay encima de la tabla de inventario.  
-       2. desde el menú desplegable, al cual se puede acceder haciendo *click* sobre las 3 líneas de la parte superior izquierda.
+        1. usando la barra de búsqueda que hay encima de la tabla de inventario.  
+        2. desde el menú desplegable, al cual se puede acceder haciendo *click* sobre las 3 líneas de la parte superior izquierda.
           ![inventario ejemplo prueba datos tabla menu-desplegable](images/sct_inventory_menu_opened.png)
           El menú desplegable permite mostrar productos que pertenezcan a una ***categoría determinada***, o directamente ***mostrarlos todos***.  
-          <br>
     - <ins>**ELIMINACIÓN DE DATOS**:</ins>  
       Para eliminar datos simplemente se deben ***seleccionar los productos que se quieren borrar*** y luego hacer *click* en el botón rojo *"Eliminar producto"*.  
-      <br>
     - <ins>**AGREGADO DE DATOS**:</ins>  
       Por el contrario, para agregar productos nuevos es necesario presionar el botón azul *"Nuevo producto"*, lo que hará que se muestre un diálogo que pida varios datos
       sobre el nuevo producto. Para finalizar, simplemente presionar *"Aceptar"*.  
       ![inventario ejemplo prueba datos producto dialog](images/sct_new_product_dialog.png)  
-      <br>
     - <ins>**MODIFICACIÓN DE DATOS**:</ins>  
       Para modificar datos sobre algún producto sólo hace falta hacer *doble click* sobre la celda donde esté el dato que se quiere cambiar e ingresar el nuevo valor.  
       Además, se incluye en la sección de **INVENTARIO** un menú desplegable que permite seleccionar uno o más productos e incrementar/decrementar su precio (normal o comercial) a partir de un cierto porcentaje(%) sin necesidad de calcularlos individualmente y de forma manual.
