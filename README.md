@@ -48,6 +48,7 @@ El software se divide en 3 partes principales:
       Además, se incluye en la sección de **INVENTARIO** un menú desplegable que permite seleccionar uno o más productos e incrementar/decrementar su precio (normal o comercial) a partir de un cierto porcentaje(%) sin necesidad de calcularlos individualmente y de forma manual.
       Ejemplo de modificación de precios usando porcentajes:  
       ![modificación precio inventario porcentaje producto](images/sct_inventory_change_perc.png)
+      En la imagen de arriba primero se abre el menú usado para cambiar precios usando porcentajes, se selecciona el tipo de precio (normal o comercial), se elige en la tabla qué productos serán modificados y por último se ingresa la cantidad a incrementar/decrementar. Para efectuar los cambios se debe presionar la tecla *enter* en el recuadro con el porcentaje y listo, los cambios se realizan automáticamente.
   <br>
   
   #### <ins>**VENTAS**</ins>  
