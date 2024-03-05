@@ -8,7 +8,7 @@ from ui.ui_listproduct import Ui_listProduct
 from ui.ui_debtorDataDialog import Ui_debtorDataDialog
 from ui.ui_debtsTable_debtorDetails import Ui_debtorDetails
 from re import (search, Match, sub)
-from functionutils import *
+from utils.functionutils import *
 
 # Dialog con datos de un producto
 class ProductDialog(QDialog):

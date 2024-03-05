@@ -5,8 +5,8 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QLineEdit,
 from PySide6.QtCore import (QModelIndex, Qt)
 from PySide6.QtGui import (QIntValidator, QRegularExpressionValidator)
 from ui.ui_mainwindow import Ui_MainWindow
-from functionutils import *
-from classes import (ProductDialog, SaleDialog, ListItem, DebtorDataDialog, DebtsTablePersonData)
+from utils.functionutils import *
+from utils.classes import (ProductDialog, SaleDialog, ListItem, DebtorDataDialog, DebtsTablePersonData)
 from time import perf_counter
 
 class MainWindow(QMainWindow):
