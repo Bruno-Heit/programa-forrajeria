@@ -37,18 +37,23 @@ El software se divide en 3 partes principales:
         2. desde el menú desplegable, al cual se puede acceder haciendo *click* sobre las 3 líneas de la parte superior izquierda.
           ![inventario ejemplo prueba datos tabla menu-desplegable](images/sct_inventory_menu_opened.png)
           El menú desplegable permite mostrar productos que pertenezcan a una ***categoría determinada***, o directamente ***mostrarlos todos***.  
+          <br>
     - <ins>**ELIMINACIÓN DE DATOS**:</ins>  
       Para eliminar datos simplemente se deben ***seleccionar los productos que se quieren borrar*** y luego hacer *click* en el botón rojo *"Eliminar producto"*.  
+      <br>
     - <ins>**AGREGADO DE DATOS**:</ins>  
       Por el contrario, para agregar productos nuevos es necesario presionar el botón azul *"Nuevo producto"*, lo que hará que se muestre un diálogo que pida varios datos
       sobre el nuevo producto. Para finalizar, simplemente presionar *"Aceptar"*.  
       ![inventario ejemplo prueba datos producto dialog](images/sct_new_product_dialog.png)  
+      <br>
     - <ins>**MODIFICACIÓN DE DATOS**:</ins>  
       Para modificar datos sobre algún producto sólo hace falta hacer *doble click* sobre la celda donde esté el dato que se quiere cambiar e ingresar el nuevo valor.  
       Además, se incluye en la sección de **INVENTARIO** un menú desplegable que permite seleccionar uno o más productos e incrementar/decrementar su precio (normal o comercial) a partir de un cierto porcentaje(%) sin necesidad de calcularlos individualmente y de forma manual.
       Ejemplo de modificación de precios usando porcentajes:  
       ![modificación precio inventario porcentaje producto](images/sct_inventory_change_perc.png)
       En la imagen de arriba primero se abre el menú usado para cambiar precios usando porcentajes, se selecciona el tipo de precio (normal o comercial), se elige en la tabla qué productos serán modificados y por último se ingresa la cantidad a incrementar/decrementar. Para efectuar los cambios se debe presionar la tecla *enter* en el recuadro con el porcentaje y listo, los cambios se realizan automáticamente.
+      
+  <br>
   <br>
   
   #### <ins>**VENTAS**</ins>  
@@ -62,7 +67,24 @@ El software se divide en 3 partes principales:
   Tabla de ventas:  
   ![tabla ventas datos-de-ventas productos deudores](images/sct_sales_table.png)
   Lo ideal es que el usuario utilice la sección del *formulario de venta* para concretar ventas a medida que se hacen, pero no es obligatorio, también se pueden realizar usando la tabla.
-  
+  El principal uso de esta tabla es ver las ventas que se han concretado hasta el momento, pero también admite crear ventas nuevas (repito, lo ideal es usar la sección de *formulario de venta*), eliminar ventas o modificar ventas.  
+  <br>
+    - <ins>*MUESTRA DE VENTAS*</ins>:  
+    Las ventas nuevas se muestran automáticamente ni bien se cambia a la pestaña de *tabla de ventas*.  
+    <br>
+    - <ins>*ELIMINACIÓN DE VENTAS*</ins>:  
+    Al igual que en ***inventario***, simplemente hay que seleccionar las ventas que se quieran borrar y presionar el botón "*Eliminar venta*".  
+    *NOTA: ES RECOMENDABLE NO BORRAR VENTAS REALIZADAS. ESTA ACCIÓN NO PRESENTA INCONVENIENTE ALGUNO EN EL FUNCIONAMIENTO DEL PROGRAMA, PERO SIEMPRE ES ÚTIL E INCLUSO IMPORTANTE MANTENER EL REGISTRO DE LAS VENTAS CONCRETADAS.*  
+    <br>
+    - <ins>*AGREGADO DE VENTAS*</ins>:  
+    Nuevamente, se insta al usuario a ingresar nuevas ventas usando el *formulario de venta*. Alternativamente, se pueden agregar ventas nuevas presionando el botón *Nueva venta*. Al hacerlo aparecerá un diálogo como el siguiente pidiendo datos de la venta:  
+    ![nueva-venta venta producto tabla sin-deuda](images/sct_new_sale_dialog_nodebt.png)  
+    ***Los datos obligatorios están marcados con un * (asterisco).***  
+    Si la venta tiene en el recuadro de "*total abonado*" una cantidad diferente al total, se expande el diálogo y se muestra un recuadro como el siguiente:  
+    ![nueva-venta venta producto tabla con-deuda](images/sct_new_sale_dialog_debt.png)  
+    Al haber diferencias en lo abonado y en el costo total se considera deuda/a favor del cliente, y se piden datos de la persona. Nuevamente, ***los campos obligatorios están marcados con un * (asterisco)***.
+    
+  <br>
   <br>
   
   #### <ins>**CUENTAS CORRIENTES**</ins> (aún no en funcionamiento)
@@ -79,6 +101,7 @@ El manejo de bases de datos es llevado a cabo con ***SQLite*** para lograr una m
 
 ### <ins>FUNCIONES A FUTURO</ins>
 - [ ] Las tablas aún no se pueden ordenar, por lo que antes de avanzar con las funciones de abajo pienso realizar esta.
+- [ ] Implementación del **sistema de gestión de cuentas corrientes** (¡las deudas no se pueden cobrar! :scream:)
 - [ ] Implementación de un **sistema de estadísticas** con respecto a los productos más vendidos -y menos vendidos- usando gráficos de barras (por ser valores discretos).
 - [ ] Implementación de un **sistema de facturación** que permita crear facturas y distribuirlas a los clientes. **(a considerar)**
 - [ ] Implementación de un sistema de pedidos a proveedores y registro de pedidos. **(a considerar)**
