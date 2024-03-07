@@ -870,6 +870,7 @@ class ListItem(QWidget):
         self.listWidgetItem = listWidgetItem
         # asigno el ícono para el botón de borrar el item actual
         icon:QIcon = QIcon()
+        # TODO: PYINSTALLER PUDO ENCONTRAR TODAS LAS RUTAS A ÍCONOS, SALVO ESTA. AVERIGÜAR POR QUÉ.
         icon.addFile(pyinstallerCompleteResourcePath("/icons/xWhite.svg"))
         self.listItem.btn_deleteCurrentProduct.setIcon(icon)
         self.listItem.btn_deleteCurrentProduct.setIconSize(QSize(28, 28))

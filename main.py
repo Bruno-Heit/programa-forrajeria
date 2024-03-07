@@ -46,7 +46,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_delete_product_sales.setIcon(icon)
         self.ui.btn_delete_product_sales.setIconSize(QSize(24, 24))
         icon.addFile(pyinstallerCompleteResourcePath("icons/plusWhite.svg"))
-        self.ui.btn_add_debt.setIcon()
+        self.ui.btn_add_debt.setIcon(icon)
         self.ui.btn_add_debt.setIconSize(QSize(24, 24))
         icon.addFile(pyinstallerCompleteResourcePath("icons/minus-circleWhite.svg"))
         self.ui.btn_delete_debt.setIcon(icon)
