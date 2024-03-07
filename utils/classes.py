@@ -868,6 +868,11 @@ class ListItem(QWidget):
         self.listItem.setupUi(self)
         self.listWidget = listWidget
         self.listWidgetItem = listWidgetItem
+        # asigno el ícono para el botón de borrar el item actual
+        icon:QIcon = QIcon()
+        icon.addFile(pyinstallerCompleteResourcePath("/icons/xWhite.svg"))
+        self.listItem.btn_deleteCurrentProduct.setIcon(icon)
+        self.listItem.btn_deleteCurrentProduct.setIconSize(QSize(28, 28))
 
         # cambia el 'objectName' del ListItem
         self.setObjectName(newObjectName)
@@ -1293,7 +1298,7 @@ class DebtsTablePersonData(QWidget):
         self.mainDataWidget.label_full_name.setText(full_name)
 
         icon = QIcon()
-        icon.addFile("icons\chevron-downBlack.svg")
+        icon.addFile(pyinstallerCompleteResourcePath("icons\chevron-downBlack.svg"))
         self.mainDataWidget.btn_expand_info.setIcon(icon)
         self.mainDataWidget.btn_expand_info.setIconSize(QSize(24, 24))
 
@@ -1317,13 +1322,13 @@ class DebtsTablePersonData(QWidget):
         \nRetorna 'None'.'''
         if self.BTN_STATE:
             icon = QIcon()
-            icon.addFile("icons\chevron-downBlack.svg")
+            icon.addFile(pyinstallerCompleteResourcePath("icons\chevron-downBlack.svg"))
             self.mainDataWidget.btn_expand_info.setIcon(icon)
 
             self.BTN_STATE = 0
         else:
             icon = QIcon()
-            icon.addFile("icons\chevron-upBlack.svg")
+            icon.addFile(pyinstallerCompleteResourcePath("icons\chevron-upBlack.svg"))
             self.mainDataWidget.btn_expand_info.setIcon(icon)
             self.__createExpandedDataWidget()
 

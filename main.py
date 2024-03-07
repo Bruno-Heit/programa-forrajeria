@@ -2,12 +2,11 @@ import sys
 from PySide6.QtWidgets import (QApplication, QMainWindow, QLineEdit, 
                                QCheckBox, QAbstractItemView, QDateTimeEdit, 
                                QListWidgetItem)
-from PySide6.QtCore import (QModelIndex, Qt)
-from PySide6.QtGui import (QIntValidator, QRegularExpressionValidator)
+from PySide6.QtCore import (QModelIndex, Qt, QSize)
+from PySide6.QtGui import (QIntValidator, QRegularExpressionValidator, QIcon)
 from ui.ui_mainwindow import Ui_MainWindow
 from utils.functionutils import *
 from utils.classes import (ProductDialog, SaleDialog, ListItem, DebtorDataDialog, DebtsTablePersonData)
-from time import perf_counter
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -21,6 +20,37 @@ class MainWindow(QMainWindow):
         self.ui.label_feedbackInventory.hide()
         self.ui.label_feedbackChangePercentage.hide()
         self.ui.label_feedbackSales.hide()
+        # asigno íconos a los botones
+        icon:QIcon = QIcon()
+        icon.addFile(pyinstallerCompleteResourcePath("icons/menuWhite.svg"))
+        self.ui.btn_side_barToggle.setIcon(icon)
+        self.ui.btn_side_barToggle.setIconSize(QSize(26, 26))
+        self.ui.btn_inventory_sideBarToggle.setIcon(icon)
+        self.ui.btn_inventory_sideBarToggle.setIconSize(QSize(26, 26))
+        icon.addFile(pyinstallerCompleteResourcePath("icons/plusWhite.svg"))
+        self.ui.btn_add_product_inventory.setIcon(icon)
+        self.ui.btn_add_product_inventory.setIconSize(QSize(24, 24))
+        icon.addFile(pyinstallerCompleteResourcePath("icons/minus-circleWhite.svg"))
+        self.ui.btn_delete_product_inventory.setIcon(icon)
+        self.ui.btn_delete_product_inventory.setIconSize(QSize(24, 24))
+        icon.addFile(pyinstallerCompleteResourcePath("icons/plusWhite.svg"))
+        self.ui.btn_add_product.setIcon(icon)
+        self.ui.btn_add_product.setIconSize(QSize(24, 24))
+        icon.addFile(pyinstallerCompleteResourcePath("icons/checkWhite.svg"))
+        self.ui.btn_end_sale.setIcon(icon)
+        self.ui.btn_end_sale.setIconSize(QSize(24, 24))
+        icon.addFile(pyinstallerCompleteResourcePath("icons/plusWhite.svg"))
+        self.ui.btn_add_product_sales.setIcon(icon)
+        self.ui.btn_add_product_sales.setIconSize(QSize(24, 24))
+        icon.addFile(pyinstallerCompleteResourcePath("icons/minus-circleWhite.svg"))
+        self.ui.btn_delete_product_sales.setIcon(icon)
+        self.ui.btn_delete_product_sales.setIconSize(QSize(24, 24))
+        icon.addFile(pyinstallerCompleteResourcePath("icons/plusWhite.svg"))
+        self.ui.btn_add_debt.setIcon()
+        self.ui.btn_add_debt.setIconSize(QSize(24, 24))
+        icon.addFile(pyinstallerCompleteResourcePath("icons/minus-circleWhite.svg"))
+        self.ui.btn_delete_debt.setIcon(icon)
+        self.ui.btn_delete_debt.setIconSize(QSize(24, 24))
 
         # inventario
         setTableWidthPolitics(self.ui.displayTable)

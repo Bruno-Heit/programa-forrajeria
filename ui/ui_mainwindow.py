@@ -181,9 +181,6 @@ class Ui_MainWindow(object):
 "	padding-right: 2px;\n"
 "	padding-bottom: 3px;\n"
 "}")
-        icon = QIcon()
-        icon.addFile(u"icons/menuWhite.svg", QSize(), QIcon.Normal, QIcon.Off)
-        self.btn_side_barToggle.setIcon(icon)
         self.btn_side_barToggle.setIconSize(QSize(32, 32))
 
         self.side_bar_VLayout.addWidget(self.btn_side_barToggle, 0, Qt.AlignLeft|Qt.AlignTop)
@@ -627,9 +624,6 @@ class Ui_MainWindow(object):
         self.btn_add_product_inventory.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">A\u00f1adir un producto nuevo a la lista de productos actual (</span><span style=\" font-size:11pt; font-style:italic;\">+</span><span style=\" font-size:11pt;\">). </span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.btn_add_product_inventory.setText(u"Nuevo producto")
-        icon1 = QIcon()
-        icon1.addFile(u"icons/plusWhite.svg", QSize(), QIcon.Normal, QIcon.Off)
-        self.btn_add_product_inventory.setIcon(icon1)
         self.btn_add_product_inventory.setIconSize(QSize(24, 24))
 #if QT_CONFIG(shortcut)
         self.btn_add_product_inventory.setShortcut(u"+")
@@ -650,9 +644,6 @@ class Ui_MainWindow(object):
 "}\n"
 "")
         self.btn_delete_product_inventory.setText(u"Eliminar producto")
-        icon2 = QIcon()
-        icon2.addFile(u"icons/minus-circleWhite.svg", QSize(), QIcon.Normal, QIcon.Off)
-        self.btn_delete_product_inventory.setIcon(icon2)
         self.btn_delete_product_inventory.setIconSize(QSize(24, 24))
 #if QT_CONFIG(shortcut)
         self.btn_delete_product_inventory.setShortcut(u"Del")
@@ -731,7 +722,6 @@ class Ui_MainWindow(object):
 "	padding-left: 2px;\n"
 "	padding-bottom: 3px;\n"
 "}")
-        self.btn_inventory_sideBarToggle.setIcon(icon)
         self.btn_inventory_sideBarToggle.setIconSize(QSize(32, 32))
 
         self.inventory_sideBar_Vlayout.addWidget(self.btn_inventory_sideBarToggle, 0, Qt.AlignRight|Qt.AlignTop)
@@ -933,7 +923,6 @@ class Ui_MainWindow(object):
         self.btn_add_product = QPushButton(self.add_products)
         self.btn_add_product.setObjectName(u"btn_add_product")
         self.btn_add_product.setMaximumSize(QSize(172, 16777215))
-        self.btn_add_product.setIcon(icon1)
         self.btn_add_product.setIconSize(QSize(24, 24))
 #if QT_CONFIG(shortcut)
         self.btn_add_product.setShortcut(u"+")
@@ -1089,9 +1078,6 @@ class Ui_MainWindow(object):
 #if QT_CONFIG(tooltip)
         self.btn_end_sale.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Guarda los datos de la venta actual y da por terminada la venta (</span><span style=\" font-size:11pt; font-style:italic;\">may\u00fasculas </span><span style=\" font-size:11pt;\">+</span><span style=\" font-size:11pt; font-style:italic;\"> enter</span><span style=\" font-size:11pt;\">).</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        icon3 = QIcon()
-        icon3.addFile(u"icons/checkWhite.svg", QSize(), QIcon.Normal, QIcon.Off)
-        self.btn_end_sale.setIcon(icon3)
         self.btn_end_sale.setIconSize(QSize(24, 24))
 #if QT_CONFIG(shortcut)
         self.btn_end_sale.setShortcut(u"Shift+Return")
@@ -1218,7 +1204,6 @@ class Ui_MainWindow(object):
         self.btn_add_product_sales.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">A\u00f1adir un producto nuevo vendido a la lista de ventas actual (</span><span style=\" font-size:11pt; font-style:italic;\">+</span><span style=\" font-size:11pt;\">).</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.btn_add_product_sales.setText(u"Nueva venta")
-        self.btn_add_product_sales.setIcon(icon1)
         self.btn_add_product_sales.setIconSize(QSize(24, 24))
 #if QT_CONFIG(shortcut)
         self.btn_add_product_sales.setShortcut(u"+")
@@ -1238,7 +1223,6 @@ class Ui_MainWindow(object):
 "	background-color: #faa;\n"
 "}\n"
 "")
-        self.btn_delete_product_sales.setIcon(icon2)
         self.btn_delete_product_sales.setIconSize(QSize(24, 24))
 #if QT_CONFIG(shortcut)
         self.btn_delete_product_sales.setShortcut(u"Del")
@@ -1379,7 +1363,6 @@ class Ui_MainWindow(object):
         self.btn_add_debt.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Agrega una deuda nueva a la tabla (</span><span style=\" font-size:11pt; font-style:italic;\">+</span><span style=\" font-size:11pt;\">).</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.btn_add_debt.setText(u"Nueva deuda")
-        self.btn_add_debt.setIcon(icon1)
         self.btn_add_debt.setIconSize(QSize(24, 24))
 #if QT_CONFIG(shortcut)
         self.btn_add_debt.setShortcut(u"+")
@@ -1400,7 +1383,6 @@ class Ui_MainWindow(object):
 "}\n"
 "")
         self.btn_delete_debt.setText(u"Eliminar deuda")
-        self.btn_delete_debt.setIcon(icon2)
         self.btn_delete_debt.setIconSize(QSize(24, 24))
 #if QT_CONFIG(shortcut)
         self.btn_delete_debt.setShortcut(u"Del")

@@ -114,7 +114,7 @@ def createConnection(db_name:str) -> Connection | None:
     from sqlite3 import connect
     from sqlite3 import Error
     try:
-        connection = connect(db_name)
+        connection = connect(pyinstallerCompleteResourcePath(db_name))
     except Error as e:
         return None
     return connection
