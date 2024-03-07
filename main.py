@@ -24,33 +24,33 @@ class MainWindow(QMainWindow):
         icon:QIcon = QIcon()
         icon.addFile(pyinstallerCompleteResourcePath("icons/menuWhite.svg"))
         self.ui.btn_side_barToggle.setIcon(icon)
-        self.ui.btn_side_barToggle.setIconSize(QSize(26, 26))
+        # self.ui.btn_side_barToggle.setIconSize(QSize(32, 32))
         self.ui.btn_inventory_sideBarToggle.setIcon(icon)
-        self.ui.btn_inventory_sideBarToggle.setIconSize(QSize(26, 26))
+        # self.ui.btn_inventory_sideBarToggle.setIconSize(QSize(32, 32))
         icon.addFile(pyinstallerCompleteResourcePath("icons/plusWhite.svg"))
         self.ui.btn_add_product_inventory.setIcon(icon)
-        self.ui.btn_add_product_inventory.setIconSize(QSize(24, 24))
+        # self.ui.btn_add_product_inventory.setIconSize(QSize(24, 24))
         icon.addFile(pyinstallerCompleteResourcePath("icons/minus-circleWhite.svg"))
         self.ui.btn_delete_product_inventory.setIcon(icon)
-        self.ui.btn_delete_product_inventory.setIconSize(QSize(24, 24))
+        # self.ui.btn_delete_product_inventory.setIconSize(QSize(24, 24))
         icon.addFile(pyinstallerCompleteResourcePath("icons/plusWhite.svg"))
         self.ui.btn_add_product.setIcon(icon)
-        self.ui.btn_add_product.setIconSize(QSize(24, 24))
+        # self.ui.btn_add_product.setIconSize(QSize(24, 24))
         icon.addFile(pyinstallerCompleteResourcePath("icons/checkWhite.svg"))
         self.ui.btn_end_sale.setIcon(icon)
-        self.ui.btn_end_sale.setIconSize(QSize(24, 24))
+        # self.ui.btn_end_sale.setIconSize(QSize(24, 24))
         icon.addFile(pyinstallerCompleteResourcePath("icons/plusWhite.svg"))
         self.ui.btn_add_product_sales.setIcon(icon)
-        self.ui.btn_add_product_sales.setIconSize(QSize(24, 24))
+        # self.ui.btn_add_product_sales.setIconSize(QSize(24, 24))
         icon.addFile(pyinstallerCompleteResourcePath("icons/minus-circleWhite.svg"))
         self.ui.btn_delete_product_sales.setIcon(icon)
-        self.ui.btn_delete_product_sales.setIconSize(QSize(24, 24))
+        # self.ui.btn_delete_product_sales.setIconSize(QSize(24, 24))
         icon.addFile(pyinstallerCompleteResourcePath("icons/plusWhite.svg"))
         self.ui.btn_add_debt.setIcon(icon)
-        self.ui.btn_add_debt.setIconSize(QSize(24, 24))
+        # self.ui.btn_add_debt.setIconSize(QSize(24, 24))
         icon.addFile(pyinstallerCompleteResourcePath("icons/minus-circleWhite.svg"))
         self.ui.btn_delete_debt.setIcon(icon)
-        self.ui.btn_delete_debt.setIconSize(QSize(24, 24))
+        # self.ui.btn_delete_debt.setIconSize(QSize(24, 24))
 
         # inventario
         setTableWidthPolitics(self.ui.displayTable)
@@ -379,9 +379,9 @@ class MainWindow(QMainWindow):
                             # obtiene la expresión para calcular en Deudas el nuevo total_adeudado
                             try:
                                 percentage_diff = (float(lineEdit.text()) - float(prev_text)) * 100 / float(prev_text)
-                                new_debt_term = 1 + percentage_diff / 100
-                            except:
-                                pass
+                            except ZeroDivisionError: # en caso de fallar porque el valor anterior es 0, hago que sea 0.00001
+                                percentage_diff = (float(lineEdit.text()) - float(prev_text)) * 100 / (float(prev_text) + 0.00001)
+                            new_debt_term = 1 + percentage_diff / 100
                             sql = "UPDATE Deudas SET total_adeudado = ROUND(total_adeudado * ?, 2) WHERE IDdeuda IN (SELECT Detalle_Ventas.IDdeuda FROM Detalle_Ventas JOIN Ventas ON Detalle_Ventas.IDventa = Ventas.IDventa WHERE Detalle_Ventas.IDproducto = (SELECT IDproducto FROM Productos WHERE nombre = ?) AND Ventas.detalles_venta LIKE '%(P. NORMAL)%');"
                             # actualiza total_adeudado en Deudas en precios normales
                             makeUpdateQuery(sql, (new_debt_term, tableWidget.item(curr_index.row(), 1).text(),) )
@@ -393,9 +393,9 @@ class MainWindow(QMainWindow):
                                 makeUpdateQuery(sql, params)
                                 try:
                                     percentage_diff = (float(lineEdit.text()) - float(prev_text)) * 100 / float(prev_text)
-                                    new_debt_term = 1 + percentage_diff / 100
-                                except:
-                                    pass
+                                except ZeroDivisionError: # en caso de fallar porque el valor anterior es 0, hago que sea 0.00001
+                                    percentage_diff = (float(lineEdit.text()) - float(prev_text)) * 100 / (float(prev_text) + 0.00001)
+                                new_debt_term = 1 + percentage_diff / 100
                                 sql = sql = "UPDATE Deudas SET total_adeudado = ROUND(total_adeudado * ?, 2) WHERE IDdeuda IN (SELECT Detalle_Ventas.IDdeuda FROM Detalle_Ventas JOIN Ventas ON Detalle_Ventas.IDventa = Ventas.IDventa WHERE Detalle_Ventas.IDproducto = (SELECT IDproducto FROM Productos WHERE nombre = ?) AND Ventas.detalles_venta LIKE '%(P. COMERCIAL)%');"
                                 # actualiza total_adeudado en Deudas en precios comerciales
                                 makeUpdateQuery(sql, (new_debt_term, tableWidget.item(curr_index.row(), 1).text(),) )

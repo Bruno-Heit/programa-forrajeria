@@ -4,6 +4,9 @@ __pycache__/
 # archivos .py
 test.py
 
+# archivos innecesarios
+py_to_exe_config.json
+
 # archivos de compilación
 *.o
 *.pyc
