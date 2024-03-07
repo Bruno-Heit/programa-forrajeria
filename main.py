@@ -179,6 +179,7 @@ class MainWindow(QMainWindow):
 
             case "table_debts":
                 # TODO: declarar consultas sql para también para traer los datos necesarios
+                # TODO: VER VIDEO DE YOUTUBE SOBRE CÓMO RESOLVER PROBLEMAS COMUNES DE PYINSTALLER -> min 14:43
                 if not searchBar:
                     count_sql = "SELECT COUNT(DISTINCT IDdeudor) FROM Deudas;"
                     sql = 'SELECT Detalle_Ventas.*, Deudores.* \

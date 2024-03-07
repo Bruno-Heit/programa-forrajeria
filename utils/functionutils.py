@@ -1,4 +1,6 @@
 # SQLITE3
+import sys
+import os
 from sqlite3 import Connection
 from PySide6.QtWidgets import (QTableWidget, QComboBox, QHeaderView, QTableWidgetItem, QListWidget,
                                QLineEdit, QLabel, QCompleter, QFrame, QWidget, QDateTimeEdit)
@@ -6,6 +8,25 @@ from PySide6.QtCore import (QRegularExpression, QModelIndex, Qt, QPropertyAnimat
                             QEasingCurve, QDateTime, QDate, QTime)
 from PySide6.QtGui import (QRegularExpressionValidator)
 from re import (Match, match, search, sub, IGNORECASE)
+
+
+'''
+La siguiente función sirve para ayudar a pyinstaller a completar el path completo a un archivo, 
+y se tiene que hacer esto porque tiene un error y a veces no puede hacerlo.
+'''
+def pyinstallerCompleteResourcePath(relative_path:str) -> str:
+    '''Obtiene el path completo para el archivo especificado y lo devuelve. Retorna un 'str'.'''
+    base_path:str
+    try:
+        base_path = sys._MEIPASS
+    except AttributeError as e:
+        base_path = os.path.abspath(".")
+        print(e)
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+
 
 # side bars
 def toggleSideBar(side_bar:QFrame, parent:QWidget|QFrame, body:QFrame, max_width:int=250) -> None:
