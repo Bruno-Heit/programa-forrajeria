@@ -14,12 +14,14 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.setWindowTitle("herramienta de gestión - Forrajería Torres")
+        
         # ocultar widgets
         self.ui.side_bar_body.hide()
         self.ui.inventory_side_bar_body.hide()
         self.ui.label_feedbackInventory.hide()
         self.ui.label_feedbackChangePercentage.hide()
         self.ui.label_feedbackSales.hide()
+
         # asigno íconos a los botones
         icon:QIcon = QIcon()
         icon.addFile(pyinstallerCompleteResourcePath("icons/menuWhite.svg"))
