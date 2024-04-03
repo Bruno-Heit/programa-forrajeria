@@ -1,0 +1,12 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="icons">
+        <file alias="menu-white.svg">../icons/menuWhite.svg</file>
+        <file alias="plus-white.svg">../icons/plusWhite.svg</file>
+        <file alias="minus-circle-white.svg">../icons/minus-circleWhite.svg</file>
+        <file alias="check-white.svg">../icons/checkWhite.svg</file>
+        <file alias="chevron-down-black.svg">../icons/chevron-downBlack.svg</file>
+        <file alias="chevron-up-black.svg">../icons/chevron-upBlack.svg</file>
+        <file alias="x-white.svg">../icons/xWhite.svg</file>
+    </qresource>
+</RCC>

@@ -2,13 +2,18 @@ from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QLineEdit, QCompleter,
                                QWidget, QVBoxLayout)
 from PySide6.QtCore import (QRegularExpression, QObject, Qt, Signal, QSize)
 from PySide6.QtGui import (QRegularExpressionValidator, QIntValidator, QIcon)
+
 from ui.ui_productDialog import Ui_Dialog
 from ui.ui_saleDialog import Ui_saleDialog
 from ui.ui_listproduct import Ui_listProduct
 from ui.ui_debtorDataDialog import Ui_debtorDataDialog
 from ui.ui_debtsTable_debtorDetails import Ui_debtorDetails
+
+from resources import (rc_icons)
+
 from re import (search, Match, sub)
 from utils.functionutils import *
+
 
 # Dialog con datos de un producto
 class ProductDialog(QDialog):
@@ -870,9 +875,7 @@ class ListItem(QWidget):
         self.listWidgetItem = listWidgetItem
         # asigno el ícono para el botón de borrar el item actual
         icon:QIcon = QIcon()
-        # obtengo el path al ícono (tengo que volver una carpeta atrás y entrar en 'icons')
-        icon_path:str = "/icons/xWhite.svg"
-        icon.addFile(pyinstallerCompleteResourcePath(icon_path))
+        icon.addFile(":/icons/x-white.svg")
         self.listItem.btn_deleteCurrentProduct.setIcon(icon)
         self.listItem.btn_deleteCurrentProduct.setIconSize(QSize(28, 28))
 

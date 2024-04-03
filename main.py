@@ -1,12 +1,17 @@
 import sys
+
 from PySide6.QtWidgets import (QApplication, QMainWindow, QLineEdit, 
                                QCheckBox, QAbstractItemView, QDateTimeEdit, 
                                QListWidgetItem)
 from PySide6.QtCore import (QModelIndex, Qt, QSize)
 from PySide6.QtGui import (QIntValidator, QRegularExpressionValidator, QIcon)
+
 from ui.ui_mainwindow import Ui_MainWindow
 from utils.functionutils import *
 from utils.classes import (ProductDialog, SaleDialog, ListItem, DebtorDataDialog, DebtsTablePersonData)
+
+from resources import (rc_icons)
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -14,7 +19,6 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.setWindowTitle("herramienta de gestión - Forrajería Torres")
-        
         # ocultar widgets
         self.ui.side_bar_body.hide()
         self.ui.inventory_side_bar_body.hide()
@@ -22,75 +26,57 @@ class MainWindow(QMainWindow):
         self.ui.label_feedbackChangePercentage.hide()
         self.ui.label_feedbackSales.hide()
 
-        # asigno íconos a los botones
-        icon:QIcon = QIcon()
-        icon.addFile(pyinstallerCompleteResourcePath("icons/menuWhite.svg"))
-        self.ui.btn_side_barToggle.setIcon(icon)
-        # self.ui.btn_side_barToggle.setIconSize(QSize(32, 32))
-        self.ui.btn_inventory_sideBarToggle.setIcon(icon)
-        # self.ui.btn_inventory_sideBarToggle.setIconSize(QSize(32, 32))
-        icon.addFile(pyinstallerCompleteResourcePath("icons/plusWhite.svg"))
-        self.ui.btn_add_product_inventory.setIcon(icon)
-        # self.ui.btn_add_product_inventory.setIconSize(QSize(24, 24))
-        icon.addFile(pyinstallerCompleteResourcePath("icons/minus-circleWhite.svg"))
-        self.ui.btn_delete_product_inventory.setIcon(icon)
-        # self.ui.btn_delete_product_inventory.setIconSize(QSize(24, 24))
-        icon.addFile(pyinstallerCompleteResourcePath("icons/plusWhite.svg"))
-        self.ui.btn_add_product.setIcon(icon)
-        # self.ui.btn_add_product.setIconSize(QSize(24, 24))
-        icon.addFile(pyinstallerCompleteResourcePath("icons/checkWhite.svg"))
-        self.ui.btn_end_sale.setIcon(icon)
-        # self.ui.btn_end_sale.setIconSize(QSize(24, 24))
-        icon.addFile(pyinstallerCompleteResourcePath("icons/plusWhite.svg"))
-        self.ui.btn_add_product_sales.setIcon(icon)
-        # self.ui.btn_add_product_sales.setIconSize(QSize(24, 24))
-        icon.addFile(pyinstallerCompleteResourcePath("icons/minus-circleWhite.svg"))
-        self.ui.btn_delete_product_sales.setIcon(icon)
-        # self.ui.btn_delete_product_sales.setIconSize(QSize(24, 24))
-        icon.addFile(pyinstallerCompleteResourcePath("icons/plusWhite.svg"))
-        self.ui.btn_add_debt.setIcon(icon)
-        # self.ui.btn_add_debt.setIconSize(QSize(24, 24))
-        icon.addFile(pyinstallerCompleteResourcePath("icons/minus-circleWhite.svg"))
-        self.ui.btn_delete_debt.setIcon(icon)
-        # self.ui.btn_delete_debt.setIconSize(QSize(24, 24))
-
-        # inventario
+        # políticas de QTableWidgets
         setTableWidthPolitics(self.ui.displayTable)
+        setTableWidthPolitics(self.ui.table_sales_data)
+        setTableWidthPolitics(self.ui.table_debts)
+
+        set_tables_ListWidgetItemsTooltip(self.ui.tables_ListWidget, getCategoriesDescription())
+
+        # validators
         setSearchBarValidator(self.ui.inventory_searchBar)
-        self.categoriesDescriptions:tuple = getCategoriesDescription() # var. de 'tables_ListWidget' que tiene la descrip. de las categorías que se muetran en los tooltips
-        set_tables_ListWidgetItemsTooltip(self.ui.tables_ListWidget, self.categoriesDescriptions)
+        setSearchBarValidator(self.ui.sales_searchBar)
+        setSearchBarValidator(self.ui.debts_searchBar)
+
+        self.ui.lineEdit_percentage_change.setValidator(QIntValidator(-9_999_999, 99_999_999, self.ui.lineEdit_percentage_change))
+        paid_validator = QRegularExpressionValidator("[0-9]{0,9}(\.|,)?[0-9]{0,2}", parent=self.ui.lineEdit_paid)
+        self.ui.lineEdit_paid.setValidator(paid_validator)
+
+        # añade íconos a los widgets
+        self.addIconsToWidgets()
+
+        # variables de inventario
         self.IDs_products:tuple = tuple() # var. de 'displayTable' que tiene los IDs de los productos
         self.cb_categories:list[str] = getProductsCategories()
         
-        validator = QIntValidator(-9_999_999, 99_999_999, self.ui.lineEdit_percentage_change)
-        self.ui.lineEdit_percentage_change.setValidator(validator)
 
-        # ventas
+        # variables de ventas
         self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
-        setTableWidthPolitics(self.ui.table_sales_data)
-        setSearchBarValidator(self.ui.sales_searchBar)
         
         self.IDs_saleDetails:tuple = tuple() # var. de 'table_sales_data' que tiene los IDs de las ventas en Detalle_Ventas
         self.items_objectNames:int = 0 # "ID" en los 'objectName', al crearse un item el nombre se da a partir del contador
         self.VALID_ITEMS:dict[str:bool] = {} # se usa para verificar si todos los ListItems son válidos para habilitar/deshabilitar 'btn_end_sale'
         self.ITEMS_VALUES:dict[str:tuple[str,str,bool,str,str,str,float]] = {} # tiene los valores de cada ListItem
         self.debtor_chosen:tuple[int,str,str] = None # tiene el ID, nombre y apellido del deudor elegido en DebtorDataDialog
-        
-        paid_validator = QRegularExpressionValidator("[0-9]{0,9}(\.|,)?[0-9]{0,2}", parent=self.ui.lineEdit_paid)
-        self.ui.lineEdit_paid.setValidator(paid_validator)
 
-        # deudas
-        setTableWidthPolitics(self.ui.table_debts)
-        setSearchBarValidator(self.ui.debts_searchBar)
+
+        # variables de deudas
         
         # TODO: mostrar deudas
         # TODO: permitir agregar deuda
         # TODO: permitir eliminar deuda
         # TODO: permitir modificar deuda
 
+        # THREAD WORKERS
+        
+
 
 
         #### SEÑALES #####################################################
+        # WORKER THREADS
+        
+
+
         #--- INVENTARIO --------------------------------------------------
         self.ui.btn_side_barToggle.clicked.connect(lambda: toggleSideBar(self.ui.side_bar, self.ui.centralwidget, self.ui.side_bar_body))
         
@@ -143,6 +129,41 @@ class MainWindow(QMainWindow):
 
 
     #### MÉTODOS #####################################################
+    # método que coloca íconos a los widgets
+    def addIconsToWidgets(self) -> None:
+        '''Simplemente le coloca los íconos que le corresponde a cada Widget. Retorna 'None'.'''
+        icon:QIcon = QIcon()
+        icon.addFile(":/icons/menu-white.svg")
+        self.ui.btn_side_barToggle.setIcon(icon)
+        self.ui.btn_inventory_sideBarToggle.setIcon(icon)
+
+        icon.addFile(":/icons/plus-white.svg")
+        self.ui.btn_add_product_inventory.setIcon(icon)
+
+        icon.addFile(":/icons/minus-circle-white.svg")
+        self.ui.btn_delete_product_inventory.setIcon(icon)
+
+        icon.addFile(":/icons/plus-white.svg")
+        self.ui.btn_add_product.setIcon(icon)
+
+        icon.addFile(":/icons/check-white.svg")
+        self.ui.btn_end_sale.setIcon(icon)
+
+        icon.addFile(":/icons/plus-white.svg")
+        self.ui.btn_add_product_sales.setIcon(icon)
+
+        icon.addFile(":/icons/minus-circle-white.svg")
+        self.ui.btn_delete_product_sales.setIcon(icon)
+
+        icon.addFile(":/icons/plus-white.svg")
+        self.ui.btn_add_debt.setIcon(icon)
+
+        icon.addFile(":/icons/minus-circle-white.svg")
+        self.ui.btn_delete_debt.setIcon(icon)
+
+        return None
+
+
     # tablas (READ)
     def handleTableToFill(self, tableWidget:QTableWidget, searchBar:QLineEdit=None, accessed_by_list:bool=False) -> None:
         '''dependiendo del QTableWidget que se tenga que llenar con valores, se encarga de declarar las variables \

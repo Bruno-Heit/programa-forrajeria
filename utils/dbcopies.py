@@ -43,6 +43,7 @@ DIAGRAMA DE ACCESO A REGISTROS:
 import sqlite3
 from sqlite3 import Connection
 from functionutils import (createConnection)
+import os
 
 
 def saveAllDatabaseTables(n_records:int=-1) -> None:
@@ -57,3 +58,11 @@ def saveAllDatabaseTables(n_records:int=-1) -> None:
     # TODO 2: crear función que verifique si todas las tablas existen, sino que las cree.
     # TODO 3: crear función que verifique si todos los archivos de tipo historial.csv existen, sino que los cree.
     # TODO 4: crear función que permita obtener los registros que se borran y mandarlos a cada archivo historial.csv.
+
+
+def verifyDatabaseExistence(db_name:str) -> None:
+    '''Verifica si existe la base de datos 'db_name' y si no existe la crea. 
+    \nRetorna None.'''
+    if not os.path.exists("../database/inventario.db"):
+        # TODO: escribir código para crear base de datos (obtenerlo de sqlite)
+        pass
