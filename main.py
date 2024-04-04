@@ -3,14 +3,17 @@ import sys
 from PySide6.QtWidgets import (QApplication, QMainWindow, QLineEdit, 
                                QCheckBox, QAbstractItemView, QDateTimeEdit, 
                                QListWidgetItem)
-from PySide6.QtCore import (QModelIndex, Qt, QSize)
+from PySide6.QtCore import (QModelIndex, Qt, QSize, QThread)
 from PySide6.QtGui import (QIntValidator, QRegularExpressionValidator, QIcon)
 
-from ui.ui_mainwindow import Ui_MainWindow
+from ui.ui_mainwindow import (Ui_MainWindow)
 from utils.functionutils import *
 from utils.classes import (ProductDialog, SaleDialog, ListItem, DebtorDataDialog, DebtsTablePersonData)
+from utils.workerclasses import *
 
 from resources import (rc_icons)
+
+from typing import (Any)
 
 
 class MainWindow(QMainWindow):
@@ -67,14 +70,9 @@ class MainWindow(QMainWindow):
         # TODO: permitir eliminar deuda
         # TODO: permitir modificar deuda
 
-        # THREAD WORKERS
-        
-
-
 
         #### SEÑALES #####################################################
         # WORKER THREADS
-        
 
 
         #--- INVENTARIO --------------------------------------------------
@@ -166,21 +164,30 @@ class MainWindow(QMainWindow):
 
     # tablas (READ)
     def handleTableToFill(self, tableWidget:QTableWidget, searchBar:QLineEdit=None, accessed_by_list:bool=False) -> None:
-        '''dependiendo del QTableWidget que se tenga que llenar con valores, se encarga de declarar las variables \
-        necesarias y llamar a los métodos necesarios para que se encarguen de llenarlas; dependiendo de cuál tabla \
-        se llenó, obtiene los IDs necesarios y los almacena en 'self.IDs_products' ó 'self.IDs_saleDetails'. \n
-        'searchBar' determina si se usó una barra de búsqueda, y cuál fue.\n
-        \nRetorna 'None'.'''
-        row_count:int
+        '''
+        Dependiendo del QTableWidget que se tenga que llenar con valores, se encarga de declarar las variables 
+        necesarias y llamar a los métodos necesarios para que se encarguen de llenarlas; dependiendo de cuál tabla 
+        se llenó, obtiene los IDs necesarios y los almacena en 'self.IDs_products' ó 'self.IDs_saleDetails'.
+
+        'searchBar' determina si se usó una barra de búsqueda, y cuál fue.
+
+        'accessed_by_list' es un bool que será True si se seleccionó un item desde 'tables_ListWidget', sino False.
+
+        Retorna 'None'.
+        '''
+        
+        count_sql:str
+        count_params:str
+        row_count:int # cantidad de filas para tableWidget
+        sql:str
         params:tuple
-        fill_query:list
+        fill_query:list[Any] # resultado de consulta hecha para llenar tableWidget
+        
+        # TODO: declarar filas de las tablas, llenar las tablas y obtener IDs al final, sino no conecta bien 
+        # TODO: las señales de self.read_worker.
 
-        # NOTE: todas las tablas del programa (son 3) tienen la opción de buscar elementos usando una 'searchBar', 
-        # así que en cada caso se debe verificar si se está llenando la tabla con ó sin el uso de esa barra de búsqueda.
-
-        # desactiva el ordenamiento (causa que los valores se inserten mal)
-        # tableWidget.setSortingEnabled(False)
-
+        #* todas las tablas del programa (son 3) tienen la opción de buscar elementos usando una 'searchBar', 
+        #* así que en cada caso se debe verificar si se está llenando la tabla CON ó SIN el uso de esa barra de búsqueda.
         match tableWidget.objectName():
             case "displayTable":
                 # si se seleccionó una categoría desde 'tables_ListWidget', cambia hacia la pestaña de inventario...
@@ -190,8 +197,9 @@ class MainWindow(QMainWindow):
                 # si no se usa una barra de búsqueda...
                 if not searchBar and accessed_by_list:
                     if self.ui.tables_ListWidget.currentItem().text() == "MOSTRAR TODOS":
+                        count_sql:str = "SELECT COUNT(*) FROM Productos;"
                         sql = "SELECT IDproducto,nombre_categoria,nombre,p.descripcion,stock,unidad_medida,precio_unit,precio_comerc FROM Productos AS p INNER JOIN Categorias AS c WHERE p.IDcategoria=c.IDcategoria;"
-                        row_count = getTableWidgetRowCount()
+                        row_count = getTableWidgetRowCount(count_sql)
                         fill_query = makeReadQuery(sql)
                     else:
                         # cols.: detalle venta, cantidad, producto, costo total, abonado, fecha y hora
@@ -232,7 +240,6 @@ class MainWindow(QMainWindow):
 
             case "table_debts":
                 # TODO: declarar consultas sql para también para traer los datos necesarios
-                # TODO: VER VIDEO DE YOUTUBE SOBRE CÓMO RESOLVER PROBLEMAS COMUNES DE PYINSTALLER -> min 14:43
                 if not searchBar:
                     count_sql = "SELECT COUNT(DISTINCT IDdeudor) FROM Deudas;"
                     sql = 'SELECT Detalle_Ventas.*, Deudores.* \
@@ -246,9 +253,6 @@ class MainWindow(QMainWindow):
                     pass
                 setTableWidgetContent(self.ui.table_debts, row_count, None)
                 self.__fillDebtsTable()
-    
-        # vuelve a activar el ordenamiento
-        # tableWidget.setSortingEnabled(True)
         return None
 
 

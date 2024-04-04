@@ -2,11 +2,13 @@
 import sys
 import os
 from sqlite3 import Connection
+
 from PySide6.QtWidgets import (QTableWidget, QComboBox, QHeaderView, QTableWidgetItem, QListWidget,
                                QLineEdit, QLabel, QCompleter, QFrame, QWidget, QDateTimeEdit)
 from PySide6.QtCore import (QRegularExpression, QModelIndex, Qt, QPropertyAnimation, 
                             QEasingCurve, QDateTime, QDate, QTime)
 from PySide6.QtGui import (QRegularExpressionValidator)
+
 from re import (Match, match, search, sub, IGNORECASE)
 
 
@@ -188,8 +190,11 @@ def setTableWidthPolitics(tableWidget:QTableWidget) -> None:
 
 
 def getTableWidgetRowCount(count_sql:str=None, count_params:tuple=None) -> int:
-    '''Dependiendo del QTableWidget del parámetro, hace una consulta SELECT a la base de datos y obtiene la cantidad 
-    de filas que debe tener la tabla. Retorna la cantidad como 'int'.'''
+    '''
+    Hace una consulta SELECT a la base de datos y obtiene la cantidad de filas que debe tener la tabla. 
+    
+    Retorna la cantidad como 'int'.
+    '''
     row_count:int
     conn = createConnection("database/inventario.db")
     if not conn:
