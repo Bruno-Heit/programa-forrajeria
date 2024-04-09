@@ -20,9 +20,9 @@ from PySide6.QtWidgets import (QAbstractItemView, QAbstractScrollArea, QAbstract
     QButtonGroup, QCheckBox, QDateTimeEdit, QFrame,
     QGridLayout, QHBoxLayout, QHeaderView, QLabel,
     QLineEdit, QListView, QListWidget, QListWidgetItem,
-    QMainWindow, QPushButton, QSizePolicy, QSpacerItem,
-    QTabWidget, QTableWidget, QTableWidgetItem, QToolBox,
-    QVBoxLayout, QWidget)
+    QMainWindow, QProgressBar, QPushButton, QSizePolicy,
+    QSpacerItem, QTabWidget, QTableWidget, QTableWidgetItem,
+    QToolBox, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -459,6 +459,19 @@ class Ui_MainWindow(object):
 "QCalendarWidget QToolButton:pressed {\n"
 "	background-color: #38a3a5;\n"
 "	color: #111;\n"
+"}\n"
+"\n"
+"\n"
+"/* estilos de QProgressBar */\n"
+"QProgressBar {\n"
+"	margin: 0 10px 0 10px;\n"
+"	background-color: rgba(255, 255, 255, 0.6);\n"
+"	border: None;\n"
+"	border-radius: 5px;\n"
+"}\n"
+"QProgressBar::chunk {\n"
+"	background-color: qlineargradient(spread:reflect, x1:0.119, y1:0.426, x2:0.712045, y2:0.926, stop:0.0451977 rgba(84, 137, 172, 255), stop:0.59887 rgba(71, 184, 255, 255));\n"
+"	border-radius: 5px;\n"
 "}")
         self.tabWidget.setTabPosition(QTabWidget.North)
         self.tabWidget.setTabShape(QTabWidget.Rounded)
@@ -492,33 +505,7 @@ class Ui_MainWindow(object):
         self.inventory_display_Vlayout = QVBoxLayout(self.inventory_display)
         self.inventory_display_Vlayout.setSpacing(4)
         self.inventory_display_Vlayout.setObjectName(u"inventory_display_Vlayout")
-        self.inventory_display_Vlayout.setContentsMargins(0, 0, 0, 0)
-        self.label_inventory = QLabel(self.inventory_display)
-        self.label_inventory.setObjectName(u"label_inventory")
-        font2 = QFont()
-        font2.setFamilies([u"Bahnschrift SemiLight SemiConde"])
-        font2.setBold(False)
-        font2.setItalic(False)
-        self.label_inventory.setFont(font2)
-        self.label_inventory.setStyleSheet(u"QLabel {\n"
-"	font: 24px \"Bahnschrift SemiLight SemiConde\";\n"
-"	letter-spacing: 2px;\n"
-"	word-spacing: 2px;\n"
-"	color: rgb(8, 68, 68);\n"
-"	margin-left: 30px;\n"
-"	margin-right: 30px;\n"
-"	border-bottom: 1px solid;\n"
-"	border-color: rgb(11, 126, 127);\n"
-"}")
-        self.label_inventory.setText(u"INVENTARIO")
-        self.label_inventory.setTextFormat(Qt.PlainText)
-        self.label_inventory.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
-        self.label_inventory.setMargin(5)
-        self.label_inventory.setIndent(-1)
-        self.label_inventory.setTextInteractionFlags(Qt.NoTextInteraction)
-
-        self.inventory_display_Vlayout.addWidget(self.label_inventory)
-
+        self.inventory_display_Vlayout.setContentsMargins(0, 8, 0, 0)
         self.inventory_header = QFrame(self.inventory_display)
         self.inventory_header.setObjectName(u"inventory_header")
         self.inventory_header.setFrameShape(QFrame.NoFrame)
@@ -552,6 +539,16 @@ class Ui_MainWindow(object):
 
 
         self.inventory_display_Vlayout.addWidget(self.inventory_header)
+
+        self.inventory_progressbar = QProgressBar(self.inventory_display)
+        self.inventory_progressbar.setObjectName(u"inventory_progressbar")
+        self.inventory_progressbar.setMinimumSize(QSize(0, 12))
+        self.inventory_progressbar.setMaximumSize(QSize(16777215, 12))
+        self.inventory_progressbar.setValue(24)
+        self.inventory_progressbar.setTextVisible(False)
+        self.inventory_progressbar.setFormat(u"%p%")
+
+        self.inventory_display_Vlayout.addWidget(self.inventory_progressbar)
 
         self.displayTable = QTableWidget(self.inventory_display)
         if (self.displayTable.columnCount() < 6):
@@ -873,7 +870,7 @@ class Ui_MainWindow(object):
         self.box1_sales_form_Vlayout = QVBoxLayout(self.box1_sales_form)
         self.box1_sales_form_Vlayout.setSpacing(4)
         self.box1_sales_form_Vlayout.setObjectName(u"box1_sales_form_Vlayout")
-        self.box1_sales_form_Vlayout.setContentsMargins(0, 0, 0, 0)
+        self.box1_sales_form_Vlayout.setContentsMargins(0, 6, 0, 0)
         self.main_form = QFrame(self.box1_sales_form)
         self.main_form.setObjectName(u"main_form")
         self.main_form.setFrameShape(QFrame.StyledPanel)
@@ -882,28 +879,6 @@ class Ui_MainWindow(object):
         self.box1_main_form_Vlayout.setSpacing(4)
         self.box1_main_form_Vlayout.setObjectName(u"box1_main_form_Vlayout")
         self.box1_main_form_Vlayout.setContentsMargins(0, 0, 0, 0)
-        self.label_sales_data = QLabel(self.main_form)
-        self.label_sales_data.setObjectName(u"label_sales_data")
-#if QT_CONFIG(tooltip)
-        self.label_sales_data.setToolTip(u"")
-#endif // QT_CONFIG(tooltip)
-        self.label_sales_data.setStyleSheet(u"QLabel {\n"
-"	font: 24px \"Bahnschrift SemiLight SemiConde\";\n"
-"	letter-spacing: 2px;\n"
-"	word-spacing: 2px;\n"
-"	color: rgb(8, 68, 68);\n"
-"	margin-left: 30px;\n"
-"	margin-right: 30px;\n"
-"	border-bottom: 1px solid;\n"
-"	border-color: rgb(11, 126, 127);\n"
-"}")
-        self.label_sales_data.setText(u"DATOS DE LA VENTA")
-        self.label_sales_data.setTextFormat(Qt.PlainText)
-        self.label_sales_data.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
-        self.label_sales_data.setTextInteractionFlags(Qt.NoTextInteraction)
-
-        self.box1_main_form_Vlayout.addWidget(self.label_sales_data)
-
         self.frame_list = QFrame(self.main_form)
         self.frame_list.setObjectName(u"frame_list")
         self.frame_list.setFrameShape(QFrame.StyledPanel)
@@ -1090,7 +1065,7 @@ class Ui_MainWindow(object):
 
         self.box1_main_form_Vlayout.addWidget(self.end_sale)
 
-        self.box1_main_form_Vlayout.setStretch(1, 10)
+        self.box1_main_form_Vlayout.setStretch(0, 10)
 
         self.box1_sales_form_Vlayout.addWidget(self.main_form)
 
@@ -1101,27 +1076,7 @@ class Ui_MainWindow(object):
         self.box2_sales_Vlayout = QVBoxLayout(self.box2_sales_table)
         self.box2_sales_Vlayout.setSpacing(4)
         self.box2_sales_Vlayout.setObjectName(u"box2_sales_Vlayout")
-        self.box2_sales_Vlayout.setContentsMargins(0, 0, 0, 0)
-        self.label_sales = QLabel(self.box2_sales_table)
-        self.label_sales.setObjectName(u"label_sales")
-        self.label_sales.setStyleSheet(u"QLabel {\n"
-"	font: 24px \"Bahnschrift SemiLight SemiConde\";\n"
-"	letter-spacing: 2px;\n"
-"	word-spacing: 2px;\n"
-"	color: rgb(8, 68, 68);\n"
-"	margin-left: 30px;\n"
-"	margin-right: 30px;\n"
-"	border-bottom: 1px solid;\n"
-"	border-color: rgb(11, 126, 127);\n"
-"}")
-        self.label_sales.setTextFormat(Qt.PlainText)
-        self.label_sales.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
-        self.label_sales.setMargin(5)
-        self.label_sales.setIndent(-1)
-        self.label_sales.setTextInteractionFlags(Qt.NoTextInteraction)
-
-        self.box2_sales_Vlayout.addWidget(self.label_sales)
-
+        self.box2_sales_Vlayout.setContentsMargins(0, 6, 0, 0)
         self.sales_searchBar = QLineEdit(self.box2_sales_table)
         self.sales_searchBar.setObjectName(u"sales_searchBar")
         sizePolicy3.setHeightForWidth(self.sales_searchBar.sizePolicy().hasHeightForWidth())
@@ -1140,6 +1095,16 @@ class Ui_MainWindow(object):
         self.sales_searchBar.setClearButtonEnabled(True)
 
         self.box2_sales_Vlayout.addWidget(self.sales_searchBar, 0, Qt.AlignLeft|Qt.AlignVCenter)
+
+        self.sales_progressbar = QProgressBar(self.box2_sales_table)
+        self.sales_progressbar.setObjectName(u"sales_progressbar")
+        self.sales_progressbar.setMinimumSize(QSize(0, 12))
+        self.sales_progressbar.setMaximumSize(QSize(16777215, 12))
+        self.sales_progressbar.setValue(24)
+        self.sales_progressbar.setTextVisible(False)
+        self.sales_progressbar.setFormat(u"%p%")
+
+        self.box2_sales_Vlayout.addWidget(self.sales_progressbar)
 
         self.table_sales_data = QTableWidget(self.box2_sales_table)
         if (self.table_sales_data.columnCount() < 6):
@@ -1252,36 +1217,17 @@ class Ui_MainWindow(object):
         self.debts_info_Vlayout = QVBoxLayout(self.debts_info)
         self.debts_info_Vlayout.setSpacing(4)
         self.debts_info_Vlayout.setObjectName(u"debts_info_Vlayout")
-        self.debts_info_Vlayout.setContentsMargins(0, 4, 0, 0)
-        self.label_debts = QLabel(self.debts_info)
-        self.label_debts.setObjectName(u"label_debts")
-        self.label_debts.setStyleSheet(u"QLabel {\n"
-"	font: 24px \"Bahnschrift SemiLight SemiConde\";\n"
-"	letter-spacing: 2px;\n"
-"	word-spacing: 2px;\n"
-"	color: rgb(8, 68, 68);\n"
-"	margin-left: 30px;\n"
-"	margin-right: 30px;\n"
-"	border-bottom: 1px solid;\n"
-"	border-color: rgb(11, 126, 127);\n"
-"}")
-        self.label_debts.setText(u"DEUDAS")
-        self.label_debts.setTextFormat(Qt.PlainText)
-        self.label_debts.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
-        self.label_debts.setTextInteractionFlags(Qt.NoTextInteraction)
-
-        self.debts_info_Vlayout.addWidget(self.label_debts)
-
+        self.debts_info_Vlayout.setContentsMargins(0, 8, 0, 0)
         self.debts_searchBar = QLineEdit(self.debts_info)
         self.debts_searchBar.setObjectName(u"debts_searchBar")
         sizePolicy3.setHeightForWidth(self.debts_searchBar.sizePolicy().hasHeightForWidth())
         self.debts_searchBar.setSizePolicy(sizePolicy3)
         self.debts_searchBar.setMinimumSize(QSize(150, 24))
         self.debts_searchBar.setMaximumSize(QSize(500, 24))
-        font3 = QFont()
-        font3.setFamilies([u"Verdana"])
-        font3.setStyleStrategy(QFont.PreferDefault)
-        self.debts_searchBar.setFont(font3)
+        font2 = QFont()
+        font2.setFamilies([u"Verdana"])
+        font2.setStyleStrategy(QFont.PreferDefault)
+        self.debts_searchBar.setFont(font2)
         self.debts_searchBar.setAcceptDrops(False)
 #if QT_CONFIG(tooltip)
         self.debts_searchBar.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Buscar una deuda en la tabla seg\u00fan nombres, caracter\u00edsticas, palabras claves, etc.</span></p></body></html>")
@@ -1295,6 +1241,16 @@ class Ui_MainWindow(object):
         self.debts_searchBar.setClearButtonEnabled(True)
 
         self.debts_info_Vlayout.addWidget(self.debts_searchBar, 0, Qt.AlignLeft|Qt.AlignVCenter)
+
+        self.debts_progressbar = QProgressBar(self.debts_info)
+        self.debts_progressbar.setObjectName(u"debts_progressbar")
+        self.debts_progressbar.setMinimumSize(QSize(0, 12))
+        self.debts_progressbar.setMaximumSize(QSize(16777215, 12))
+        self.debts_progressbar.setValue(24)
+        self.debts_progressbar.setTextVisible(False)
+        self.debts_progressbar.setFormat(u"%p%")
+
+        self.debts_info_Vlayout.addWidget(self.debts_progressbar)
 
         self.table_debts = QTableWidget(self.debts_info)
         if (self.table_debts.columnCount() < 3):
@@ -1470,7 +1426,6 @@ class Ui_MainWindow(object):
         self.dateTimeEdit_sale.setDisplayFormat(QCoreApplication.translate("MainWindow", u"d/M/yyyy HH:mm:ss", None))
         self.btn_end_sale.setText(QCoreApplication.translate("MainWindow", u"Finalizar venta", None))
         self.tab2_toolBox.setItemText(self.tab2_toolBox.indexOf(self.box1_sales_form), QCoreApplication.translate("MainWindow", u"Formulario de venta", None))
-        self.label_sales.setText(QCoreApplication.translate("MainWindow", u"VENTAS", None))
         ___qtablewidgetitem = self.table_sales_data.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"detalle de venta", None));
         ___qtablewidgetitem1 = self.table_sales_data.horizontalHeaderItem(1)

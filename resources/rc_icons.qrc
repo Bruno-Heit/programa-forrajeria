@@ -8,5 +8,7 @@
         <file alias="chevron-down-black.svg">../icons/chevron-downBlack.svg</file>
         <file alias="chevron-up-black.svg">../icons/chevron-upBlack.svg</file>
         <file alias="x-white.svg">../icons/xWhite.svg</file>
+        <file alias="arrow-left-white.svg">../icons/arrow-leftWhite.svg</file>
+        <file alias="arrow-right-white.svg">../icons/arrow-rightWhite.svg</file>
     </qresource>
 </RCC>

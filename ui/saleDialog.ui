@@ -391,26 +391,6 @@ border-right: 1px solid #111;</string>
         <property name="toolTip">
          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fecha y hora de la compra.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; no es necesario que sea exacta, pero por conveniencia debe ser al menos aproximada.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
-        <property name="styleSheet">
-         <string notr="true">QDateTimeEdit {
-	background-color: #fff;
-}
-
-
-QCalendarWidget QAbstractItemView {
-	background-color: #fff;
-	selection-background-color: #38a3a5;
-}
-QCalendarWidget QToolButton {
-	background-color: #22577a;
-	color: #fff;
-}
-QCalendarWidget QToolButton:hover,
-QCalendarWidget QToolButton:pressed {
-	background-color: #38a3a5;
-	color: #111;
-}</string>
-        </property>
         <property name="frame">
          <bool>true</bool>
         </property>

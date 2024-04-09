@@ -267,24 +267,6 @@ class Ui_saleDialog(object):
 #if QT_CONFIG(tooltip)
         self.dateTimeEdit.setToolTip(u"<html><head/><body><p>Fecha y hora de la compra.</p><p><span style=\" font-weight:600; text-decoration: underline;\">NOTA:</span> no es necesario que sea exacta, pero por conveniencia debe ser al menos aproximada.</p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        self.dateTimeEdit.setStyleSheet(u"QDateTimeEdit {\n"
-"	background-color: #fff;\n"
-"}\n"
-"\n"
-"\n"
-"QCalendarWidget QAbstractItemView {\n"
-"	background-color: #fff;\n"
-"	selection-background-color: #38a3a5;\n"
-"}\n"
-"QCalendarWidget QToolButton {\n"
-"	background-color: #22577a;\n"
-"	color: #fff;\n"
-"}\n"
-"QCalendarWidget QToolButton:hover,\n"
-"QCalendarWidget QToolButton:pressed {\n"
-"	background-color: #38a3a5;\n"
-"	color: #111;\n"
-"}")
         self.dateTimeEdit.setFrame(True)
         self.dateTimeEdit.setButtonSymbols(QAbstractSpinBox.UpDownArrows)
         self.dateTimeEdit.setProperty("showGroupSeparator", False)

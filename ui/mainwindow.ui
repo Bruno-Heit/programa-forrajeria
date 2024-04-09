@@ -648,6 +648,19 @@ QCalendarWidget QToolButton:hover,
 QCalendarWidget QToolButton:pressed {
 	background-color: #38a3a5;
 	color: #111;
+}
+
+
+/* estilos de QProgressBar */
+QProgressBar {
+	margin: 0 10px 0 10px;
+	background-color: rgba(255, 255, 255, 0.6);
+	border: None;
+	border-radius: 5px;
+}
+QProgressBar::chunk {
+	background-color: qlineargradient(spread:reflect, x1:0.119, y1:0.426, x2:0.712045, y2:0.926, stop:0.0451977 rgba(84, 137, 172, 255), stop:0.59887 rgba(71, 184, 255, 255));
+	border-radius: 5px;
 }</string>
          </property>
          <property name="tabPosition">
@@ -746,7 +759,7 @@ QCalendarWidget QToolButton:pressed {
                   <number>0</number>
                  </property>
                  <property name="topMargin">
-                  <number>0</number>
+                  <number>8</number>
                  </property>
                  <property name="rightMargin">
                   <number>0</number>
@@ -754,49 +767,6 @@ QCalendarWidget QToolButton:pressed {
                  <property name="bottomMargin">
                   <number>0</number>
                  </property>
-                 <item>
-                  <widget class="QLabel" name="label_inventory">
-                   <property name="font">
-                    <font>
-                     <family>Bahnschrift SemiLight SemiConde</family>
-                     <pointsize>-1</pointsize>
-                     <weight>50</weight>
-                     <italic>false</italic>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">QLabel {
-	font: 24px &quot;Bahnschrift SemiLight SemiConde&quot;;
-	letter-spacing: 2px;
-	word-spacing: 2px;
-	color: rgb(8, 68, 68);
-	margin-left: 30px;
-	margin-right: 30px;
-	border-bottom: 1px solid;
-	border-color: rgb(11, 126, 127);
-}</string>
-                   </property>
-                   <property name="text">
-                    <string notr="true">INVENTARIO</string>
-                   </property>
-                   <property name="textFormat">
-                    <enum>Qt::PlainText</enum>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignBottom|Qt::AlignHCenter</set>
-                   </property>
-                   <property name="margin">
-                    <number>5</number>
-                   </property>
-                   <property name="indent">
-                    <number>-1</number>
-                   </property>
-                   <property name="textInteractionFlags">
-                    <set>Qt::NoTextInteraction</set>
-                   </property>
-                  </widget>
-                 </item>
                  <item>
                   <widget class="QFrame" name="inventory_header">
                    <property name="frameShape">
@@ -874,6 +844,31 @@ QCalendarWidget QToolButton:pressed {
                      </widget>
                     </item>
                    </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QProgressBar" name="inventory_progressbar">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>12</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>12</height>
+                    </size>
+                   </property>
+                   <property name="value">
+                    <number>24</number>
+                   </property>
+                   <property name="textVisible">
+                    <bool>false</bool>
+                   </property>
+                   <property name="format">
+                    <string notr="true">%p%</string>
+                   </property>
                   </widget>
                  </item>
                  <item>
@@ -1479,7 +1474,7 @@ color: #111;</string>
                 <number>0</number>
                </property>
                <property name="topMargin">
-                <number>0</number>
+                <number>6</number>
                </property>
                <property name="rightMargin">
                 <number>0</number>
@@ -1495,7 +1490,7 @@ color: #111;</string>
                  <property name="frameShadow">
                   <enum>QFrame::Raised</enum>
                  </property>
-                 <layout class="QVBoxLayout" name="box1_main_form_Vlayout" stretch="0,10,0,0">
+                 <layout class="QVBoxLayout" name="box1_main_form_Vlayout" stretch="10,0,0">
                   <property name="spacing">
                    <number>4</number>
                   </property>
@@ -1511,37 +1506,6 @@ color: #111;</string>
                   <property name="bottomMargin">
                    <number>0</number>
                   </property>
-                  <item>
-                   <widget class="QLabel" name="label_sales_data">
-                    <property name="toolTip">
-                     <string notr="true"/>
-                    </property>
-                    <property name="styleSheet">
-                     <string notr="true">QLabel {
-	font: 24px &quot;Bahnschrift SemiLight SemiConde&quot;;
-	letter-spacing: 2px;
-	word-spacing: 2px;
-	color: rgb(8, 68, 68);
-	margin-left: 30px;
-	margin-right: 30px;
-	border-bottom: 1px solid;
-	border-color: rgb(11, 126, 127);
-}</string>
-                    </property>
-                    <property name="text">
-                     <string notr="true">DATOS DE LA VENTA</string>
-                    </property>
-                    <property name="textFormat">
-                     <enum>Qt::PlainText</enum>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignBottom|Qt::AlignHCenter</set>
-                    </property>
-                    <property name="textInteractionFlags">
-                     <set>Qt::NoTextInteraction</set>
-                    </property>
-                   </widget>
-                  </item>
                   <item>
                    <widget class="QFrame" name="frame_list">
                     <property name="frameShape">
@@ -1937,7 +1901,7 @@ border-right: 1px solid #111;</string>
                 <number>0</number>
                </property>
                <property name="topMargin">
-                <number>0</number>
+                <number>6</number>
                </property>
                <property name="rightMargin">
                 <number>0</number>
@@ -1945,40 +1909,6 @@ border-right: 1px solid #111;</string>
                <property name="bottomMargin">
                 <number>0</number>
                </property>
-               <item>
-                <widget class="QLabel" name="label_sales">
-                 <property name="styleSheet">
-                  <string notr="true">QLabel {
-	font: 24px &quot;Bahnschrift SemiLight SemiConde&quot;;
-	letter-spacing: 2px;
-	word-spacing: 2px;
-	color: rgb(8, 68, 68);
-	margin-left: 30px;
-	margin-right: 30px;
-	border-bottom: 1px solid;
-	border-color: rgb(11, 126, 127);
-}</string>
-                 </property>
-                 <property name="text">
-                  <string>VENTAS</string>
-                 </property>
-                 <property name="textFormat">
-                  <enum>Qt::PlainText</enum>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignBottom|Qt::AlignHCenter</set>
-                 </property>
-                 <property name="margin">
-                  <number>5</number>
-                 </property>
-                 <property name="indent">
-                  <number>-1</number>
-                 </property>
-                 <property name="textInteractionFlags">
-                  <set>Qt::NoTextInteraction</set>
-                 </property>
-                </widget>
-               </item>
                <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
                 <widget class="QLineEdit" name="sales_searchBar">
                  <property name="sizePolicy">
@@ -2022,6 +1952,31 @@ border-right: 1px solid #111;</string>
                  </property>
                  <property name="clearButtonEnabled">
                   <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QProgressBar" name="sales_progressbar">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>12</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>12</height>
+                  </size>
+                 </property>
+                 <property name="value">
+                  <number>24</number>
+                 </property>
+                 <property name="textVisible">
+                  <bool>false</bool>
+                 </property>
+                 <property name="format">
+                  <string notr="true">%p%</string>
                  </property>
                 </widget>
                </item>
@@ -2247,7 +2202,7 @@ QPushButton:hover {
                <number>0</number>
               </property>
               <property name="topMargin">
-               <number>4</number>
+               <number>8</number>
               </property>
               <property name="rightMargin">
                <number>0</number>
@@ -2255,34 +2210,6 @@ QPushButton:hover {
               <property name="bottomMargin">
                <number>0</number>
               </property>
-              <item>
-               <widget class="QLabel" name="label_debts">
-                <property name="styleSheet">
-                 <string notr="true">QLabel {
-	font: 24px &quot;Bahnschrift SemiLight SemiConde&quot;;
-	letter-spacing: 2px;
-	word-spacing: 2px;
-	color: rgb(8, 68, 68);
-	margin-left: 30px;
-	margin-right: 30px;
-	border-bottom: 1px solid;
-	border-color: rgb(11, 126, 127);
-}</string>
-                </property>
-                <property name="text">
-                 <string notr="true">DEUDAS</string>
-                </property>
-                <property name="textFormat">
-                 <enum>Qt::PlainText</enum>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignBottom|Qt::AlignHCenter</set>
-                </property>
-                <property name="textInteractionFlags">
-                 <set>Qt::NoTextInteraction</set>
-                </property>
-               </widget>
-              </item>
               <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
                <widget class="QLineEdit" name="debts_searchBar">
                 <property name="sizePolicy">
@@ -2336,6 +2263,31 @@ QPushButton:hover {
                 </property>
                 <property name="clearButtonEnabled">
                  <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QProgressBar" name="debts_progressbar">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>12</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>12</height>
+                 </size>
+                </property>
+                <property name="value">
+                 <number>24</number>
+                </property>
+                <property name="textVisible">
+                 <bool>false</bool>
+                </property>
+                <property name="format">
+                 <string notr="true">%p%</string>
                 </property>
                </widget>
               </item>
