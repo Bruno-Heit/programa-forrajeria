@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QLineEdit, QCompleter, QListWidget, QListWidgetItem, 
                                QWidget, QVBoxLayout)
-from PySide6.QtCore import (QRegularExpression, QObject, Qt, Signal, QSize)
+from PySide6.QtCore import (QRegularExpression, QObject, Qt, Signal, QSize, QThread)
 from PySide6.QtGui import (QRegularExpressionValidator, QIntValidator, QIcon)
 
 from ui.ui_productDialog import Ui_Dialog
@@ -13,6 +13,10 @@ from resources import (rc_icons)
 
 from re import (search, Match, sub)
 from utils.functionutils import *
+from utils.workerclasses import *
+
+from sqlite3 import (Error as sqlite3Error)
+
 
 
 # Dialog con datos de un producto
@@ -59,17 +63,23 @@ class ProductDialog(QDialog):
 
         #--- SEÑALES --------------------------------------------------
         self.productDialog_ui.lineedit_productName.textChanged.connect(self.__checkProductNameValidity)
+        
         self.productDialog_ui.cb_productCategory.currentIndexChanged.connect(self.__checkProductCategoryValidity)
+        
         self.productDialog_ui.lineedit_productStock.textChanged.connect(lambda: self.__checkProductStockValidity())
         self.productDialog_ui.lineedit_productStock.editingFinished.connect(lambda: self.__checkProductStockValidity(True))
+        
         self.productDialog_ui.lineedit_productUnitPrice.textChanged.connect(lambda: self.__checkProductUnitPriceValidity(False))
         self.productDialog_ui.lineedit_productUnitPrice.editingFinished.connect(lambda: self.__checkProductUnitPriceValidity(True))
+        
         self.productDialog_ui.lineedit_productComercialPrice.textChanged.connect(lambda: self.__checkProductComercialPriceValidity(False))
         self.productDialog_ui.lineedit_productComercialPrice.editingFinished.connect(lambda: self.__checkProductComercialPriceValidity(True))
+        
         self.productDialog_ui.buttonBox.accepted.connect(self.addProductToDatabase)
     
     #### MÉTODOS #####################################################
     # funciones de validación de campos
+    @Slot(bool)
     def __checkProductStockValidity(self, editing_finished:bool = False) -> None:
         '''Verifica si 'lineedit_productStock' tiene un nombre válido. Si es válido 'self.VALID_STOCK' será True, sino 
         False. Modifica el texto de 'label_stockWarning' de acuerdo a las condiciones, y el estilo del campo. Retorna 'None'.'''
@@ -107,21 +117,24 @@ class ProductDialog(QDialog):
         return None
 
 
+    @Slot()
     def __checkProductNameValidity(self) -> None:
-        '''Verifica si 'lineedit_productName' tiene valores válidos. Si son válidos 'self.VALID_NAME' será True, sino 
-        False. Modifica el texto de 'label_nameWarning' de acuerdo a las condiciones, y el estilo del campo. Retorna 'None'.'''
+        '''
+        Verifica si 'lineedit_productName' tiene valores válidos. Si son válidos 'self.VALID_NAME' será True, sino 
+        False. Modifica el texto de 'label_nameWarning' de acuerdo a las condiciones, y el estilo del campo. 
+        
+        Retorna None.
+        '''
         # reinicio la validez del nombre
         self.VALID_NAME = True
+        
         # si el producto no tiene nombre (si el campo está vacío)...
         if self.productDialog_ui.lineedit_productName.text() == "":
             self.VALID_NAME = False
             self.productDialog_ui.label_nameWarning.setText("El producto debe tener un nombre")
         
         # hace un SELECT a la Productos para ver si ya existe ese nombre...
-        # NOTE: sé que no es ideal hacer múltiples consultas a bases de datos rápidamente, pero considerando que 
-        # SQLite puede hacer hasta 50.000 SELECTS por segundo sin problemas y que sólo es un campo el que estoy 
-        # verificando, no tendrá un gran impacto en el performance (incluso en equipos de gama baja, como el mío :C )
-        if makeReadQuery("SELECT nombre FROM Productos WHERE nombre = ?;", (self.productDialog_ui.lineedit_productName.text(),)):
+        if self.VALID_NAME and makeReadQuery("SELECT nombre FROM Productos WHERE nombre = ?;", (self.productDialog_ui.lineedit_productName.text(),)):
             self.VALID_NAME = False
             self.productDialog_ui.label_nameWarning.setText("Ya existe un producto con ese nombre")
         
@@ -134,6 +147,7 @@ class ProductDialog(QDialog):
         return None
 
 
+    @Slot()
     def __checkProductCategoryValidity(self) -> None:
         '''Verifica si 'cb_productCategory' tiene una categoría seleccionada. Si la tiene, se considera válido y 
         'self.VALID_CATEGORY' será True, sino False. Modifica el texto de 'label_categoryWarning' de acuerdo a las 
@@ -159,6 +173,7 @@ class ProductDialog(QDialog):
         return None
 
 
+    @Slot(bool)
     def __checkProductUnitPriceValidity(self, editing_finished:bool) -> None:
         '''Verifica si 'lineedit_productUnitPrice' tiene un precio válido. Si es válido 'self.VALID_UNIT_PRICE' será True, 
         sino False. Modifica el texto de 'label_unitPriceWarning' de acuerdo a las condiciones, y el estilo del campo. Retorna 
@@ -211,6 +226,7 @@ class ProductDialog(QDialog):
         return None
 
 
+    @Slot()
     def __checkProductComercialPriceValidity(self, editing_finished:bool) -> None:
         '''Verifica si 'lineedit_productComercialPrice' tiene un precio válido. Si es válido 'self.VALID_COMERCIAL_PRICE' 
         será True, sino False. Al ser este campo opcional, no se considera inválido el campo vacío. Modifica el texto de 
@@ -265,8 +281,14 @@ class ProductDialog(QDialog):
 
 
     def verifyFieldsValidity(self) -> None:
-        '''Es llamada desde cada método de tipo '__check...'. Verifica que todos los campos tengan valores válidos. 
-        Compara si todos son válidos y activa o desactiva el botón "Aceptar" dependiendo del caso. Retorna 'None'.'''
+        '''
+        Es llamada desde cada método de tipo '__check...'.
+        
+        Verifica que todos los campos tengan valores válidos. Compara si todos son válidos y activa o desactiva el 
+        botón "Aceptar" dependiendo del caso.
+        
+        Retorna None.
+        '''
         valid:tuple[bool] = (
             self.VALID_NAME,
             self.VALID_CATEGORY,
@@ -283,7 +305,13 @@ class ProductDialog(QDialog):
 
     # funciones del botón Ok
     def __getFieldsData(self) -> tuple[str]:
-        '''Obtiene todos los datos introducidos en los campos y los devuelve como una tupla de strings.'''
+        '''
+        Es llamada desde 'self.addProductToDatabase'.
+        
+        Obtiene todos los datos introducidos en los campos y los devuelve como una tupla de strings.
+        
+        Retorna un tuple[str].
+        '''
         # obtengo los datos de los campos
         data:tuple[str] = (
             self.productDialog_ui.lineedit_productName.text().strip(),
@@ -297,15 +325,38 @@ class ProductDialog(QDialog):
         return data
 
 
+    @Slot()
     def addProductToDatabase(self) -> None:
-        '''Obtiene los datos de los campos y hace una consulta INSERT INTO a la base de datos.
-        Retorna 'None'.'''
+        '''
+        Es llamada cuando se presiona el botón "Aceptar".
+        
+        Obtiene los datos de los campos y hace una consulta INSERT INTO a la base de datos.
+        Crea una instancia de 'workerclasses.DbInsertWorker' para que haga la consulta INSERT en un QThread diferente.
+        
+        Retorna None.
+        '''
+        self.INSERT_THREAD = QThread()
+        self.insert_worker = DbInsertWorker()
+        
+        self.insert_worker.moveToThread(self.INSERT_THREAD)
+        
         if self.productDialog_ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled() == False:
             return None
         data:tuple[str] = self.__getFieldsData()
         sql = "INSERT INTO Productos(nombre,descripcion,stock,unidad_medida,precio_unit,precio_comerc,IDcategoria) VALUES(?,?,?,?,?,?,(SELECT IDcategoria FROM Categorias WHERE nombre_categoria=?));"
-        makeInsertQuery(sql, data)
+        
+        # makeInsertQuery(sql, data)
+        self.INSERT_THREAD.started.connect(lambda: self.insert_worker.executeInsertQuery(
+            data_sql=sql,
+            data_params=data))
+        self.insert_worker.finished.connect(self.INSERT_THREAD.quit)
+        self.insert_worker.finished.connect(self.INSERT_THREAD.wait)
+        self.INSERT_THREAD.finished.connect(self.insert_worker.deleteLater)
+        
+        self.INSERT_THREAD.start()
         return None
+    
+
 
 
 
@@ -330,6 +381,33 @@ class SaleDialog(QDialog):
                                                         background-color: #faa;\
                                                       }")
         self.saleDialog_ui.comboBox_productName.addItems(getProductNames())
+        self.saleDialog_ui.dateTimeEdit.setStyleSheet(
+            "QDateTimeEdit {\
+                background-color: #fff;\
+            }\
+            \
+            \
+            QCalendarWidget QAbstractItemView {\
+                background-color: #fff;\
+                selection-background-color: #38a3a5;\
+            }\
+            QCalendarWidget QToolButton {\
+                background-color: #22577a;\
+                color: #fff;\
+            }\
+            QCalendarWidget QToolButton:hover,\
+            QCalendarWidget QToolButton:pressed {\
+                background-color: #38a3a5;\
+                color: #111;\
+            }\
+            \
+            \
+            QCalendarWidget QWidget#qt_calendar_prevmonth{\
+                qproperty-icon: url(':/icons/arrow-left-white.svg')\
+            }\
+            QCalendarWidget QWidget#qt_calendar_nextmonth{\
+                qproperty-icon: url(':/icons/arrow-right-white.svg')\
+            }")
         self.saleDialog_ui.dateTimeEdit.setDateTime(QDateTime.currentDateTime())
 
         # esconde los campos de datos del deudor
@@ -546,6 +624,7 @@ class SaleDialog(QDialog):
         return valid_total_paid
 
 
+    @Slot()
     def __validateDebtorNameField(self) -> None:
         '''Verifica si el campo de nombre del deudor es válido; cambia el texto de 'label_debtorName_feedback'
         dependiendo de la condición, y cambia el estilo del campo. 'self.VALID_DEBTOR_NAME' es True si es válido, 
@@ -564,6 +643,7 @@ class SaleDialog(QDialog):
         return None
 
 
+    @Slot()
     def __validateDebtorSurnameField(self) -> None:
         '''Verifica si el campo de apellido del deudor es válido; cambia el texto de 'label_debtorSurname_feedback'
         dependiendo de la condición, y cambia el estilo del campo. 'self.VALID_DEBTOR_SURNAME' es True si es válido, 
@@ -581,6 +661,7 @@ class SaleDialog(QDialog):
         return None
     
 
+    @Slot()
     def __validateDebtorPhoneNumberField(self) -> None:
         '''Verifica si el campo de número de teléfono es válido; cambia el texto de 'label_phoneNumber_feedback' dependiendo 
         de la condición, y cambia el estilo del campo. Retorna 'True' si es válido, sino 'False'.'''
@@ -608,6 +689,7 @@ class SaleDialog(QDialog):
         return self.VALID_PHONE_NUMBER
     
 
+    @Slot()
     def __validateDebtorPostalCodeField(self) -> None:
         '''Verifica si el campo de código postal es válido; cambia el texto de 'label_postalCode_feedback' dependiendo 
         de la condición, y cambia el estilo del campo. 'self.VALID_POSTAL_CODE' es True si es válido, sino False. Retorna 
@@ -727,7 +809,12 @@ class SaleDialog(QDialog):
 
 
     def getFieldsData(self) -> tuple:
-        '''Obtiene todos los datos de los campos y formatea los valores. Retorna una tupla.'''
+        '''
+        Es llamado desde 'self.handleOkClicked' al principio.
+        
+        Obtiene todos los datos de los campos y formatea los valores.
+        
+        Retorna un tuple.'''
         re_total_cost: Match | float
         total_paid:float
         values:tuple
@@ -788,62 +875,88 @@ class SaleDialog(QDialog):
         return values
 
 
-    def __updateProductStock(self, sold_quantity:int|float, product_name:str) -> None:
-        '''Determina la consulta sql y los parámetros que recibe y hace la consulta UPDATE a la base de datos. 
-        \nRetorna 'None'.'''
-        sql_product:str = "UPDATE Productos SET stock = stock - ? WHERE nombre = ?;"
-        params_product:tuple = (sold_quantity, product_name,)
-        makeUpdateQuery(sql_product, params_product)
-        return None
-
-
+    @Slot()
     def handleOkClicked(self) -> None:
-        '''Se encarga de ejecutar las instrucciones, métodos y funciones necesarias para obtener los datos de los campos 
-        formateados e insertar los valores en la base de datos, y actualizar el stock del producto. Retorna 'None'.'''
-        # NOTE: siempre se insertan datos en Ventas y Detalle_Ventas, pero si el "total abonado" no es igual 
-        # al "costo total" entonces se insertan datos también en Deudas y Deudores.
+        '''
+        Es llamado una vez que se presiona el botón "Aceptar".
+        
+        Este método obtiene los datos formateados de los campos, declara las consultas INSERT y sus parámetros, 
+        realiza las consultas INSERT a la base de datos y al final actualiza el stock en la tabla "Productos".
+        En éste método las consultas se hacen sin llamar a otra función, y tampoco usando MULTITHREADING, esto es 
+        es así para garantizar la atomicidad e integridad de los datos.
+        
+        Este método llama a:
+        - self.getFieldsData: para obtener los valores formateados de los campos.
+        - self.__updateProductStock: para actualizar (luego de los INSERT) el stock en tabla "Productos".
+        
+        Retorna None.
+        '''
+        #NOTE: siempre se insertan datos en Ventas y Detalle_Ventas, pero si el "total abonado" no es igual 
+        #      al "costo total" entonces se insertan datos también en Deudas y Deudores.
 
         # obtiene los valores formateados de los campos...
         values:tuple = self.getFieldsData()
 
-        # declara la consulta sql y params de Ventas y hace la consulta...
-        sql_sales:str = "INSERT INTO Ventas(fecha_hora, detalles_venta) VALUES(?,?);"
-        params_sales:tuple = (values[6], values[0],)
-        makeInsertQuery(sql_sales, params_sales)
-
-        # si el largo de 'values' es de 12, es porque hay una deuda/cantidad a favor dentro de la compra...
-        if len(values) == 12:
-            # verifica si el deudor en Deudores existe
-            sql_verify:str = "SELECT COUNT(*) FROM Deudores WHERE nombre = ? AND apellido = ?;"
-            params_verify:tuple = (values[7], values[8],)
-            verify_query = makeReadQuery(sql_verify, params_verify)[0][0]
-
-            # si no existe ese deudor, lo agrega...
-            if not verify_query:
-                # declara la consulta sql y params de Deudores y hace la consulta...
-                sql_debtor:str = "INSERT INTO Deudores(nombre, apellido, num_telefono, direccion, codigo_postal) VALUES(?, ?, ?, ?, ?);"
-                params_debtor:tuple = (values[7], values[8], values[9], values[10], values[11],)
-                makeInsertQuery(sql_debtor, params_debtor)
-            
-            # declara la consutla sql y params de Deudas y hace la consulta...
-            sql_debt:str = "INSERT INTO Deudas(fecha_hora, total_adeudado, IDdeudor) VALUES(?, ?, (SELECT IDdeudor FROM Deudores WHERE nombre = ? AND apellido = ?) );"
-            params_debt:tuple = (values[6], round(values[4] - values[5],2), values[7], values[8],)
-            makeInsertQuery(sql_debt, params_debt)
-
-            # al final, declara la consulta y los parámetros para Detalle_Ventas...
-            sql_saleDetail:str = "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?,?,(SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?),?, (SELECT IDdeuda FROM Deudas WHERE fecha_hora = ? AND IDdeudor = (SELECT IDdeudor FROM Deudores WHERE nombre = ? AND apellido = ?) ) );"
-            params_saleDetail:tuple = (values[2], values[4], values[1], values[6], values[0], values[5], values[6], values[7], values[8],)
-        # si lo abonado es igual al total...
-        else:
-            # declara la consulta sql y los params de Detalle_Ventas (solamente de esa tabla)...
-            sql_saleDetail:str = "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, NULL);"
-            params_saleDetail:tuple = (values[2], values[4], values[1], values[6], values[0], values[5],)
-        # hace la consulta a Detalle_Ventas
-        makeInsertQuery(sql_saleDetail, params_saleDetail)
-
-        # antes de terminar, actualiza el stock en Productos (resta al stock la cantidad vendida)
-        self.__updateProductStock(values[2], values[1])
+        #! hago las consultas sin llamar funciones porque necesito tratarlas como una transacción, es decir, 
+        #! se hacen todas las consultas INSERT o ninguna...
+        conn = createConnection("database/inventario.db")
+        if not conn:
+            return None
+        cursor = conn.cursor()
         
+        #! lo pongo entre un try-except porque si falla necesito hacer un rollback
+        try:
+            # declara la consulta sql y params de Ventas y hace la consulta...
+            sql_sales:str = "INSERT INTO Ventas(fecha_hora, detalles_venta) VALUES(?,?);"
+            params_sales:tuple = (values[6], values[0],)
+            cursor.execute(sql_sales, params_sales)
+            conn.commit()
+
+            # si el largo de 'values' es de 12, es porque hay una deuda/cantidad a favor dentro de la compra...
+            if len(values) == 12:
+                # verifica si el deudor en Deudores existe
+                sql_verify:str = "SELECT COUNT(*) FROM Deudores WHERE nombre = ? AND apellido = ?;"
+                params_verify:tuple = (values[7], values[8],)
+                verify_query = makeReadQuery(sql_verify, params_verify)[0][0]
+
+                # si no existe ese deudor, lo agrega...
+                if not verify_query:
+                    # declara la consulta sql y params de Deudores y hace la consulta...
+                    sql_debtor:str = "INSERT INTO Deudores(nombre, apellido, num_telefono, direccion, codigo_postal) VALUES(?, ?, ?, ?, ?);"
+                    params_debtor:tuple = (values[7], values[8], values[9], values[10], values[11],)
+                    cursor.execute(sql_debtor, params_debtor)
+                    conn.commit()
+                
+                # declara la consutla sql y params de Deudas y hace la consulta...
+                sql_debt:str = "INSERT INTO Deudas(fecha_hora, total_adeudado, IDdeudor) VALUES(?, ?, (SELECT IDdeudor FROM Deudores WHERE nombre = ? AND apellido = ?) );"
+                params_debt:tuple = (values[6], round(values[4] - values[5],2), values[7], values[8],)
+                cursor.execute(sql_debt, params_debt)
+                conn.commit()
+
+                # al final, declara la consulta y los parámetros para Detalle_Ventas...
+                sql_saleDetail:str = "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?,?,(SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?),?, (SELECT IDdeuda FROM Deudas WHERE fecha_hora = ? AND IDdeudor = (SELECT IDdeudor FROM Deudores WHERE nombre = ? AND apellido = ?) ) );"
+                params_saleDetail:tuple = (values[2], values[4], values[1], values[6], values[0], values[5], values[6], values[7], values[8],)
+            # si lo abonado es igual al total...
+            else:
+                # declara la consulta sql y los params de Detalle_Ventas (solamente de esa tabla)...
+                sql_saleDetail:str = "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, NULL);"
+                params_saleDetail:tuple = (values[2], values[4], values[1], values[6], values[0], values[5],)
+            # hace la consulta a Detalle_Ventas
+            cursor.execute(sql_saleDetail, params_saleDetail)
+            conn.commit()
+            
+            # antes de terminar, actualiza el stock en Productos (resta al stock la cantidad vendida)
+            sql_product:str = "UPDATE Productos SET stock = stock - ? WHERE nombre = ?;"
+            params_product:tuple = (values[2], values[1],)
+            cursor.execute(sql_product, params_product)
+            conn.commit()
+            
+        except sqlite3Error as err:
+            conn.rollback()
+            print(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+        
+        finally:
+            conn.close()
         return None
 
 
@@ -862,6 +975,8 @@ class SaleDialog(QDialog):
         completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
 
         return completer
+
+
 
 
 

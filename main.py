@@ -3,7 +3,7 @@ import sys
 from PySide6.QtWidgets import (QApplication, QMainWindow, QLineEdit, 
                                QCheckBox, QAbstractItemView, QDateTimeEdit, 
                                QListWidgetItem)
-from PySide6.QtCore import (QModelIndex, Qt, QSize, QThread)
+from PySide6.QtCore import (QModelIndex, Qt, QSize, QThread, Slot)
 from PySide6.QtGui import (QIntValidator, QRegularExpressionValidator, QIcon)
 
 from ui.ui_mainwindow import (Ui_MainWindow)
@@ -28,6 +28,9 @@ class MainWindow(QMainWindow):
         self.ui.label_feedbackInventory.hide()
         self.ui.label_feedbackChangePercentage.hide()
         self.ui.label_feedbackSales.hide()
+        self.ui.inventory_progressbar.hide()
+        self.ui.sales_progressbar.hide()
+        self.ui.debts_progressbar.hide()
 
         # políticas de QTableWidgets
         setTableWidthPolitics(self.ui.displayTable)
@@ -49,14 +52,14 @@ class MainWindow(QMainWindow):
         self.addIconsToWidgets()
 
         # variables de inventario
-        self.IDs_products:tuple = tuple() # var. de 'displayTable' que tiene los IDs de los productos
+        self.IDs_products:list = [] # var. de 'displayTable' que tiene los IDs de los productos
         self.cb_categories:list[str] = getProductsCategories()
         
 
         # variables de ventas
         self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
         
-        self.IDs_saleDetails:tuple = tuple() # var. de 'table_sales_data' que tiene los IDs de las ventas en Detalle_Ventas
+        self.IDs_saleDetails:list = [] # var. de 'table_sales_data' que tiene los IDs de las ventas en Detalle_Ventas
         self.items_objectNames:int = 0 # "ID" en los 'objectName', al crearse un item el nombre se da a partir del contador
         self.VALID_ITEMS:dict[str:bool] = {} # se usa para verificar si todos los ListItems son válidos para habilitar/deshabilitar 'btn_end_sale'
         self.ITEMS_VALUES:dict[str:tuple[str,str,bool,str,str,str,float]] = {} # tiene los valores de cada ListItem
@@ -69,21 +72,23 @@ class MainWindow(QMainWindow):
         # TODO: permitir agregar deuda
         # TODO: permitir eliminar deuda
         # TODO: permitir modificar deuda
+        
+        
+        #?### VARIABLES DE MULTITHREADING ################################
+        # self.READ_THREAD:QThread = QThread()
+        
 
-
-        #### SEÑALES #####################################################
-        # WORKER THREADS
-
-
+        #*## SEÑALES #####################################################
         #--- INVENTARIO --------------------------------------------------
         self.ui.btn_side_barToggle.clicked.connect(lambda: toggleSideBar(self.ui.side_bar, self.ui.centralwidget, self.ui.side_bar_body))
         
         self.ui.btn_inventory_sideBarToggle.clicked.connect(lambda: toggleSideBar(self.ui.inventory_sideBar, self.ui.main_inventory_frame, self.ui.inventory_side_bar_body, 200))
         # (READ) cargar con productos 'displayTable'
-        self.ui.tables_ListWidget.itemClicked.connect(lambda: self.handleTableToFill(self.ui.displayTable, accessed_by_list=True))
-        self.ui.tables_ListWidget.itemActivated.connect(lambda: self.handleTableToFill(self.ui.displayTable, accessed_by_list=True))
-        
+        self.ui.tables_ListWidget.itemClicked.connect(lambda: self.handleTableToFill(self.ui.displayTable, ACCESSED_BY_LIST=True))
+        self.ui.tables_ListWidget.itemActivated.connect(lambda: self.handleTableToFill(self.ui.displayTable, ACCESSED_BY_LIST=True))
+
         self.ui.inventory_searchBar.returnPressed.connect(lambda: self.handleTableToFill(self.ui.displayTable, self.ui.inventory_searchBar))
+
         # (CREATE) añadir nuevo producto a tabla 'displayTable'
         self.ui.btn_add_product_inventory.clicked.connect(lambda: self.handleTableCreateRow(self.ui.displayTable))
         # (DELETE) eliminar un producto de 'displayTable'
@@ -126,7 +131,7 @@ class MainWindow(QMainWindow):
 
 
 
-    #### MÉTODOS #####################################################
+    #*## MÉTODOS #####################################################
     # método que coloca íconos a los widgets
     def addIconsToWidgets(self) -> None:
         '''Simplemente le coloca los íconos que le corresponde a cada Widget. Retorna 'None'.'''
@@ -162,122 +167,303 @@ class MainWindow(QMainWindow):
         return None
 
 
-    # tablas (READ)
-    def handleTableToFill(self, tableWidget:QTableWidget, searchBar:QLineEdit=None, accessed_by_list:bool=False) -> None:
+    #?================ MULTITHREADING ================
+    #¡ tablas (READ)
+    @Slot(QTableWidget,QLineEdit,bool)
+    def handleTableToFill(self, table_widget:QTableWidget, search_bar:QLineEdit=None, ACCESSED_BY_LIST:bool=False) -> None:
         '''
-        Dependiendo del QTableWidget que se tenga que llenar con valores, se encarga de declarar las variables 
-        necesarias y llamar a los métodos necesarios para que se encarguen de llenarlas; dependiendo de cuál tabla 
-        se llenó, obtiene los IDs necesarios y los almacena en 'self.IDs_products' ó 'self.IDs_saleDetails'.
+        
+        Este método hace lo siguiente:
+        - Limpia el 'table_widget'.
+        - Dependiendo del 'table_widget' que se tenga que llenar, se encarga de declarar las consultas sql y los 
+        parámetros necesarios para luego hacer las consultas en la clase 'workerclasses.DbReadWorker'.
+        - Limpia las variables de IDs asociadas con 'table_widget'.
+        - Crea una instancia de WORKER y QThread y conecta sus señales/slots.
+        
+        NO LLAMA A NINGÚN OTRO MÉTODO.
 
-        'searchBar' determina si se usó una barra de búsqueda, y cuál fue.
-
-        'accessed_by_list' es un bool que será True si se seleccionó un item desde 'tables_ListWidget', sino False.
+        Args:
+        - table_widget: el QTableWidget que se referencia.
+        - search_bar: determina si se usó una barra de búsqueda, y cuál fue.
+        - ACCESSED_BY_LIST: flag que será True si se seleccionó un item desde 'tables_ListWidget', sino False.
 
         Retorna 'None'.
         '''
+        # TODO: por alguna razón, cuando se llama a esta función desde otras, no llena la tabla.
         
-        count_sql:str
-        count_params:str
-        row_count:int # cantidad de filas para tableWidget
-        sql:str
-        params:tuple
-        fill_query:list[Any] # resultado de consulta hecha para llenar tableWidget
         
-        # TODO: declarar filas de las tablas, llenar las tablas y obtener IDs al final, sino no conecta bien 
-        # TODO: las señales de self.read_worker.
-
-        #* todas las tablas del programa (son 3) tienen la opción de buscar elementos usando una 'searchBar', 
-        #* así que en cada caso se debe verificar si se está llenando la tabla CON ó SIN el uso de esa barra de búsqueda.
-        match tableWidget.objectName():
+        count_sql:str = "" # consulta de tipo COUNT()
+        count_params:tuple[Any] = None # params de la consulta COUNT()
+        
+        sql:str = "" # consulta que pide los registros
+        params:tuple[Any] = None # params de la consulta de registros
+        
+        # limpia la tabla
+        table_widget.clearContents()
+        table_widget.setRowCount(0)
+        
+        print("accedió...")
+        # crea las consultas para obtener el COUNT() de filas y los registros para llenar la tabla
+        match table_widget.objectName():
             case "displayTable":
+                self.IDs_products.clear() # limpia los IDs
+                
                 # si se seleccionó una categoría desde 'tables_ListWidget', cambia hacia la pestaña de inventario...
-                if accessed_by_list:
+                if ACCESSED_BY_LIST:
                     self.ui.tabWidget.setCurrentWidget(self.ui.tabWidget.findChild(QWidget, "tab1_inventory"))
 
                 # si no se usa una barra de búsqueda...
-                if not searchBar and accessed_by_list:
+                if not search_bar and ACCESSED_BY_LIST:
                     if self.ui.tables_ListWidget.currentItem().text() == "MOSTRAR TODOS":
                         count_sql:str = "SELECT COUNT(*) FROM Productos;"
                         sql = "SELECT IDproducto,nombre_categoria,nombre,p.descripcion,stock,unidad_medida,precio_unit,precio_comerc FROM Productos AS p INNER JOIN Categorias AS c WHERE p.IDcategoria=c.IDcategoria;"
-                        row_count = getTableWidgetRowCount(count_sql)
-                        fill_query = makeReadQuery(sql)
                     else:
                         # cols.: detalle venta, cantidad, producto, costo total, abonado, fecha y hora
                         count_sql = "SELECT COUNT(*) FROM Productos WHERE IDcategoria = (SELECT IDcategoria FROM Categorias WHERE nombre_categoria = ? );"
                         count_params = (self.ui.tables_ListWidget.currentItem().text(),)
                         sql = "SELECT IDproducto,nombre_categoria,nombre,p.descripcion,stock,unidad_medida,precio_unit,precio_comerc FROM Productos AS p INNER JOIN Categorias AS c WHERE p.IDcategoria=c.IDcategoria AND c.nombre_categoria=?;"
                         params = (self.ui.tables_ListWidget.currentItem().text(),)
-                        row_count = getTableWidgetRowCount(count_sql, count_params)
-                        fill_query = makeReadQuery(sql, params)
-                    self.IDs_products = setTableWidgetContent(self.ui.displayTable, row_count, fill_query)
                     
                 # si SÍ se usa una barra de búsqueda...
-                elif searchBar:
+                elif search_bar:
                     text:str = self.ui.inventory_searchBar.text()
                     count_sql = f"SELECT COUNT(*) FROM Productos AS p LEFT JOIN Categorias AS c WHERE p.IDcategoria=c.IDcategoria AND (nombre_categoria LIKE '%{text}%' OR nombre LIKE '%{text}%' OR p.descripcion LIKE '%{text}%' OR stock LIKE '%{text}%' OR unidad_medida LIKE '%{text}%' OR precio_unit LIKE '%{text}%' OR precio_comerc LIKE '%{text}%');"
                     sql = f"SELECT IDproducto,nombre_categoria,nombre,p.descripcion,stock,unidad_medida,precio_unit,precio_comerc FROM Productos AS p LEFT JOIN Categorias AS c WHERE p.IDcategoria=c.IDcategoria AND  (nombre_categoria LIKE '%{text}%' OR  nombre LIKE '%{text}%' OR  p.descripcion LIKE '%{text}%' OR  stock LIKE '%{text}%' OR unidad_medida LIKE '%{text}%' OR precio_unit LIKE '%{text}%' OR precio_comerc LIKE '%{text}%');"
-                    row_count = getTableWidgetRowCount(count_sql)
-                    fill_query = makeReadQuery(sql)
-                    self.IDs_products = setTableWidgetContent(self.ui.displayTable, row_count, fill_query)
                 self.ui.label_feedbackInventory.hide()
 
+
             case "table_sales_data":
+                self.IDs_saleDetails.clear() # limpia los IDs
+                
                 # si no se usa la 'search bar'...
-                if not searchBar:
+                if not search_bar:
                     count_sql = "SELECT COUNT(*) FROM Detalle_Ventas as dv LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa;"
                     sql = "SELECT dv.ID_detalle_venta, v.detalles_venta, p.nombre, dv.cantidad, p.unidad_medida, dv.costo_total, dv.abonado, v.fecha_hora FROM Detalle_Ventas as dv LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa;"
-                    row_count = getTableWidgetRowCount(count_sql)
-                    fill_query = makeReadQuery(sql)
                 # en cambio, si SÍ se usa...
                 else:
                     text:str = self.ui.sales_searchBar.text()
                     count_sql = f'SELECT COUNT(*) FROM Detalle_Ventas AS dv, Productos AS p, Ventas AS v WHERE (dv.IDproducto = p.IDproducto AND dv.IDventa = v.IDventa) AND (v.Detalles_venta LIKE "%{text}%" OR p.nombre LIKE "%{text}%" OR cantidad LIKE "%{text}%" OR p.unidad_medida LIKE "%{text}%" OR costo_total LIKE "%{text}%" OR abonado LIKE "%{text}%" OR fecha_hora LIKE "%{text}%") ;'
                     sql = f'SELECT dv.ID_detalle_venta, v.detalles_venta, p.nombre, dv.cantidad, p.unidad_medida, dv.costo_total, dv.abonado, v.fecha_hora FROM Detalle_Ventas AS dv, Productos AS p, Ventas AS v WHERE (dv.IDproducto = p.IDproducto AND dv.IDventa = v.IDventa) AND (v.Detalles_venta LIKE "%{text}%" OR p.nombre LIKE "%{text}%" OR cantidad LIKE "%{text}%" OR p.unidad_medida LIKE "%{text}%" OR costo_total LIKE "%{text}%" OR abonado LIKE "%{text}%" OR fecha_hora LIKE "%{text}%") ;'
-                    row_count = getTableWidgetRowCount(count_sql)
-                    fill_query = makeReadQuery(sql)
-                self.IDs_saleDetails = setTableWidgetContent(self.ui.table_sales_data, row_count, fill_query)
                 self.ui.label_feedbackSales.hide()
+
 
             case "table_debts":
                 # TODO: declarar consultas sql para también para traer los datos necesarios
-                if not searchBar:
+                if not search_bar:
                     count_sql = "SELECT COUNT(DISTINCT IDdeudor) FROM Deudas;"
                     sql = 'SELECT Detalle_Ventas.*, Deudores.* \
                         FROM Detalle_Ventas \
                         JOIN Deudas ON Detalle_Ventas.IDdeuda = Deudas.IDdeuda \
                         JOIN Deudores ON Deudas.IDdeudor = Deudores.IDdeudor;'
-                    fill_query = makeReadQuery(sql)
-                    row_count = getTableWidgetRowCount(count_sql)
 
                 else:
                     pass
-                setTableWidgetContent(self.ui.table_debts, row_count, None)
-                self.__fillDebtsTable()
+        
+        print("llegó hasta acá...")
+        
+        #? declaro WORKER, THREAD y sus señales/slots
+        self.READ_THREAD = QThread()
+        self.read_worker = DbReadWorker()
+        
+        self.read_worker.moveToThread(self.READ_THREAD)
+        
+        self.READ_THREAD.started.connect(lambda: self.read_worker.executeReadQuery(
+            data_sql=sql,
+            data_params=params if params else None,
+            count_sql=count_sql,
+            count_params=count_params if count_params else None))
+        self.read_worker.countFinished.connect(lambda row_count: self.DbReadWorker_onCountFinished(
+            row_count=row_count,
+            table_widget=table_widget))
+        self.read_worker.registerProgress.connect(lambda register: self.DbReadWorker_onRegisterProgress(
+            register=register,
+            table_widget=table_widget))
+        self.read_worker.finished.connect(lambda: self.DbReadWorker_onFinished(
+            table_name=table_widget.objectName()))
+        self.read_worker.finished.connect(self.READ_THREAD.quit)
+        self.READ_THREAD.finished.connect(self.read_worker.deleteLater)
+        
+        self.READ_THREAD.start()
+        return None
+    
+    
+    @Slot(int,QTableWidget,str,tuple)
+    def DbReadWorker_onCountFinished(self, row_count:int, table_widget:QTableWidget) -> None:
+        '''
+        Es llamada cuando el WORKER termina con la consulta COUNT().
+        
+        Este método llama al método 'self.__updateProgressBar' sólo para indicar el valor máximo del QProgressBar 
+        relacionado con el 'table_widget' y asigna la cantidad de filas al 'table_widget'.
+        
+        - row_count: cantidad de filas para el 'table_widget'.
+        - table_widget: QTableWidget al que se referencia.
+        
+        Retorna None.
+        '''
+        self.__updateProgressBar(table_name=table_widget.objectName(),
+                                 max_val=row_count)
+        table_widget.setRowCount(row_count)
+        return None
+    
+    
+    @Slot(tuple,QTableWidget)
+    def DbReadWorker_onRegisterProgress(self, register:tuple[Any], table_widget:QTableWidget=None) -> None:
+        '''
+        Es llamado a medida que el WORKER encuentra registros.
+        
+        Si 'FILL_TABLE == True' y 'table_widget != None' éste método llama a:
+        - self.__saveTableWidgetIDs -> para guardar en una variable global los IDs del 'table_widget'.
+        - self.__setTableWidgetContent -> para colocar los datos en el 'table_widget' correspondiente.
+        - self.__updateProgressBar -> para actualizar el valor del QProgressBar relacionado con el 'table_widget'.
+        
+        - register: registro obtenido de la consulta READ.
+        - table_widget: el QTableWidget al que se referencia. Por defecto es None.
+        '''
+        self.__saveTableWidgetIDs(table_name=table_widget.objectName(),
+                                    register_id=register[1][0])
+        self.__setTableWidgetContent(table_widget=table_widget,
+                                        curr_row=register[0],
+                                        row_data=register[1])
+        self.__updateProgressBar(table_name=table_widget.objectName(),max_val=None,
+                                    value=register[0])
+    
+    
+    def __updateProgressBar(self, table_name:str, max_val:int=None, value:int=None) -> None:
+        '''
+        Es llamada desde 'self.DbReadWorker_onCountFinished' una vez para determinar el valor máximo del QProgressBar 
+        asociado al QTableWidget con nombre 'table_name', y luego es llamado desde 'self.DbReadWorker_onRegisterProgress' 
+        a medida que se encuentran registros para actualizar el 'value' del QProgressBar.
+        
+        Actualiza el QProgressBar correspondiente dependiendo del nombre de la tabla 'table_name'. 
+        
+        Recibe un 'max_val' si se llama desde 'self.DbReadWorker_onCountFinished' que determina el valor máximo del 
+        QProgressBar, ó recibe un 'value' si se llama desde 'self.DbReadWorker_onRegisterProgress' que representa el 
+        valor actual de progreso del QProgressBar.
+        
+        Retorna None.
+        '''
+        match table_name:
+            case "displayTable":
+                self.ui.inventory_progressbar.show() if self.ui.inventory_progressbar.isHidden() else None
+                self.ui.inventory_progressbar.setMaximum(max_val) if max_val is not None and self.ui.inventory_progressbar.maximum() != max_val else None
+                self.ui.inventory_progressbar.setValue(value + 1) if value else None
+            
+            case "table_sales_data":
+                self.ui.sales_progressbar.show() if self.ui.sales_progressbar.isHidden() else None
+                self.ui.sales_progressbar.setMaximum(max_val) if max_val is not None and self.ui.sales_progressbar.maximum() != max_val else None
+                self.ui.sales_progressbar.setValue(value + 1) if value else None
+                
+            case "table_debts":
+                self.ui.debts_progressbar.show() if self.ui.debts_progressbar.isHidden() else None
+                self.ui.debts_progressbar.setMaximum(max_val) if max_val is not None and self.ui.debts_progressbar.maximum() != max_val else None
+                self.ui.debts_progressbar.setValue(value + 1) if value else None
+        return None
+    
+    
+    def __saveTableWidgetIDs(self, table_name:str, register_id:int) -> None:
+        '''
+        Es llamada desde 'self.DbReadWorker_onRegisterProgress' a medida que el WORKER encuentra registros.
+        
+        Se encarga de guardar los 'register_id' de los registros coincidentes en una variable global asociada a cada 
+        QTableWidget con nombre 'table_name'.
+        
+        Retorna None.
+        '''
+        match table_name:
+            case "displayTable":
+                self.IDs_products.append(register_id)
+                
+            case "table_sales_data":
+                self.IDs_saleDetails.append(register_id)
+            
+            case "table_debts":
+                pass
+        return None
+    
+    
+    def __setTableWidgetContent(self, table_widget:QTableWidget, curr_row:int, row_data:list[Any]) -> None:
+        '''
+        Es llamada desde 'self.DbReadWorker_onRegisterProgress' a medida que el WORKER encuentra registros.
+        
+        Se encarga de ir poblando el 'table_widget' con los datos correspondientes.
+        
+        - table_widget: el QTableWidget que se referencia.
+        - curr_row: la fila actual de 'table_widget' a poblar con datos.
+        - row_data: los datos para poblar la fila 'curr_row' de 'table_widget'.
+        
+        Retorna None.
+        '''
+        match table_widget.objectName():
+            case "displayTable":
+                table_widget.setItem(curr_row, 0, QTableWidgetItem(str(row_data[1])) ) # col.0 tiene categoría
+                table_widget.setItem(curr_row, 1, QTableWidgetItem(str(row_data[2])) ) # col.1 tiene nombre
+                table_widget.setItem(curr_row, 2, QTableWidgetItem(str(row_data[3]) if str(row_data[3]) != None else "") ) # col.2 tiene descripción
+                table_widget.setItem(curr_row, 3, QTableWidgetItem(str(f"{row_data[4]} {row_data[5]}")) ) # col.3 tiene stock y unidad_medida
+                table_widget.setItem(curr_row, 4, QTableWidgetItem(str(row_data[6])) ) # col.4 tiene precio_unit
+                table_widget.setItem(curr_row, 5, QTableWidgetItem(str(row_data[7]) if row_data[7] != None else "") ) # col.5 tiene precio_comerc
+            
+            case "table_sales_data":
+                table_widget.setItem(curr_row, 0, QTableWidgetItem(str(row_data[1]) if row_data[1] != None else "") ) # columna 0 tiene detalles_venta
+                table_widget.setItem(curr_row, 1, QTableWidgetItem(str(f"{row_data[3]} {str(row_data[4]) if row_data[4] != None else ''}")) ) # col.1 tiene cantidad y unidad_medida
+                table_widget.setItem(curr_row, 2, QTableWidgetItem(str(row_data[2])) ) # col.2 tiene nombre
+                table_widget.setItem(curr_row, 3, QTableWidgetItem(str(row_data[5])) ) # col.3 tiene costo_total
+                table_widget.setItem(curr_row, 4, QTableWidgetItem(str(row_data[6])) ) # col.4 tiene abonado
+                table_widget.setItem(curr_row, 5, QTableWidgetItem(str(row_data[7]) if str(row_data[7]) != None else "") ) # col.5 tiene fecha_hora
+                
+            case "table_debts":
+                pass
+                # TODO: seguir poniendo funcionalidad acá (antes necesito declarar las consultas sql)
         return None
 
 
-    # tablas (CREATE)
-    def handleTableCreateRow(self, tableWidget:QTableWidget) -> None:
-        '''Dependiendo del QTableWidget al que se agregue una fila, se encarga de declarar las variables necesarias \
-        y llamar a los métodos necesarios para que se encarguen de crear el elemento en la base de datos. \
+    @Slot(str)
+    def DbReadWorker_onFinished(self, table_name:str) -> None:
+        '''
+        Esconde la QProgressBar relacionada con el QTableWidget con nombre 'table_name'.
+        
+        Retorna None.
+        '''
+        match table_name:
+            case "displayTable":
+                self.ui.inventory_progressbar.hide()
+                
+            case "table_sales_data":
+                self.ui.sales_progressbar.hide()
+                
+            case "table_debts":
+                self.ui.debts_progressbar.hide()
+        print("y terminó (final).")
+        return None
+
+
+
+    #¡ tablas (CREATE)
+    @Slot(str)
+    def handleTableCreateRow(self, table_widget:QTableWidget) -> None:
+        '''
+        Dependiendo del QTableWidget al que se agregue una fila, se encarga de crear una instancia del QDialog 
+        correspondiente que pide los datos necesarios para la nueva fila.
+        
         Al final, recarga la tabla correspondiente llamando a 'self.handleTableToFill'.
         \nRetorna 'None'.'''
-        match tableWidget.objectName():
+        match table_widget.objectName():
             case "displayTable":
-                productDialog = ProductDialog() # ventana de diálogo para añadir un producto a 'displayTable'
+                productDialog = ProductDialog() # QDialog para añadir un producto nuevo a 'displayTable'
                 productDialog.setAttribute(Qt.WA_DeleteOnClose, True) # destruye el dialog cuando se cierra
                 productDialog.exec()
 
             case "table_sales_data":
-                saleDialog = SaleDialog()
+                saleDialog = SaleDialog() # QDialog para añadir una venta nueva a 'table_sales_data' (y posiblemente, una
+                                          # deuda a 'table_debts')
                 saleDialog.setAttribute(Qt.WA_DeleteOnClose, True)
                 saleDialog.exec()
         
-        self.handleTableToFill(tableWidget)
+        self.handleTableToFill(table_widget=table_widget)
         return None
 
 
-    # tablas (DELETE)
+
+    #¡ tablas (DELETE)
     def __getTableElementsToDelete(self, tableWidget:QTableWidget, selected_rows:list) -> tuple | None:
         '''Dependiendo de cuál sea 'tableWidget', obtiene los nombres de los productos de 'displayTable' ó la fecha 
         y hora de 'table_sales_data'. Recibe el 'tableWidget' y una lista con las filas seleccionadas de esa tabla. 
@@ -326,7 +512,8 @@ class MainWindow(QMainWindow):
         return None
 
 
-    # tablas (UPDATE)
+
+    #¡ tablas (UPDATE)
     def __handleTableComboBoxCurrentTextChanged(self, tableWidget:QTableWidget, curr_index:QModelIndex, combobox:QComboBox, IDs_products:tuple, ids:tuple = None) -> None:
         '''Declara la consulta sql y los parámetros y luego hace la consulta UPDATE a la base de datos con el nuevo \
         dato seleccionado.
@@ -506,7 +693,7 @@ class MainWindow(QMainWindow):
         return None
 
 
-    # método de cambios en la selección
+    #¡ método de cambios en la selección
     def handleSelectionChange(self, tableWidget:QTableWidget) -> None:
         '''Esta función es llamada ni bien se detecta que la selección de los items en el QTableWidget cambia. 
         Verifica si hay celdas seleccionadas. Si no hay, llama a 'removeTableCellsWidgets'. Retorna 'None'.'''

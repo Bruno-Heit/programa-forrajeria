@@ -189,39 +189,6 @@ def setTableWidthPolitics(tableWidget:QTableWidget) -> None:
     return None
 
 
-def getTableWidgetRowCount(count_sql:str=None, count_params:tuple=None) -> int:
-    '''
-    Hace una consulta SELECT a la base de datos y obtiene la cantidad de filas que debe tener la tabla. 
-    
-    Retorna la cantidad como 'int'.
-    '''
-    row_count:int
-    conn = createConnection("database/inventario.db")
-    if not conn:
-        return
-    cursor = conn.cursor()
-    # si no se pasó un sql y count_params hago de cuenta que la tabla es 'displayTable' y se seleccionó "MOSTRAR TODOS"...
-    if not count_sql and not count_params:
-        count_sql:str = "SELECT COUNT(*) FROM Productos;"
-        row_count = cursor.execute(count_sql).fetchone()[0]
-    elif count_sql and not count_params:
-        row_count = cursor.execute(count_sql).fetchone()[0]
-    else:
-        row_count = cursor.execute(count_sql, count_params).fetchone()[0]
-    conn.close()
-    return row_count
-
-
-def getIDsFromTable() -> tuple:
-    '''Hace una consulta SELECT y obtiene los IDs de "Ventas" y de "Deudas". Retorna una tupla con los IDs.'''
-    sql:str
-    sql = "SELECT v.IDventa, d.IDdeuda FROM Detalle_Ventas as dv \
-        INNER JOIN Productos AS p ON dv.IDproducto = p.IDproducto \
-        INNER JOIN Ventas AS v ON dv.IDventa = v.IDventa;"
-    ids = [q[0] for q in makeReadQuery(sql)]
-    return tuple(ids)
-
-
 # READ QUERY
 def makeReadQuery(sql:str, params:tuple = None) -> list:
     '''Hace la consulta SELECT a la base de datos y devuelve los valores de las filas seleccionadas. Retorna una 'list' 
@@ -236,77 +203,6 @@ def makeReadQuery(sql:str, params:tuple = None) -> list:
         query = cursor.execute(sql, params).fetchall()
     conn.close()
     return query
-
-
-def setTableWidgetContent(tableWidget:QTableWidget, row_count:int=None, query:list=None) -> tuple | None:
-    '''Recibe un QTableWidget, la cantidad de filas que tiene y una consulta SELECT ya hecha con los valores de la base 
-    de datos.
-    \n\tColoca todos los datos de la query en el QTableWidget. 
-    Dependiendo del parámetro QTableWidget, retorna una tupla con los IDs de la tabla correspondiente o 'None'.'''
-    n_row:int = 0
-    id_list:list = []
-
-    # guardo en una lista todos los IDs (no me interesan los IDs de Deudas)
-    match tableWidget.objectName():
-        case "table_debts":
-            pass
-        case _:
-            for id_col in query:
-                id_list.append(id_col[0])
-            id_list = tuple(id_list)
-
-    # limpia la tabla
-    tableWidget.clearContents()
-    # determina la cantidad de filas que tendrá la tabla
-    tableWidget.setRowCount(row_count)
-    
-    # y dependiendo de cuál tabla se seleccionó la llena con sus respectivos valores...
-    match tableWidget.objectName():
-        case "displayTable":
-            for row in query:
-                tableWidget.setItem(n_row, 0, QTableWidgetItem(str(row[1])) ) # col.0 tiene categoría
-                tableWidget.setItem(n_row, 1, QTableWidgetItem(str(row[2])) ) # col.1 tiene nombre
-                tableWidget.setItem(n_row, 2, QTableWidgetItem(str(row[3]) if str(row[3]) != None else "") ) # col.2 tiene descripción
-                stock:float = row[4]
-                if stock.is_integer():
-                    try:
-                        stock = int(stock)
-                    except ValueError:
-                        pass
-                tableWidget.setItem(n_row, 3, QTableWidgetItem(str(f"{stock} {row[5]}")) ) # col.3 tiene stock y unidad_medida
-                tableWidget.setItem(n_row, 4, QTableWidgetItem(str(row[6])) ) # col.4 tiene precio_unit
-                tableWidget.setItem(n_row, 5, QTableWidgetItem(str(row[7]) if row[7] != None else "") ) # col.5 tiene precio_comerc
-                n_row += 1
-        
-        case "table_sales_data":
-            for row in query:
-                tableWidget.setItem(n_row, 0, QTableWidgetItem(str(row[1]) if row[1] != None else "") ) # columna 0 tiene detalles_venta
-                quantity = row[3]
-                if quantity.is_integer():
-                    try:
-                        quantity = int(quantity)
-                    except ValueError:
-                        pass
-                measurement_unit = str(row[4]) if row[4] != None else ""
-                tableWidget.setItem(n_row, 1, QTableWidgetItem(str(f"{quantity} {measurement_unit}")) ) # col.1 tiene cantidad y unidad_medida
-                tableWidget.setItem(n_row, 2, QTableWidgetItem(str(row[2])) ) # col.2 tiene nombre
-                tableWidget.setItem(n_row, 3, QTableWidgetItem(str(row[5])) ) # col.3 tiene costo_total
-                tableWidget.setItem(n_row, 4, QTableWidgetItem(str(row[6])) ) # col.4 tiene abonado
-                tableWidget.setItem(n_row, 5, QTableWidgetItem(str(row[7]) if str(row[7]) != None else "") ) # col.5 tiene fecha_hora
-                n_row += 1
-
-        case "table_debts":
-            # for row in query:
-            #     tableWidget.setItem(n_row, 0, QTableWidgetItem())
-            # TODO: seguir poniendo funcionalidad acá (antes necesito ir a MainWindow y declarar las consultas sql)
-            pass
-
-    # al final, redimensiona las filas acorde al contenido...
-    tableWidget.resizeRowsToContents()
-    if id_list:
-        return tuple(id_list)
-    else:
-        return None
 
 
 def getSelectedTableRows(tableWidget:QTableWidget) -> tuple:
