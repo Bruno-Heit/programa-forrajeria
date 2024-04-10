@@ -21,6 +21,8 @@ from sqlite3 import (Error as sqlite3Error)
 
 # Dialog con datos de un producto
 class ProductDialog(QDialog):
+    '''QDialog creado al presionar el botón 'MainWindow.btn_add_product_inventory'. Sirve para crear un nuevo registro 
+    de producto en la tabla "Productos" en la base de datos.'''
     def __init__(self):
         super(ProductDialog, self).__init__()
         self.productDialog_ui = Ui_Dialog()
@@ -362,6 +364,9 @@ class ProductDialog(QDialog):
 
 # Dialog con datos de la venta -y del deudor si se debe algo/hay algo a favor-
 class SaleDialog(QDialog):
+    '''QDialog creado al presionar el botón 'MainWindow.btn_add_product_sales'. Sirve para crear un nuevo registro 
+    de venta en la tabla "Ventas", de detalles de venta en "Detalle_Ventas", de deuda en "Deudas" (si hay diferencia 
+    entre lo abonado y el costo total) y de deudor en "Deudores" (si hay deuda) en la base de datos.'''
     def __init__(self):
         super(SaleDialog, self).__init__()
         self.saleDialog_ui = Ui_saleDialog()
@@ -982,6 +987,9 @@ class SaleDialog(QDialog):
 
 # item de la lista del formulario de Ventas
 class ListItem(QWidget):
+    '''Item creado dinámicamente dentro de la lista de formulario de ventas 'MainWindow.sales_input_list'. Sirve para 
+    seleccionar un producto, la cantidad vendida, el tipo de precio (comercial o normal) y darle alguna descripción a 
+    la venta.'''
     def __init__(self, listWidget:QListWidget, listWidgetItem:QListWidgetItem, newObjectName:str):
         super(ListItem, self).__init__()
         self.listItem = Ui_listProduct()
@@ -1016,12 +1024,16 @@ class ListItem(QWidget):
 
         self.listItem.checkBox_comercialPrice.stateChanged.connect(lambda: self.validateFields(False))
         
-
     #### MÉTODOS #####################################################
     # eliminar el item actual
+    @Slot()
     def deleteCurrentProduct(self) -> None:
-        '''Emite una señal a 'sales_input_list' (al método addSalesInputListItem) de que se eliminó el item y 
-        elimina el item actual de la lista. Retorna 'None'.'''
+        '''
+        Emite una señal a 'MainWindow.sales_input_list' (al método 'MainWindow.addSalesInputListItem') de que se 
+        eliminó el item y elimina el item actual de la lista.
+        
+        Retorna None.
+        '''
         self.listWidget.takeItem(self.listWidget.row(self.listWidgetItem))
         self.signalToParent.deletedItem.emit(self.objectName())
         return None
@@ -1029,8 +1041,11 @@ class ListItem(QWidget):
 
     # métodos de validación
     def validateProductName(self, curr_index:int) -> None:
-        '''Valida que el nombre del producto introducido sea válido, muestra un mensaje en 'label_nameFeedback'.
-        \nRetorna un bool.'''
+        '''
+        Valida que el nombre del producto introducido sea válido, muestra un mensaje en 'label_nameFeedback'.
+        
+        Retorna un bool.
+        '''
         valid_name:bool = True
 
         # valido el nombre
@@ -1042,8 +1057,11 @@ class ListItem(QWidget):
 
 
     def validateProductQuantity(self, curr_text:str, editing_finished:bool = False) -> bool:
-        '''Valida que la cantidad introducida sea válida, muestra un mensaje en 'label_quantityFeedback'.
-        \nRetorna un bool.'''
+        '''
+        Valida que la cantidad introducida sea válida, muestra un mensaje en 'label_quantityFeedback'.
+        
+        Retorna un bool.
+        '''
         valid_quantity:bool = True
         curr_stock:float | int | str
         
@@ -1084,12 +1102,18 @@ class ListItem(QWidget):
         return valid_quantity
 
 
+    @Slot(bool)
     def validateFields(self, le_editing_finished:bool = False) -> None:
-        '''Actúa como nexo para validar el nombre del producto y la cantidad cuando se emitan señales desde el campo \
-        del nombre del producto (QComboBox), la cantidad (QLineEdit) o el tipo de precio (QCheckBox). \
-        Envía una señal a 'sales_input_list' (al método addSalesInputListItem) con el valor (True o False). \
-        También pone el foco en éste item de 'sales_input_list'.
-        \nRetorna 'None'.'''
+        '''
+        Actúa como nexo para validar el nombre del producto y la cantidad cuando se emitan señales desde el campo 
+        del nombre del producto (QComboBox), la cantidad (QLineEdit) o el tipo de precio (QCheckBox). 
+        Envía una señal a 'MainWindow.sales_input_list' (al método 'MainWindow.addSalesInputListItem') con el valor 
+        (True o False). 
+        
+        También pone el foco en éste item de 'MainWindow.sales_input_list'.
+        
+        Retorna None.
+        '''
         combobox_curr_index:int = self.listItem.comboBox_productName.currentIndex()
         le_curr_text:str = self.listItem.lineEdit_productQuantity.text()
         valid:tuple = (
@@ -1115,7 +1139,7 @@ class ListItem(QWidget):
         else:
             self._setTotalCost(False)
 
-        # envía una señal a sales_input_list (al método addSalesInputListItem)
+        # envía una señal a MainWindow.sales_input_list (al método MainWindow.addSalesInputListItem)
         if "NO DISPONIBLE" in self.listItem.label_subtotal.text() or self.listItem.label_subtotal.text() == "SUBTOTAL":
             self.signalToParent.allFieldsValid.emit({self.objectName():False})
         else:
@@ -1126,9 +1150,12 @@ class ListItem(QWidget):
 
     # métodos generales
     def _setLabelMeasurementUnit(self) -> None:
-        '''Si 'self.VALID_NAME' y 'self.VALID_QUANTITY' son True, hace una consulta SELECT a la base de datos y \
+        '''
+        Si 'self.VALID_NAME' y 'self.VALID_QUANTITY' son True, hace una consulta SELECT a la base de datos y 
         obtiene la unidad de medida del producto.
-        \nRetorna 'None'.'''
+        
+        Retorna None.
+        '''
         m_unit:str
 
         m_unit = makeReadQuery("SELECT unidad_medida FROM Productos WHERE nombre = ?;", (self.listItem.comboBox_productName.itemText(self.listItem.comboBox_productName.currentIndex()),) )[0][0]
@@ -1138,10 +1165,14 @@ class ListItem(QWidget):
 
 
     def _setTotalCost(self, all_valid:bool = True) -> None:
-        '''Si el nombre y la cantidad son válidos, hace una consulta SELECT a la base de datos y \
-        obtiene el precio del producto, y si 'checkBox_comercialPrice' está marcada obtiene el precio comercial. \
+        '''
+        Si el nombre y la cantidad son válidos, hace una consulta SELECT a la base de datos y obtiene el precio del 
+        producto, y si 'checkBox_comercialPrice' está marcada obtiene el precio comercial.
+        
         Calcula el precio total y lo reemplaza en 'label_subtotal'.
-        \nRetorna 'None'.'''
+        
+        Retorna None.
+        '''
         col_name:str
         sql:str
         price:float | None | str
@@ -1166,12 +1197,16 @@ class ListItem(QWidget):
 
 
     def _setSaleDetails(self) -> None:
-        '''Si 'lineEdit_saleDetail' no fue rellenado para cuando se completen los campos del nombre del producto \
-        y la cantidad, este método llena el campo de detalles de venta con el nombre del producto, la cantidad vendida \
+        '''
+        Si 'lineEdit_saleDetail' no fue rellenado para cuando se completen los campos del nombre del producto 
+        y la cantidad, este método llena el campo de detalles de venta con el nombre del producto, la cantidad vendida 
         y el tipo de precio que se pagó.
-        \nSi el campo de 'lineEdit_saleDetail' ya tenía contenido escrito, sólo coloca si el precio fue el normal o el \
+        
+        Si el campo de 'lineEdit_saleDetail' ya tenía contenido escrito, sólo coloca si el precio fue el normal o el 
         comercial.
-        \nRetorna 'None'.'''
+        
+        Retorna None.
+        '''
         product_name:str
         quantity:str
         price_type:str
@@ -1201,7 +1236,7 @@ class ListItem(QWidget):
 
 # subclase con métodos de validación para las clases que manejen datos de deudores
 class DebtorDataValidation():
-    '''Clase que se encarga de llevar a cabo la validación de '''
+    '''Clase que se encarga de llevar a cabo la validación de datos de deudores. Es usada en la clase 'DebtorDataDialog'.'''
     def __init__(self, name:QLineEdit, surname:QLineEdit, phone_number:QLineEdit, postal_code:QLineEdit):
         self.name:QLineEdit = name
         self.surname:QLineEdit = surname

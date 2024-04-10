@@ -1,7 +1,7 @@
 # SQLITE3
 import sys
 import os
-from sqlite3 import Connection
+from sqlite3 import (connect, Connection, Error as sqlite3Error)
 
 from PySide6.QtWidgets import (QTableWidget, QComboBox, QHeaderView, QTableWidgetItem, QListWidget,
                                QLineEdit, QLabel, QCompleter, QFrame, QWidget, QDateTimeEdit)
@@ -112,11 +112,10 @@ def set_tables_ListWidgetItemsTooltip(listWidget:QListWidget, categories_descrip
 #------------------------------------------------
 def createConnection(db_name:str) -> Connection | None:
     '''Crea una conexión a la base de datos y devuelve la conexión, si no se pudo devuelve None.'''
-    from sqlite3 import connect
-    from sqlite3 import Error
     try:
         connection = connect(pyinstallerCompleteResourcePath(db_name))
-    except Error as e:
+    except sqlite3Error as err:
+        print(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
         return None
     return connection
 
@@ -191,8 +190,14 @@ def setTableWidthPolitics(tableWidget:QTableWidget) -> None:
 
 # READ QUERY
 def makeReadQuery(sql:str, params:tuple = None) -> list:
-    '''Hace la consulta SELECT a la base de datos y devuelve los valores de las filas seleccionadas. Retorna una 'list' 
-    con los valores.'''
+    '''
+    Hace la consulta SELECT a la base de datos y devuelve los valores de las filas seleccionadas. 
+    
+    IMPORTANTE: Esta función es genérica y está pensada para hecerse en casos donde no se requiere realizar 
+    error-handling, ya que no retorna ningún tipo de feedback.
+    
+    Retorna una 'list' con los valores.
+    '''
     conn = createConnection("database/inventario.db")
     if not conn:
         return
@@ -216,34 +221,65 @@ def getSelectedTableRows(tableWidget:QTableWidget) -> tuple:
 
 # DELETE QUERY
 def makeDeleteQuery(tableWidget:QTableWidget, rows_to_delete:tuple, ids:tuple, items_to_delete:tuple = None) -> None:
-    '''Declara las consultas sql y los parámetros para hacer la consulta DELETE a la base de datos con las filas 
-    seleccionadas. El parámetro 'items_to_delete' no es necesario, funciona como una "medida de seguridad", es otro 
-    valor a tener en cuenta -además del ID del registro- para borrar un registro. Retorna 'None'.'''
+    '''
+    Declara las consultas sql y los parámetros para hacer la consulta DELETE a la base de datos con las filas 
+    seleccionadas.
+    
+    - items_to_delete: (opcional) funciona como una "medida de seguridad", es otro valor a tener en cuenta -además 
+    del ID del registro- para borrar un registro.
+    
+    IMPORTANTE: Esta función implementa error-handling y feedback.
+    
+    Retorna None.
+    '''
     pos:int = 0
-    connection = createConnection("database/inventario.db")
-    if not connection:
+    conn = createConnection("database/inventario.db")
+    if not conn:
         return None
-    cursor = connection.cursor()
-    # NOTE: sql no admite múltiples DELETE, así que se deben hacer 1 por 1
-    match tableWidget.objectName():
-        case "displayTable":
-            while pos < len(rows_to_delete):
-                cursor.execute("DELETE FROM Productos WHERE IDproducto = ? AND nombre = ?", (ids[rows_to_delete[pos]], items_to_delete[pos], ) )
-                pos += 1
-        
-        case "table_sales_data":
-            while pos < len(rows_to_delete):
-                cursor.execute("DELETE FROM Detalle_Ventas WHERE ID_detalle_venta = ?;", (ids[rows_to_delete[pos]], ) )
-                # obtengo el IDventa desde Detalle_Ventas
-                IDventa = makeReadQuery("SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?", (ids[rows_to_delete[pos]], ))[0][0]
-                IDdeuda = makeReadQuery("SELECT IDdeuda FROM Detalle_Ventas WHERE ID_detalle_venta = ?", (ids[rows_to_delete[pos]], ))[0][0]
-                # hago los DELETE a Ventas y Deudas
-                cursor.execute("DELETE FROM Ventas WHERE IDventa = ? AND fecha_hora = ?;", (IDventa, items_to_delete[pos]) )
-                cursor.execute("DELETE FROM Deudas WHERE IDdeuda = ? AND fecha_hora = ?;", (IDdeuda, items_to_delete[pos]) )
-                pos += 1
+    cursor = conn.cursor()
+    
+    #* sql no admite múltiples DELETE, así que se deben hacer 1 por 1
+    try:
+        match tableWidget.objectName():
+            case "displayTable":
+                while pos < len(rows_to_delete):
+                    cursor.execute(
+                        "DELETE FROM Productos WHERE IDproducto = ? AND nombre = ?",
+                        (ids[rows_to_delete[pos]], items_to_delete[pos], ) )
+                    pos += 1
             
-    connection.commit()
-    connection.close()
+            case "table_sales_data":
+                while pos < len(rows_to_delete):
+                    cursor.execute(
+                        "DELETE FROM Detalle_Ventas WHERE ID_detalle_venta = ?;",
+                        (ids[rows_to_delete[pos]], ) )
+                    
+                    # obtengo el IDventa desde Detalle_Ventas
+                    IDventa = makeReadQuery(
+                        "SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?",
+                        (ids[rows_to_delete[pos]], ))[0][0]
+                    IDdeuda = makeReadQuery(
+                        "SELECT IDdeuda FROM Detalle_Ventas WHERE ID_detalle_venta = ?",
+                        (ids[rows_to_delete[pos]], ))[0][0]
+                    
+                    # hago los DELETE a Ventas y Deudas
+                    cursor.execute(
+                        "DELETE FROM Ventas WHERE IDventa = ? AND fecha_hora = ?;",
+                        (IDventa, items_to_delete[pos]) )
+                    cursor.execute(
+                        "DELETE FROM Deudas WHERE IDdeuda = ? AND fecha_hora = ?;",
+                        (IDdeuda, items_to_delete[pos]) )
+                    
+                    conn.commit()
+                    pos += 1
+        
+    except sqlite3Error as err:
+        conn.rollback()
+        print(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+        
+    finally:
+        conn.close()
+    
     return None
 
 
@@ -413,16 +449,23 @@ def validateColumnUpdatedValue(tableWidget:QTableWidget, curr_index:QModelIndex,
 
 
 # UPDATE QUERY
-def makeUpdateQuery(sql:str, params:tuple, inv_prices:bool=None) -> None:
-    '''Hace la consulta UPDATE a la base de datos.\n
-    'inv_prices' determina si hacer un UPDATE normal ó si es para actualizar los precios que fueron modificados de \n
-    la tabla 'displayTable' usando porcentajes, en cuyo caso se usa la instrucción 'executemany()'.
-    \nRetorna 'None'.'''
+def makeUpdateQuery(sql:str, params:tuple, INV_PERC_CHANGE:bool=None) -> None:
+    '''
+    Hace la consulta UPDATE a la base de datos.
+    
+    - INV_PERC_CHANGE: flag que sirve para distinguir si se hace un UPDATE normal ó si es para actualizar los precios 
+    que fueron modificados de la tabla 'displayTable' usando porcentajes.
+    
+    IMPORTANTE: Esta función es genérica y está pensada para hecerse en casos donde no se requiere realizar 
+    error-handling, ya que no retorna ningún tipo de feedback.
+    
+    Retorna None.
+    '''
     conn = createConnection("database/inventario.db")
     if not conn:
         return None
     cursor = conn.cursor()
-    if not inv_prices:
+    if not INV_PERC_CHANGE:
         cursor.execute(sql, params)
     else:
         cursor.executemany(sql, params)
@@ -507,7 +550,13 @@ def createTableColumnLineEdit(tableWidget:QTableWidget, curr_index:QModelIndex) 
 
 # INSERT QUERY
 def makeInsertQuery(sql:str, params:tuple = None) -> None:
-    '''Hace la consulta INSERT a la base de datos. Retorna 'None'.'''
+    '''Hace una consulta INSERT a la base de datos. 
+    
+    IMPORTANTE: Esta función es genérica y está pensada para hecerse en casos donde no se requiere realizar 
+    error-handling, ya que no retorna ningún tipo de feedback.
+    
+    Retorna None.
+    '''
     conn = createConnection("database/inventario.db")
     if not conn:
         return None

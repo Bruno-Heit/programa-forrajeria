@@ -376,6 +376,8 @@ class Ui_MainWindow(object):
 "}\n"
 "QTabBar::tab:selected {\n"
 "	margin-bottom: -1px;\n"
+"	background-color: qlineargradient(spread:pad, x1:0.658, y1:1, x2:0.289, y2:0, stop:0 rgba(11, 126, 127, 255), stop:1 rgba(84, 137, 172, 255));\n"
+"	border-top-color:  rgba(84, 137, 172, 255);\n"
 "}\n"
 "QTabBar::tab:!selected {\n"
 "	margin-top: 3px;\n"
@@ -392,7 +394,8 @@ class Ui_MainWindow(object):
 "	background-color: rgb(197, 255, 252);\n"
 "}\n"
 "QTableWidget::item:selected {\n"
-"	background-color: #38a3a5;\n"
+"	bac"
+                        "kground-color: #38a3a5;\n"
 "}\n"
 "QHeaderView:section {\n"
 "	background-color: #fff;\n"
@@ -401,8 +404,7 @@ class Ui_MainWindow(object):
 "	border-bottom: 1px solid;\n"
 "	border-color: #111;\n"
 "}\n"
-""
-                        "\n"
+"\n"
 "\n"
 "QToolBox::tab {\n"
 "	background-color: #13947d;\n"
@@ -441,7 +443,8 @@ class Ui_MainWindow(object):
 "\n"
 "\n"
 "/* estilos del QDateTimeEdit y del QCalendarWidget */\n"
-"QDateTimeEdit {\n"
+"QDateTimeEdit"
+                        " {\n"
 "	background-color: #fff;\n"
 "}\n"
 "\n"
@@ -451,8 +454,7 @@ class Ui_MainWindow(object):
 "	selection-background-color: #38a3a5;\n"
 "}\n"
 "QCalendarWidget QToolButton {\n"
-""
-                        "	background-color: #22577a;\n"
+"	background-color: #22577a;\n"
 "	color: #fff;\n"
 "}\n"
 "QCalendarWidget QToolButton:hover,\n"
@@ -1386,8 +1388,8 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(1)
-        self.tab2_toolBox.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(0)
+        self.tab2_toolBox.setCurrentIndex(1)
         self.tab2_toolBox.layout().setSpacing(4)
 
 

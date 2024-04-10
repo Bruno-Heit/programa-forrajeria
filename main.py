@@ -484,6 +484,7 @@ class MainWindow(QMainWindow):
         return tuple(registers_to_delete)
 
 
+    @Slot(QTableWidget)
     def handleTableDeleteRows(self, tableWidget:QTableWidget) -> None:
         '''dependiendo del QTableWidget del que se tenga borrar filas, se encarga de declarar las variables necesarias 
         y llamar a los métodos necesarios para que se encarguen de borrarlas de la base de datos. Al final, llama a 
@@ -657,6 +658,7 @@ class MainWindow(QMainWindow):
                 pass
 
 
+    @Slot(QTableWidget, QModelIndex)
     def handleTableUpdateItem(self, tableWidget:QTableWidget, curr_index:QModelIndex) -> None:
         '''dependiendo del QTableWidget del cual se quiera modificar una celda, se encarga de declarar las variables necesarias \
         y llamar a los métodos necesarios para que se pueda modificar el elemento en la base de datos. 
@@ -694,6 +696,7 @@ class MainWindow(QMainWindow):
 
 
     #¡ método de cambios en la selección
+    @Slot(QTableWidget)
     def handleSelectionChange(self, tableWidget:QTableWidget) -> None:
         '''Esta función es llamada ni bien se detecta que la selección de los items en el QTableWidget cambia. 
         Verifica si hay celdas seleccionadas. Si no hay, llama a 'removeTableCellsWidgets'. Retorna 'None'.'''
@@ -766,6 +769,7 @@ class MainWindow(QMainWindow):
         return is_valid
 
 
+    @Slot()
     def handleLineeditPercentageEditingFinished(self) -> None:
         '''Maneja los métodos asociados con 'lineEdit_percentage_change'. Llama a 'validateLineeditPercentageChange' para 
         validar el valor ingresado, y si es válido obtiene las filas seleccionadas con 'getSelectedTableRows', calcula los 
@@ -777,6 +781,7 @@ class MainWindow(QMainWindow):
         return None
 
 
+    @Slot()
     def handleCheckboxStateChange(self) -> None:
         '''Dependiendo de cuál se haya checkeado, permite al usuario seleccionar las filas de los productos cuyos 
         precios (unitarios o comerciales) de la tabla 'displayTable' desee incrementar/decrementar de forma porcentual. Además 
@@ -796,12 +801,14 @@ class MainWindow(QMainWindow):
     
 
     # funciones de inventory_checkbuttons_buttonGroup
+    @Slot(QCheckBox)
     def handlePressedCheckbutton(self, checkbox:QCheckBox) -> None:
         '''Permite seleccionar/deseleccionar un checkbox libremente, y se usa en conjunto con 'handleClickedCheckbutton'. 
         Retorna 'None'.'''
         checkbox.group().setExclusive(not checkbox.isChecked())
 
 
+    @Slot(QCheckBox)
     def handleClickedCheckbutton(self, checkbox:QCheckBox) -> None:
         '''Permite seleccionar/deseleccionar un checkbox libremente, y se usa en conjunto con 'handlePressedCheckbutton'. 
         Retorna 'None'.'''
@@ -953,6 +960,7 @@ class MainWindow(QMainWindow):
         return None
 
 
+    @Slot()
     def addSalesInputListItem(self) -> None:
         '''Crea un item que se colocará dentro de 'sales_input_list', y que representa la venta de un producto.
         \nRetorna 'None'.'''
@@ -1004,6 +1012,7 @@ class MainWindow(QMainWindow):
         return None
 
 
+    @Slot()
     def handleFinishedSale(self) -> None:
         '''Obtiene los datos de los campos de los items y hace las consultas necesarias a la base de datos.
         \nSi la cantidad abonada es menor al precio total se crea un Dialog que pide datos del deudor.
