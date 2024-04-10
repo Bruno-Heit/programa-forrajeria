@@ -1234,6 +1234,8 @@ class ListItem(QWidget):
 
 
 
+
+
 # subclase con métodos de validación para las clases que manejen datos de deudores
 class DebtorDataValidation():
     '''Clase que se encarga de llevar a cabo la validación de datos de deudores. Es usada en la clase 'DebtorDataDialog'.'''
@@ -1286,6 +1288,8 @@ class DebtorDataValidation():
 
 
 
+
+
 # se usa en las clases ListItem y DebtorDataDialog
 class SignalToParent(QObject):
     allFieldsValid = Signal(object) # usado en ListItem
@@ -1294,8 +1298,11 @@ class SignalToParent(QObject):
 
 
 
+
+
 # Dialog con datos de deudores
 class DebtorDataDialog(QDialog):
+    '''QDialog con datos de deudores.'''
     def __init__(self):
         super(DebtorDataDialog, self).__init__()
         self.debtorData = Ui_debtorDataDialog()
@@ -1337,11 +1344,15 @@ class DebtorDataDialog(QDialog):
         self.debtorData.buttonBox.rejected.connect(lambda: self.signalToParent.debtorChosen.emit(0))
 
     #### MÉTODOS #####################################################
+    @Slot(str)
     def validateFields(self, type:str) -> None:
-        '''Llama a funciones de la clase 'DebtorDataValidation' para validar el campo especificado en el argumento 'type', \
-        y cambia el estilo de los campos y los labels de feedback correspondientes de acuerdo a la validación. Al final activa \
-        o desactiva el botón "Aceptar".
-        \nRetorna 'None'.'''
+        '''
+        Llama a métodos de la clase 'DebtorDataValidation' para validar el campo especificado en el argumento 'type', 
+        y cambia el estilo de los campos y los labels de feedback correspondientes de acuerdo a la validación. 
+        Al final activa o desactiva el botón "Aceptar".
+        
+        Retorna None.
+        '''
         match type:
             case 'name':
                 self.dataValidation.validateDebtorNameField()
@@ -1408,11 +1419,17 @@ class DebtorDataDialog(QDialog):
         return values
     
 
+    @Slot()
     def handleOkClicked(self) -> None:
-        '''Obtiene los datos de los campos formateados e inserta los valores en la base de datos en las tablas de \
-        "Deudores" (si no existe el deudor). Al final envía una señal con el ID, nombre y apellido del deudor al \
-        método 'MainWindow.handleFinishedSale' confirmando que se eligió un deudor. 
-        \nRetorna 'None'.'''
+        '''
+        Es llamado una vez que se presiona el botón "Aceptar".
+        
+        Obtiene los datos de los campos formateados e inserta los valores en la base de datos en las tablas de 
+        "Deudores" (si no existe el deudor). Al final envía una señal con el ID, nombre y apellido del deudor al 
+        método 'MainWindow.handleFinishedSale' confirmando que se eligió un deudor.
+        
+        Retorna None.
+        '''
         # obtiene los valores formateados de los campos...
         values:tuple = self.getFieldsData()
         sql:str
@@ -1424,19 +1441,36 @@ class DebtorDataDialog(QDialog):
         params = (values[0], values[1],)
         query = makeReadQuery(sql, params)[0][0] # si el deudor no existe devuelve 0
 
-        # si no existe ese deudor, lo agrega...
-        if not query:
-            # declara la consulta sql y params de Deudores y hace la consulta...
-            sql = "INSERT INTO Deudores(nombre, apellido, num_telefono, direccion, codigo_postal) VALUES(?, ?, ?, ?, ?);"
-            params = (values[0], values[1], values[2], values[3], values[4],)
-            makeInsertQuery(sql, params)
+        try:
+            conn = createConnection("database/inventario.db")
+            cursor = conn.cursor()
+            
+            # si no existe ese deudor, lo agrega...
+            if not query:
+                # declara la consulta sql y params de Deudores y hace la consulta...
+                sql = "INSERT INTO Deudores(nombre, apellido, num_telefono, direccion, codigo_postal) VALUES(?, ?, ?, ?, ?);"
+                params = (values[0], values[1], values[2], values[3], values[4],)
+                cursor.execute(sql, params)
+                conn.commit()
 
-        # trae el ID, el nombre y el apellido del deudor para luego mandarlo a MainWindow en la señal 'debtorChosen'
-        query = makeReadQuery("SELECT IDdeudor, nombre, apellido FROM Deudores WHERE nombre = ? AND apellido = ?;", (values[0], values[1],))[0]
+            # trae el ID, el nombre y el apellido del deudor para luego mandarlo a MainWindow en la señal 'debtorChosen'
+            query = makeReadQuery(
+                "SELECT IDdeudor, nombre, apellido FROM Deudores WHERE nombre = ? AND apellido = ?;",
+                (values[0], values[1],))[0]
 
-        # envía señal comunicando que sí se eligió un deudor
-        self.signalToParent.debtorChosen.emit(query)
+            # envía señal comunicando que sí se eligió un deudor
+            self.signalToParent.debtorChosen.emit(query)
+            
+        except sqlite3Error as err:
+            conn.rollback()
+            print(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+        
+        finally:
+            conn.close()
+        
         return None
+
+
 
 
 
