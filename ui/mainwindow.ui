@@ -608,6 +608,8 @@ QToolBox::tab:hover {
 QToolBox::tab:selected {
 	font: italic;
 	font-size: 16px;
+	background-color: qlineargradient(spread:pad, x1:0.658, y1:1, x2:0.289, y2:0, stop:0 rgba(11, 126, 127, 255), stop:1 rgba(84, 137, 172, 255));
+	border-top-color:  rgba(84, 137, 172, 255);
 }
 
 
@@ -672,7 +674,7 @@ QProgressBar::chunk {
           <enum>QTabWidget::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <property name="elideMode">
           <enum>Qt::ElideMiddle</enum>
@@ -1451,7 +1453,7 @@ color: #111;</string>
 }</string>
              </property>
              <property name="currentIndex">
-              <number>1</number>
+              <number>0</number>
              </property>
              <property name="tabSpacing">
               <number>4</number>

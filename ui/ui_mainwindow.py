@@ -418,6 +418,8 @@ class Ui_MainWindow(object):
 "QToolBox::tab:selected {\n"
 "	font: italic;\n"
 "	font-size: 16px;\n"
+"	background-color: qlineargradient(spread:pad, x1:0.658, y1:1, x2:0.289, y2:0, stop:0 rgba(11, 126, 127, 255), stop:1 rgba(84, 137, 172, 255));\n"
+"	border-top-color:  rgba(84, 137, 172, 255);\n"
 "}\n"
 "\n"
 "\n"
@@ -435,7 +437,8 @@ class Ui_MainWindow(object):
 "	border-color: rgb(11, 126, 127);\n"
 "	padding-top: 2px;\n"
 "	padding-left: 4px;\n"
-"}\n"
+"}"
+                        "\n"
 "QComboBox QAbstractItemView {\n"
 "	background-color: #fff;\n"
 "	selection-background-color: #38a3a5;\n"
@@ -443,8 +446,7 @@ class Ui_MainWindow(object):
 "\n"
 "\n"
 "/* estilos del QDateTimeEdit y del QCalendarWidget */\n"
-"QDateTimeEdit"
-                        " {\n"
+"QDateTimeEdit {\n"
 "	background-color: #fff;\n"
 "}\n"
 "\n"
@@ -1388,8 +1390,8 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(0)
-        self.tab2_toolBox.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(1)
+        self.tab2_toolBox.setCurrentIndex(0)
         self.tab2_toolBox.layout().setSpacing(4)
 
 

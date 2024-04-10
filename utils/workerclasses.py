@@ -59,6 +59,8 @@ class DbReadWorker(QObject):
 
 
 
+
+
 class DbInsertWorker(QObject):
     finished = Signal(int) # emite 0 si no se pudo establecer comunicación con la base de datos, sino 1.
     

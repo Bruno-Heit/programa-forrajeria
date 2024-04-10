@@ -121,8 +121,10 @@ def createConnection(db_name:str) -> Connection | None:
 
 
 def getProductsCategories() -> list[str] | None:
-    '''Hace una consulta SELECT a la base de datos y toma las categorías que hay. Devuelve una lista con las categorías. 
-    Si hubo un error conectándose a la base  de datos devuelve 'None'.'''
+    '''
+    Hace una consulta SELECT a la base de datos y toma las categorías que hay. Devuelve una lista con las 
+    categorías. 
+    '''
     connection = createConnection("database/inventario.db")
     if not connection:
         return None
@@ -135,8 +137,10 @@ def getProductsCategories() -> list[str] | None:
 
 
 def getProductNames() -> list[str]:
-    '''Hace una consulta SELECT a la base de datos y obtiene todos los nombres de productos que hay. Retorna una 
-    lista con los nombres.'''
+    '''
+    Hace una consulta SELECT a la base de datos y obtiene todos los nombres de productos que hay. Retorna una 
+    lista con los nombres.
+    '''
     conn = createConnection("database/inventario.db")
     if not conn:
         return None
@@ -150,8 +154,10 @@ def getProductNames() -> list[str]:
 
 
 def getCategoriesDescription() -> tuple[str] | None:
-    '''Hace una consulta SELECT a la base de datos y toma las descripciones de las categorías que hay. Devuelve una tupla 
-    con las categorías. Si hubo un error conectándose a la base  de datos devuelve 'None'.'''
+    '''
+    Hace una consulta SELECT a la base de datos y toma las descripciones de las categorías que hay. Devuelve una tupla 
+    con las categorías.
+    '''
     connection = createConnection("database/inventario.db")
     if not connection:
         return None
@@ -165,7 +171,11 @@ def getCategoriesDescription() -> tuple[str] | None:
 
 
 def setTableWidthPolitics(tableWidget:QTableWidget) -> None:
-    '''Recibe un 'QTableWidget' y especifica las políticas de ancho de las columnas. Retorna un 'QHeaderView'.'''
+    '''
+    Recibe un 'QTableWidget' y especifica las políticas de ancho de las columnas. 
+    
+    Retorna None.
+    '''
     match tableWidget.objectName():
         case "displayTable":
             header = tableWidget.horizontalHeader()

@@ -111,6 +111,8 @@ class MainWindow(QMainWindow):
         self.ui.tab2_toolBox.currentChanged.connect(lambda curr_index: self.handleTableToFill(self.ui.table_sales_data) if curr_index == 1 else None)
         
         self.ui.sales_searchBar.returnPressed.connect(lambda: self.handleTableToFill(self.ui.table_sales_data, self.ui.sales_searchBar))
+        
+        self.ui.tabWidget.currentChanged.connect(lambda index: self.ui.tab2_toolBox.setCurrentIndex(0) if index == 1 else None)
         # (CREATE) añadir una venta a 'table_sales_data'
         self.ui.btn_add_product_sales.clicked.connect(lambda: self.handleTableCreateRow(self.ui.table_sales_data))
         # (DELETE) eliminar ventas de 'table_sales_data'
