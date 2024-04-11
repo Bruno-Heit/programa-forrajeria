@@ -333,29 +333,28 @@ class ProductDialog(QDialog):
         Es llamada cuando se presiona el botón "Aceptar".
         
         Obtiene los datos de los campos y hace una consulta INSERT INTO a la base de datos.
-        Crea una instancia de 'workerclasses.DbInsertWorker' para que haga la consulta INSERT en un QThread diferente.
         
         Retorna None.
         '''
-        self.INSERT_THREAD = QThread()
-        self.insert_worker = DbInsertWorker()
+        try:
+            conn = createConnection("database/inventario.db")
+            cursor = conn.cursor()
+            
+            if self.productDialog_ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled() == False:
+                return None
+            data:tuple[str] = self.__getFieldsData()
+            sql = "INSERT INTO Productos(nombre,descripcion,stock,unidad_medida,precio_unit,precio_comerc,IDcategoria) VALUES(?,?,?,?,?,?,(SELECT IDcategoria FROM Categorias WHERE nombre_categoria=?));"
+
+            cursor.execute(sql, data)
+            conn.commit()
+            
+        except sqlite3Error as err:
+            conn.rollback()
+            print(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+            
+        finally:
+            conn.close()
         
-        self.insert_worker.moveToThread(self.INSERT_THREAD)
-        
-        if self.productDialog_ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled() == False:
-            return None
-        data:tuple[str] = self.__getFieldsData()
-        sql = "INSERT INTO Productos(nombre,descripcion,stock,unidad_medida,precio_unit,precio_comerc,IDcategoria) VALUES(?,?,?,?,?,?,(SELECT IDcategoria FROM Categorias WHERE nombre_categoria=?));"
-        
-        # makeInsertQuery(sql, data)
-        self.INSERT_THREAD.started.connect(lambda: self.insert_worker.executeInsertQuery(
-            data_sql=sql,
-            data_params=data))
-        self.insert_worker.finished.connect(self.INSERT_THREAD.quit)
-        self.insert_worker.finished.connect(self.INSERT_THREAD.wait)
-        self.INSERT_THREAD.finished.connect(self.insert_worker.deleteLater)
-        
-        self.INSERT_THREAD.start()
         return None
     
 
@@ -492,8 +491,9 @@ class SaleDialog(QDialog):
         if not conn:
             return None
         cursor = conn.cursor()
-        # NOTE: SQLite3 por alguna razón no permite pasar nombres de columnas como parámetro, así que hay que 
-        # escribirlos explícitamente, de ahí que haga el match a continuación...
+        
+        #? SQLite3 por alguna razón no permite pasar nombres de columnas como parámetro, así que hay que 
+        #? escribirlos explícitamente, de ahí que haga el match a continuación...
         match is_comercial_price:
             case True:
                 sql:str = "SELECT ? * precio_comerc FROM Productos WHERE nombre = ?;"
@@ -1292,6 +1292,7 @@ class DebtorDataValidation():
 
 # se usa en las clases ListItem y DebtorDataDialog
 class SignalToParent(QObject):
+    '''Señales para usar en las clases 'ListItem' y 'DebtorDataDialog'.'''
     allFieldsValid = Signal(object) # usado en ListItem
     deletedItem = Signal(str) # usado en ListItem
     debtorChosen = Signal(object) # usado en DebtorDataDialog
