@@ -14,6 +14,7 @@ from utils.workerclasses import *
 from resources import (rc_icons)
 
 from typing import (Any)
+import logging
 
 
 class MainWindow(QMainWindow):
@@ -174,12 +175,11 @@ class MainWindow(QMainWindow):
     @Slot(QTableWidget,QLineEdit,bool)
     def handleTableToFill(self, table_widget:QTableWidget, search_bar:QLineEdit=None, ACCESSED_BY_LIST:bool=False) -> None:
         '''
-        
         Este método hace lo siguiente:
         - Limpia el 'table_widget'.
+        - Limpia las variables de IDs asociadas con 'table_widget'.
         - Dependiendo del 'table_widget' que se tenga que llenar, se encarga de declarar las consultas sql y los 
         parámetros necesarios para luego hacer las consultas en la clase 'workerclasses.DbReadWorker'.
-        - Limpia las variables de IDs asociadas con 'table_widget'.
         - Crea una instancia de WORKER y QThread y conecta sus señales/slots.
         
         NO LLAMA A NINGÚN OTRO MÉTODO.
@@ -191,8 +191,6 @@ class MainWindow(QMainWindow):
 
         Retorna 'None'.
         '''
-        # TODO: por alguna razón, cuando se llama a esta función desde otras, no llena la tabla.
-        
         
         count_sql:str = "" # consulta de tipo COUNT()
         count_params:tuple[Any] = None # params de la consulta COUNT()
@@ -204,7 +202,6 @@ class MainWindow(QMainWindow):
         table_widget.clearContents()
         table_widget.setRowCount(0)
         
-        print("accedió...")
         # crea las consultas para obtener el COUNT() de filas y los registros para llenar la tabla
         match table_widget.objectName():
             case "displayTable":
@@ -261,8 +258,6 @@ class MainWindow(QMainWindow):
                 else:
                     pass
         
-        print("llegó hasta acá...")
-        
         #? declaro WORKER, THREAD y sus señales/slots
         self.READ_THREAD = QThread()
         self.read_worker = DbReadWorker()
@@ -280,7 +275,7 @@ class MainWindow(QMainWindow):
         self.read_worker.registerProgress.connect(lambda register: self.DbReadWorker_onRegisterProgress(
             register=register,
             table_widget=table_widget))
-        self.read_worker.finished.connect(lambda: self.DbReadWorker_onFinished(
+        self.read_worker.finished.connect(lambda: self.workerOnFinished(
             table_name=table_widget.objectName()))
         self.read_worker.finished.connect(self.READ_THREAD.quit)
         self.READ_THREAD.finished.connect(self.read_worker.deleteLater)
@@ -332,15 +327,18 @@ class MainWindow(QMainWindow):
     
     def __updateProgressBar(self, table_name:str, max_val:int=None, value:int=None) -> None:
         '''
-        Es llamada desde 'self.DbReadWorker_onCountFinished' una vez para determinar el valor máximo del QProgressBar 
-        asociado al QTableWidget con nombre 'table_name', y luego es llamado desde 'self.DbReadWorker_onRegisterProgress' 
-        a medida que se encuentran registros para actualizar el 'value' del QProgressBar.
-        
-        Actualiza el QProgressBar correspondiente dependiendo del nombre de la tabla 'table_name'. 
+        Actualiza el QProgressBar correspondiente dependiendo del nombre de la tabla 'table_name'.
         
         Recibe un 'max_val' si se llama desde 'self.DbReadWorker_onCountFinished' que determina el valor máximo del 
-        QProgressBar, ó recibe un 'value' si se llama desde 'self.DbReadWorker_onRegisterProgress' que representa el 
-        valor actual de progreso del QProgressBar.
+        QProgressBar, ó recibe un 'value' si se llama desde las otros métodos/señales que representa el valor actual 
+        de progreso del QProgressBar.
+        
+        Es llamada desde:
+        - self.DbReadWorker_onCountFinished: se llama una vez para determinar el valor máximo del QProgressBar 
+        asociado al QTableWidget con nombre 'table_name', y luego desde la señal 'self.DbReadWorker_onRegisterProgress' 
+        a medida que se encuentran registros para actualizar el 'value' del QProgressBar.
+        - self.DbDeleteWorker_onFinished: se llama a medida que se borran registros para actualizar el 'value' del 
+        QProgressBar.
         
         Retorna None.
         '''
@@ -419,22 +417,26 @@ class MainWindow(QMainWindow):
 
 
     @Slot(str)
-    def DbReadWorker_onFinished(self, table_name:str) -> None:
+    def workerOnFinished(self, table_name:str) -> None:
         '''
-        Esconde la QProgressBar relacionada con el QTableWidget con nombre 'table_name'.
+        Esconde la QProgressBar relacionada con el QTableWidget con nombre 'table_name' y reinicia el valor del 
+        QSS de dicha QProgressBar.
         
         Retorna None.
         '''
         match table_name:
             case "displayTable":
+                self.ui.inventory_progressbar.setStyleSheet("")
                 self.ui.inventory_progressbar.hide()
                 
             case "table_sales_data":
+                self.ui.sales_progressbar.setStyleSheet("")
                 self.ui.sales_progressbar.hide()
                 
             case "table_debts":
+                self.ui.debts_progressbar.setStyleSheet("")
                 self.ui.debts_progressbar.hide()
-        print("y terminó (final).")
+        logging.debug(f">> WORKER terminó de ejecutarse.")
         return None
 
 
@@ -460,60 +462,150 @@ class MainWindow(QMainWindow):
                 saleDialog.setAttribute(Qt.WA_DeleteOnClose, True)
                 saleDialog.exec()
         
-        self.handleTableToFill(table_widget=table_widget)
         return None
 
 
 
     #¡ tablas (DELETE)
-    def __getTableElementsToDelete(self, tableWidget:QTableWidget, selected_rows:list) -> tuple | None:
-        '''Dependiendo de cuál sea 'tableWidget', obtiene los nombres de los productos de 'displayTable' ó la fecha 
-        y hora de 'table_sales_data'. Recibe el 'tableWidget' y una lista con las filas seleccionadas de esa tabla. 
-        Retorna una tupla con los elementos, o 'None' si no hay elementos seleccionados.'''
+    def __getTableElementsToDelete(self, table_widget:QTableWidget, selected_rows:list) -> tuple | None:
+        '''
+        Dependiendo de cuál sea 'table_widget', obtiene los nombres de los productos de 'displayTable' ó la fecha 
+        y hora de 'table_sales_data'. 
+        
+        - table_widget: QTableWidget al que se referencia.
+        - selected_rows: lista con las filas seleccionadas del 'table_widget'.
+        
+        Retorna una tupla con los registros a eliminar, o None si no hay elementos seleccionados.
+        '''
         if not selected_rows:
             return None
+        
         registers_to_delete:list = [None]*len(selected_rows)
-        match tableWidget.objectName():
+        
+        match table_widget.objectName():
             # obtiene los nombres de los productos a borrar
             case "displayTable":
                 for pos,row in enumerate(selected_rows):
-                    registers_to_delete[pos] = tableWidget.item(row, 1).text()
+                    registers_to_delete[pos] = table_widget.item(row, 1).text()
             
             # obtiene la fecha y hora de las ventas a borrar
             case "table_sales_data":
                 for pos,row in enumerate(selected_rows):
-                    registers_to_delete[pos] = tableWidget.item(row, 5).text()
+                    registers_to_delete[pos] = table_widget.item(row, 5).text()
+            
         return tuple(registers_to_delete)
 
 
     @Slot(QTableWidget)
-    def handleTableDeleteRows(self, tableWidget:QTableWidget) -> None:
-        '''dependiendo del QTableWidget del que se tenga borrar filas, se encarga de declarar las variables necesarias 
-        y llamar a los métodos necesarios para que se encarguen de borrarlas de la base de datos. Al final, llama a 
-        'self.handleTableToFill' y recarga la tabla. Retorna 'None'.'''
-        match tableWidget.objectName():
+    def handleTableDeleteRows(self, table_widget:QTableWidget) -> None:
+        '''
+        Este método hace lo siguiente:
+        - Dependiendo del 'table_widget' del que se tengan que borrar registros, se encarga de declarar las 
+        consultas sql y los parámetros necesarios para luego hacer las consultas DELETE en la clase 
+        'workerclasses.DbDeleteWorker'.
+        - Cambia el QSS del QProgressBar asociado a 'table_widget'.
+        - Especifica el valor máximo del QProgressBar asociado a 'table_widget'.
+        - Crea una instancia de WORKER y QThread y conecta sus señales/slots.
+        
+        Este método llama a:
+        - functionutils.getSelectedTableRows: para obtener las filas seleccionas del 'table_widget'.
+        - self.__getTableElementsToDelete: para obtener datos sobre los registros a eliminar.
+        - self.__updateProgressBar: para especificar el valor máximo de la QProgressBar asociada a 'table_widget'.
+        
+        Retorna None.
+        '''
+        selected_rows:tuple # tiene las posiciones de self.IDs_products donde están los registros seleccionados
+        ids_to_delete:list # tiene los IDs de los registros a eliminar (necesario para consulta)
+        productnames_to_delete:list|None # tiene los nombres de los registros a eliminar de "Productos" (no es obligatorio)
+        dateTime_to_delete:list|None # tiene las fechas y horas de los registros a eliminar de "Ventas" y "Detalle_Ventas"
+                                     # (no es obligatorio)
+
+        sql:str = None # se usa cuando se tiene que borrar sólo un registro (como en Productos)
+        mult_sql:tuple[str] = None # se usa para borrar de Detalle_Ventas, Ventas y Deudas de forma consecutiva
+        params:list[tuple] = None # lista[(id, nombre)] si es Productos; ó lista[(id,fecha_hora)] si es Detalle_Ventas
+        
+        selected_rows = getSelectedTableRows(table_widget)
+        
+        if not selected_rows:
+            return None
+        
+        match table_widget.objectName():
             case "displayTable":
-                selected_rows = getSelectedTableRows(tableWidget)
-                productnames_to_delete:list | None = self.__getTableElementsToDelete(tableWidget, selected_rows)
-                if selected_rows and productnames_to_delete:
-                    makeDeleteQuery(tableWidget, selected_rows, self.IDs_products, productnames_to_delete)
+                productnames_to_delete = self.__getTableElementsToDelete(table_widget, selected_rows)
+                
+                # a partir de las filas seleccionadas, obtiene de self.IDs_products los ids para la consulta
+                ids_to_delete = [self.IDs_products[n_id] for n_id in selected_rows]
+                
+                sql = "DELETE FROM Productos WHERE IDproducto = ? AND nombre = ?;"
+                
+                # une 'ids_to_delete' y 'productnames_to_delete' en una lista[(id, nombre)]
+                params = [(id, name) for id,name in zip(ids_to_delete, productnames_to_delete)]
+                
+                # print("\033[38;2;180;255;120m\tselected_rows          -> ", selected_rows)
+                # print("\033[38;2;120;180;255m\tIDs_products           ->", self.IDs_products)
+                # print("\033[38;2;255;120;180m\tproductnames_to_delete ->", productnames_to_delete)
+                # print("\033[38;2;255;255;255m\tids_to_delete ->", ids_to_delete, )
+                # print("\tparams        ->", params)
+                
+                self.ui.inventory_progressbar.setMaximum(len(params))
+                
+                self.ui.inventory_progressbar.setStyleSheet("QProgressBar::chunk {background-color: qlineargradient(spread:reflect, x1:0.119, y1:0.426, x2:0.712045, y2:0.926, stop:0.0451977 rgba(255, 84, 87, 255), stop:0.59887 rgba(255, 161, 71, 255));}")
+            
             
             case "table_sales_data":
-                selected_rows = getSelectedTableRows(self.ui.table_sales_data)
-                dateTime_to_delete:list | None = self.__getTableElementsToDelete(tableWidget, selected_rows)
-                if selected_rows and dateTime_to_delete:
-                    makeDeleteQuery(tableWidget, selected_rows, self.IDs_saleDetails, dateTime_to_delete)
-            
+                dateTime_to_delete = self.__getTableElementsToDelete(table_widget, selected_rows)
+                
+                # obtiene ids de las filas seleccionadas
+                ids_to_delete = [self.IDs_saleDetails[n_id] for n_id in selected_rows]
+                
+                mult_sql:tuple[str] = (
+                    "DELETE FROM Detalle_Ventas WHERE ID_detalle_venta = ?;",
+                    "DELETE FROM Ventas WHERE IDventa = (SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?) AND fecha_hora = ?;",
+                    "DELETE FROM Deudas WHERE IDdeuda = (SELECT IDdeuda FROM Detalle_Ventas WHERE ID_detalle_venta = ?) AND fecha_hora = ?;",
+                    )
+                
+                # une 'ids_to_delete' y 'dateTime_to_delete' en una lista[(id, fecha_y_hora)]
+                params = [(id, datetime) for id,datetime in zip(ids_to_delete, dateTime_to_delete)]
+                
+                # print("\033[38;2;180;255;120m\tselected_rows          -> ", selected_rows)
+                # print("\033[38;2;120;180;255m\tIDs_products           ->", self.IDs_saleDetails)
+                # print("\033[38;2;255;120;180m\tproductnames_to_delete ->", dateTime_to_delete)
+                # print("\n\033[38;2;255;255;255m\tids_to_delete ->", ids_to_delete, )
+                # print("\tparams        ->", params)
+                
+                self.ui.sales_progressbar.setMaximum(len(params))
+                
+                self.ui.sales_progressbar.setStyleSheet("QProgressBar::chunk {background-color: qlineargradient(spread:reflect, x1:0.119, y1:0.426, x2:0.712045, y2:0.926, stop:0.0451977 rgba(255, 84, 87, 255), stop:0.59887 rgba(255, 161, 71, 255));}")
+
+
             case "table_debts":
                 pass
         
+        #? inicializa WORKER y THREAD, y conecta señales/slots
+        self.DELETE_THREAD = QThread()
+        self.delete_worker = DbDeleteWorker()
+        
+        self.delete_worker.moveToThread(self.DELETE_THREAD)
+        
+        self.DELETE_THREAD.started.connect(lambda: self.delete_worker.executeDeleteQuery(
+            params=params,
+            sql=sql if sql else None,
+            mult_sql=mult_sql if mult_sql else None))
+        self.delete_worker.progress.connect(lambda value: self.__updateProgressBar(
+            table_name=table_widget.objectName(),
+            value=value))
+        self.delete_worker.finished.connect(lambda: self.workerOnFinished(table_widget.objectName()) )
+        self.delete_worker.finished.connect(self.DELETE_THREAD.quit)
+        self.DELETE_THREAD.finished.connect(self.delete_worker.deleteLater)
+        
+        self.DELETE_THREAD.start()
+        
         # recarga la tabla
-        try:
-            self.handleTableToFill(tableWidget)
-        except AttributeError: # salta porque se intenta recargar la tabla pero nunca se llenó anteriormente
-            pass
+        # try:
+        # self.handleTableToFill(table_widget)
+        # except AttributeError: # salta porque se intenta recargar la tabla pero nunca se llenó anteriormente
+        #     pass
         return None
-
 
 
     #¡ tablas (UPDATE)
