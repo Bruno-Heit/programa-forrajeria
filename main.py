@@ -109,7 +109,7 @@ class MainWindow(QMainWindow):
 
         #--- VENTAS ------------------------------------------------------
         # (READ) cargar con ventas 'table_sales_data'
-        self.ui.tab2_toolBox.currentChanged.connect(lambda curr_index: self.handleTableToFill(self.ui.table_sales_data) if curr_index == 1 else None)
+        self.ui.tab2_toolBox.currentChanged.connect(lambda curr_index: self.handleTableToFill(self.ui.table_sales_data, SHOW_ALL=True) if curr_index == 1 else None)
         
         self.ui.sales_searchBar.returnPressed.connect(lambda: self.handleTableToFill(self.ui.table_sales_data, self.ui.sales_searchBar))
         
@@ -129,7 +129,7 @@ class MainWindow(QMainWindow):
         self.ui.lineEdit_paid.editingFinished.connect(lambda: self.validateSalesFields(None))
 
         #--- DEUDAS ------------------------------------------------------
-        self.ui.tabWidget.currentChanged.connect(lambda curr_index: self.handleTableToFill(self.ui.table_debts) if curr_index == 2 else None)
+        self.ui.tabWidget.currentChanged.connect(lambda curr_index: self.handleTableToFill(self.ui.table_debts, SHOW_ALL=True) if curr_index == 2 else None)
 
 
 
@@ -173,7 +173,7 @@ class MainWindow(QMainWindow):
     #?================ MULTITHREADING ================
     #¡ tablas (READ)
     @Slot(QTableWidget,QLineEdit,bool)
-    def handleTableToFill(self, table_widget:QTableWidget, search_bar:QLineEdit=None, ACCESSED_BY_LIST:bool=False) -> None:
+    def handleTableToFill(self, table_widget:QTableWidget, search_bar:QLineEdit=None, ACCESSED_BY_LIST:bool=False, SHOW_ALL:bool=False) -> None:
         '''
         Este método hace lo siguiente:
         - Limpia el 'table_widget'.
@@ -184,10 +184,12 @@ class MainWindow(QMainWindow):
         
         NO LLAMA A NINGÚN OTRO MÉTODO.
 
-        Args:
+        PARAMS:
         - table_widget: el QTableWidget que se referencia.
         - search_bar: determina si se usó una barra de búsqueda, y cuál fue.
-        - ACCESSED_BY_LIST: flag que será True si se seleccionó un item desde 'tables_ListWidget', sino False.
+        - ACCESSED_BY_LIST: flag que será True si se seleccionó un item desde 'tables_ListWidget', sino False. 
+        Por defecto es False.
+        - SHOW_ALL: flag que determina si mostrar todos los elementos de un 'table_widget'. Por defecto es False.
 
         Retorna 'None'.
         '''
@@ -197,6 +199,8 @@ class MainWindow(QMainWindow):
         
         sql:str = "" # consulta que pide los registros
         params:tuple[Any] = None # params de la consulta de registros
+        
+        text:str = None # var. auxiliar; se usa esta variable si se llena la tabla usando un search_bar
         
         # limpia la tabla
         table_widget.clearContents()
@@ -211,18 +215,20 @@ class MainWindow(QMainWindow):
                 if ACCESSED_BY_LIST:
                     self.ui.tabWidget.setCurrentWidget(self.ui.tabWidget.findChild(QWidget, "tab1_inventory"))
 
-                # si no se usa una barra de búsqueda...
-                if not search_bar and ACCESSED_BY_LIST:
-                    if self.ui.tables_ListWidget.currentItem().text() == "MOSTRAR TODOS":
+                # si NO se usa una barra de búsqueda...
+                if not search_bar:
+                    if SHOW_ALL or self.ui.tables_ListWidget.currentItem().text() == "MOSTRAR TODOS":
                         count_sql:str = "SELECT COUNT(*) FROM Productos;"
                         sql = "SELECT IDproducto,nombre_categoria,nombre,p.descripcion,stock,unidad_medida,precio_unit,precio_comerc FROM Productos AS p INNER JOIN Categorias AS c WHERE p.IDcategoria=c.IDcategoria;"
-                    else:
+                    elif not SHOW_ALL and ACCESSED_BY_LIST:
                         # cols.: detalle venta, cantidad, producto, costo total, abonado, fecha y hora
                         count_sql = "SELECT COUNT(*) FROM Productos WHERE IDcategoria = (SELECT IDcategoria FROM Categorias WHERE nombre_categoria = ? );"
                         count_params = (self.ui.tables_ListWidget.currentItem().text(),)
                         sql = "SELECT IDproducto,nombre_categoria,nombre,p.descripcion,stock,unidad_medida,precio_unit,precio_comerc FROM Productos AS p INNER JOIN Categorias AS c WHERE p.IDcategoria=c.IDcategoria AND c.nombre_categoria=?;"
                         params = (self.ui.tables_ListWidget.currentItem().text(),)
                     
+                # TODO: al usar search_bar, cambiar %{text}% por ?, para evitar sql injections.
+                
                 # si SÍ se usa una barra de búsqueda...
                 elif search_bar:
                     text:str = self.ui.inventory_searchBar.text()
@@ -235,7 +241,7 @@ class MainWindow(QMainWindow):
                 self.IDs_saleDetails.clear() # limpia los IDs
                 
                 # si no se usa la 'search bar'...
-                if not search_bar:
+                if not search_bar and SHOW_ALL:
                     count_sql = "SELECT COUNT(*) FROM Detalle_Ventas as dv LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa;"
                     sql = "SELECT dv.ID_detalle_venta, v.detalles_venta, p.nombre, dv.cantidad, p.unidad_medida, dv.costo_total, dv.abonado, v.fecha_hora FROM Detalle_Ventas as dv LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa;"
                 # en cambio, si SÍ se usa...
@@ -247,8 +253,8 @@ class MainWindow(QMainWindow):
 
 
             case "table_debts":
-                # TODO: declarar consultas sql para también para traer los datos necesarios
-                if not search_bar:
+                # TODO: declarar consultas sql para también traer los datos necesarios
+                if not search_bar and SHOW_ALL:
                     count_sql = "SELECT COUNT(DISTINCT IDdeudor) FROM Deudas;"
                     sql = 'SELECT Detalle_Ventas.*, Deudores.* \
                         FROM Detalle_Ventas \
@@ -417,10 +423,21 @@ class MainWindow(QMainWindow):
 
 
     @Slot(str)
-    def workerOnFinished(self, table_name:str) -> None:
+    def workerOnFinished(self, table_name:str, READ_OPERATION:bool=True) -> None:
         '''
-        Esconde la QProgressBar relacionada con el QTableWidget con nombre 'table_name' y reinicia el valor del 
-        QSS de dicha QProgressBar.
+        Esconde la QProgressBar relacionada con el QTableWidget con nombre 'table_name', reinicia el valor del 
+        QSS de dicha QProgressBar y recarga el QTableWidget.
+        
+        Este método llama a:
+        - self.handleTableToFill: para recargar el QTableWdiget con nombre 'table_name'.
+        
+        PARAMS:
+        - table_name: nombre del QTableWidget al que se referencia.
+        - READ_OPERATION: flag que determina si la operación que se hizo fue de llenado (READ) a un QTableWidget.
+        Por defecto es True.
+
+        Si 'READ_OPERATION' es False es porque se realizaron otras consultas a la base de datos (DELETE ó INSERT), y 
+        sólo en esos casos se debe llamar a 'self.handleTableToFill'.
         
         Retorna None.
         '''
@@ -428,14 +445,27 @@ class MainWindow(QMainWindow):
             case "displayTable":
                 self.ui.inventory_progressbar.setStyleSheet("")
                 self.ui.inventory_progressbar.hide()
+                if not READ_OPERATION:
+                    # recarga la tabla
+                    try:
+                        self.handleTableToFill(table_widget=self.ui.displayTable, SHOW_ALL=True)
+                    except AttributeError: # salta porque se intenta recargar la tabla pero nunca se llenó anteriormente
+                        pass
                 
             case "table_sales_data":
                 self.ui.sales_progressbar.setStyleSheet("")
                 self.ui.sales_progressbar.hide()
+                if not READ_OPERATION:
+                    # recarga la tabla
+                    self.handleTableToFill(table_widget=self.ui.table_sales_data, SHOW_ALL=True)
                 
             case "table_debts":
                 self.ui.debts_progressbar.setStyleSheet("")
                 self.ui.debts_progressbar.hide()
+                if not READ_OPERATION:
+                    # recarga la tabla
+                    self.handleTableToFill(table_widget=self.ui.table_debts, SHOW_ALL=True)
+            
         logging.debug(f">> WORKER terminó de ejecutarse.")
         return None
 
@@ -541,14 +571,7 @@ class MainWindow(QMainWindow):
                 # une 'ids_to_delete' y 'productnames_to_delete' en una lista[(id, nombre)]
                 params = [(id, name) for id,name in zip(ids_to_delete, productnames_to_delete)]
                 
-                # print("\033[38;2;180;255;120m\tselected_rows          -> ", selected_rows)
-                # print("\033[38;2;120;180;255m\tIDs_products           ->", self.IDs_products)
-                # print("\033[38;2;255;120;180m\tproductnames_to_delete ->", productnames_to_delete)
-                # print("\033[38;2;255;255;255m\tids_to_delete ->", ids_to_delete, )
-                # print("\tparams        ->", params)
-                
                 self.ui.inventory_progressbar.setMaximum(len(params))
-                
                 self.ui.inventory_progressbar.setStyleSheet("QProgressBar::chunk {background-color: qlineargradient(spread:reflect, x1:0.119, y1:0.426, x2:0.712045, y2:0.926, stop:0.0451977 rgba(255, 84, 87, 255), stop:0.59887 rgba(255, 161, 71, 255));}")
             
             
@@ -567,14 +590,7 @@ class MainWindow(QMainWindow):
                 # une 'ids_to_delete' y 'dateTime_to_delete' en una lista[(id, fecha_y_hora)]
                 params = [(id, datetime) for id,datetime in zip(ids_to_delete, dateTime_to_delete)]
                 
-                # print("\033[38;2;180;255;120m\tselected_rows          -> ", selected_rows)
-                # print("\033[38;2;120;180;255m\tIDs_products           ->", self.IDs_saleDetails)
-                # print("\033[38;2;255;120;180m\tproductnames_to_delete ->", dateTime_to_delete)
-                # print("\n\033[38;2;255;255;255m\tids_to_delete ->", ids_to_delete, )
-                # print("\tparams        ->", params)
-                
                 self.ui.sales_progressbar.setMaximum(len(params))
-                
                 self.ui.sales_progressbar.setStyleSheet("QProgressBar::chunk {background-color: qlineargradient(spread:reflect, x1:0.119, y1:0.426, x2:0.712045, y2:0.926, stop:0.0451977 rgba(255, 84, 87, 255), stop:0.59887 rgba(255, 161, 71, 255));}")
 
 
@@ -594,17 +610,13 @@ class MainWindow(QMainWindow):
         self.delete_worker.progress.connect(lambda value: self.__updateProgressBar(
             table_name=table_widget.objectName(),
             value=value))
-        self.delete_worker.finished.connect(lambda: self.workerOnFinished(table_widget.objectName()) )
+        self.delete_worker.finished.connect(lambda: self.workerOnFinished(
+            table_name=table_widget.objectName(),
+            READ_OPERATION=False) )
         self.delete_worker.finished.connect(self.DELETE_THREAD.quit)
         self.DELETE_THREAD.finished.connect(self.delete_worker.deleteLater)
         
         self.DELETE_THREAD.start()
-        
-        # recarga la tabla
-        # try:
-        # self.handleTableToFill(table_widget)
-        # except AttributeError: # salta porque se intenta recargar la tabla pero nunca se llenó anteriormente
-        #     pass
         return None
 
 
@@ -1200,6 +1212,7 @@ class MainWindow(QMainWindow):
 
 
 def main():
+    logging.basicConfig(level=logging.DEBUG)
     app = QApplication(sys.argv)
     mainWindow = MainWindow()
     mainWindow.show()

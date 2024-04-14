@@ -70,7 +70,8 @@ class DbReadWorker(QObject):
 
 
 class DbDeleteWorker(QObject):
-    '''Clase WORKER que se encarga de ejecutar las consultas de tipo DELETE a la base de datos.'''
+    '''Clase WORKER que se encarga de ejecutar las consultas de tipo DELETE a la base de datos.
+    Este WORKER guarda los registros eliminados de la base de datos en archivos .csv.'''
     progress = Signal(int) # devuelve un int con el progreso que lleva borrado para actualizar el progressbar en MainWindow.
     finished = Signal(int)
     
@@ -81,7 +82,7 @@ class DbDeleteWorker(QObject):
         PARAMS:
         - sql: la consulta DELETE para eliminar los registros de una tabla. Por defecto es None.
         - params: los parámetros como iterable para la consulta DELETE 'sql'. Cada '[tuple]' tiene un 'int' con el ID y un 
-        'str' con el nombre del registro.
+        'str' con un valor único del registro (ej.:nombre de un producto, fecha y hora de una venta, etc.).
         - mult_sql: consultas DELETE y sus parámetros en formato tuple[str]. Por defecto es None.
         
         Se recibe el parámetro 'mult_delete' cuando se deben realizar consultas DELETE en más de una tabla en forma 
@@ -101,7 +102,6 @@ class DbDeleteWorker(QObject):
         cursor = conn.cursor()
         
         # TODO: guardar copias de los registros eliminados en archivos.
-        # TODO: leer documentación de logging, no se muestran en consola los logs... y guardarlos en archivos.
         
         try:
             if sql and not mult_sql:
@@ -109,21 +109,21 @@ class DbDeleteWorker(QObject):
                     cursor.execute(sql, param)
                     # conn.commit()
                     self.progress.emit(n)
-                    logging.debug(f"\t\t>> Consulta DELETE a ID={param[0]} realizada exitosamente...")
-                logging.debug(f"\t>> Todas las consultas DELETE terminadas.")
+                    logging.debug(f">> Consulta DELETE a ID={param[0]} realizada exitosamente...")
+                logging.debug(f">> Todas las consultas DELETE terminadas.")
                 
             elif not sql and mult_sql:
                 for n,param in enumerate(params):
                     for sql in mult_sql:
                         cursor.execute(sql, param[:sql.count("?")])
                         # conn.commit()
-                    logging.debug(f"\t\t>> Consulta DELETE a ID={param[0]} realizada exitosamente...")
+                    logging.debug(f">> Consulta DELETE a ID={param[0]} realizada exitosamente...")
                     self.progress.emit(n)
-                logging.debug(f"\t>> Todas las consultas DELETE terminadas.")
+                logging.debug(f">> Todas las consultas DELETE terminadas.")
                 
             
         except sqlite3Error as err: #! errores de base de datos, consultas, etc.
-            logging.error(f"\t>> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+            logging.error(f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
             conn.rollback()
             self.finished.emit(err.sqlite_errorcode)
             
@@ -170,7 +170,7 @@ class DbInsertWorker(QObject):
                 self.finished.emit(1) #* todo bien
                 
             except sqlite3Error as err:
-                logging.error(f"\t\t>> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+                logging.error(f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
                 self.finished.emit(err.sqlite_errorcode) #! error al realizar el insert
                 
             finally:

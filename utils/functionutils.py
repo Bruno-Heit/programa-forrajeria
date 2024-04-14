@@ -229,78 +229,7 @@ def getSelectedTableRows(tableWidget:QTableWidget) -> tuple:
     return tuple(selected_indexes)
 
 
-# DELETE QUERY
-def makeDeleteQuery(table_widget:QTableWidget, rows_to_delete:tuple, ids:tuple, items_to_delete:tuple = None) -> None:
-    '''
-    Declara las consultas sql y los parámetros para hacer la consulta DELETE a la base de datos con las filas 
-    seleccionadas.
-    
-    - table_widget: el QTableWidget al que se referencia.
-    - rows_to_delete: las columnas seleccionadas a eliminar de 'table_widget'.
-    - ids: IDs de los registros a eliminar.
-    - items_to_delete: (opcional) funciona como una "medida de seguridad", es otro valor a tener en cuenta -además 
-    del ID del registro- para borrar un registro.
-    
-    IMPORTANTE: Esta función implementa error-handling y feedback.
-    
-    Retorna None.
-    '''
-    pos:int = 0
-    conn = createConnection("database/inventario.db")
-    if not conn:
-        return None
-    cursor = conn.cursor()
-    
-    #* sql no admite múltiples DELETE, así que se deben hacer 1 por 1
-    try:
-        match table_widget.objectName():
-            case "displayTable":
-                while pos < len(rows_to_delete):
-                    cursor.execute(
-                        "DELETE FROM Productos WHERE IDproducto = ? AND nombre = ?",
-                        (ids[rows_to_delete[pos]], items_to_delete[pos], ) )
-                    conn.commit()
-                    
-                    pos += 1
-            
-            case "table_sales_data":
-                while pos < len(rows_to_delete):
-                    cursor.execute(
-                        "DELETE FROM Detalle_Ventas WHERE ID_detalle_venta = ?;",
-                        (ids[rows_to_delete[pos]], ) )
-                    conn.commit()
-                    
-                    # obtengo el IDventa desde Detalle_Ventas
-                    IDventa = makeReadQuery(
-                        "SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?",
-                        (ids[rows_to_delete[pos]], ))[0][0]
-                    IDdeuda = makeReadQuery(
-                        "SELECT IDdeuda FROM Detalle_Ventas WHERE ID_detalle_venta = ?",
-                        (ids[rows_to_delete[pos]], ))[0][0]
-                    
-                    # hago los DELETE a Ventas y Deudas
-                    cursor.execute(
-                        "DELETE FROM Ventas WHERE IDventa = ? AND fecha_hora = ?;",
-                        (IDventa, items_to_delete[pos]) )
-                    conn.commit()
-                    
-                    cursor.execute(
-                        "DELETE FROM Deudas WHERE IDdeuda = ? AND fecha_hora = ?;",
-                        (IDdeuda, items_to_delete[pos]) )
-                    conn.commit()
-                    
-                    pos += 1
-        
-    except sqlite3Error as err:
-        conn.rollback()
-        print(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
-        
-    finally:
-        conn.close()
-    
-    return None
-
-
+# DELETE
 def removeTableCellsWidgets(tableWidget:QTableWidget) -> None:
     '''Recorre la tabla y borra todos los widgets creados en las celdas. Retorna 'None'.'''
     # si cell_widget es un QComboBox o un QLineEdit lo elimina...
