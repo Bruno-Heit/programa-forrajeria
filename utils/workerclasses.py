@@ -101,8 +101,6 @@ class DbDeleteWorker(QObject):
             self.finished.emit(0) #! error con la comunicación a la base de datos
         cursor = conn.cursor()
         
-        # TODO: guardar copias de los registros eliminados en archivos.
-        
         try:
             if sql and not mult_sql:
                 for n,param in enumerate(params):

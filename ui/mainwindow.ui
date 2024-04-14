@@ -837,7 +837,7 @@ QProgressBar::chunk {
                        <enum>QLineEdit::Normal</enum>
                       </property>
                       <property name="placeholderText">
-                       <string notr="true">Escribir un elemento a buscar...</string>
+                       <string notr="true">Ingresar detalles de productos a buscar...</string>
                       </property>
                       <property name="cursorMoveStyle">
                        <enum>Qt::LogicalMoveStyle</enum>
@@ -1949,7 +1949,7 @@ border-right: 1px solid #111;</string>
                   <enum>QLineEdit::Normal</enum>
                  </property>
                  <property name="placeholderText">
-                  <string notr="true">Escribir un elemento a buscar...</string>
+                  <string notr="true">Ingresar detalles de ventas a buscar...</string>
                  </property>
                  <property name="cursorMoveStyle">
                   <enum>Qt::LogicalMoveStyle</enum>
@@ -2172,7 +2172,7 @@ QPushButton:hover {
          </widget>
          <widget class="QWidget" name="tab3_debts">
           <attribute name="title">
-           <string>DEUDAS</string>
+           <string>CUENTAS CORRIENTES</string>
           </attribute>
           <layout class="QVBoxLayout" name="tab3_debts_Vlayout">
            <property name="spacing">
@@ -2260,7 +2260,7 @@ QPushButton:hover {
                  <enum>QLineEdit::Normal</enum>
                 </property>
                 <property name="placeholderText">
-                 <string notr="true">Ingresar una deuda a buscar...</string>
+                 <string notr="true">Ingresar detalles de cuenta corriente a buscar...</string>
                 </property>
                 <property name="cursorMoveStyle">
                  <enum>Qt::LogicalMoveStyle</enum>
@@ -2354,17 +2354,17 @@ QPushButton:hover {
                 </attribute>
                 <column>
                  <property name="text">
-                  <string>datos del cliente</string>
+                  <string>datos de la persona</string>
                  </property>
                 </column>
                 <column>
                  <property name="text">
-                  <string>productos adeudados</string>
+                  <string>productos</string>
                  </property>
                 </column>
                 <column>
                  <property name="text">
-                  <string>total adeudado</string>
+                  <string>saldo</string>
                  </property>
                 </column>
                </widget>

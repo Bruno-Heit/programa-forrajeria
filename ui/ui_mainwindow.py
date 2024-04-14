@@ -535,7 +535,7 @@ class Ui_MainWindow(object):
         self.inventory_searchBar.setText(u"")
         self.inventory_searchBar.setMaxLength(255)
         self.inventory_searchBar.setEchoMode(QLineEdit.Normal)
-        self.inventory_searchBar.setPlaceholderText(u"Escribir un elemento a buscar...")
+        self.inventory_searchBar.setPlaceholderText(u"Ingresar detalles de productos a buscar...")
         self.inventory_searchBar.setCursorMoveStyle(Qt.LogicalMoveStyle)
         self.inventory_searchBar.setClearButtonEnabled(True)
 
@@ -1094,7 +1094,7 @@ class Ui_MainWindow(object):
         self.sales_searchBar.setText(u"")
         self.sales_searchBar.setMaxLength(255)
         self.sales_searchBar.setEchoMode(QLineEdit.Normal)
-        self.sales_searchBar.setPlaceholderText(u"Escribir un elemento a buscar...")
+        self.sales_searchBar.setPlaceholderText(u"Ingresar detalles de ventas a buscar...")
         self.sales_searchBar.setCursorMoveStyle(Qt.LogicalMoveStyle)
         self.sales_searchBar.setClearButtonEnabled(True)
 
@@ -1240,7 +1240,7 @@ class Ui_MainWindow(object):
         self.debts_searchBar.setMaxLength(255)
         self.debts_searchBar.setFrame(False)
         self.debts_searchBar.setEchoMode(QLineEdit.Normal)
-        self.debts_searchBar.setPlaceholderText(u"Ingresar una deuda a buscar...")
+        self.debts_searchBar.setPlaceholderText(u"Ingresar detalles de cuenta corriente a buscar...")
         self.debts_searchBar.setCursorMoveStyle(Qt.LogicalMoveStyle)
         self.debts_searchBar.setClearButtonEnabled(True)
 
@@ -1449,14 +1449,14 @@ class Ui_MainWindow(object):
         self.tab2_toolBox.setItemText(self.tab2_toolBox.indexOf(self.box2_sales_table), QCoreApplication.translate("MainWindow", u"Tabla de ventas", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab2_sales), QCoreApplication.translate("MainWindow", u"VENTAS", None))
         ___qtablewidgetitem6 = self.table_debts.horizontalHeaderItem(0)
-        ___qtablewidgetitem6.setText(QCoreApplication.translate("MainWindow", u"datos del cliente", None));
+        ___qtablewidgetitem6.setText(QCoreApplication.translate("MainWindow", u"datos de la persona", None));
         ___qtablewidgetitem7 = self.table_debts.horizontalHeaderItem(1)
-        ___qtablewidgetitem7.setText(QCoreApplication.translate("MainWindow", u"productos adeudados", None));
+        ___qtablewidgetitem7.setText(QCoreApplication.translate("MainWindow", u"productos", None));
         ___qtablewidgetitem8 = self.table_debts.horizontalHeaderItem(2)
-        ___qtablewidgetitem8.setText(QCoreApplication.translate("MainWindow", u"total adeudado", None));
+        ___qtablewidgetitem8.setText(QCoreApplication.translate("MainWindow", u"saldo", None));
 #if QT_CONFIG(tooltip)
         self.table_debts.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Para <span style=\" text-decoration: underline;\">modificar</span> las <span style=\" text-decoration: underline;\">caracter\u00edsticas</span> de una deuda simplemente hacer <span style=\" font-style:italic;\">doble click</span> sobre la celda que se quiere modificar e ingresar el nuevo valor.</p></body></html>", None))
 #endif // QT_CONFIG(tooltip)
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab3_debts), QCoreApplication.translate("MainWindow", u"DEUDAS", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab3_debts), QCoreApplication.translate("MainWindow", u"CUENTAS CORRIENTES", None))
     # retranslateUi
 
