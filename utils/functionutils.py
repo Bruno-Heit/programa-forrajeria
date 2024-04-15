@@ -1,7 +1,4 @@
 # SQLITE3
-import sys
-import os
-from sqlite3 import (connect, Connection, Error as sqlite3Error)
 
 from PySide6.QtWidgets import (QTableWidget, QComboBox, QHeaderView, QTableWidgetItem, QListWidget,
                                QLineEdit, QLabel, QCompleter, QFrame, QWidget, QDateTimeEdit)
@@ -12,25 +9,6 @@ from PySide6.QtGui import (QRegularExpressionValidator)
 from re import (Match, match, search, sub, IGNORECASE)
 
 from utils.dboperations import *
-
-import logging
-
-
-'''
-La siguiente función sirve para ayudar a pyinstaller a completar el path completo a un archivo, 
-y se tiene que hacer esto porque tiene un error y a veces no puede hacerlo.
-'''
-def pyinstallerCompleteResourcePath(relative_path:str) -> str:
-    '''Obtiene el path completo para el archivo especificado y lo devuelve. Retorna un 'str'.'''
-    base_path:str
-    try:
-        base_path = sys._MEIPASS
-    except AttributeError:
-        base_path = os.path.abspath(".")
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
-
 
 
 # side bars
@@ -466,27 +444,6 @@ def createTableColumnLineEdit(tableWidget:QTableWidget, curr_index:QModelIndex) 
 
 
 #========================================================================================================================
-def makeInsertQuery(sql:str, params:tuple = None) -> None:
-    '''Hace una consulta INSERT a la base de datos. 
-    
-    IMPORTANTE: Esta función es genérica y está pensada para hecerse en casos donde no se requiere realizar 
-    error-handling, ya que no retorna ningún tipo de feedback.
-    
-    Retorna None.
-    '''
-    conn = createConnection("database/inventario.db")
-    if not conn:
-        return None
-    cursor = conn.cursor()
-    if sql and params:
-        cursor.execute(sql, params)
-    else:
-        cursor.execute(sql)
-    conn.commit()
-    conn.close()
-    return None
-
-
 def getDebtorNamesOrSurnames(type:int = 1 | 2) -> list[str]:
     '''Hace una consulta SELECT a la base de datos y obtiene los nombres ó apellidos de los deudores. Si 'type' es 1 
     trae los nombres, si es 2 trae los apellidos. Retorna una lista de strings.'''

@@ -2,11 +2,31 @@
 En este archivo están las operaciones a la base de datos sencillas, que no requieren 
 de MULTITHREADING por tardar mucho para ejecutarse... Son operaciones CRUD simples 
 que tienen la intención no generar resultados masivos.
+
+Además coloqué acá la función 'pyinstallerCompleteResourcePath' para evitar 
+'circular import' con 'utils/functionutils'.
 '''
-from utils.functionutils import (pyinstallerCompleteResourcePath)
+import os # para obtener el 'relative path' de algunos archivos cuando se ejecutan luego de empaquetarse con pyinstaller...
+import sys # sirve para lo mismo que el módulo 'os'.
 
 from sqlite3 import (connect, Connection, Error as sqlite3Error)
 import logging
+
+
+'''
+La siguiente función sirve para ayudar a pyinstaller a completar el path completo a un archivo, 
+y se tiene que hacer esto porque tiene un error y a veces no puede hacerlo.
+'''
+def pyinstallerCompleteResourcePath(relative_path:str) -> str:
+    '''Obtiene el path completo para el archivo especificado y lo devuelve. Retorna un 'str'.'''
+    base_path:str
+    try:
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.abspath(".")
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 
 def createConnection(db_name:str) -> Connection | None:
