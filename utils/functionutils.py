@@ -11,6 +11,10 @@ from PySide6.QtGui import (QRegularExpressionValidator)
 
 from re import (Match, match, search, sub, IGNORECASE)
 
+from utils.dboperations import *
+
+import logging
+
 
 '''
 La siguiente función sirve para ayudar a pyinstaller a completar el path completo a un archivo, 
@@ -61,7 +65,7 @@ def __toggleSideBarWidgetsVisibility(body:QFrame, signal:int):
         case 1:
             body.show()
     return None
-#------------------------------------------------
+#========================================================================================================================
 # tooltips
 def set_tables_ListWidgetItemsTooltip(listWidget:QListWidget, categories_descriptions:tuple[str]) -> None:
     '''Recibe una tupla con las descripciones de las categorías y crea los tooltips para cada item de 'tables_ListWidget'.
@@ -109,17 +113,7 @@ def set_tables_ListWidgetItemsTooltip(listWidget:QListWidget, categories_descrip
 
 
 
-#------------------------------------------------
-def createConnection(db_name:str) -> Connection | None:
-    '''Crea una conexión a la base de datos y devuelve la conexión, si no se pudo devuelve None.'''
-    try:
-        connection = connect(pyinstallerCompleteResourcePath(db_name))
-    except sqlite3Error as err:
-        print(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
-        return None
-    return connection
-
-
+#========================================================================================================================
 def getProductsCategories() -> list[str] | None:
     '''
     Hace una consulta SELECT a la base de datos y toma las categorías que hay. Devuelve una lista con las 
@@ -198,28 +192,6 @@ def setTableWidthPolitics(tableWidget:QTableWidget) -> None:
     return None
 
 
-# READ QUERY
-def makeReadQuery(sql:str, params:tuple = None) -> list:
-    '''
-    Hace la consulta SELECT a la base de datos y devuelve los valores de las filas seleccionadas. 
-    
-    IMPORTANTE: Esta función es genérica y está pensada para hecerse en casos donde no se requiere realizar 
-    error-handling, ya que no retorna ningún tipo de feedback.
-    
-    Retorna una 'list' con los valores.
-    '''
-    conn = createConnection("database/inventario.db")
-    if not conn:
-        return
-    cursor = conn.cursor()
-    if not params:
-        query = cursor.execute(sql).fetchall()
-    else:
-        query = cursor.execute(sql, params).fetchall()
-    conn.close()
-    return query
-
-
 def getSelectedTableRows(tableWidget:QTableWidget) -> tuple:
     '''Obtiene todas las filas seleccionadas del QTableWidget. Retorna una tupla con las filas.'''
     selected_indexes:list = []
@@ -229,15 +201,19 @@ def getSelectedTableRows(tableWidget:QTableWidget) -> tuple:
     return tuple(selected_indexes)
 
 
-# DELETE
-def removeTableCellsWidgets(tableWidget:QTableWidget) -> None:
-    '''Recorre la tabla y borra todos los widgets creados en las celdas. Retorna 'None'.'''
+#========================================================================================================================
+def removeTableCellsWidgets(table_widget:QTableWidget) -> None:
+    '''
+    Recorre 'table_widget' y borra todos los widgets creados en las celdas. 
+    
+    Retorna None.
+    '''
     # si cell_widget es un QComboBox o un QLineEdit lo elimina...
-    for row in range(tableWidget.rowCount()):
-        for col in range(tableWidget.columnCount()):
-            cell_widget = tableWidget.cellWidget(row, col)
+    for row in range(table_widget.rowCount()):
+        for col in range(table_widget.columnCount()):
+            cell_widget = table_widget.cellWidget(row, col)
             if isinstance(cell_widget, (QComboBox, QLineEdit, QDateTimeEdit)):
-                tableWidget.removeCellWidget(row, col)
+                table_widget.removeCellWidget(row, col)
     return None
 
 
@@ -309,118 +285,112 @@ def getUpdateSqlAndParameters(tableWidget:QTableWidget, lineEdit:QLineEdit, curr
     return sql, params
 
 
-def validateColumnUpdatedValue(tableWidget:QTableWidget, curr_index:QModelIndex, lineEdit:QLineEdit, prev_text:str, labelFeedback:QLabel) -> None:
-    '''Valida el valor ingresado para el 'QLineEdit' en la celda ubicada en la columna de la tabla actual; \
-    modifica el texto de 'labelFeedback' dependiendo del error si hubo alguno.\n
-    'prev_text' es la cadena de texto que había antes en la celda.\n
-    \nRetorna 'None'.'''
+def validateColumnUpdatedValue(table_widget:QTableWidget, curr_index:QModelIndex, lineedit:QLineEdit, prev_text:str) -> None:
+    '''
+    Esta función hace lo siguiente:
+    - Valida el valor ingresado para el 'QLineEdit' en la celda ubicada en la columna de la tabla actual.
+    - Si es válido, formatea el texto si es necesario.
+    - Determina el feedback como 'str' para luego retornarlo.
+    
+    PARAMS:
+    table_widget: el QTableWidget al que se referencia.
+    curr_index: índice seleccionado en 'table_widget'.
+    lineedit: el QLineEdit de la celda en la posición 'curr_index'.
+    prev_text: la cadena de texto que había antes en la celda.
+    
+    Retorna el texto para mostrar como feedback en formato str ó None si no hay errores.
+    '''
     valid:bool = True
+    feedback_text:str = None
     text_stock:str # guarda el texto completo del stock.
     aux_stock:str # variable auxiliar. Contiene la cantidad de la celda en "stock" de 'displayTable'.
 
-    match tableWidget.objectName():
+    match table_widget.objectName():
         case "displayTable":
             # verifica si el campo está vacío...
-            if lineEdit.text().strip() == "" and (curr_index.column() != 2 and curr_index.column() != 5): # col.2 (descripción) y 5 (precio comer.) son opcionales...
+            if lineedit.text().strip() == "" and (curr_index.column() != 2 and curr_index.column() != 5): # col.2 (descripción) y 5 (precio comer.) son opcionales...
                 valid = False
                 # pone como contenido en la celda lo que estaba antes...
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(prev_text)
-                labelFeedback.show()
-                labelFeedback.setStyleSheet("font-family: 'Verdana'; font-size: 16px; letter-spacing: 0px; word-spacing: 0px;color: #f00; border: 1px solid #f00; background-color: rgb(255, 185, 185);")
+                table_widget.item(curr_index.row(), curr_index.column()).setText(prev_text)
+                # labelfeedback.show()
+                # labelfeedback.setStyleSheet("font-family: 'Verdana'; font-size: 16px; letter-spacing: 0px; word-spacing: 0px;color: #f00; border: 1px solid #f00; background-color: rgb(255, 185, 185);")
                 # y dependiendo de la columa seleccionada muestra un mensaje diferente...
                 match curr_index.column():
                     case 1: # columna de nombre del producto
-                        labelFeedback.setText("El campo del nombre del producto no puede estar vacío")
+                        feedback_text = "El campo del nombre del producto no puede estar vacío"
+                        # labelfeedback.setText("El campo del nombre del producto no puede estar vacío")
                     case 3: # columna de stock
-                        labelFeedback.setText("El campo de stock no puede estar vacío")
+                        feedback_text = "El campo de stock no puede estar vacío"
+                        # labelfeedback.setText("El campo de stock no puede estar vacío")
                     case 4: # columna de precio unitario
-                        labelFeedback.setText("El campo de precio unitario no puede estar vacío")
+                        feedback_text = "El campo de precio unitario no puede estar vacío"
+                        # labelfeedback.setText("El campo de precio unitario no puede estar vacío")
 
             # si es 'float' lo formatea...
-            if curr_index.column() == 3: # stock
-                text_stock = lineEdit.text()
-                aux_stock = lineEdit.text().split(" ")[0]
+            if curr_index.column() == 3: # columna de stock
+                text_stock = lineedit.text()
+                aux_stock = lineedit.text().split(" ")[0] # si el stock tiene "número unidad" toma sólo el número
                 aux_stock = aux_stock.replace(",",".")
                 if aux_stock.endswith("."):
                     aux_stock = aux_stock.strip(".")
                 text_stock = sub("[0-9]{1,8}(\.|,)?[0-9]{0,2}", aux_stock, text_stock, count=1)
-                lineEdit.setText(text_stock)
+                lineedit.setText(text_stock)
 
             elif (curr_index.column() == 4 or curr_index.column() == 5): # precio unitario/precio comercial
-                lineEdit.setText(lineEdit.text().replace(",", "."))
-                # y si termina con "," ó "."...
-                if lineEdit.text().endswith("."):
-                    lineEdit.setText(lineEdit.text().rstrip("."))
+                lineedit.setText(lineedit.text().replace(",", "."))
+                if lineedit.text().endswith("."):
+                    lineedit.setText(lineedit.text().rstrip("."))
 
             if valid:
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(lineEdit.text())
-                labelFeedback.hide()
+                table_widget.item(curr_index.row(), curr_index.column()).setText(lineedit.text())
+                # labelfeedback.hide()
+        
         
         case "table_sales_data":
             # si es 'float' lo formatea...
             if (curr_index.column() == 3 or curr_index.column() == 4):
-                lineEdit.setText(lineEdit.text().replace(",", "."))
+                lineedit.setText(lineedit.text().replace(",", "."))
                 # y si termina con "," ó "."...
-                if lineEdit.text().replace(",", ".").endswith("."):
-                    lineEdit.setText(lineEdit.text().rstrip(",."))
+                if lineedit.text().replace(",", ".").endswith("."):
+                    lineedit.setText(lineedit.text().rstrip(",."))
             
             # si el campo está vacío...
-            if curr_index.column() != 0 and lineEdit.text().strip() == "": # col.0 (detalle de venta) es opcional...
+            if curr_index.column() != 0 and lineedit.text().strip() == "": # col.0 (detalle de venta) es opcional...
                 valid = False
 
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(prev_text)
-                labelFeedback.show()
-                labelFeedback.setStyleSheet("font-family: 'Verdana'; font-size: 16px; letter-spacing: 0px; word-spacing: 0px; color: #f00; border: 1px solid #f00; background-color: rgb(255, 185, 185);")
+                table_widget.item(curr_index.row(), curr_index.column()).setText(prev_text)
+                # labelfeedback.show()
+                # labelfeedback.setStyleSheet("font-family: 'Verdana'; font-size: 16px; letter-spacing: 0px; word-spacing: 0px; color: #f00; border: 1px solid #f00; background-color: rgb(255, 185, 185);")
                 # diferente mensaje de error dependiendo de la columna...
                 match curr_index.column():
                     case 1: # cantidad
-                        labelFeedback.setText("El campo de cantidad no puede estar vacío")
+                        feedback_text = "El campo de cantidad no puede estar vacío"
+                        # labelfeedback.setText("El campo de cantidad no puede estar vacío")
                     case 2: # producto
-                        labelFeedback.setText("El campo de producto no puede estar vacío")
+                        feedback_text = "El campo de producto no puede estar vacío"
+                        # labelfeedback.setText("El campo de producto no puede estar vacío")
                     case 3: # costo total
-                        labelFeedback.setText("El campo de costo total no puede estar vacío")
+                        feedback_text = "El campo de costo total no puede estar vacío"
+                        # labelfeedback.setText("El campo de costo total no puede estar vacío")
                     case 4: # abonado
-                        labelFeedback.setText("El campo del total abonado no puede estar vacío")
+                        feedback_text = "El campo del total abonado no puede estar vacío"
+                        # labelfeedback.setText("El campo del total abonado no puede estar vacío")
                     case 5: # fecha y hora
-                        labelFeedback.setText("El campo de fecha y hora no puede estar vacío")
+                        feedback_text = "El campo de fecha y hora no puede estar vacío"
+                        # labelfeedback.setText("El campo de fecha y hora no puede estar vacío")
 
             if valid:
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(lineEdit.text())
-                labelFeedback.hide()
+                table_widget.item(curr_index.row(), curr_index.column()).setText(lineedit.text())
+                # labelfeedback.hide()
 
 
         case "":
             pass
     
-    return None
+    return feedback_text
 
 
-# UPDATE QUERY
-def makeUpdateQuery(sql:str, params:tuple, INV_PERC_CHANGE:bool=None) -> None:
-    '''
-    Hace la consulta UPDATE a la base de datos.
-    
-    - INV_PERC_CHANGE: flag que sirve para distinguir si se hace un UPDATE normal ó si es para actualizar los precios 
-    que fueron modificados de la tabla 'displayTable' usando porcentajes.
-    
-    IMPORTANTE: Esta función es genérica y está pensada para hecerse en casos donde no se requiere realizar 
-    error-handling, ya que no retorna ningún tipo de feedback.
-    
-    Retorna None.
-    '''
-    conn = createConnection("database/inventario.db")
-    if not conn:
-        return None
-    cursor = conn.cursor()
-    if not INV_PERC_CHANGE:
-        cursor.execute(sql, params)
-    else:
-        cursor.executemany(sql, params)
-    conn.commit()
-    conn.close()
-    return None
-
-
+#========================================================================================================================
 def overwriteTableCellOldValue(tableWidget:QTableWidget, curr_index:QModelIndex, params:tuple = None, cb_curr_text:str = None) -> None:
     '''Reemplaza el valor anterior de la celda en la posición 'curr_index' en 'tableWidget' con el nuevo valor.\n
     'params' es por si la celda tiene un QLineEdit: la 1ra posición es a la que hay que acceder para obtener el 
@@ -495,7 +465,7 @@ def createTableColumnLineEdit(tableWidget:QTableWidget, curr_index:QModelIndex) 
     return lineedit
 
 
-# INSERT QUERY
+#========================================================================================================================
 def makeInsertQuery(sql:str, params:tuple = None) -> None:
     '''Hace una consulta INSERT a la base de datos. 
     

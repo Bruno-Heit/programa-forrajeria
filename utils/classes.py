@@ -14,6 +14,7 @@ from resources import (rc_icons)
 from re import (search, Match, sub)
 from utils.functionutils import *
 from utils.workerclasses import *
+from utils.dboperations import *
 
 from sqlite3 import (Error as sqlite3Error)
 

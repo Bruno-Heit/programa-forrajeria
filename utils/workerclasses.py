@@ -75,9 +75,9 @@ class DbDeleteWorker(QObject):
     progress = Signal(int) # devuelve un int con el progreso que lleva borrado para actualizar el progressbar en MainWindow.
     finished = Signal(int)
     
-    def executeDeleteQuery(self, params:list[tuple], sql:str=None, mult_sql:tuple[str]=None) -> None:
+    def executeDeleteQuery(self, params:list[tuple[int,str]], sql:str=None, mult_sql:tuple[str]=None) -> None:
         '''
-        Hace la consulta DELETE a la base de datos y devuelve feedback sobre filas borradas.
+        Hace la consulta DELETE a la base de datos.
         
         PARAMS:
         - sql: la consulta DELETE para eliminar los registros de una tabla. Por defecto es None.
@@ -85,8 +85,8 @@ class DbDeleteWorker(QObject):
         'str' con un valor único del registro (ej.:nombre de un producto, fecha y hora de una venta, etc.).
         - mult_sql: consultas DELETE y sus parámetros en formato tuple[str]. Por defecto es None.
         
-        Se recibe el parámetro 'mult_delete' cuando se deben realizar consultas DELETE en más de una tabla en forma 
-        consecutiva (por ej.: en Detalle_Ventas se debe borrar registros de Ventas y Deudas).
+        Se recibe el parámetro 'mult_sql' cuando se deben realizar consultas DELETE en más de una tabla en forma 
+        consecutiva (por ej.: en Detalle_Ventas se debe borrar registros de Ventas también).
         
         SEÑALES:
         La señal 'finished' emite:
@@ -105,7 +105,7 @@ class DbDeleteWorker(QObject):
             if sql and not mult_sql:
                 for n,param in enumerate(params):
                     cursor.execute(sql, param)
-                    # conn.commit()
+                    conn.commit()
                     self.progress.emit(n)
                     logging.debug(f">> Consulta DELETE a ID={param[0]} realizada exitosamente...")
                 logging.debug(f">> Todas las consultas DELETE terminadas.")
@@ -114,15 +114,15 @@ class DbDeleteWorker(QObject):
                 for n,param in enumerate(params):
                     for sql in mult_sql:
                         cursor.execute(sql, param[:sql.count("?")])
-                        # conn.commit()
+                        conn.commit()
                     logging.debug(f">> Consulta DELETE a ID={param[0]} realizada exitosamente...")
                     self.progress.emit(n)
                 logging.debug(f">> Todas las consultas DELETE terminadas.")
                 
             
         except sqlite3Error as err: #! errores de base de datos, consultas, etc.
-            logging.error(f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
             conn.rollback()
+            logging.error(f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
             self.finished.emit(err.sqlite_errorcode)
             
         finally:
@@ -136,6 +136,7 @@ class DbDeleteWorker(QObject):
 
 
 class DbInsertWorker(QObject):
+    '''Clase WORKER que se encarga de ejecutar las consultas de tipo INSERT a la base de datos.'''
     finished = Signal(int) # emite 0 si no se pudo establecer comunicación con la base de datos, sino 1.
     
     
@@ -163,14 +164,69 @@ class DbInsertWorker(QObject):
         if SINGLE_REG:
             try:
                 cursor.execute(data_sql, data_params) if data_params else cursor.execute(data_sql)
-                conn.commit()
+                logging.debug(f">> Consulta INSERT realizada exitosamente...")
                 
+                conn.commit()
                 self.finished.emit(1) #* todo bien
                 
             except sqlite3Error as err:
+                conn.rollback()
                 logging.error(f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
                 self.finished.emit(err.sqlite_errorcode) #! error al realizar el insert
                 
             finally:
                 conn.close()
+        return None
+
+
+
+
+
+class DbUpdateWorker(QObject):
+    '''Clase WORKER que se encarga de ejecutar las consultas de tipo UPDATE a la base de datos.
+    Este WORKER es usado también para marcar registros como eliminados en la columna "eliminado" en la base de datos.'''
+    progress = Signal(int)
+    finished = Signal(int)
+    
+    
+    @Slot(str,tuple,bool)
+    def executeUpdateQuery(self, sql:str, params:tuple[int,str]) -> None:
+        '''
+        Hace la consulta UPDATE a la base de datos.
+        
+        PARAMS:
+        - sql: consulta UPDATE a ejecutar.
+        - params: parámetros para consulta 'sql'. Guarda como 'int' el ID del registro y como 'str' un dato 
+        de un registro único.
+        
+        SEÑALES:
+        La señal 'finished' emite:
+        - 0: si no se pudo establecer una conexión con la base de datos.
+        - 1: si no hubo errores.
+        - sqlite3.Error.sqlite_errorcode: si hubo un error concreto, emite el código de error de sqlite3.
+        
+        La señal 'progress' emite un 'int' que indica el progreso de actualización.
+        '''
+        conn = createConnection("database/inventario.db")
+        if not conn:
+            self.finished.emit(0) #! error con la comunicación de la base de datos
+        cursor = conn.cursor()
+        
+        try:
+            for n,param in enumerate(params):
+                cursor.execute(sql, param)
+                conn.commit()
+                self.progress.emit(n)
+                logging.debug(f">> Consulta UPDATE a ID={param[0]} realizada exitosamente...")
+            logging.debug(f">> Todas las consultas UPDATE terminadas.")
+            
+        except sqlite3Error as err:
+            conn.rollback()
+            logging.error(f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+            self.finished.emit(err.sqlite_errorcode) #! error al realizar el update
+                
+        finally:
+            conn.close()
+            
+        self.finished.emit(1) #* todo bien
         return None
