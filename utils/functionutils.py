@@ -9,6 +9,7 @@ from PySide6.QtGui import (QRegularExpressionValidator)
 from re import (Match, match, search, sub, IGNORECASE)
 
 from utils.dboperations import *
+from utils.customvalidators import *
 
 
 # side bars
@@ -110,17 +111,20 @@ def getProductsCategories() -> list[str] | None:
 
 def getProductNames() -> list[str]:
     '''
-    Hace una consulta SELECT a la base de datos y obtiene todos los nombres de productos que hay. Retorna una 
-    lista con los nombres.
+    Hace una consulta SELECT a la base de datos y obtiene todos los nombres de productos que hay.
+    
+    Retorna una lista con los nombres.
     '''
     conn = createConnection("database/inventario.db")
     if not conn:
         return None
     cursor = conn.cursor()
-    sql = "SELECT nombre FROM Productos;"
-    query = cursor.execute(sql).fetchall()
+    
+    query = cursor.execute("SELECT nombre FROM Productos;").fetchall()
+    
     # convierto la lista de tuplas en una lista de strings...
     query:list[str] = [q[0] for q in query]
+    
     conn.close()
     return query
 
@@ -186,25 +190,31 @@ def removeTableCellsWidgets(table_widget:QTableWidget) -> None:
     
     Retorna None.
     '''
-    # si cell_widget es un QComboBox o un QLineEdit lo elimina...
+    # si cell_widget es un QComboBox|QLineEdit|QDateTimeEdit lo elimina...
     for row in range(table_widget.rowCount()):
         for col in range(table_widget.columnCount()):
-            cell_widget = table_widget.cellWidget(row, col)
-            if isinstance(cell_widget, (QComboBox, QLineEdit, QDateTimeEdit)):
+            if isinstance(table_widget.cellWidget(row, col), (QComboBox, QLineEdit, QDateTimeEdit)):
                 table_widget.removeCellWidget(row, col)
     return None
 
 
-def createTableColumnComboBox(tableWidget:QTableWidget, curr_index:QModelIndex, curr_text:str) -> QComboBox:
-    '''Crea el combobox que se encontrará dentro de la celda de la columna especificada por 'curr_index' en la tabla 
-    'tableWidget'.\n
-    'curr_text' representa al elemento que está seleccionado inicialmente en la combobox.
-    \nRetorna un 'QComboBox'.'''
-    combobox = QComboBox(tableWidget)
+def createTableColumnComboBox(table_widget:QTableWidget, curr_index:QModelIndex, curr_text:str) -> QComboBox:
+    '''
+    Crea el combobox que se encontrará dentro de la celda de la columna especificada por 'curr_index' en la tabla 
+    'table_widget'.
+    
+    PARAMS:
+    - table_widget: el QTableWidget donde se colocará el QComboBox.
+    - curr_index: índice seleccionado de la celda de 'table_widget'.
+    - curr_text: el elemento que está seleccionado inicialmente en el QComboBox.
+    
+    Retorna un QComboBox.
+    '''
+    combobox = QComboBox(table_widget)
     combobox.setEditable(False)
     combobox.setFrame(False)
 
-    match tableWidget.objectName():
+    match table_widget.objectName():
         case "displayTable":
             combobox.addItems(getProductsCategories())
             combobox.setPlaceholderText("Elegir categoría")
@@ -215,262 +225,139 @@ def createTableColumnComboBox(tableWidget:QTableWidget, curr_index:QModelIndex, 
         
     # coloca como índice actual el que tenga el string 'curr_text', sino hay el índice actual es -1
     combobox.setCurrentIndex(combobox.findText(curr_text))
-    tableWidget.setCellWidget(curr_index.row(), curr_index.column(), combobox)
+    table_widget.setCellWidget(curr_index.row(), curr_index.column(), combobox)
     return combobox
 
 
-def getUpdateSqlAndParameters(tableWidget:QTableWidget, lineEdit:QLineEdit, curr_index:QModelIndex, ids:tuple) -> tuple[str, tuple[str]]:
-    '''Recibe el 'QTableWidget', el item que fue modificado, el 'QLineEdit' y los IDs de los elementos. Retorna una 
-    tupla con la consulta Sql y una tupla con los parámetros que recibe la consulta.'''
-    sql:str
-    params:tuple
-    re_stock:Match | None
-    re_unit:Match | None
+# def getUpdateSqlAndParameters(tableWidget:QTableWidget, lineEdit:QLineEdit, curr_index:QModelIndex, ids:tuple) -> tuple[str, tuple[str]]:
+#     '''Recibe el 'QTableWidget', el item que fue modificado, el 'QLineEdit' y los IDs de los elementos. Retorna una 
+#     tupla con la consulta Sql y una tupla con los parámetros que recibe la consulta.'''
+#     sql:str
+#     params:tuple
+#     re_stock:Match | None
+#     re_unit:Match | None
     
-    match tableWidget.objectName():
-        case "displayTable":
-            params = (lineEdit.text(), str(ids[curr_index.row()]))
-            match curr_index.column():
-                case 1: # columna de nombre
-                    sql = "UPDATE Productos SET nombre = ? WHERE IDproducto = ?;"
-                case 2: # columna de descripción
-                    sql = "UPDATE Productos SET descripcion = ? WHERE IDproducto = ?;"
-                case 3: # columna de stock
-                    re_stock = match("[0-9]+(\.)?[0-9]{0,2}", lineEdit.text())
-                    re_stock = re_stock.group() if re_stock is not None else None
-                    re_unit = search("[a-zA-Z]*$", lineEdit.text(), IGNORECASE)
-                    re_unit = re_unit.group() if re_unit is not None else None
-                    if re_stock:
-                        params = (re_stock, re_unit, str(ids[curr_index.row()]))
-                        sql = "UPDATE Productos SET stock = ?, unidad_medida = ? WHERE IDproducto = ?;"
-                case 4: # precio unitario
-                    sql = "UPDATE Productos SET precio_unit = ? WHERE IDproducto = ?;"
-                case 5: # precio comercial
-                    sql = "UPDATE Productos SET precio_comerc = ? WHERE IDproducto = ?;"
+#     match tableWidget.objectName():
+#         # case "displayTable":
+#             # params = (lineEdit.text(), str(ids[curr_index.row()]))
+#             # match curr_index.column():
+#                 # case 1: # columna de nombre
+#                 #     sql = "UPDATE Productos SET nombre = ? WHERE IDproducto = ?;"
+#                 # case 2: # columna de descripción
+#                 #     sql = "UPDATE Productos SET descripcion = ? WHERE IDproducto = ?;"
+#                 # case 3: # columna de stock
+#                     # re_stock = match("[0-9]+(\.)?[0-9]{0,2}", lineEdit.text())
+#                     # re_stock = re_stock.group() if re_stock is not None else None
+#                     # re_unit = search("[a-zA-Z]*$", lineEdit.text(), IGNORECASE)
+#                     # re_unit = re_unit.group() if re_unit is not None else None
+#                     # if re_stock:
+#                     #     params = (re_stock, re_unit, str(ids[curr_index.row()]))
+#                     #     sql = "UPDATE Productos SET stock = ?, unidad_medida = ? WHERE IDproducto = ?;"
+#                 # case 4: # precio unitario
+#                 #     sql = "UPDATE Productos SET precio_unit = ? WHERE IDproducto = ?;"
+#                 # case 5: # precio comercial
+#                 #     sql = "UPDATE Productos SET precio_comerc = ? WHERE IDproducto = ?;"
         
-        case "table_sales_data":
-            params = (lineEdit.text(), str(ids[curr_index.row()]))
-            match curr_index.column():
-                case 0: # detalle de venta
-                    sql = "UPDATE Ventas SET detalles_venta = ? WHERE IDventa = (SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?);"
-                case 1: # cantidad
-                    sql = "UPDATE Detalle_Ventas SET cantidad = ? WHERE ID_detalle_venta = ?;"
-                case 3: # costo total
-                    sql = "UPDATE Detalle_Ventas SET costo_total = ? WHERE ID_detalle_venta = ?;"
-                case 4: # abonado
-                    sql = "UPDATE Detalle_Ventas SET abonado = ? WHERE ID_detalle_venta = ?;"
+#         # case "table_sales_data":
+#         #     # params = (lineEdit.text(), str(ids[curr_index.row()]))
+#         #     match curr_index.column():
+#         #         case 0: # detalle de venta
+#         #             sql = "UPDATE Ventas SET detalles_venta = ? WHERE IDventa = (SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?);"
+#         #         case 1: # cantidad
+#         #             sql = "UPDATE Detalle_Ventas SET cantidad = ? WHERE ID_detalle_venta = ?;"
+#         #         case 3: # costo total
+#         #             sql = "UPDATE Detalle_Ventas SET costo_total = ? WHERE ID_detalle_venta = ?;"
+#         #         case 4: # abonado
+#         #             sql = "UPDATE Detalle_Ventas SET abonado = ? WHERE ID_detalle_venta = ?;"
             
-    return sql, params
+#     return sql, params
 
 
-def validateColumnUpdatedValue(table_widget:QTableWidget, curr_index:QModelIndex, lineedit:QLineEdit, prev_text:str) -> None:
+def createTableColumnLineEdit(table_widget:QTableWidget, curr_index:QModelIndex) -> QLineEdit:
     '''
-    Esta función hace lo siguiente:
-    - Valida el valor ingresado para el 'QLineEdit' en la celda ubicada en la columna de la tabla actual.
-    - Si es válido, formatea el texto si es necesario.
-    - Determina el feedback como 'str' para luego retornarlo.
+    Crea un QLineEdit para ser colocado en la celda seleccionada con índice 'curr_index', y dependiendo de la columna 
+    donde esté la celda le aplica un validador al QLineEdit. Si el QTableWidget es "inventario" y la columna es "nombre" 
+    también le asigna un QCompleter con los nombres de los productos.
     
-    PARAMS:
-    table_widget: el QTableWidget al que se referencia.
-    curr_index: índice seleccionado en 'table_widget'.
-    lineedit: el QLineEdit de la celda en la posición 'curr_index'.
-    prev_text: la cadena de texto que había antes en la celda.
-    
-    Retorna el texto para mostrar como feedback en formato str ó None si no hay errores.
+    Retorna un QLineEdit.
     '''
-    valid:bool = True
-    feedback_text:str = None
-    text_stock:str # guarda el texto completo del stock.
-    aux_stock:str # variable auxiliar. Contiene la cantidad de la celda en "stock" de 'displayTable'.
-
-    match table_widget.objectName():
-        case "displayTable":
-            # verifica si el campo está vacío...
-            if lineedit.text().strip() == "" and (curr_index.column() != 2 and curr_index.column() != 5): # col.2 (descripción) y 5 (precio comer.) son opcionales...
-                valid = False
-                # pone como contenido en la celda lo que estaba antes...
-                table_widget.item(curr_index.row(), curr_index.column()).setText(prev_text)
-                # labelfeedback.show()
-                # labelfeedback.setStyleSheet("font-family: 'Verdana'; font-size: 16px; letter-spacing: 0px; word-spacing: 0px;color: #f00; border: 1px solid #f00; background-color: rgb(255, 185, 185);")
-                # y dependiendo de la columa seleccionada muestra un mensaje diferente...
-                match curr_index.column():
-                    case 1: # columna de nombre del producto
-                        feedback_text = "El campo del nombre del producto no puede estar vacío"
-                        # labelfeedback.setText("El campo del nombre del producto no puede estar vacío")
-                    case 3: # columna de stock
-                        feedback_text = "El campo de stock no puede estar vacío"
-                        # labelfeedback.setText("El campo de stock no puede estar vacío")
-                    case 4: # columna de precio unitario
-                        feedback_text = "El campo de precio unitario no puede estar vacío"
-                        # labelfeedback.setText("El campo de precio unitario no puede estar vacío")
-
-            # si es 'float' lo formatea...
-            if curr_index.column() == 3: # columna de stock
-                text_stock = lineedit.text()
-                aux_stock = lineedit.text().split(" ")[0] # si el stock tiene "número unidad" toma sólo el número
-                aux_stock = aux_stock.replace(",",".")
-                if aux_stock.endswith("."):
-                    aux_stock = aux_stock.strip(".")
-                text_stock = sub("[0-9]{1,8}(\.|,)?[0-9]{0,2}", aux_stock, text_stock, count=1)
-                lineedit.setText(text_stock)
-
-            elif (curr_index.column() == 4 or curr_index.column() == 5): # precio unitario/precio comercial
-                lineedit.setText(lineedit.text().replace(",", "."))
-                if lineedit.text().endswith("."):
-                    lineedit.setText(lineedit.text().rstrip("."))
-
-            if valid:
-                table_widget.item(curr_index.row(), curr_index.column()).setText(lineedit.text())
-                # labelfeedback.hide()
-        
-        
-        case "table_sales_data":
-            # si es 'float' lo formatea...
-            if (curr_index.column() == 3 or curr_index.column() == 4):
-                lineedit.setText(lineedit.text().replace(",", "."))
-                # y si termina con "," ó "."...
-                if lineedit.text().replace(",", ".").endswith("."):
-                    lineedit.setText(lineedit.text().rstrip(",."))
-            
-            # si el campo está vacío...
-            if curr_index.column() != 0 and lineedit.text().strip() == "": # col.0 (detalle de venta) es opcional...
-                valid = False
-
-                table_widget.item(curr_index.row(), curr_index.column()).setText(prev_text)
-                # labelfeedback.show()
-                # labelfeedback.setStyleSheet("font-family: 'Verdana'; font-size: 16px; letter-spacing: 0px; word-spacing: 0px; color: #f00; border: 1px solid #f00; background-color: rgb(255, 185, 185);")
-                # diferente mensaje de error dependiendo de la columna...
-                match curr_index.column():
-                    case 1: # cantidad
-                        feedback_text = "El campo de cantidad no puede estar vacío"
-                        # labelfeedback.setText("El campo de cantidad no puede estar vacío")
-                    case 2: # producto
-                        feedback_text = "El campo de producto no puede estar vacío"
-                        # labelfeedback.setText("El campo de producto no puede estar vacío")
-                    case 3: # costo total
-                        feedback_text = "El campo de costo total no puede estar vacío"
-                        # labelfeedback.setText("El campo de costo total no puede estar vacío")
-                    case 4: # abonado
-                        feedback_text = "El campo del total abonado no puede estar vacío"
-                        # labelfeedback.setText("El campo del total abonado no puede estar vacío")
-                    case 5: # fecha y hora
-                        feedback_text = "El campo de fecha y hora no puede estar vacío"
-                        # labelfeedback.setText("El campo de fecha y hora no puede estar vacío")
-
-            if valid:
-                table_widget.item(curr_index.row(), curr_index.column()).setText(lineedit.text())
-                # labelfeedback.hide()
-
-
-        case "":
-            pass
-    
-    return feedback_text
-
-
-#========================================================================================================================
-def overwriteTableCellOldValue(tableWidget:QTableWidget, curr_index:QModelIndex, params:tuple = None, cb_curr_text:str = None) -> None:
-    '''Reemplaza el valor anterior de la celda en la posición 'curr_index' en 'tableWidget' con el nuevo valor.\n
-    'params' es por si la celda tiene un QLineEdit: la 1ra posición es a la que hay que acceder para obtener el 
-    contenido, y la 2da posición es sólo por si el contenido está compuesto por 2 tipos de valores (ej.: el stock en 
-    'displayTable').\n
-    'cb_curr_text' es por si la celda tiene un QComboBox: representa al texto del combobox.
-    \nRetorna 'None'.'''
-    # coloca el valor nuevo en la celda
-    match tableWidget.objectName():
-        case "displayTable":
-            if curr_index.column() == 0: # categoría
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(cb_curr_text)
-            elif curr_index.column() == (1 or 2 or 4 or 5): # nombre/descripción/precio unitario/precio comercial
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(str(params[0]).strip())
-            elif curr_index.column() == 3: # stock
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(f"{params[0]} {str(params[1]).strip()}")
-        
-        case "table_sales_data":
-            if curr_index.column() == 1: # cantidad (int|float + str)
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(f"{params[0]} {params[1]}")
-            elif curr_index.column() == 2: # producto
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(f"{cb_curr_text}")
-            else: # detalle de venta/costo total/abonado/fecha y hora
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(f"{str(params[0]).strip()}")
-
-        case "":
-            pass
-    return None
-
-
-def setSearchBarValidator(searchBar:QLineEdit) -> None:
-    '''Coloca un 'Validator' en el 'searchBar' de entrada. Retorna 'None'.'''
-    re = QRegularExpression("[^;,.?¿\'\'\"\"\t\r]*")
-    validator = QRegularExpressionValidator(re, searchBar)
-    searchBar.setValidator(validator)
-    return None
-
-
-def createTableColumnLineEdit(tableWidget:QTableWidget, curr_index:QModelIndex) -> QLineEdit:
-    '''crea un 'QLineEdit' para ser colocado en la celda seleccionada, y dependiendo de la columna donde esté la celda 
-    le aplica un 'Validator' al lineedit; además, si la celda seleccionada es de un nombre de un producto se le aplica un 
-    'QCompleter' al LineEdit. Retorna un 'QLineEdit'.'''
     float_re:QRegularExpression = QRegularExpression("[0-9]{0,7}(\.|,)?[0-9]{0,2}")
-    completer:QCompleter
-    lineedit:QLineEdit = QLineEdit(tableWidget)
+    lineedit:QLineEdit = QLineEdit(table_widget)
 
-    lineedit.setText(tableWidget.item(curr_index.row(), curr_index.column()).text())
-    match tableWidget.objectName():
+    lineedit.setText(table_widget.item(curr_index.row(), curr_index.column()).text())
+    
+    # a continuación coloca validators y completers dependiendo de la columna...
+    match table_widget.objectName():
         case "displayTable":
             match curr_index.column():
                 case 1: # nombre
-                    completer = createCompleter(lineedit, 3)
-                    lineedit.setCompleter(completer)
+                    lineedit.setCompleter(createCompleter(type=3))
+                    lineedit.setValidator(ProductNameValidator(lineedit))
+                
                 case 3: # stock
-                    lineedit.setValidator(QRegularExpressionValidator("[0-9]{0,8}(\.|,)?[0-9]{0,2} ?[a-zA-Z]{0,20}", lineedit))
+                    lineedit.setValidator(ProductStockValidator(lineedit))
+                
                 case 4: # precio unitario
-                    lineedit.setValidator(QRegularExpressionValidator(float_re, lineedit))
+                    lineedit.setValidator(ProductUnitPriceValidator(lineedit))
+                
                 case 5: # precio comercial
-                    lineedit.setValidator(QRegularExpressionValidator(float_re, lineedit))
+                    lineedit.setValidator(ProductComercPriceValidator(lineedit))
+        
         
         case "table_sales_data":
             match curr_index.column():
+                case 0: # detalle de venta
+                    lineedit.setValidator(SaleDetailsValidator(lineedit))
+                
                 case 1: # cantidad
-                    lineedit.setValidator(QRegularExpressionValidator("[0-9]{0,8}(\.|,)?[0-9]{0,2}", lineedit))
-                    lineedit.setText(tableWidget.item(curr_index.row(), curr_index.column()).text().split(" ")[0].strip())
+                    lineedit.setValidator(SaleQuantityValidator(lineedit))
+                    # sólo permite editar la cantidad, no la unidad
+                    lineedit.setText(table_widget.item(curr_index.row(), curr_index.column()).text().split(" ")[0].strip())
+                
                 case 3: # costo total
-                    lineedit.setValidator(QRegularExpressionValidator(float_re, lineedit))
+                    lineedit.setValidator(SaleTotalCostValidator(lineedit))
+                
                 case 4: # abonado
-                    lineedit.setValidator(QRegularExpressionValidator(float_re, lineedit))
+                    lineedit.setValidator(SalePaidValidator(lineedit))
 
-    tableWidget.setCellWidget(curr_index.row(), curr_index.column(), lineedit)
+    table_widget.setCellWidget(curr_index.row(), curr_index.column(), lineedit)
+    
     return lineedit
 
 
-#========================================================================================================================
-def getDebtorNamesOrSurnames(type:int = 1 | 2) -> list[str]:
-    '''Hace una consulta SELECT a la base de datos y obtiene los nombres ó apellidos de los deudores. Si 'type' es 1 
-    trae los nombres, si es 2 trae los apellidos. Retorna una lista de strings.'''
-    column:str = "nombre" if type == 1 else "apellido"
-    sql = f"SELECT {column} FROM Deudores;"
-    query = makeReadQuery(sql)
-    return query
+# def overwriteTableCellOldValue(table_widget:QTableWidget, curr_index:QModelIndex, params:tuple = None, cb_curr_text:str = None) -> None:
+#     '''
+#     Reemplaza el valor anterior de la celda en la posición 'curr_index' en 'table_widget' con el nuevo valor.
+    
+#     PARAMS:
+#     - params: si la celda tiene un QLineEdit:
+#         - la 1ra posición es a la que hay que acceder para obtener el contenido
+#         - la 2da posición es sólo por si el contenido está compuesto por 2 tipos de valores (ej.: stock en 'displayTable').
+#     - cb_curr_text es por si la celda tiene un QComboBox: representa al texto del QComboBox.
+    
+#     Retorna None.
+#     '''
+#     # coloca el valor nuevo en la celda
+#     match table_widget.objectName():
+#         # case "displayTable":
+#         #     if curr_index.column() == 0: # categoría
+#         #         table_widget.item(curr_index.row(), curr_index.column()).setText(cb_curr_text)
+#         #     elif curr_index.column() == (1 or 2 or 4 or 5): # nombre/descripción/precio unitario/precio comercial
+#         #         table_widget.item(curr_index.row(), curr_index.column()).setText(str(params[0]).strip())
+#         #     elif curr_index.column() == 3: # stock
+#         #         table_widget.item(curr_index.row(), curr_index.column()).setText(f"{params[0]} {str(params[1]).strip()}")
+        
+#         case "table_sales_data":
+#             # if curr_index.column() == 1: # cantidad (int|float + str)
+#                 # table_widget.item(curr_index.row(), curr_index.column()).setText(f"{params[0]} {params[1]}")
+#             # elif curr_index.column() == 2: # producto
+#             #     table_widget.item(curr_index.row(), curr_index.column()).setText(f"{cb_curr_text}")
+#             # else: # detalle de venta/costo total/abonado/fecha y hora
+#             #     table_widget.item(curr_index.row(), curr_index.column()).setText(f"{str(params[0]).strip()}")
 
-
-def createCompleter(widget:QLineEdit, type:int = 1 | 2 | 3) -> None:
-    '''Recibe un 'QLineEdit'; crea un 'QCompleter', establece sus atributos y lo coloca dentro del widget. 
-    \nSi 'type' es 1 carga el 'QCompleter' con nombres de deudores, si es 2 lo carga con los apellidos, si \
-    es 3 lo carga con nombres de productos.
-    \nRetorna 'None'.'''
-    completer:QCompleter
-    if type == 1 or type == 2: # nombres o apellidos de deudores
-        names_or_surnames = [q[0] for q in getDebtorNamesOrSurnames(type)]
-        completer = QCompleter(names_or_surnames, parent=widget)
-    elif type == 3: # nombres de productos
-        completer = QCompleter(getProductNames(), parent=widget)
-    completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
-    completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
-    completer.setMaxVisibleItems(10)
-
-    widget.setCompleter(completer)
-    return None
-
+#         case "":
+#             pass
+#     return None
 
 def createTableColumnDateTimeEdit(tableWidget:QTableWidget, curr_index:QModelIndex) -> QDateTimeEdit:
     '''Crea un 'QDateTimeEdit' en el 'tableWidget' indicado y en la celda indicada por 'curr_index'. Retorna un 
@@ -494,5 +381,53 @@ def createTableColumnDateTimeEdit(tableWidget:QTableWidget, curr_index:QModelInd
     tableWidget.setCellWidget(curr_index.row(), curr_index.column(), dateTimeEdit)
 
     return dateTimeEdit
+
+
+#========================================================================================================================
+def setSearchBarValidator(searchBar:QLineEdit) -> None:
+    '''Coloca un 'Validator' en el 'searchBar' de entrada. Retorna 'None'.'''
+    re = QRegularExpression("[^;,.?¿\'\'\"\"\t\r]*")
+    validator = QRegularExpressionValidator(re, searchBar)
+    searchBar.setValidator(validator)
+    return None
+
+
+#========================================================================================================================
+def createCompleter(type:int = 1 | 2 | 3) -> QCompleter:
+    '''
+    Crea un QCompleter, establece sus atributos y lo coloca dentro de 'lineedit'.
+    
+    PARAMS:
+    - type: valor entero que determina los datos con los que llenar el QCompleter. 
+        - 1: lo carga con nombres de personas con cuenta corriente.
+        - 2: lo carga con apellidos de personas con cuenta corriente.
+        - 3: lo carga con nombres de productos.
+    
+    Retorna un QCompleter.
+    '''
+    completer:QCompleter
+    query:list
+    
+    if type == 1: # nombres de personas con cta. corriente
+        query = makeReadQuery("SELECT nombre FROM Deudores;")
+        names = [name[0] for name in query]
+        completer = QCompleter(names)
+        
+    elif type == 2:# apellidos de personas con cta. corriente
+        query = makeReadQuery("SELECT apellido FROM Deudores;")
+        surnames = [surname[0] for surname in query]
+        completer = QCompleter(surnames)
+        
+    
+    elif type == 3: # nombres de productos
+        completer = QCompleter(getProductNames())
+    
+    completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+    completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
+    completer.setMaxVisibleItems(10)
+
+    return completer
+
+
 
 

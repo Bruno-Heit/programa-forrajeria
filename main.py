@@ -122,6 +122,7 @@ class MainWindow(QMainWindow):
         # (UPDATE) modificar celdas de 'table_sales_data'
         self.ui.table_sales_data.doubleClicked.connect(lambda: self.handleTableUpdateItem(self.ui.table_sales_data, self.ui.table_sales_data.currentIndex()) )
         self.ui.table_sales_data.itemSelectionChanged.connect(lambda: self.handleSelectionChange(self.ui.table_sales_data))
+        
         # formulario de ventas
         self.ui.btn_add_product.clicked.connect(self.addSalesInputListItem)
         
@@ -400,21 +401,25 @@ class MainWindow(QMainWindow):
         
         Retorna None.
         '''
+        aux_text:str # var. aux. placeholder para formatear texto de celdas
+        
         match table_widget.objectName():
             case "displayTable":
                 table_widget.setItem(curr_row, 0, QTableWidgetItem(str(row_data[1])) ) # col.0 tiene categoría
                 table_widget.setItem(curr_row, 1, QTableWidgetItem(str(row_data[2])) ) # col.1 tiene nombre
                 table_widget.setItem(curr_row, 2, QTableWidgetItem(str(row_data[3]) if str(row_data[3]) != None else "") ) # col.2 tiene descripción
-                table_widget.setItem(curr_row, 3, QTableWidgetItem(str(f"{row_data[4]} {row_data[5]}")) ) # col.3 tiene stock y unidad_medida
-                table_widget.setItem(curr_row, 4, QTableWidgetItem(str(row_data[6])) ) # col.4 tiene precio_unit
-                table_widget.setItem(curr_row, 5, QTableWidgetItem(str(row_data[7]) if row_data[7] != None else "") ) # col.5 tiene precio_comerc
+                aux_text = str(row_data[4]).replace(".",",")
+                table_widget.setItem(curr_row, 3, QTableWidgetItem(str(f"{aux_text} {row_data[5]}")) ) # col.3 tiene stock y unidad_medida
+                table_widget.setItem(curr_row, 4, QTableWidgetItem(str(row_data[6]).replace(".",",")) ) # col.4 tiene precio_unit
+                table_widget.setItem(curr_row, 5, QTableWidgetItem(str(row_data[7]).replace(".",",") if row_data[7] != None else "") ) # col.5 tiene precio_comerc
             
             case "table_sales_data":
                 table_widget.setItem(curr_row, 0, QTableWidgetItem(str(row_data[1]) if row_data[1] != None else "") ) # columna 0 tiene detalles_venta
-                table_widget.setItem(curr_row, 1, QTableWidgetItem(str(f"{row_data[3]} {str(row_data[4]) if row_data[4] != None else ''}")) ) # col.1 tiene cantidad y unidad_medida
+                aux_text = str(row_data[3]).replace(".",",")
+                table_widget.setItem(curr_row, 1, QTableWidgetItem(str(f"{aux_text} {str(row_data[4]) if row_data[4] != None else ''}")) ) # col.1 tiene cantidad y unidad_medida
                 table_widget.setItem(curr_row, 2, QTableWidgetItem(str(row_data[2])) ) # col.2 tiene nombre
-                table_widget.setItem(curr_row, 3, QTableWidgetItem(str(row_data[5])) ) # col.3 tiene costo_total
-                table_widget.setItem(curr_row, 4, QTableWidgetItem(str(row_data[6])) ) # col.4 tiene abonado
+                table_widget.setItem(curr_row, 3, QTableWidgetItem(str(row_data[5]).replace(".",",")) ) # col.3 tiene costo_total
+                table_widget.setItem(curr_row, 4, QTableWidgetItem(str(row_data[6]).replace(".",",")) ) # col.4 tiene abonado
                 table_widget.setItem(curr_row, 5, QTableWidgetItem(str(row_data[7]) if str(row_data[7]) != None else "") ) # col.5 tiene fecha_hora
                 
             case "table_debts":
@@ -452,6 +457,8 @@ class MainWindow(QMainWindow):
                         self.handleTableToFill(table_widget=self.ui.displayTable, SHOW_ALL=True)
                     except AttributeError: # salta porque se intenta recargar la tabla pero nunca se llenó anteriormente
                         pass
+                else:
+                    self.ui.displayTable.resizeRowsToContents()
                 
             case "table_sales_data":
                 self.ui.sales_progressbar.setStyleSheet("")
@@ -459,6 +466,8 @@ class MainWindow(QMainWindow):
                 if not READ_OPERATION:
                     # recarga la tabla
                     self.handleTableToFill(table_widget=self.ui.table_sales_data, SHOW_ALL=True)
+                else:
+                    self.ui.table_sales_data.resizeRowsToContents()
                 
             case "table_debts":
                 self.ui.debts_progressbar.setStyleSheet("")
@@ -466,6 +475,8 @@ class MainWindow(QMainWindow):
                 if not READ_OPERATION:
                     # recarga la tabla
                     self.handleTableToFill(table_widget=self.ui.table_debts, SHOW_ALL=True)
+                else:
+                    self.ui.table_debts.resizeRowsToContents()
             
         logging.debug(f">> WORKER terminó de ejecutarse.")
         return None
@@ -639,10 +650,11 @@ class MainWindow(QMainWindow):
 
 
     #¡ tablas (UPDATE)
-    def __handleTableComboBoxCurrentTextChanged(self, table_widget:QTableWidget, curr_index:QModelIndex, combobox:QComboBox) -> None:
+    def __tableComboBoxOnCurrentTextChanged(self, table_widget:QTableWidget, curr_index:QModelIndex, combobox:QComboBox) -> None:
         '''
         Declara la consulta sql y los parámetros y luego hace la consulta UPDATE a la base de datos con el nuevo 
-        dato seleccionado a partir del nuevo texto de 'combobox'.
+        dato seleccionado a partir del nuevo texto de 'combobox'. Reemplaza el valor anterior de la celda por el
+        nuevo.
         
         PARAMS:
         - table_widget: QTableWidget al que se referencia.
@@ -651,35 +663,31 @@ class MainWindow(QMainWindow):
         
         Retorna None.
         '''
-        sql_product:str # consulta para actualizar el "nombre del producto"|"ID de categoría" en "Detalle_Ventas"|"Productos".
-        sql_new_unit:str # consulta SELECT para traer la unidad de medida del producto nuevo...
         new_unit:str | None # y el valor de la unidad ya seleccionado.
         quantity:float | int # cantidad seleccionada.
 
         match table_widget.objectName():
             case "displayTable":
-                sql_product = "UPDATE Productos SET IDcategoria = (SELECT IDcategoria FROM Categorias WHERE nombre_categoria = ?) WHERE IDproducto = ?;"
-                makeUpdateQuery(sql=sql_product,
+                makeUpdateQuery(sql="UPDATE Productos SET IDcategoria = (SELECT IDcategoria FROM Categorias WHERE nombre_categoria = ?) WHERE IDproducto = ?;",
                                 params=(combobox.currentText(), str(self.IDs_products[curr_index.row()]),) )
-                overwriteTableCellOldValue(table_widget, curr_index, cb_curr_text=combobox.currentText())
+                table_widget.item(curr_index.row(), curr_index.column()).setText(combobox.currentText())
 
 
             case "table_sales_data":
                 # actualiza el producto en Detalle_Ventas
-                sql_product = "UPDATE Detalle_Ventas SET IDproducto = (SELECT IDproducto FROM Productos WHERE nombre = ?) WHERE ID_detalle_venta = ?;"
-                makeUpdateQuery(sql=sql_product,
+                makeUpdateQuery(sql="UPDATE Detalle_Ventas SET IDproducto = (SELECT IDproducto FROM Productos WHERE nombre = ?) WHERE ID_detalle_venta = ?;",
                                 params=(combobox.currentText(), str(self.IDs_saleDetails[curr_index.row()]),) )
-                overwriteTableCellOldValue(table_widget, curr_index, cb_curr_text=combobox.currentText())
+                table_widget.item(curr_index.row(), curr_index.column()).setText(f"{combobox.currentText()}")
 
                 # obtengo la cantidad de la columna "cantidad" para luego unirlo a la unidad de medida
                 quantity = table_widget.item(curr_index.row(), 1).text().split(" ")[0].strip()
 
                 # obtengo la unidad de medida del producto actual para colocarlo en la columna "cantidad"
-                sql_new_unit = "SELECT unidad_medida FROM Productos WHERE nombre = ?;"
-                new_unit = makeReadQuery(sql=sql_new_unit,
+                new_unit = makeReadQuery(sql="SELECT unidad_medida FROM Productos WHERE nombre = ?;",
                                          params=(combobox.currentText(),) )[0][0]
-                overwriteTableCellOldValue(table_widget, table_widget.indexFromItem(table_widget.item(curr_index.row(), 1)), params=(quantity, new_unit,))
+                table_widget.item(curr_index.row(), 1).setText(f"{quantity} {new_unit}")
 
+        combobox.deleteLater()
         # remueve los widgets de las celdas (para que se puedan modificar sólo una vez al mismo tiempo las comboboxes)
         removeTableCellsWidgets(table_widget)
         # vuelve a activar el ordenamiento de la tabla
@@ -687,130 +695,187 @@ class MainWindow(QMainWindow):
         return None
 
 
-    def __handleTableLineEditEditingFinished(self, table_widget:QTableWidget, curr_index:QModelIndex, lineedit:QLineEdit, prev_text:str, ids:tuple = None) -> None:
+    @Slot(QTableWidget, QModelIndex, QLineEdit, str)
+    def __tableLineEditOnReturnPressed(self, table_widget:QTableWidget, curr_index:QModelIndex, lineedit:QLineEdit, prev_text:str) -> None:
         '''
+        Este método es llamado desde la señal 'self.lineedit.returnPressed' y sólo se ejecutará cuando el input 
+        sea válido ('validador.State.Acceptable').
+        
         Declara la consulta sql y los parámetros y luego hace la consulta UPDATE a la base de datos con el nuevo 
-        dato ingresado a partir del nuevo texto introducido en 'lineedit'.
-        Valida el valor ingresado en 'lineedit' y según su validez muestra/esconde el QLabel de feedback asociado 
-        a 'table_widget' junto con el feedback.
+        dato ingresado a partir del nuevo texto introducido en 'lineedit'. Luego sustituye el valor actual de 
+        la celda por el nuevo.
+        Al finalizar, remueve 'lineedit' de la celda de 'table_widget'.
         
         Este método llama a:
+        - makeUpdateQuery: para realizar las consultas UPDATE.
+        - overwriteTableCellOldValue: para, una vez hecha la consulta, reemplazar en la celda actual el valor 
+        anterior por el nuevo valor.
         - 
+        
+        PARAMS:
+        - table_widget: el QTableWidget al que se referencia.
+        - curr_index: índice de la celda seleccionada de 'table_widget'.
+        - lineedit: el QLineEdit que envía la señal.
+        - prev_text: el texto que había antes en la celda.
         
         Retorna None.
         '''
-        feedback_text:str
-        sql:str
-        params:tuple | list
+        full_stock:list[str] # var. aux. con el texto completo del stock
         percentage_diff:float # el porcentaje de diferencia entre el valor viejo y el nuevo, se usa junto a new_total_debt...
         new_debt_term:float # para calcular el nuevo valor en Deudas.total_adeudado. new_debt_term es el segundo término de la 
                              # expresión "total_adeudado * (1 + percentage_diff / 100)", siendo "(1 + percentage_diff / 100)".
+        
+        pattern:Pattern # patrón para buscar (P.NORMAL)|(P.COMERCIAL) en lineedit.text()
+        price_type:Match # var. aux. con substring (P.NORMAL)|(P.COMERCIAL) obtenido de 'prev_text'
+        lineedit_text:str # var. aux. placeholder para formatear texto de celdas
+
 
         match table_widget.objectName():
-            case "displayTable":
-                # validación
-                feedback_text = validateColumnUpdatedValue(
-                    table_widget=table_widget, 
-                    curr_index=curr_index, 
-                    lineedit=lineedit, 
-                    prev_text=prev_text)
-                
-                if feedback_text:
-                    self.ui.label_feedbackInventory.show()
-                    self.ui.label_feedbackInventory.setText(feedback_text)
-                    self.ui.label_feedbackInventory.setStyleSheet("font-family: 'Verdana'; font-size: 16px; letter-spacing: 0px; word-spacing: 0px; color: #f00; border: 1px solid #f00; background-color: rgb(255, 185, 185);")
-                else:
-                    self.ui.label_feedbackInventory.hide()
+            case "displayTable":                
+                match curr_index.column():
+                    case 1: # nombre
+                        makeUpdateQuery(sql="UPDATE Productos SET nombre = ? WHERE IDproducto = ?;",
+                                        params=( lineedit.text(), str(self.IDs_products[curr_index.row()]), ))
+                        # reemplaza el valor anterior con el nuevo
+                        table_widget.item(curr_index.row(), curr_index.column()).setText(lineedit.text().strip())
                     
-                # si 'labelFeedback' está escondida, significa que no hay errores en lineedit
-                if self.ui.label_feedbackInventory.isHidden():
-                    if ids:
-                        sql, params = getUpdateSqlAndParameters(table_widget, lineedit, curr_index, ids)
-                    else:
-                        sql, params = getUpdateSqlAndParameters(table_widget, lineedit, curr_index)
-
-                    match curr_index.column():
-                        case 1: # si la columna es la de nombre...
-                            # verifico si el nombre ya existe, y si existe avisa al usuario...
-                            if prev_text != lineedit.text() and makeReadQuery("SELECT nombre FROM Productos WHERE nombre = ?;", (lineedit.text(),)):
-                                table_widget.item(curr_index.row(), curr_index.column()).setText(prev_text)
-                                self.ui.label_feedbackInventory.show()
-                                self.ui.label_feedbackInventory.setStyleSheet("font-family: 'Verdana'; font-size: 16px; letter-spacing: 0px; word-spacing: 0px;color: #f00; border: 1px solid #f00; background-color: rgb(255, 185, 185);")
-                                self.ui.label_feedbackInventory.setText("Ya existe un producto con ese nombre")
-                            # sino, actualiza el nombre en la base de datos...
-                            else:
-                                makeUpdateQuery(sql, params)
-                                overwriteTableCellOldValue(table_widget, curr_index, params)
+                    case 2: # descripción
+                        makeUpdateQuery(sql="UPDATE Productos SET descripcion = ? WHERE IDproducto = ?;",
+                                        params=( lineedit.text(), str(self.IDs_products[curr_index.row()]), ))
+                        # reemplaza el valor anterior con el nuevo
+                        table_widget.item(curr_index.row(), curr_index.column()).setText(lineedit.text().strip())
+                    
+                    case 3: # stock
+                        # obtiene la cantidad de stock y la unidad de medida (si tiene)
+                        full_stock = lineedit.text().replace(",",".").split(" ") # pos. 0 tiene cantidad de stock y pos. 1 tiene unidad de medida
+                        full_stock.append("") if len(full_stock) == 1 else None
                         
-                        case 4: # si es precio unitario, modifica en Deudas precios normales
-                            # actualiza en Productos
-                            makeUpdateQuery(sql, params)
-                            # obtiene la expresión para calcular en Deudas el nuevo total_adeudado
-                            try:
-                                percentage_diff = (float(lineedit.text()) - float(prev_text)) * 100 / float(prev_text)
-                            except ZeroDivisionError: # en caso de fallar porque el valor anterior es 0, hago que sea 0.00001
-                                percentage_diff = (float(lineedit.text()) - float(prev_text)) * 100 / (float(prev_text) + 0.00001)
-                            new_debt_term = 1 + percentage_diff / 100
-                            sql = "UPDATE Deudas SET total_adeudado = ROUND(total_adeudado * ?, 2) WHERE IDdeuda IN (SELECT Detalle_Ventas.IDdeuda FROM Detalle_Ventas JOIN Ventas ON Detalle_Ventas.IDventa = Ventas.IDventa WHERE Detalle_Ventas.IDproducto = (SELECT IDproducto FROM Productos WHERE nombre = ?) AND Ventas.detalles_venta LIKE '%(P. NORMAL)%');"
-                            # actualiza total_adeudado en Deudas en precios normales
-                            makeUpdateQuery(sql, (new_debt_term, table_widget.item(curr_index.row(), 1).text(),) )
-                            overwriteTableCellOldValue(table_widget, curr_index, params)
+                        makeUpdateQuery(sql="UPDATE Productos SET stock = ?, unidad_medida = ? WHERE IDproducto = ?;",
+                                        params=(full_stock[0], full_stock[1], str(self.IDs_products[curr_index.row()]), ))
+                        # reemplaza el valor anterior con el nuevo
+                        full_stock[0] = full_stock[0].replace(".",",")
+                        table_widget.item(curr_index.row(), curr_index.column()).setText(f"{full_stock[0]} {full_stock[1].strip()}")
+                    
+                    case 4: # si es precio unitario, modifica también en Deudas precios normales
+                        # actualiza en Productos
+                        makeUpdateQuery(sql="UPDATE Productos SET precio_unit = ? WHERE IDproducto = ?;",
+                                        params=(lineedit.text().replace(",","."), str(self.IDs_products[curr_index.row()]), ))
+                        
+                        # obtiene la expresión para calcular en Deudas el nuevo total_adeudado
+                        prev_text = prev_text.replace(",",".")
+                        try:
+                            percentage_diff = (float(lineedit.text().replace(",",".")) - float(prev_text)) * 100 / float(prev_text)
                             
-                        case 5: # si es precio comercial, modifica en Deudas precios comerciales
-                            if lineedit.text(): # sólo modifica los valores si el campo no está vacío
-                                # actualiza en Productos
-                                makeUpdateQuery(sql, params)
-                                try:
-                                    percentage_diff = (float(lineedit.text()) - float(prev_text)) * 100 / float(prev_text)
-                                except ZeroDivisionError: # en caso de fallar porque el valor anterior es 0, hago que sea 0.00001
-                                    percentage_diff = (float(lineedit.text()) - float(prev_text)) * 100 / (float(prev_text) + 0.00001)
-                                new_debt_term = 1 + percentage_diff / 100
-                                sql = sql = "UPDATE Deudas SET total_adeudado = ROUND(total_adeudado * ?, 2) WHERE IDdeuda IN (SELECT Detalle_Ventas.IDdeuda FROM Detalle_Ventas JOIN Ventas ON Detalle_Ventas.IDventa = Ventas.IDventa WHERE Detalle_Ventas.IDproducto = (SELECT IDproducto FROM Productos WHERE nombre = ?) AND Ventas.detalles_venta LIKE '%(P. COMERCIAL)%');"
-                                # actualiza total_adeudado en Deudas en precios comerciales
-                                makeUpdateQuery(sql, (new_debt_term, table_widget.item(curr_index.row(), 1).text(),) )
-                            overwriteTableCellOldValue(table_widget, curr_index, params)
+                        except ZeroDivisionError: # en caso de fallar porque el valor anterior es 0, hago que sea 0.00001
+                            percentage_diff = (float(lineedit.text().replace(",",".")) - float(prev_text)) * 100 / (float(prev_text) + 0.00001)
+                            
+                        new_debt_term = 1 + percentage_diff / 100
+                        sql = "UPDATE Deudas SET total_adeudado = ROUND(total_adeudado * ?, 2) WHERE IDdeuda IN (SELECT Detalle_Ventas.IDdeuda FROM Detalle_Ventas JOIN Ventas ON Detalle_Ventas.IDventa = Ventas.IDventa WHERE Detalle_Ventas.IDproducto = (SELECT IDproducto FROM Productos WHERE nombre = ?) AND Ventas.detalles_venta LIKE '%(P. NORMAL)%');"
+                        
+                        # actualiza total_adeudado en Deudas en precios normales
+                        makeUpdateQuery(sql, (new_debt_term, table_widget.item(curr_index.row(), 1).text(),) )
+                        # reemplaza el valor anterior con el nuevo
+                        lineedit_text = lineedit.text().replace(".",",")
+                        table_widget.item(curr_index.row(), curr_index.column()).setText(lineedit_text.strip())
+                        
+                    case 5: # si es precio comercial, modifica en Deudas precios comerciales
+                        lineedit_text = lineedit.text().replace(",",".") if lineedit.text() else 0.0
+                            
+                        # actualiza en Productos
+                        makeUpdateQuery(sql="UPDATE Productos SET precio_comerc = ? WHERE IDproducto = ?;",
+                                        params=(str(lineedit_text), str(self.IDs_products[curr_index.row()]), ))
+                        
+                        prev_text = prev_text.replace(",",".") if prev_text else 0.0
+                        try:
+                            percentage_diff = (float(lineedit_text) - float(prev_text)) * 100 / float(prev_text)
+                            
+                        except ZeroDivisionError: # en caso de fallar porque el valor anterior es 0, hago que sea 0.00001
+                            percentage_diff = (float(lineedit_text) - float(prev_text)) * 100 / (float(prev_text) + 0.00001)
+                        
+                        new_debt_term = 1 + percentage_diff / 100
+                        sql = sql = "UPDATE Deudas SET total_adeudado = ROUND(total_adeudado * ?, 2) WHERE IDdeuda IN (SELECT Detalle_Ventas.IDdeuda FROM Detalle_Ventas JOIN Ventas ON Detalle_Ventas.IDventa = Ventas.IDventa WHERE Detalle_Ventas.IDproducto = (SELECT IDproducto FROM Productos WHERE nombre = ?) AND Ventas.detalles_venta LIKE '%(P. COMERCIAL)%');"
+                        
+                        # actualiza total_adeudado en Deudas en precios comerciales
+                        makeUpdateQuery(sql, (new_debt_term, table_widget.item(curr_index.row(), 1).text(),) )
+                        
+                        # reemplaza el valor anterior con el nuevo
+                        lineedit_text = lineedit.text().replace(".",",")
+                        table_widget.item(curr_index.row(), curr_index.column()).setText(lineedit_text.strip())
 
-                        case _:
-                            makeUpdateQuery(sql, params) # actualiza en Productos
-                            overwriteTableCellOldValue(table_widget, curr_index, params)
 
             case "table_sales_data":
-                validateColumnUpdatedValue(table_widget, curr_index, lineedit, prev_text, self.ui.label_feedbackSales)
-                if self.ui.label_feedbackSales.isHidden():
-                    sql, params = getUpdateSqlAndParameters(table_widget, lineedit, curr_index, ids)
-                    makeUpdateQuery(sql, params)
-
-                    # si la columna es la de cantidad...
-                    if curr_index.column() == 1:
-                        # hace un typecast de params a una lista y cambia el 2do elemento...
-                        params = list(params)
-                        # antes el 2do elemento era el ID_detalle_venta, ahora es la unidad de medida...
-                        params[1] = prev_text.split(" ")[1].strip()
-                        params = tuple(params)
-
-                    overwriteTableCellOldValue(table_widget, curr_index, params)
+                match curr_index.column():
+                    case 0: # detalle de venta
+                        pattern = compile("(\([\s]*P\.[\s]*NORMAL[\s]*\)|\([\s]*P\.[\s]*COMERCIAL[\s]*\))$", IGNORECASE)
+                        
+                        # verifica si (P. NORMAL) | (P. COMERCIAL) está, sino lo toma de prev_text y lo coloca al final
+                        if not search(pattern, lineedit.text()):
+                            # obtiene (P. NORMAL) | (P. COMERCIAL) de prev_text
+                            price_type = search(pattern, prev_text)
+                            # lo pone en mayúsculas
+                            price_type = str(price_type.group()).upper()
+                            
+                            lineedit_text = f"{lineedit.text()} {price_type}"
+                        # si SÍ ESTÁ lo reemplaza...
+                        else:
+                            price_type = search(pattern, lineedit.text())
+                            price_type = str(price_type.group()).upper().replace(" ", "")
+                            lineedit_text = sub(pattern, price_type, lineedit.text())
+                        
+                        makeUpdateQuery(sql="UPDATE Ventas SET detalles_venta = ? WHERE IDventa = (SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?);",
+                                        params=(lineedit_text, str(self.IDs_saleDetails[curr_index.row()]), ))
+                        table_widget.item(curr_index.row(), curr_index.column()).setText(f"{lineedit_text}")
+                    
+                    case 1: # cantidad
+                        makeUpdateQuery(sql="UPDATE Detalle_Ventas SET cantidad = ? WHERE ID_detalle_venta = ?;",
+                                        params=(lineedit.text().replace(",","."), str(self.IDs_saleDetails[curr_index.row()]), ))
+                        # toma la unidad de medida (si tiene) y la concatena con la nueva cantidad
+                        new_prev_text = prev_text.split(" ")[1] if len(prev_text.split(" ")) > 1 else ""
+                        lineedit_text = lineedit.text().replace(".",",")
+                        table_widget.item(curr_index.row(), curr_index.column()).setText(f"{lineedit_text} {new_prev_text}")
+                    
+                    case 3: # costo total
+                        makeUpdateQuery(sql="UPDATE Detalle_Ventas SET costo_total = ? WHERE ID_detalle_venta = ?;",
+                                        params=(lineedit.text().replace(",","."), str(self.IDs_saleDetails[curr_index.row()]), ))
+                        lineedit_text = lineedit.text().replace(".",",")
+                        table_widget.item(curr_index.row(), curr_index.column()).setText(f"{lineedit_text.strip()}")
+                    
+                    case 4: # abonado
+                        makeUpdateQuery(sql="UPDATE Detalle_Ventas SET abonado = ? WHERE ID_detalle_venta = ?;",
+                                        params=(lineedit.text().replace(",","."), str(self.IDs_saleDetails[curr_index.row()]), ))
+                        lineedit_text = lineedit.text().replace(".",",")
+                        table_widget.item(curr_index.row(), curr_index.column()).setText(f"{lineedit_text.strip()}")
         
-        lineedit.deleteLater()
+        # remueve todos los widgets
         removeTableCellsWidgets(table_widget)
+        
         # vuelvo a activar el ordenamiento de la tabla
         # table_widget.setSortingEnabled(True)
         return None
 
 
-    def __handleDateTimeEditingFinished(self, tableWidget:QTableWidget, curr_index:QModelIndex, dateTimeEdit:QDateTimeEdit, ids:tuple) -> None:
-        '''Recibe la tabla, el índice de la celda y el 'QDateTimeEdit' de la celda, y luego hace la consulta UPDATE 
-        a la base de datos. Retorna 'None'.'''
-        sql:str
-        params:tuple
-        match tableWidget.objectName():
+    @Slot(QTableWidget, QModelIndex, QDateTimeEdit)
+    def __tableDateTimeOnEditingFinished(self, table_widget:QTableWidget, curr_index:QModelIndex, datetimeedit:QDateTimeEdit) -> None:
+        '''
+        Este método es llamado desde la señal 'self.datetimeedit.editingFinished'.
+        
+        Declara la consulta UPDATE y sus parámetros y luego hace la consulta a la base de datos para actualizar 
+        el valor de 'datetimeedit'.
+        
+        Retorna None.
+        '''
+        match table_widget.objectName():
             case "table_sales_data":
-                sql = "UPDATE Ventas SET fecha_hora = ? WHERE IDventa = (SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?);"
-                params = (dateTimeEdit.text(), ids[curr_index.row()])
-                makeUpdateQuery(sql, params)
-                overwriteTableCellOldValue(tableWidget, curr_index, params)
+                makeUpdateQuery(sql="UPDATE Ventas SET fecha_hora = ? WHERE IDventa = (SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?);",
+                                params=(datetimeedit.text(), self.IDs_saleDetails[curr_index.row()], ))
+                table_widget.item(curr_index.row(), curr_index.column()).setText(f"{str(datetimeedit.text()).strip()}")
             
             case _:
                 pass
+            
+        datetimeedit.deleteLater()
+        removeTableCellsWidgets(table_widget)
+        return None
 
 
     @Slot(QTableWidget, QModelIndex)
@@ -818,14 +883,12 @@ class MainWindow(QMainWindow):
         '''
         Dependiendo del 'table_widget' del cual se quiera modificar una celda y dependiendo de la columna seleccionada 
         en 'curr_index' crea un QLineEdit|QComboBox|QDateTimeEdit para permitir una modificación más adecuada en esa celda.
+        Además conecta las señales/slots de los widgets y sus 'validators'.
 
         Este método llama a:
         - functionutils.createTableColumnComboBox: para crear QComboBox.
-        - self.__handleTableComboBoxCurrentTextChanged: como slot para recibir las señales de los QComboBox.
         - functionutils.createTableColumnLineEdit: para crear QLineEdit.
-        - self.__handleTableLineEditEditingFinished: como slot para recibir las señales de los QLineEdit.
         - functionutils.createTableColumnDateTimeEdit: para crear QDateTimeEdit.
-        - self.__handleDateTimeEditingFinished: como slot para recibir las señales de los QDateTimeEdit.
         
         PARAMS:
         - table_widget: el QTableWidget al que se referencia.
@@ -833,73 +896,130 @@ class MainWindow(QMainWindow):
         
         Retorna None.
         '''
-        curr_text:str # texto actual de la celda.
+        # TODO: una vez terminado con los validators, probar columna por columna si las UPDATE se hacen bien
+        
+        cell_old_text:str # texto actual de la celda.
         self.combobox:QComboBox
         self.lineedit:QLineEdit
         self.datetimeedit:QDateTimeEdit
+        validator:ProductNameValidator
         
         # desactivo el ordenamiento de la tabla
         # table_widget.setSortingEnabled(False)
 
         if table_widget.editTriggers() != QAbstractItemView.EditTrigger.NoEditTriggers:
-            curr_text = table_widget.item(curr_index.row(), curr_index.column()).text()
+            cell_old_text = table_widget.item(curr_index.row(), curr_index.column()).text()
             
             match table_widget.objectName():
                 case "displayTable":
+                    self.ui.label_feedbackInventory.hide()
+                    
                     match curr_index.column():
-                        case 0: # columna de categoría
-                            self.combobox = createTableColumnComboBox(table_widget, curr_index, curr_text)
-                            self.combobox.textActivated.connect(lambda: self.__handleTableComboBoxCurrentTextChanged(
-                                table_widget=table_widget,
-                                curr_index=curr_index,
-                                combobox=self.combobox))
-                        case _: # resto de columnas
-                            self.lineedit = createTableColumnLineEdit(self.ui.displayTable, curr_index)
-                            self.lineedit.editingFinished.connect(lambda: self.__handleTableLineEditEditingFinished(
-                                table_widget=self.ui.displayTable,
-                                curr_index=curr_index,
-                                lineedit=self.lineedit,
-                                prev_text=curr_text,
-                                ids=self.IDs_products))
-                
-                
-                case "table_sales_data":
-                    match curr_index.column():
-                        case 2: # producto (QComboBox)
-                            self.combobox  = createTableColumnComboBox(table_widget, curr_index, curr_text)
-                            self.combobox.textActivated.connect(lambda: self.__handleTableComboBoxCurrentTextChanged(
+                        case 0: # categoría (QComboBox)
+                            self.combobox = createTableColumnComboBox(table_widget, curr_index, cell_old_text)
+                            self.combobox.textActivated.connect(lambda: self.__tableComboBoxOnCurrentTextChanged(
                                 table_widget=table_widget,
                                 curr_index=curr_index,
                                 combobox=self.combobox))
                             
+                        case _: # nombre | descripción | stock | precio unitario | precio comercial (QLineEdit)
+                            self.lineedit = createTableColumnLineEdit(table_widget, curr_index)
+                        
+                            self.lineedit.returnPressed.connect(lambda: self.__tableLineEditOnReturnPressed(
+                                table_widget=self.ui.displayTable,
+                                curr_index=curr_index,
+                                lineedit=self.lineedit,
+                                prev_text=cell_old_text))
+                            
+                            if curr_index.column() != 2: # diferente de descripción (no tiene validador)
+                                # señal del validador
+                                validator = self.lineedit.validator()
+                                validator.validationSucceded.connect(self.ui.label_feedbackInventory.hide)
+                                validator.validationFailed.connect(lambda text: self.__validatorOnValidationFailed(
+                                    feedback_text=text,
+                                    feedback_label=self.ui.label_feedbackInventory,
+                                    curr_text=self.lineedit.text(),
+                                    prev_text=cell_old_text))
+                
+                
+                case "table_sales_data":
+                    self.ui.label_feedbackSales.hide()
+                    
+                    match curr_index.column():
+                        case 2: # producto (QComboBox)
+                            self.combobox  = createTableColumnComboBox(table_widget, curr_index, cell_old_text)
+                            
+                            self.combobox.textActivated.connect(lambda: self.__tableComboBoxOnCurrentTextChanged(
+                                table_widget=table_widget,
+                                curr_index=curr_index,
+                                combobox=self.combobox))
+                        
                         case 5: # fecha y hora (QDateTimeEdit)
                             self.datetimeedit = createTableColumnDateTimeEdit(table_widget, curr_index)
-                            self.datetimeedit.editingFinished.connect(lambda: self.__handleDateTimeEditingFinished(
+                            
+                            self.datetimeedit.editingFinished.connect(lambda: self.__tableDateTimeOnEditingFinished(
                                 table_widget=table_widget,
                                 curr_index=curr_index,
                                 dateTimeEdit=self.datetimeedit,
                                 ids=self.IDs_saleDetails))
+                        
+                        case _: # detalle de venta | cantidad | costo total | abonado (QLineEdit)
                             
-                        case _: # detalle de venta/cantidad/costo total/abonado
                             self.lineedit = createTableColumnLineEdit(table_widget, curr_index)
-                            self.lineedit.editingFinished.connect(lambda: self.__handleTableLineEditEditingFinished(
-                                table_widget=table_widget,
+                            
+                            self.lineedit.returnPressed.connect(lambda: self.__tableLineEditOnReturnPressed(
+                                table_widget=self.ui.table_sales_data,
                                 curr_index=curr_index,
                                 lineedit=self.lineedit,
-                                prev_text=curr_text,
-                                ids=self.IDs_saleDetails))
+                                prev_text=cell_old_text))
+                            
+                            # señal del validador
+                            validator = self.lineedit.validator()
+                            validator.validationSucceded.connect(self.ui.label_feedbackSales.hide)
+                            validator.validationFailed.connect(lambda text: self.__validatorOnValidationFailed(
+                                feedback_text=text,
+                                feedback_label=self.ui.label_feedbackSales,
+                                curr_text=self.lineedit.text(),
+                                prev_text=cell_old_text))
+                
+                            
+                case "table_debts":
+                    self.ui.label_feedbackDebts.hide()
+                    
+        return None
+
+
+    @Slot(str)
+    def __validatorOnValidationFailed(self, feedback_text:str, feedback_label:QLabel, curr_text:str, prev_text:str) -> None:
+        '''
+        Es llamado desde la señal 'validationFailed' perteneciente a los validadores declarados en el método 
+        'self.handleTableUpdateItem'.
+        
+        Muestra el 'feedback_label' con el texto 'feedback_text' en él sólo si 'prev_text' es diferente al 
+        texto actual (sino significa que hubo un falso 'Validator.State.Intermediate' dado que el nombre introducido 
+        es el mismo que el anterior), además cambia la hoja de estilos del QLabel.
+        
+        Retorna None.
+        '''
+        if prev_text != curr_text:
+            feedback_label.show()
+            feedback_label.setStyleSheet("font-family: 'Verdana'; font-size: 16px; letter-spacing: 0px; word-spacing: 0px; color: #f00; border: 1px solid #f00; background-color: rgb(255, 185, 185);")
+            feedback_label.setText(feedback_text)
         return None
 
 
     #¡ método de cambios en la selección
     @Slot(QTableWidget)
-    def handleSelectionChange(self, tableWidget:QTableWidget) -> None:
-        '''Esta función es llamada ni bien se detecta que la selección de los items en el QTableWidget cambia. 
-        Verifica si hay celdas seleccionadas. Si no hay, llama a 'removeTableCellsWidgets'. Retorna 'None'.'''
+    def handleSelectionChange(self, table_widget:QTableWidget) -> None:
+        '''
+        Esta función es llamada ni bien se detecta que la selección de los items en 'table_widget' cambia. 
+        Verifica si hay celdas seleccionadas. Si no hay, llama a 'functionutils.removeTableCellsWidgets'.
+        
+        Retorna None.'''
         # obtengo los items seleccionados actualmente de las tablas
-        curr_selection = tableWidget.selectedItems()
+        curr_selection = table_widget.selectedItems()
         if len(curr_selection) <= 1: # por alguna razón 'curr_selection' siempre tiene 1 item, nunca llega a estar vacía...
-            removeTableCellsWidgets(tableWidget)
+            removeTableCellsWidgets(table_widget)
         return None
 
 
@@ -1033,8 +1153,12 @@ class MainWindow(QMainWindow):
 
 
     def __update_self_ItemsValues(self) -> float:
-        '''Actualiza con los valores de los items la tupla 'self.ITEMS_VALUES', y de paso calcula el costo total de la 
-        venta. Retorna un float.'''
+        '''
+        Actualiza con los valores de los items la tupla 'self.ITEMS_VALUES', y de paso calcula el costo total de la 
+        venta.
+        
+        Retorna un float.
+        '''
         object_name:str
         name_combobox:QComboBox
         product_price:str

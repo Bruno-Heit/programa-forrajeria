@@ -39,13 +39,13 @@ def createConnection(db_name:str) -> Connection | None:
     return connection
 
 
-def makeReadQuery(sql:str, params:tuple = None) -> list:
+def makeReadQuery(sql:str, params:tuple = None) -> list[tuple]:
     '''
     Hace la consulta SELECT a la base de datos y devuelve los valores de las filas seleccionadas. 
     
     IMPORTANTE: esta función no muestra feedback en caso de errores.
     
-    Retorna una 'list' con los valores.
+    Retorna una 'list[tuple]' con los valores.
     '''
     conn = createConnection("database/inventario.db")
     if not conn:

@@ -55,7 +55,7 @@ class ProductDialog(QDialog):
         self.productDialog_ui.lineedit_productComercialPrice.setValidator(comercialPrice_validator)
         
         # completers
-        createCompleter(self.productDialog_ui.lineedit_productName, type=3)
+        self.productDialog_ui.lineedit_productName.setCompleter(createCompleter(type=3))
 
         # flags de validación
         self.VALID_STOCK:bool = None
@@ -420,8 +420,8 @@ class SaleDialog(QDialog):
         self.saleDialog_ui.debtor_data.hide()
 
         # QCompleters
-        createCompleter(self.saleDialog_ui.lineEdit_debtorName, 1)
-        createCompleter(self.saleDialog_ui.lineEdit_debtorSurname, 2)
+        self.saleDialog_ui.lineEdit_debtorName.setCompleter(createCompleter(1))
+        self.saleDialog_ui.lineEdit_debtorSurname.setCompleter(createCompleter(2))
 
         # validators
         float_re = QRegularExpression("[0-9]{0,9}(\.|,)?[0-9]{0,2}")
@@ -1315,8 +1315,8 @@ class DebtorDataDialog(QDialog):
         self.signalToParent = SignalToParent()
         
 
-        createCompleter(self.debtorData.lineEdit_debtorName, type=1)
-        createCompleter(self.debtorData.lineEdit_debtorSurname, type=2)
+        self.debtorData.lineEdit_debtorName.setCompleter(createCompleter(type=1))
+        self.debtorData.lineEdit_debtorSurname.setCompleter(createCompleter(type=2))
 
         self.debtorData.buttonBox.button(QDialogButtonBox.Ok).setText("Aceptar")
         self.debtorData.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
