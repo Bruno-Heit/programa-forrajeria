@@ -85,6 +85,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_side_barToggle.clicked.connect(lambda: toggleSideBar(self.ui.side_bar, self.ui.centralwidget, self.ui.side_bar_body))
         
         self.ui.btn_inventory_sideBarToggle.clicked.connect(lambda: toggleSideBar(self.ui.inventory_sideBar, self.ui.main_inventory_frame, self.ui.inventory_side_bar_body, 200))
+        
         # (READ) cargar con productos 'displayTable'
         self.ui.tables_ListWidget.itemClicked.connect(lambda: self.handleTableToFill(self.ui.displayTable, ACCESSED_BY_LIST=True))
         self.ui.tables_ListWidget.itemActivated.connect(lambda: self.handleTableToFill(self.ui.displayTable, ACCESSED_BY_LIST=True))
@@ -93,11 +94,16 @@ class MainWindow(QMainWindow):
 
         # (CREATE) añadir nuevo producto a tabla 'displayTable'
         self.ui.btn_add_product_inventory.clicked.connect(lambda: self.handleTableCreateRow(self.ui.displayTable))
+        
         # (DELETE) eliminar un producto de 'displayTable'
         self.ui.btn_delete_product_inventory.clicked.connect(lambda: self.handleTableDeleteRows(self.ui.displayTable))
+        
         # (UPDATE) modificar celdas de 'displayTable'
         self.ui.displayTable.doubleClicked.connect(lambda: self.handleTableUpdateItem(self.ui.displayTable, self.ui.displayTable.currentIndex()) )
+        
+        # cambio de selección
         self.ui.displayTable.itemSelectionChanged.connect(lambda: self.handleSelectionChange(self.ui.displayTable))
+        
         # inventory_sideBar
         self.ui.inventory_checkbuttons_buttonGroup.buttonPressed.connect(self.handlePressedCheckbutton)
         self.ui.inventory_checkbuttons_buttonGroup.buttonClicked.connect(self.handleClickedCheckbutton)
@@ -115,6 +121,7 @@ class MainWindow(QMainWindow):
         self.ui.sales_searchBar.returnPressed.connect(lambda: self.handleTableToFill(self.ui.table_sales_data, self.ui.sales_searchBar))
         
         self.ui.tabWidget.currentChanged.connect(lambda index: self.ui.tab2_toolBox.setCurrentIndex(0) if index == 1 else None)
+        
         # (CREATE) añadir una venta a 'table_sales_data'
         self.ui.btn_add_product_sales.clicked.connect(lambda: self.handleTableCreateRow(self.ui.table_sales_data))
         # (DELETE) eliminar ventas de 'table_sales_data'
@@ -654,7 +661,7 @@ class MainWindow(QMainWindow):
         '''
         Declara la consulta sql y los parámetros y luego hace la consulta UPDATE a la base de datos con el nuevo 
         dato seleccionado a partir del nuevo texto de 'combobox'. Reemplaza el valor anterior de la celda por el
-        nuevo.
+        nuevo. Al finalizar, elimina todos los QComboBox de 'table_widget'.
         
         PARAMS:
         - table_widget: QTableWidget al que se referencia.
@@ -708,9 +715,7 @@ class MainWindow(QMainWindow):
         
         Este método llama a:
         - makeUpdateQuery: para realizar las consultas UPDATE.
-        - overwriteTableCellOldValue: para, una vez hecha la consulta, reemplazar en la celda actual el valor 
-        anterior por el nuevo valor.
-        - 
+        - removeTableCellsWidgets: para quitar los QLineEdit de 'table_widget'.
         
         PARAMS:
         - table_widget: el QTableWidget al que se referencia.
@@ -846,8 +851,11 @@ class MainWindow(QMainWindow):
                         lineedit_text = lineedit.text().replace(".",",")
                         table_widget.item(curr_index.row(), curr_index.column()).setText(f"{lineedit_text.strip()}")
         
-        # remueve todos los widgets
-        removeTableCellsWidgets(table_widget)
+        # borra el lineedit
+        if table_widget.cellWidget(curr_index.row(), curr_index.column()): #! veo si existe porque, por alguna razón, al
+            lineedit.deleteLater()                                         #! lineedit en 'table_sales_data' no lo encuentra.
+        # remueve todos los widgets                                        #! Igualmente 'removeTableCellWidgets' le da 
+        removeTableCellsWidgets(table_widget)                              #! permiso al 'garbage collector' de borrarlos...
         
         # vuelvo a activar el ordenamiento de la tabla
         # table_widget.setSortingEnabled(True)
@@ -860,7 +868,17 @@ class MainWindow(QMainWindow):
         Este método es llamado desde la señal 'self.datetimeedit.editingFinished'.
         
         Declara la consulta UPDATE y sus parámetros y luego hace la consulta a la base de datos para actualizar 
-        el valor de 'datetimeedit'.
+        el valor de 'datetimeedit', luego sustituye el valor actual de la celda por el nuevo.
+        Al finalizar, remueve 'datetimeedit' de la celda de 'table_widget'.
+        
+        Este método llama a:
+        - makeUpdateQuery: para realizar las consultas UPDATE.
+        - removeTableCellsWidgets: para quitar los QDateTimeEdit de 'table_widget'.
+        
+        PARAMS:
+        - table_widget: el QTableWidget al que se referencia.
+        - curr_index: índice de la celda seleccionada de 'table_widget'.
+        - datetimeedit: el QDateTimeEdit que envía la señal.
         
         Retorna None.
         '''
@@ -872,9 +890,13 @@ class MainWindow(QMainWindow):
             
             case _:
                 pass
-            
-        datetimeedit.deleteLater()
-        removeTableCellsWidgets(table_widget)
+        
+        #? verifico si el calendar tiene el foco puesto porque cuando se muestra el popup cambia el foco y envía 
+        #? la señal 'editingFinished' a éste método, lo que hace que se cierre instantáneamente. La comparación 
+        #? de abajo hace que no se cierre el calendar y permita editar la fecha.
+        if not datetimeedit.calendarWidget().hasFocus():
+            datetimeedit.deleteLater()
+            removeTableCellsWidgets(table_widget)
         return None
 
 
@@ -896,8 +918,6 @@ class MainWindow(QMainWindow):
         
         Retorna None.
         '''
-        # TODO: una vez terminado con los validators, probar columna por columna si las UPDATE se hacen bien
-        
         cell_old_text:str # texto actual de la celda.
         self.combobox:QComboBox
         self.lineedit:QLineEdit
@@ -960,8 +980,7 @@ class MainWindow(QMainWindow):
                             self.datetimeedit.editingFinished.connect(lambda: self.__tableDateTimeOnEditingFinished(
                                 table_widget=table_widget,
                                 curr_index=curr_index,
-                                dateTimeEdit=self.datetimeedit,
-                                ids=self.IDs_saleDetails))
+                                datetimeedit=self.datetimeedit))
                         
                         case _: # detalle de venta | cantidad | costo total | abonado (QLineEdit)
                             

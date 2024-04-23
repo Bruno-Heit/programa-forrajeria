@@ -1,11 +1,10 @@
 '''
 En este archivo se encuentran los QValidators -y sus variantes- que he tenido que modificar 
-para poder lograr una mejor validación de datos en QComboBoxes, QLineEdits y demás widgets 
-donde el usuario pueda ingresar datos.
+para poder lograr una mejor validación de datos en QComboBoxes, QLineEdits, QDateTimeEdits y 
+demás widgets donde el usuario pueda ingresar datos.
 '''
-from PySide6.QtWidgets import (QWidget)
-from PySide6.QtCore import (Signal, QLocale)
-from PySide6.QtGui import (QValidator, QRegularExpressionValidator, QDoubleValidator)
+from PySide6.QtCore import (Signal)
+from PySide6.QtGui import (QValidator, QRegularExpressionValidator)
 
 from utils.dboperations import *
 

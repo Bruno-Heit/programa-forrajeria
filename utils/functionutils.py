@@ -8,6 +8,7 @@ from PySide6.QtGui import (QRegularExpressionValidator)
 
 from re import (Match, match, search, sub, IGNORECASE)
 
+from resources import (rc_icons)
 from utils.dboperations import *
 from utils.customvalidators import *
 
@@ -229,59 +230,13 @@ def createTableColumnComboBox(table_widget:QTableWidget, curr_index:QModelIndex,
     return combobox
 
 
-# def getUpdateSqlAndParameters(tableWidget:QTableWidget, lineEdit:QLineEdit, curr_index:QModelIndex, ids:tuple) -> tuple[str, tuple[str]]:
-#     '''Recibe el 'QTableWidget', el item que fue modificado, el 'QLineEdit' y los IDs de los elementos. Retorna una 
-#     tupla con la consulta Sql y una tupla con los parámetros que recibe la consulta.'''
-#     sql:str
-#     params:tuple
-#     re_stock:Match | None
-#     re_unit:Match | None
-    
-#     match tableWidget.objectName():
-#         # case "displayTable":
-#             # params = (lineEdit.text(), str(ids[curr_index.row()]))
-#             # match curr_index.column():
-#                 # case 1: # columna de nombre
-#                 #     sql = "UPDATE Productos SET nombre = ? WHERE IDproducto = ?;"
-#                 # case 2: # columna de descripción
-#                 #     sql = "UPDATE Productos SET descripcion = ? WHERE IDproducto = ?;"
-#                 # case 3: # columna de stock
-#                     # re_stock = match("[0-9]+(\.)?[0-9]{0,2}", lineEdit.text())
-#                     # re_stock = re_stock.group() if re_stock is not None else None
-#                     # re_unit = search("[a-zA-Z]*$", lineEdit.text(), IGNORECASE)
-#                     # re_unit = re_unit.group() if re_unit is not None else None
-#                     # if re_stock:
-#                     #     params = (re_stock, re_unit, str(ids[curr_index.row()]))
-#                     #     sql = "UPDATE Productos SET stock = ?, unidad_medida = ? WHERE IDproducto = ?;"
-#                 # case 4: # precio unitario
-#                 #     sql = "UPDATE Productos SET precio_unit = ? WHERE IDproducto = ?;"
-#                 # case 5: # precio comercial
-#                 #     sql = "UPDATE Productos SET precio_comerc = ? WHERE IDproducto = ?;"
-        
-#         # case "table_sales_data":
-#         #     # params = (lineEdit.text(), str(ids[curr_index.row()]))
-#         #     match curr_index.column():
-#         #         case 0: # detalle de venta
-#         #             sql = "UPDATE Ventas SET detalles_venta = ? WHERE IDventa = (SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?);"
-#         #         case 1: # cantidad
-#         #             sql = "UPDATE Detalle_Ventas SET cantidad = ? WHERE ID_detalle_venta = ?;"
-#         #         case 3: # costo total
-#         #             sql = "UPDATE Detalle_Ventas SET costo_total = ? WHERE ID_detalle_venta = ?;"
-#         #         case 4: # abonado
-#         #             sql = "UPDATE Detalle_Ventas SET abonado = ? WHERE ID_detalle_venta = ?;"
-            
-#     return sql, params
-
-
 def createTableColumnLineEdit(table_widget:QTableWidget, curr_index:QModelIndex) -> QLineEdit:
     '''
-    Crea un QLineEdit para ser colocado en la celda seleccionada con índice 'curr_index', y dependiendo de la columna 
-    donde esté la celda le aplica un validador al QLineEdit. Si el QTableWidget es "inventario" y la columna es "nombre" 
-    también le asigna un QCompleter con los nombres de los productos.
+    Crea un QLineEdit para ser colocado en la celda de 'table_widget' seleccionada con índice 'curr_index', y 
+    dependiendo de la columna donde esté la celda le aplica un validador al QLineEdit y/o un QCompleter.
     
     Retorna un QLineEdit.
     '''
-    float_re:QRegularExpression = QRegularExpression("[0-9]{0,7}(\.|,)?[0-9]{0,2}")
     lineedit:QLineEdit = QLineEdit(table_widget)
 
     lineedit.setText(table_widget.item(curr_index.row(), curr_index.column()).text())
@@ -318,6 +273,8 @@ def createTableColumnLineEdit(table_widget:QTableWidget, curr_index:QModelIndex)
                     lineedit.setValidator(SaleTotalCostValidator(lineedit))
                 
                 case 4: # abonado
+                    # completer con costo total (misma fila, columna 3)
+                    lineedit.setCompleter( QCompleter( [table_widget.item(curr_index.row(), 3).text()] ) )
                     lineedit.setValidator(SalePaidValidator(lineedit))
 
     table_widget.setCellWidget(curr_index.row(), curr_index.column(), lineedit)
@@ -325,62 +282,65 @@ def createTableColumnLineEdit(table_widget:QTableWidget, curr_index:QModelIndex)
     return lineedit
 
 
-# def overwriteTableCellOldValue(table_widget:QTableWidget, curr_index:QModelIndex, params:tuple = None, cb_curr_text:str = None) -> None:
-#     '''
-#     Reemplaza el valor anterior de la celda en la posición 'curr_index' en 'table_widget' con el nuevo valor.
+def createTableColumnDateTimeEdit(table_widget:QTableWidget, curr_index:QModelIndex) -> QDateTimeEdit:
+    '''
+    Crea un QDateTimeEdit en 'table_widget' y en la celda indicada por 'curr_index'. Además le asigna un estilo 
+    QSS.
     
-#     PARAMS:
-#     - params: si la celda tiene un QLineEdit:
-#         - la 1ra posición es a la que hay que acceder para obtener el contenido
-#         - la 2da posición es sólo por si el contenido está compuesto por 2 tipos de valores (ej.: stock en 'displayTable').
-#     - cb_curr_text es por si la celda tiene un QComboBox: representa al texto del QComboBox.
-    
-#     Retorna None.
-#     '''
-#     # coloca el valor nuevo en la celda
-#     match table_widget.objectName():
-#         # case "displayTable":
-#         #     if curr_index.column() == 0: # categoría
-#         #         table_widget.item(curr_index.row(), curr_index.column()).setText(cb_curr_text)
-#         #     elif curr_index.column() == (1 or 2 or 4 or 5): # nombre/descripción/precio unitario/precio comercial
-#         #         table_widget.item(curr_index.row(), curr_index.column()).setText(str(params[0]).strip())
-#         #     elif curr_index.column() == 3: # stock
-#         #         table_widget.item(curr_index.row(), curr_index.column()).setText(f"{params[0]} {str(params[1]).strip()}")
-        
-#         case "table_sales_data":
-#             # if curr_index.column() == 1: # cantidad (int|float + str)
-#                 # table_widget.item(curr_index.row(), curr_index.column()).setText(f"{params[0]} {params[1]}")
-#             # elif curr_index.column() == 2: # producto
-#             #     table_widget.item(curr_index.row(), curr_index.column()).setText(f"{cb_curr_text}")
-#             # else: # detalle de venta/costo total/abonado/fecha y hora
-#             #     table_widget.item(curr_index.row(), curr_index.column()).setText(f"{str(params[0]).strip()}")
-
-#         case "":
-#             pass
-#     return None
-
-def createTableColumnDateTimeEdit(tableWidget:QTableWidget, curr_index:QModelIndex) -> QDateTimeEdit:
-    '''Crea un 'QDateTimeEdit' en el 'tableWidget' indicado y en la celda indicada por 'curr_index'. Retorna un 
-    'QDateTimeEdit'.'''
-    dateTimeEdit = QDateTimeEdit(parent=tableWidget)
+    Retorna un QDateTimeEdit.
+    '''
+    datetimeedit = QDateTimeEdit(parent=table_widget)
     curr_datetime:QDateTime = QDateTime()
     date:QDate
     time:QTime
 
-    dateTimeEdit.setMinimumDateTime(QDateTime().fromString("1/1/2022 00:00", "d/M/yyyy HH:mm"))
-    dateTimeEdit.setCalendarPopup(True)
+    datetimeedit.setMinimumDateTime(QDateTime().fromString("1/1/2022 00:00", "d/M/yyyy HH:mm"))
+    datetimeedit.setCalendarPopup(True)
+    
     # por alguna razón, QDateTime().fromString() no me funcionó, así que obtengo la fecha y la hora separadas...
-    cell_datetime = tableWidget.item(curr_index.row(), curr_index.column()).text()
-    date = QDate().fromString(cell_datetime.split(" ")[0].strip(), "d/M/yyyy") # bien
-    time = QTime().fromString(cell_datetime.split(" ")[1].strip(), "HH:mm") # bien
+    cell_datetime = table_widget.item(curr_index.row(), curr_index.column()).text()
+    date = QDate().fromString(cell_datetime.split(" ")[0].strip(), "d/M/yyyy")
+    time = QTime().fromString(cell_datetime.split(" ")[1].strip(), "HH:mm")
+    
     # y las junto en el curr_datetime...
     curr_datetime.setDate(date)
     curr_datetime.setTime(time)
-    # al final asigno la fecha y la hora al dateTimeEdit
-    dateTimeEdit.setDateTime(curr_datetime)
-    tableWidget.setCellWidget(curr_index.row(), curr_index.column(), dateTimeEdit)
+    
+    # al final asigno la fecha y la hora al datetimeedit
+    datetimeedit.setDateTime(curr_datetime)
+    
+    # le asigno un estilo
+    datetimeedit.setStyleSheet(
+            "QDateTimeEdit {\
+                background-color: #fff;\
+            }\
+            \
+            \
+            QCalendarWidget QAbstractItemView {\
+                background-color: #fff;\
+                selection-background-color: #38a3a5;\
+            }\
+            QCalendarWidget QToolButton {\
+                background-color: #22577a;\
+                color: #fff;\
+            }\
+            QCalendarWidget QToolButton:hover,\
+            QCalendarWidget QToolButton:pressed {\
+                background-color: #38a3a5;\
+                color: #111;\
+            }\
+            \
+            \
+            QCalendarWidget QWidget#qt_calendar_prevmonth{\
+                qproperty-icon: url(':/icons/arrow-left-white.svg')\
+            }\
+            QCalendarWidget QWidget#qt_calendar_nextmonth{\
+                qproperty-icon: url(':/icons/arrow-right-white.svg')\
+            }")
+    
+    table_widget.setCellWidget(curr_index.row(), curr_index.column(), datetimeedit)
 
-    return dateTimeEdit
+    return datetimeedit
 
 
 #========================================================================================================================
