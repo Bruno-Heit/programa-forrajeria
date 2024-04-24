@@ -50,7 +50,7 @@ class ProductStockValidator(QRegularExpressionValidator):
     validationFailed = Signal(str)
     
     
-    def fixup(self, text: str) -> str:
+    def fixup(self, text: str) -> str:        
         while text.split(" ")[0].endswith((".", ",")):
             text = text.rstrip(",")
             text = text.rstrip(".")

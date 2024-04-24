@@ -29,6 +29,13 @@ class ProductDialog(QDialog):
         self.productDialog_ui = Ui_Dialog()
         self.productDialog_ui.setupUi(self)
         self.productDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setText("Aceptar")
+        # esconde widgets
+        self.productDialog_ui.label_nameWarning.hide()
+        self.productDialog_ui.label_stockWarning.hide()
+        self.productDialog_ui.label_categoryWarning.hide()
+        self.productDialog_ui.label_unitPriceWarning.hide()
+        self.productDialog_ui.label_comercialPriceWarning.hide()
+        
         # desactiva desde el principio el botón "Aceptar"
         self.productDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
         self.productDialog_ui.buttonBox.button(QDialogButtonBox.Cancel).setText("Cancelar")
@@ -41,18 +48,16 @@ class ProductDialog(QDialog):
                                                       }")
         comboBox_categories:list[str] = getProductsCategories()
         self.productDialog_ui.cb_productCategory.addItems(comboBox_categories)
+        
         # validators
-        name_re = QRegularExpression(".*")
-        float_re = QRegularExpression("[0-9]{0,9}[.|,]?[0-9]{0,2}")
-
-        name_validator = QRegularExpressionValidator(name_re, self.productDialog_ui.lineedit_productName)
+        name_validator = ProductNameValidator(self.productDialog_ui.lineedit_productName)
+        stock_validator = ProductStockValidator(self.productDialog_ui.lineedit_productStock)
+        unit_price_validator = ProductUnitPriceValidator(self.productDialog_ui.lineedit_productUnitPrice)
+        comerc_price_validator = ProductComercPriceValidator(self.productDialog_ui.lineedit_productComercialPrice)
         self.productDialog_ui.lineedit_productName.setValidator(name_validator)
-        stock_validator = QRegularExpressionValidator(float_re, self.productDialog_ui.lineedit_productStock)
         self.productDialog_ui.lineedit_productStock.setValidator(stock_validator)
-        unitPrice_validator = QRegularExpressionValidator(float_re, self.productDialog_ui.lineedit_productUnitPrice)
-        self.productDialog_ui.lineedit_productUnitPrice.setValidator(unitPrice_validator)
-        comercialPrice_validator = QRegularExpressionValidator(float_re, self.productDialog_ui.lineedit_productComercialPrice)
-        self.productDialog_ui.lineedit_productComercialPrice.setValidator(comercialPrice_validator)
+        self.productDialog_ui.lineedit_productUnitPrice.setValidator(unit_price_validator)
+        self.productDialog_ui.lineedit_productComercialPrice.setValidator(comerc_price_validator)
         
         # completers
         self.productDialog_ui.lineedit_productName.setCompleter(createCompleter(type=3))
@@ -65,96 +70,140 @@ class ProductDialog(QDialog):
         self.VALID_COMERCIAL_PRICE:bool = None
 
         #--- SEÑALES --------------------------------------------------
-        self.productDialog_ui.lineedit_productName.textChanged.connect(self.__checkProductNameValidity)
+        name_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('name'))
+        stock_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('stock'))
+        unit_price_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('unit_price'))
+        comerc_price_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('comerc_price'))
+        
+        name_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
+            field_validated='name',
+            error_message=error_message))
+        stock_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
+            field_validated='stock',
+            error_message=error_message))
+        unit_price_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
+            field_validated='unit_price',
+            error_message=error_message))
+        comerc_price_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
+            field_validated='comerc_price',
+            error_message=error_message))
         
         self.productDialog_ui.cb_productCategory.currentIndexChanged.connect(self.__checkProductCategoryValidity)
-        
-        self.productDialog_ui.lineedit_productStock.textChanged.connect(lambda: self.__checkProductStockValidity())
-        self.productDialog_ui.lineedit_productStock.editingFinished.connect(lambda: self.__checkProductStockValidity(True))
-        
-        self.productDialog_ui.lineedit_productUnitPrice.textChanged.connect(lambda: self.__checkProductUnitPriceValidity(False))
-        self.productDialog_ui.lineedit_productUnitPrice.editingFinished.connect(lambda: self.__checkProductUnitPriceValidity(True))
-        
-        self.productDialog_ui.lineedit_productComercialPrice.textChanged.connect(lambda: self.__checkProductComercialPriceValidity(False))
-        self.productDialog_ui.lineedit_productComercialPrice.editingFinished.connect(lambda: self.__checkProductComercialPriceValidity(True))
+        self.productDialog_ui.lineedit_productStock.editingFinished.connect(lambda: self.formatField('stock'))
+        self.productDialog_ui.lineedit_productUnitPrice.editingFinished.connect(lambda: self.formatField('unit_price'))
+        self.productDialog_ui.lineedit_productComercialPrice.editingFinished.connect(lambda: self.formatField('comerc_price'))
         
         self.productDialog_ui.buttonBox.accepted.connect(self.addProductToDatabase)
     
     #### MÉTODOS #####################################################
-    # funciones de validación de campos
-    @Slot(bool)
-    def __checkProductStockValidity(self, editing_finished:bool = False) -> None:
-        '''Verifica si 'lineedit_productStock' tiene un nombre válido. Si es válido 'self.VALID_STOCK' será True, sino 
-        False. Modifica el texto de 'label_stockWarning' de acuerdo a las condiciones, y el estilo del campo. Retorna 'None'.'''
-        stock:int | float | str
-
-        # reinicio la validez del stock
-        self.VALID_STOCK = True
-
-        # si es texto vacío o si no es un número...
-        if self.productDialog_ui.lineedit_productStock.text().strip() == "" or self.productDialog_ui.lineedit_productStock.text().replace(",","").replace(".","").isnumeric() == False:
-            self.VALID_STOCK = False
-            self.productDialog_ui.label_stockWarning.setText("El stock debe ser un número")
-        # sino, formatea el valor
-        else:
-            stock = self.productDialog_ui.lineedit_productStock.text().replace(",",".")
-
-            if editing_finished and self.productDialog_ui.lineedit_productStock.text().endswith("."):
-                stock = self.productDialog_ui.lineedit_productStock.text().replace(".","")
-            
-            # intenta convertir el valor a int ó a float
-            try:
-                stock = int(self.productDialog_ui.lineedit_productStock.text()) if float(self.productDialog_ui.lineedit_productStock.text()).is_integer() else float(self.productDialog_ui.lineedit_productStock.text())
-            except ValueError:
-                pass
-            # reemplaza al texto del lineedit por el nuevo formateado
-            self.productDialog_ui.lineedit_productStock.setText(str(stock))
-
-        # si es válido, borra el mensaje de error y cambia el estilo del lineedit
-        if self.VALID_STOCK:
-            self.productDialog_ui.label_stockWarning.setText("")
-            self.productDialog_ui.lineedit_productStock.setStyleSheet("border: 1px solid #0f0; background-color: rgb(185, 255, 185);")
-        else:
-            self.productDialog_ui.lineedit_productStock.setStyleSheet("border: 1px solid #f00; background-color: rgb(255, 185, 185);")
-        self.verifyFieldsValidity()
-        return None
-
-
-    @Slot()
-    def __checkProductNameValidity(self) -> None:
+    @Slot(str)
+    def validatorOnValidationSucceded(self, field_validated:str) -> None:
         '''
-        Verifica si 'lineedit_productName' tiene valores válidos. Si son válidos 'self.VALID_NAME' será True, sino 
-        False. Modifica el texto de 'label_nameWarning' de acuerdo a las condiciones, y el estilo del campo. 
+        Cambia el valor del flag asociado al campo que fue validado 'field_validated' a True, cambia el 
+        QSS del campo y esconde el QLabel asociado al campo.
+        Al finalizar, llama a 'self.verifyFieldsValidity' para comprobar si el resto de campos son válidos.
+        
+        PARAMS:
+        - field_validated: el campo que fue validado. Sus posibles valores son:
+            - name: se validó el campo de nombre del producto.
+            - stock: se validó el campo de stock del producto.
+            - unit_price: se validó el campo de precio unitario del producto.
+            - comerc_price: se validó el campo de precio comercial del producto.
         
         Retorna None.
         '''
-        # reinicio la validez del nombre
-        self.VALID_NAME = True
+        match field_validated:
+            case 'name':
+                self.VALID_NAME = True
+                self.productDialog_ui.lineedit_productName.setStyleSheet("border: 1px solid #40dc26; background-color: #b9e0a4;")
+                self.productDialog_ui.label_nameWarning.hide()
+            
+            case 'stock':
+                self.VALID_STOCK = True
+                self.productDialog_ui.lineedit_productStock.setStyleSheet("border: 1px solid #40dc26; background-color: #b9e0a4;")
+                self.productDialog_ui.label_stockWarning.hide()
+            
+            case 'unit_price':
+                self.VALID_UNIT_PRICE = True
+                self.productDialog_ui.lineedit_productUnitPrice.setStyleSheet("border: 1px solid #40dc26; background-color: #b9e0a4;")
+                self.productDialog_ui.label_unitPriceWarning.hide()
+            
+            case 'comerc_price':
+                self.VALID_COMERCIAL_PRICE = True
+                self.productDialog_ui.lineedit_productComercialPrice.setStyleSheet("border: 1px solid #40dc26; background-color: #b9e0a4;")
+                self.productDialog_ui.label_comercialPriceWarning.hide()
         
-        # si el producto no tiene nombre (si el campo está vacío)...
-        if self.productDialog_ui.lineedit_productName.text() == "":
-            self.VALID_NAME = False
-            self.productDialog_ui.label_nameWarning.setText("El producto debe tener un nombre")
-        
-        # hace un SELECT a la Productos para ver si ya existe ese nombre...
-        if self.VALID_NAME and makeReadQuery("SELECT nombre FROM Productos WHERE nombre = ?;", (self.productDialog_ui.lineedit_productName.text(),)):
-            self.VALID_NAME = False
-            self.productDialog_ui.label_nameWarning.setText("Ya existe un producto con ese nombre")
-        
-        if self.VALID_NAME:
-            self.productDialog_ui.label_nameWarning.setText("")
-            self.productDialog_ui.lineedit_productName.setStyleSheet("border: 1px solid #0f0; background-color: rgb(185, 255, 185);")
-        else:
-            self.productDialog_ui.lineedit_productName.setStyleSheet("border: 1px solid #f00; background-color: rgb(255, 185, 185);")
         self.verifyFieldsValidity()
         return None
-
-
+    
+    
+    @Slot(str, str)
+    def validatorOnValidationFailed(self, field_validated:str, error_message:str) -> None:
+        '''
+        Cambia el valor del flag asociado al campo que fue validado 'field_validated' a False, cambia el 
+        QSS del campo y muestra el QLabel asociado al campo con el mensaje 'error_message' con feedback.
+        
+        Retorna None.
+        '''
+        match field_validated:
+            case 'name':
+                self.VALID_NAME = False
+                self.productDialog_ui.lineedit_productName.setStyleSheet("border: 1px solid #dc2627; background-color: #e0a4a4;")
+                self.productDialog_ui.label_nameWarning.show()
+                self.productDialog_ui.label_nameWarning.setText(error_message)
+            
+            case 'stock':
+                self.VALID_STOCK = False
+                self.productDialog_ui.lineedit_productStock.setStyleSheet("border: 1px solid #dc2627; background-color: #e0a4a4;")
+                self.productDialog_ui.label_stockWarning.show()
+                self.productDialog_ui.label_stockWarning.setText(error_message)
+            
+            case 'unit_price':
+                self.VALID_UNIT_PRICE = False
+                self.productDialog_ui.lineedit_productUnitPrice.setStyleSheet("border: 1px solid #dc2627; background-color: #e0a4a4;")
+                self.productDialog_ui.label_unitPriceWarning.show()
+                self.productDialog_ui.label_unitPriceWarning.setText(error_message)
+            
+            case 'comerc_price':
+                self.VALID_COMERCIAL_PRICE = False
+                self.productDialog_ui.lineedit_productComercialPrice.setStyleSheet("border: 1px solid #dc2627; background-color: #e0a4a4;")
+                self.productDialog_ui.label_comercialPriceWarning.show()
+                self.productDialog_ui.label_comercialPriceWarning.setText(error_message)
+        
+        return None
+    
+    
+    @Slot(str)
+    def formatField(self, field_to_format:str) -> None:
+        '''
+        Dependiendo del campo 'field_to_format' formatea el texto y lo asigna en el QLineEdit correspondiente.
+        
+        Retorna None.
+        '''
+        match field_to_format:
+            case 'stock': # cambia los puntos decimales por comas
+                self.productDialog_ui.lineedit_productStock.setText(self.productDialog_ui.lineedit_productStock.text().replace(".",","))
+            
+            case 'unit_price': # cambia los puntos decimales por comas
+                self.productDialog_ui.lineedit_productUnitPrice.setText(self.productDialog_ui.lineedit_productUnitPrice.text().replace(".",","))
+            
+            case 'comerc_price': # cambia los puntos decimales por comas
+                self.productDialog_ui.lineedit_productComercialPrice.setText(self.productDialog_ui.lineedit_productComercialPrice.text().replace(".",","))
+        
+        return None
+    
+    
     @Slot()
     def __checkProductCategoryValidity(self) -> None:
-        '''Verifica si 'cb_productCategory' tiene una categoría seleccionada. Si la tiene, se considera válido y 
+        '''
+        Verifica si 'cb_productCategory' tiene una categoría seleccionada. Si la tiene, se considera válido y 
         'self.VALID_CATEGORY' será True, sino False. Modifica el texto de 'label_categoryWarning' de acuerdo a las 
-        condiciones, y el estilo del campo. Retorna 'None'.'''
+        condiciones, y el estilo del campo.
+        Al finalizar, si el campo es válido llama a 'self.verifyFieldsValidity' para comprobar si el resto de campos 
+        son válidos.
+        
+        Retorna None.
+        '''
         # reinicio la validez de la categoría
         self.VALID_CATEGORY = True
         current_text:str = self.productDialog_ui.cb_productCategory.currentText().strip()
@@ -165,122 +214,16 @@ class ProductDialog(QDialog):
         if self.productDialog_ui.cb_productCategory.currentIndex() == -1:
             self.VALID_CATEGORY = False
             self.productDialog_ui.label_categoryWarning.setText("Se debe seleccionar una categoría para el producto")
-            self.productDialog_ui.cb_productCategory.setStyleSheet("border: 1px solid #f00; background-color: rgb(255, 185, 185);")
+            self.productDialog_ui.cb_productCategory.setStyleSheet("border: 1px solid #dc2627; background-color: #e0a4a4;")
 
         if current_text and self.VALID_CATEGORY:
             self.productDialog_ui.label_categoryWarning.setText("")
-            self.productDialog_ui.cb_productCategory.setStyleSheet("border: 1px solid #0f0; background-color: rgb(185, 255, 185);")
+            self.productDialog_ui.cb_productCategory.setStyleSheet("border: 1px solid #40dc26; background-color: #b9e0a4;")
+            self.verifyFieldsValidity()
         else:
-            self.productDialog_ui.cb_productCategory.setStyleSheet("border: 1px solid #f00; background-color: rgb(255, 185, 185);")
-        self.verifyFieldsValidity()
+            self.productDialog_ui.cb_productCategory.setStyleSheet("border: 1px solid #dc2627; background-color: #e0a4a4;")
         return None
 
-
-    @Slot(bool)
-    def __checkProductUnitPriceValidity(self, editing_finished:bool) -> None:
-        '''Verifica si 'lineedit_productUnitPrice' tiene un precio válido. Si es válido 'self.VALID_UNIT_PRICE' será True, 
-        sino False. Modifica el texto de 'label_unitPriceWarning' de acuerdo a las condiciones, y el estilo del campo. Retorna 
-        'None'.'''
-        # reinicio la validez del precio unitario
-        self.VALID_UNIT_PRICE = True
-        value:str = self.productDialog_ui.lineedit_productUnitPrice.text()
-        if not editing_finished:
-            value_is_numeric:str = self.productDialog_ui.lineedit_productUnitPrice.text().replace(",","").replace(".","")
-            # si el campo está vacío o no es un número...
-            if value == "" or value_is_numeric.isnumeric() == False:
-                self.VALID_UNIT_PRICE = False
-                self.productDialog_ui.label_unitPriceWarning.setText("El precio unitario debe ser un número")
-            # EAFP: intenta convertir el valor a float() para ver si es número...
-            try:
-                # antes de ver si es float(), reemplazo las comas decimales por puntos, si tiene...
-                unit_price = float(self.productDialog_ui.lineedit_productUnitPrice.text().replace(",","."))
-                if unit_price < 0:
-                    self.VALID_UNIT_PRICE = False
-                    self.productDialog_ui.label_unitPriceWarning.setText("El precio unitario debe ser mayor o igual a 0")
-            except ValueError:
-                pass
-        # si se presionó Enter (o se terminó de editar)...
-        else:
-            if value != "":
-                # si el número empieza o termina en "." ó ","...
-                if value.startswith((",",".")) or value.endswith((",",".")):
-                    # EAFP: intenta convertirlo a float y cambia el texto en el lineedit
-                    try:
-                        unit_price = self.productDialog_ui.lineedit_productUnitPrice.text().replace(",",".")
-                        unit_price = round(float(unit_price), 2)
-                        self.productDialog_ui.lineedit_productUnitPrice.setText(str(unit_price))
-                    except ValueError:
-                        pass
-                # si el número es sólo "," ó "."...
-                if value == "." or value == ",":
-                    unit_price = "0.0"
-                    self.productDialog_ui.lineedit_productUnitPrice.setText(unit_price)
-            else:
-                self.VALID_UNIT_PRICE = False
-                self.productDialog_ui.label_unitPriceWarning.setText("El precio unitario debe ser un número")
-        # si el campo tiene un valor Y es válido...
-        if value != "" and self.VALID_UNIT_PRICE:
-            self.productDialog_ui.label_unitPriceWarning.setText("")
-            self.productDialog_ui.lineedit_productUnitPrice.setStyleSheet("border: 1px solid #0f0; background-color: rgb(185, 255, 185);")
-        # sino, si es inválido (no importa si está vacío)...
-        elif not self.VALID_UNIT_PRICE:
-            self.productDialog_ui.lineedit_productUnitPrice.setStyleSheet("border: 1px solid #f00; background-color: rgb(255, 185, 185);")
-        self.verifyFieldsValidity()
-        return None
-
-
-    @Slot()
-    def __checkProductComercialPriceValidity(self, editing_finished:bool) -> None:
-        '''Verifica si 'lineedit_productComercialPrice' tiene un precio válido. Si es válido 'self.VALID_COMERCIAL_PRICE' 
-        será True, sino False. Al ser este campo opcional, no se considera inválido el campo vacío. Modifica el texto de 
-        'label_comercialPriceWarning' de acuerdo a las condiciones, y el estilo del campo. Retorna 'None'.'''
-        value = self.productDialog_ui.lineedit_productComercialPrice.text()
-        if not editing_finished:
-            # quita todos los "." y ",", sino no lo considera un número el método 'isnumeric()'
-            value_is_numeric = value.replace(",","").replace(".","")
-            # si no es un número...
-            if value != "" and value_is_numeric.isnumeric() == False:
-                self.VALID_COMERCIAL_PRICE = False
-                self.productDialog_ui.label_comercialPriceWarning.setText("El precio comercial debe ser un número")
-            # EAFP (otra vez)
-            try:
-                # reemplaza comas decimales por puntos, luego convierte el str a float y verifica si es negativo...
-                comercial_price = self.productDialog_ui.lineedit_productComercialPrice.text().replace(",",".")
-                comercial_price = round(float(comercial_price), 2)
-                if comercial_price < 0 and self.productDialog_ui.lineedit_productComercialPrice.text() != "":
-                    self.VALID_COMERCIAL_PRICE = False
-                    self.productDialog_ui.label_comercialPriceWarning.setText("El precio comercial debe ser mayor o igual a 0")
-            except ValueError:
-                pass
-        # si se presionó Enter o se terminó de editar...
-        else:
-            if value != "":
-                # si el número empieza o termina en "." ó ","...
-                if value.startswith((",",".")) or value.endswith((",",".")):
-                    # EAFP: intenta convertirlo a float y cambia el texto en el lineedit
-                    try:
-                        comercial_price = self.productDialog_ui.lineedit_productComercialPrice.text().replace(",",".")
-                        comercial_price = round(float(comercial_price), 2)
-                        self.productDialog_ui.lineedit_productComercialPrice.setText(str(comercial_price))
-                        self.VALID_COMERCIAL_PRICE = True
-                    except ValueError:
-                        pass
-                # si el número es sólo "," ó "."...
-                if value == "." or value == ",":
-                    comercial_price = "0.0"
-                    self.productDialog_ui.lineedit_productComercialPrice.setText(comercial_price)
-                    self.VALID_COMERCIAL_PRICE = True
-            else:
-                self.VALID_COMERCIAL_PRICE = True
-        # si el campo tiene un valor Y es válido...
-        if value != "" and self.VALID_COMERCIAL_PRICE:
-            self.productDialog_ui.label_comercialPriceWarning.setText("")
-            self.productDialog_ui.lineedit_productComercialPrice.setStyleSheet("border: 1px solid #0f0; background-color: rgb(185, 255, 185);")
-        # sino, si es inválido (no importa si está vacío)...
-        elif not self.VALID_COMERCIAL_PRICE:
-            self.productDialog_ui.lineedit_productComercialPrice.setStyleSheet("border: 1px solid #f00; background-color: rgb(255, 185, 185);")
-        self.verifyFieldsValidity()
-        return None
 
 
     def verifyFieldsValidity(self) -> None:
@@ -304,6 +247,7 @@ class ProductDialog(QDialog):
             self.productDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
         else:
             self.productDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+        return None
 
 
     # funciones del botón Ok
@@ -319,7 +263,7 @@ class ProductDialog(QDialog):
         data:tuple[str] = (
             self.productDialog_ui.lineedit_productName.text().strip(),
             self.productDialog_ui.lineedit_productDescription.text().strip(),
-            self.productDialog_ui.lineedit_productStock.text().replace(".",""),
+            self.productDialog_ui.lineedit_productStock.text().replace(",","."),
             self.productDialog_ui.lineedit_measurementUnit.text().strip(),
             self.productDialog_ui.lineedit_productUnitPrice.text().replace(",",".").strip(),
             self.productDialog_ui.lineedit_productComercialPrice.text().replace(",",".").strip(),
@@ -344,7 +288,7 @@ class ProductDialog(QDialog):
             if self.productDialog_ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled() == False:
                 return None
             data:tuple[str] = self.__getFieldsData()
-            sql = "INSERT INTO Productos(nombre,descripcion,stock,unidad_medida,precio_unit,precio_comerc,IDcategoria) VALUES(?,?,?,?,?,?,(SELECT IDcategoria FROM Categorias WHERE nombre_categoria=?));"
+            sql = "INSERT INTO Productos(nombre,descripcion,stock,unidad_medida,precio_unit,precio_comerc,IDcategoria,eliminado) VALUES(?,?,?,?,?,?,(SELECT IDcategoria FROM Categorias WHERE nombre_categoria=?),0);"
 
             cursor.execute(sql, data)
             conn.commit()

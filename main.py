@@ -122,6 +122,7 @@ class MainWindow(QMainWindow):
         
         self.ui.tabWidget.currentChanged.connect(lambda index: self.ui.tab2_toolBox.setCurrentIndex(0) if index == 1 else None)
         
+        # TODO: en classes.py, seguir colocando validators, luego seguir refactorizando el código a partir de acá
         # (CREATE) añadir una venta a 'table_sales_data'
         self.ui.btn_add_product_sales.clicked.connect(lambda: self.handleTableCreateRow(self.ui.table_sales_data))
         # (DELETE) eliminar ventas de 'table_sales_data'
