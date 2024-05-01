@@ -42,6 +42,14 @@
 }
 
 
+#lineEdit_direction:disabled,
+#lineEdit_phoneNumber:disabled,
+#lineEdit_postalCode:disabled {
+	background-color: #ccc;
+	color: #888;
+}
+
+
 *[mandatoryField=&quot;True&quot;] {
 	background-color: rgb(255, 251, 142);
 }
@@ -267,7 +275,7 @@ QScrollBar::handle:horizontal {
          <item row="0" column="1">
           <widget class="QComboBox" name="comboBox_productName">
            <property name="toolTip">
-            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;El nombre del producto vendido.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; en caso de buscar un producto que no está en esta lista de productos se debe agregar ese producto antes a la base de datos mediante la sección de &lt;span style=&quot; font-style:italic;&quot;&gt;INVENTARIO.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;El nombre del producto vendido.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; en caso de buscar un producto que no está en esta lista de productos se debe agregar ese producto antes a la base de datos mediante la sección de &lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-style:italic;&quot;&gt;INVENTARIO.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="editable">
             <bool>true</bool>
@@ -337,7 +345,7 @@ QScrollBar::handle:horizontal {
          <item row="2" column="1">
           <widget class="QLineEdit" name="lineEdit_productQuantity">
            <property name="toolTip">
-            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;La cantidad del producto vendido.&lt;/p&gt;&lt;p&gt;Admite valores decimales.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;La cantidad del producto vendido.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Admite valores decimales.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="placeholderText">
             <string notr="true">Cantidad vendida. Ej.: 5</string>
@@ -350,7 +358,7 @@ QScrollBar::handle:horizontal {
          <item row="3" column="1">
           <widget class="QCheckBox" name="checkBox_comercialPrice">
            <property name="toolTip">
-            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Si la casilla está &lt;span style=&quot; text-decoration: underline;&quot;&gt;desmarcada&lt;/span&gt; el precio calculado del producto es en base al &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;precio unitario&lt;/span&gt;.&lt;/p&gt;&lt;p&gt;Si la casilla está &lt;span style=&quot; text-decoration: underline;&quot;&gt;marcada&lt;/span&gt; el precio total calculado se basa en el &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;precio comercial&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Si la casilla está &lt;/span&gt;&lt;span style=&quot; font-size:11pt; text-decoration: underline;&quot;&gt;desmarcada&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; el precio calculado del producto es en base al &lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;precio unitario&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Si la casilla está &lt;/span&gt;&lt;span style=&quot; font-size:11pt; text-decoration: underline;&quot;&gt;marcada&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; el precio total calculado se basa en el &lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;precio comercial&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
             <string notr="true">Aplicar precio comercial</string>
@@ -423,7 +431,7 @@ border-right: 1px solid #111;</string>
          <item row="0" column="1">
           <widget class="QLineEdit" name="lineEdit_totalPaid">
            <property name="toolTip">
-            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;El valor total que es abonado en esta compra.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; text-decoration: underline;&quot;&gt;NO PUEDE SER MAYOR AL precio total&lt;/span&gt;, y &lt;span style=&quot; text-decoration: underline;&quot;&gt;si es menor al precio total&lt;/span&gt; la diferencia se agrega como deuda a ese comprador.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;El valor total que es abonado en esta compra.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; si es diferente al costo se pedirán los datos del comprador y la diferencia se agregará a la base de datos como saldo a favor/en contra.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="styleSheet">
             <string>* {
@@ -553,7 +561,7 @@ QComboBox QAbstractItemView {
       <item>
        <widget class="QDateTimeEdit" name="dateTimeEdit">
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fecha y hora de la compra.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; no es necesario que sea exacta, pero por conveniencia debe ser al menos aproximada.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Fecha y hora de la compra.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; no es necesario que sea exacta, pero por conveniencia debe ser al menos aproximada.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="frame">
          <bool>true</bool>
@@ -619,7 +627,7 @@ QComboBox QAbstractItemView {
       <item row="6" column="2" colspan="3">
        <widget class="QLineEdit" name="lineEdit_direction">
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(Opcional) dirección del deudor.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; si el deudor ya existe en la base de datos es recomendable &lt;span style=&quot; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;, porque creará un registro diferente del mismo deudor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;(Opcional) dirección del deudor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; si el deudor ya existe en la base de datos es recomendable &lt;/span&gt;&lt;span style=&quot; font-size:11pt; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;, porque creará un registro diferente del mismo deudor.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="inputMask">
          <string notr="true"/>
@@ -645,7 +653,7 @@ QComboBox QAbstractItemView {
       <item row="7" column="2" colspan="3">
        <widget class="QLineEdit" name="lineEdit_postalCode">
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(Opcional) código postal del deudor.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; si el deudor ya existe en la base de datos es recomendable &lt;span style=&quot; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;, porque creará un registro diferente del mismo deudor.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; por conveniencia sólo admite códigos postales de Argentina.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;(Opcional) código postal del deudor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; si el deudor ya existe en la base de datos es recomendable &lt;/span&gt;&lt;span style=&quot; font-size:11pt; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;, porque creará un registro diferente del mismo deudor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; por conveniencia sólo admite códigos postales de Argentina.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="inputMask">
          <string notr="true"/>
@@ -680,7 +688,7 @@ QComboBox QAbstractItemView {
       <item row="1" column="1" colspan="2">
        <widget class="QLineEdit" name="lineEdit_debtorName">
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nombre del deudor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Nombre del deudor.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
          <string notr="true"/>
@@ -772,7 +780,7 @@ border-color: rgb(11, 126, 127);</string>
       <item row="1" column="4">
        <widget class="QLineEdit" name="lineEdit_debtorSurname">
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Apellido del deudor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Apellido del deudor.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
          <string notr="true"/>
@@ -817,7 +825,7 @@ border-color: rgb(11, 126, 127);</string>
       <item row="3" column="2" colspan="3">
        <widget class="QLineEdit" name="lineEdit_phoneNumber">
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(Opcional) número de teléfono del deudor.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; si el deudor ya existe en la base de datos es recomendable &lt;span style=&quot; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;, porque creará un registro diferente del mismo deudor.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; no lleva ni 0 ni 15, pero sí requiere el código de país (el de Argentina es +54).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;(Opcional) número de teléfono del deudor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; si el deudor ya existe en la base de datos es recomendable &lt;/span&gt;&lt;span style=&quot; font-size:11pt; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;, porque creará un registro diferente del mismo deudor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; no lleva ni 0 ni 15, pero sí requiere el código de país (el de Argentina es +54).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="inputMask">
          <string notr="true">+99-9999-000000000</string>

@@ -48,6 +48,14 @@ class Ui_saleDialog(object):
 "}\n"
 "\n"
 "\n"
+"#lineEdit_direction:disabled,\n"
+"#lineEdit_phoneNumber:disabled,\n"
+"#lineEdit_postalCode:disabled {\n"
+"	background-color: #ccc;\n"
+"	color: #888;\n"
+"}\n"
+"\n"
+"\n"
 "*[mandatoryField=\"True\"] {\n"
 "	background-color: rgb(255, 251, 142);\n"
 "}\n"
@@ -63,7 +71,8 @@ class Ui_saleDialog(object):
 "}\n"
 "QLineEdit:focus {\n"
 "	background-color: rgb(197, 255, 252);\n"
-"	border: 1px solid;\n"
+"	border: 1px soli"
+                        "d;\n"
 "	border-color: #0b7e7f;\n"
 "	font-size: 18px;\n"
 "}\n"
@@ -73,8 +82,7 @@ class Ui_saleDialog(object):
 "	font-size: 16px;\n"
 "	background-color: #22577a;\n"
 "	color: #fff;\n"
-"	borde"
-                        "r: 1px solid #12476a;\n"
+"	border: 1px solid #12476a;\n"
 "	border-radius: 2px;\n"
 "	min-width: 200px;\n"
 "	min-height: 23px;\n"
@@ -210,7 +218,7 @@ class Ui_saleDialog(object):
         self.comboBox_productName = QComboBox(self.product_data)
         self.comboBox_productName.setObjectName(u"comboBox_productName")
 #if QT_CONFIG(tooltip)
-        self.comboBox_productName.setToolTip(u"<html><head/><body><p>El nombre del producto vendido.</p><p><span style=\" font-weight:600; text-decoration: underline;\">NOTA:</span> en caso de buscar un producto que no est\u00e1 en esta lista de productos se debe agregar ese producto antes a la base de datos mediante la secci\u00f3n de <span style=\" font-style:italic;\">INVENTARIO.</span></p></body></html>")
+        self.comboBox_productName.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">El nombre del producto vendido.</span></p><p><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:11pt;\"> en caso de buscar un producto que no est\u00e1 en esta lista de productos se debe agregar ese producto antes a la base de datos mediante la secci\u00f3n de </span><span style=\" font-size:11pt; font-style:italic;\">INVENTARIO.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.comboBox_productName.setEditable(True)
         self.comboBox_productName.setCurrentText(u"")
@@ -246,7 +254,7 @@ class Ui_saleDialog(object):
         self.lineEdit_productQuantity = QLineEdit(self.product_data)
         self.lineEdit_productQuantity.setObjectName(u"lineEdit_productQuantity")
 #if QT_CONFIG(tooltip)
-        self.lineEdit_productQuantity.setToolTip(u"<html><head/><body><p>La cantidad del producto vendido.</p><p>Admite valores decimales.</p></body></html>")
+        self.lineEdit_productQuantity.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">La cantidad del producto vendido.</span></p><p><span style=\" font-size:11pt;\">Admite valores decimales.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_productQuantity.setPlaceholderText(u"Cantidad vendida. Ej.: 5")
         self.lineEdit_productQuantity.setClearButtonEnabled(True)
@@ -256,7 +264,7 @@ class Ui_saleDialog(object):
         self.checkBox_comercialPrice = QCheckBox(self.product_data)
         self.checkBox_comercialPrice.setObjectName(u"checkBox_comercialPrice")
 #if QT_CONFIG(tooltip)
-        self.checkBox_comercialPrice.setToolTip(u"<html><head/><body><p>Si la casilla est\u00e1 <span style=\" text-decoration: underline;\">desmarcada</span> el precio calculado del producto es en base al <span style=\" font-weight:600; text-decoration: underline;\">precio unitario</span>.</p><p>Si la casilla est\u00e1 <span style=\" text-decoration: underline;\">marcada</span> el precio total calculado se basa en el <span style=\" font-weight:600; text-decoration: underline;\">precio comercial</span>.</p></body></html>")
+        self.checkBox_comercialPrice.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Si la casilla est\u00e1 </span><span style=\" font-size:11pt; text-decoration: underline;\">desmarcada</span><span style=\" font-size:11pt;\"> el precio calculado del producto es en base al </span><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">precio unitario</span><span style=\" font-size:11pt;\">.</span></p><p><span style=\" font-size:11pt;\">Si la casilla est\u00e1 </span><span style=\" font-size:11pt; text-decoration: underline;\">marcada</span><span style=\" font-size:11pt;\"> el precio total calculado se basa en el </span><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">precio comercial</span><span style=\" font-size:11pt;\">.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.checkBox_comercialPrice.setText(u"Aplicar precio comercial")
 #if QT_CONFIG(shortcut)
@@ -301,7 +309,7 @@ class Ui_saleDialog(object):
         self.lineEdit_totalPaid = QLineEdit(self.frame_totalPaid)
         self.lineEdit_totalPaid.setObjectName(u"lineEdit_totalPaid")
 #if QT_CONFIG(tooltip)
-        self.lineEdit_totalPaid.setToolTip(u"<html><head/><body><p>El valor total que es abonado en esta compra.</p><p><span style=\" font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" text-decoration: underline;\">NO PUEDE SER MAYOR AL precio total</span>, y <span style=\" text-decoration: underline;\">si es menor al precio total</span> la diferencia se agrega como deuda a ese comprador.</p></body></html>")
+        self.lineEdit_totalPaid.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">El valor total que es abonado en esta compra.</span></p><p><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:11pt;\"> si es diferente al costo se pedir\u00e1n los datos del comprador y la diferencia se agregar\u00e1 a la base de datos como saldo a favor/en contra.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_totalPaid.setPlaceholderText(u"Total abonado. Ej.: 15000")
         self.lineEdit_totalPaid.setClearButtonEnabled(True)
@@ -331,7 +339,7 @@ class Ui_saleDialog(object):
         self.dateTimeEdit = QDateTimeEdit(self.sale_data)
         self.dateTimeEdit.setObjectName(u"dateTimeEdit")
 #if QT_CONFIG(tooltip)
-        self.dateTimeEdit.setToolTip(u"<html><head/><body><p>Fecha y hora de la compra.</p><p><span style=\" font-weight:600; text-decoration: underline;\">NOTA:</span> no es necesario que sea exacta, pero por conveniencia debe ser al menos aproximada.</p></body></html>")
+        self.dateTimeEdit.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Fecha y hora de la compra.</span></p><p><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:11pt;\"> no es necesario que sea exacta, pero por conveniencia debe ser al menos aproximada.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.dateTimeEdit.setFrame(True)
         self.dateTimeEdit.setButtonSymbols(QAbstractSpinBox.UpDownArrows)
@@ -357,7 +365,7 @@ class Ui_saleDialog(object):
         self.lineEdit_direction = QLineEdit(self.debtor_data)
         self.lineEdit_direction.setObjectName(u"lineEdit_direction")
 #if QT_CONFIG(tooltip)
-        self.lineEdit_direction.setToolTip(u"<html><head/><body><p>(Opcional) direcci\u00f3n del deudor.</p><p><span style=\" font-weight:600; text-decoration: underline;\">NOTA:</span> si el deudor ya existe en la base de datos es recomendable <span style=\" text-decoration: underline;\">no llenar este campo</span>, porque crear\u00e1 un registro diferente del mismo deudor.</p></body></html>")
+        self.lineEdit_direction.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">(Opcional) direcci\u00f3n del deudor.</span></p><p><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:11pt;\"> si el deudor ya existe en la base de datos es recomendable </span><span style=\" font-size:11pt; text-decoration: underline;\">no llenar este campo</span><span style=\" font-size:11pt;\">, porque crear\u00e1 un registro diferente del mismo deudor.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_direction.setInputMask(u"")
         self.lineEdit_direction.setText(u"")
@@ -374,7 +382,7 @@ class Ui_saleDialog(object):
         self.lineEdit_postalCode = QLineEdit(self.debtor_data)
         self.lineEdit_postalCode.setObjectName(u"lineEdit_postalCode")
 #if QT_CONFIG(tooltip)
-        self.lineEdit_postalCode.setToolTip(u"<html><head/><body><p>(Opcional) c\u00f3digo postal del deudor.</p><p><span style=\" font-weight:600; text-decoration: underline;\">NOTA:</span> si el deudor ya existe en la base de datos es recomendable <span style=\" text-decoration: underline;\">no llenar este campo</span>, porque crear\u00e1 un registro diferente del mismo deudor.</p><p><span style=\" font-weight:600; text-decoration: underline;\">NOTA:</span> por conveniencia s\u00f3lo admite c\u00f3digos postales de Argentina.</p></body></html>")
+        self.lineEdit_postalCode.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">(Opcional) c\u00f3digo postal del deudor.</span></p><p><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:11pt;\"> si el deudor ya existe en la base de datos es recomendable </span><span style=\" font-size:11pt; text-decoration: underline;\">no llenar este campo</span><span style=\" font-size:11pt;\">, porque crear\u00e1 un registro diferente del mismo deudor.</span></p><p><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:11pt;\"> por conveniencia s\u00f3lo admite c\u00f3digos postales de Argentina.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_postalCode.setInputMask(u"")
         self.lineEdit_postalCode.setText(u"")
@@ -393,7 +401,7 @@ class Ui_saleDialog(object):
         self.lineEdit_debtorName = QLineEdit(self.debtor_data)
         self.lineEdit_debtorName.setObjectName(u"lineEdit_debtorName")
 #if QT_CONFIG(tooltip)
-        self.lineEdit_debtorName.setToolTip(u"<html><head/><body><p>Nombre del deudor.</p></body></html>")
+        self.lineEdit_debtorName.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Nombre del deudor.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_debtorName.setText(u"")
         self.lineEdit_debtorName.setFrame(False)
@@ -455,7 +463,7 @@ class Ui_saleDialog(object):
         self.lineEdit_debtorSurname = QLineEdit(self.debtor_data)
         self.lineEdit_debtorSurname.setObjectName(u"lineEdit_debtorSurname")
 #if QT_CONFIG(tooltip)
-        self.lineEdit_debtorSurname.setToolTip(u"<html><head/><body><p>Apellido del deudor.</p></body></html>")
+        self.lineEdit_debtorSurname.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Apellido del deudor.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_debtorSurname.setText(u"")
         self.lineEdit_debtorSurname.setFrame(False)
@@ -480,7 +488,7 @@ class Ui_saleDialog(object):
         self.lineEdit_phoneNumber = QLineEdit(self.debtor_data)
         self.lineEdit_phoneNumber.setObjectName(u"lineEdit_phoneNumber")
 #if QT_CONFIG(tooltip)
-        self.lineEdit_phoneNumber.setToolTip(u"<html><head/><body><p>(Opcional) n\u00famero de tel\u00e9fono del deudor.</p><p><span style=\" font-weight:600; text-decoration: underline;\">NOTA:</span> si el deudor ya existe en la base de datos es recomendable <span style=\" text-decoration: underline;\">no llenar este campo</span>, porque crear\u00e1 un registro diferente del mismo deudor.</p><p><span style=\" font-weight:600; text-decoration: underline;\">NOTA:</span> no lleva ni 0 ni 15, pero s\u00ed requiere el c\u00f3digo de pa\u00eds (el de Argentina es +54).</p></body></html>")
+        self.lineEdit_phoneNumber.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">(Opcional) n\u00famero de tel\u00e9fono del deudor.</span></p><p><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:11pt;\"> si el deudor ya existe en la base de datos es recomendable </span><span style=\" font-size:11pt; text-decoration: underline;\">no llenar este campo</span><span style=\" font-size:11pt;\">, porque crear\u00e1 un registro diferente del mismo deudor.</span></p><p><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:11pt;\"> no lleva ni 0 ni 15, pero s\u00ed requiere el c\u00f3digo de pa\u00eds (el de Argentina es +54).</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_phoneNumber.setInputMask(u"+99-9999-000000000")
         self.lineEdit_phoneNumber.setText(u"+54--")
