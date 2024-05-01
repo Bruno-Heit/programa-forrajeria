@@ -24,7 +24,7 @@ class Ui_saleDialog(object):
     def setupUi(self, saleDialog):
         if not saleDialog.objectName():
             saleDialog.setObjectName(u"saleDialog")
-        saleDialog.resize(615, 295)
+        saleDialog.resize(653, 295)
         saleDialog.setMinimumSize(QSize(615, 295))
         saleDialog.setStyleSheet(u"* {\n"
 "	background-color: #35bc88;\n"
@@ -32,6 +32,19 @@ class Ui_saleDialog(object):
 "	border-color: #0b7e7f;\n"
 "	font-family: \"Verdana\", \"Sans-Serif\";\n"
 "	font-size: 16px;\n"
+"}\n"
+"\n"
+"\n"
+"#label_productName_feedback,\n"
+"#label_productQuantity_feedback,\n"
+"#label_totalPaid_feedback,\n"
+"#label_debtorName_feedback,\n"
+"#label_debtorSurname_feedback,\n"
+"#label_phoneNumber_feedback,\n"
+"#label_postalCode_feedback {\n"
+"	color: #dc2627;\n"
+"	border: 1px solid #dc2627;\n"
+"	background-color: #e0a4a4;\n"
 "}\n"
 "\n"
 "\n"
@@ -60,7 +73,8 @@ class Ui_saleDialog(object):
 "	font-size: 16px;\n"
 "	background-color: #22577a;\n"
 "	color: #fff;\n"
-"	border: 1px solid #12476a;\n"
+"	borde"
+                        "r: 1px solid #12476a;\n"
 "	border-radius: 2px;\n"
 "	min-width: 200px;\n"
 "	min-height: 23px;\n"
@@ -76,8 +90,7 @@ class Ui_saleDialog(object):
 "	color: #999;\n"
 "}\n"
 "\n"
-""
-                        "\n"
+"\n"
 "/*cambia el estilo del combobox*/\n"
 "QComboBox {\n"
 "	background-color: #fff;\n"
@@ -104,6 +117,54 @@ class Ui_saleDialog(object):
         self.verticalLayout.setContentsMargins(5, 5, 5, 5)
         self.sale_data = QFrame(saleDialog)
         self.sale_data.setObjectName(u"sale_data")
+        self.sale_data.setStyleSheet(u"QScrollBar {\n"
+"	background-color: #fff;\n"
+"	border: 1px solid transparent;\n"
+"	border-radius: 5px;\n"
+"}\n"
+"QScrollBar:groove {\n"
+"	border-radius: 5px;\n"
+"}\n"
+"QScrollBar::handle {\n"
+"	background-color: #0b7e7f;\n"
+"	border-radius: 5px;\n"
+"}\n"
+"QScrollBar::handle:pressed {\n"
+"	background-color: #35bc88;\n"
+"}\n"
+"QScrollBar::sub-line {\n"
+"	width: 0;\n"
+"	height: 0;\n"
+"	background: none;\n"
+"}\n"
+"QScrollBar::add-line {\n"
+"	width: 0;\n"
+"	height: 0;\n"
+"	background: none;\n"
+"}\n"
+"\n"
+"\n"
+"/*vertical scrollbars*/\n"
+"QScrollBar:vertical {\n"
+"	width: 13px;\n"
+"}\n"
+"QScrollBar::handle:vertical {\n"
+"	min-height: 15px;\n"
+"}\n"
+"QScrollBar::sub-page:vertical {\n"
+"	background: none;\n"
+"}\n"
+"QScrollBar::add-page:vertical {\n"
+"	background: none;\n"
+"}\n"
+"\n"
+"/*horizontal scrollbars*/\n"
+"QScrollBar:horizontal {\n"
+"	height: 13px;\n"
+"}\n"
+"QScrollBar::handle:horizontal {\n"
+"	min-width: 15px;\n"
+"}")
         self.sale_data.setFrameShape(QFrame.NoFrame)
         self.sale_data.setFrameShadow(QFrame.Raised)
         self.verticalLayout_2 = QVBoxLayout(self.sale_data)
@@ -159,7 +220,7 @@ class Ui_saleDialog(object):
 
         self.label_productQuantity_feedback = QLabel(self.product_data)
         self.label_productQuantity_feedback.setObjectName(u"label_productQuantity_feedback")
-        self.label_productQuantity_feedback.setStyleSheet(u"color: #f00;")
+        self.label_productQuantity_feedback.setMaximumSize(QSize(16777215, 20))
         self.label_productQuantity_feedback.setText(u"")
         self.label_productQuantity_feedback.setTextFormat(Qt.PlainText)
         self.label_productQuantity_feedback.setAlignment(Qt.AlignCenter)
@@ -169,7 +230,7 @@ class Ui_saleDialog(object):
 
         self.label_productName_feedback = QLabel(self.product_data)
         self.label_productName_feedback.setObjectName(u"label_productName_feedback")
-        self.label_productName_feedback.setStyleSheet(u"color: #f00;")
+        self.label_productName_feedback.setMaximumSize(QSize(16777215, 20))
         self.label_productName_feedback.setText(u"")
         self.label_productName_feedback.setTextFormat(Qt.PlainText)
         self.label_productName_feedback.setAlignment(Qt.AlignCenter)
@@ -249,7 +310,12 @@ class Ui_saleDialog(object):
 
         self.label_totalPaid_feedback = QLabel(self.frame_totalPaid)
         self.label_totalPaid_feedback.setObjectName(u"label_totalPaid_feedback")
-        self.label_totalPaid_feedback.setStyleSheet(u"color: #f00;")
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_totalPaid_feedback.sizePolicy().hasHeightForWidth())
+        self.label_totalPaid_feedback.setSizePolicy(sizePolicy)
+        self.label_totalPaid_feedback.setMaximumSize(QSize(16777215, 20))
         self.label_totalPaid_feedback.setText(u"")
         self.label_totalPaid_feedback.setTextFormat(Qt.PlainText)
         self.label_totalPaid_feedback.setAlignment(Qt.AlignCenter)
@@ -319,7 +385,7 @@ class Ui_saleDialog(object):
 
         self.label_debtorSurname_feedback = QLabel(self.debtor_data)
         self.label_debtorSurname_feedback.setObjectName(u"label_debtorSurname_feedback")
-        self.label_debtorSurname_feedback.setStyleSheet(u"color: #f00;")
+        self.label_debtorSurname_feedback.setMaximumSize(QSize(16777215, 20))
         self.label_debtorSurname_feedback.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.debtor_data_GridLayout.addWidget(self.label_debtorSurname_feedback, 2, 4, 1, 1)
@@ -338,7 +404,7 @@ class Ui_saleDialog(object):
 
         self.label_phoneNumber_feedback = QLabel(self.debtor_data)
         self.label_phoneNumber_feedback.setObjectName(u"label_phoneNumber_feedback")
-        self.label_phoneNumber_feedback.setStyleSheet(u"color: #f00;")
+        self.label_phoneNumber_feedback.setMaximumSize(QSize(16777215, 20))
         self.label_phoneNumber_feedback.setAlignment(Qt.AlignCenter)
 
         self.debtor_data_GridLayout.addWidget(self.label_phoneNumber_feedback, 4, 0, 1, 5)
@@ -359,11 +425,11 @@ class Ui_saleDialog(object):
 
         self.label_debtorInfo = QLabel(self.debtor_data)
         self.label_debtorInfo.setObjectName(u"label_debtorInfo")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_debtorInfo.sizePolicy().hasHeightForWidth())
-        self.label_debtorInfo.setSizePolicy(sizePolicy)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.label_debtorInfo.sizePolicy().hasHeightForWidth())
+        self.label_debtorInfo.setSizePolicy(sizePolicy1)
         self.label_debtorInfo.setStyleSheet(u"color: rgb(8, 68, 68);\n"
 "margin-top: 15px;\n"
 "margin-left: 30px;\n"
@@ -405,7 +471,7 @@ class Ui_saleDialog(object):
 
         self.label_debtorName_feedback = QLabel(self.debtor_data)
         self.label_debtorName_feedback.setObjectName(u"label_debtorName_feedback")
-        self.label_debtorName_feedback.setStyleSheet(u"color: #f00;")
+        self.label_debtorName_feedback.setMaximumSize(QSize(16777215, 20))
         self.label_debtorName_feedback.setTextFormat(Qt.PlainText)
         self.label_debtorName_feedback.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
 
@@ -427,7 +493,7 @@ class Ui_saleDialog(object):
 
         self.label_postalCode_feedback = QLabel(self.debtor_data)
         self.label_postalCode_feedback.setObjectName(u"label_postalCode_feedback")
-        self.label_postalCode_feedback.setStyleSheet(u"color: #f00;")
+        self.label_postalCode_feedback.setMaximumSize(QSize(16777215, 20))
 
         self.debtor_data_GridLayout.addWidget(self.label_postalCode_feedback, 8, 0, 1, 5)
 
@@ -470,6 +536,91 @@ class Ui_saleDialog(object):
         self.comboBox_productName.setPlaceholderText(QCoreApplication.translate("saleDialog", u"Elegir el producto...", None))
         self.label_productName.setText(QCoreApplication.translate("saleDialog", u"<html><head/><body><p>Nombre del producto  <span style=\" color:#ff0000;\">*</span></p></body></html>", None))
         self.label_totalPaid.setText(QCoreApplication.translate("saleDialog", u"<html><head/><body><p>Total abonado  <span style=\" color:#ff0000;\">*</span></p></body></html>", None))
+        self.lineEdit_totalPaid.setStyleSheet(QCoreApplication.translate("saleDialog", u"* {\n"
+"	background-color: #35bc88;\n"
+"	color: #111;\n"
+"	border-color: #0b7e7f;\n"
+"	font-family: \"Verdana\", \"Sans-Serif\";\n"
+"	font-size: 16px;\n"
+"}\n"
+"\n"
+"\n"
+"#label_productName_feedback,\n"
+"#label_productQuantity_feedback,\n"
+"#label_totalPaid_feedback,\n"
+"#label_debtorName_feedback,\n"
+"#label_debtorSurname_feedback,\n"
+"#label_phoneNumber_feedback,\n"
+"#label_postalCode_feedback {\n"
+"	color: #dc2627;\n"
+"	border: 1px solid #dc2627;\n"
+"	background-color: #e0a4a4;\n"
+"}\n"
+"\n"
+"\n"
+"*[mandatoryField=\"True\"] {\n"
+"	background-color: rgb(255, 251, 142);\n"
+"}\n"
+"\n"
+"\n"
+"QLineEdit {\n"
+"	background-color: #fff;\n"
+"	border: none;\n"
+"	border-top: 1px solid;\n"
+"	border-bottom: 1px solid;\n"
+"	border-color: #0b7e7f;\n"
+"	height: 24px;\n"
+"}\n"
+"QLineEdit:focus {\n"
+"	background-color: rgb(197, 255, 252);\n"
+"	border: 1px solid;\n"
+"	border-color: #0b7e7f;\n"
+"	font-size: 18px;\n"
+"}\n"
+"\n"
+"\n"
+"QPushButton {\n"
+"	font-size: 16px;\n"
+"	background-color: #22577a;\n"
+"	color: #fff;\n"
+"	borde"
+                        "r: 1px solid #12476a;\n"
+"	border-radius: 2px;\n"
+"	min-width: 200px;\n"
+"	min-height: 23px;\n"
+"}\n"
+"QPushButton:hover,\n"
+"QPushButton:pressed {\n"
+"	background-color: #38a3a5;\n"
+"	color: #111;\n"
+"	border: 1px inset #289395;\n"
+"}\n"
+"QPushButton:disabled {\n"
+"	background-color: rgb(103, 115, 122);\n"
+"	color: #999;\n"
+"}\n"
+"\n"
+"\n"
+"/*cambia el estilo del combobox*/\n"
+"QComboBox {\n"
+"	background-color: #fff;\n"
+"	color: #111;\n"
+"	border: none;\n"
+"	border-top: 1px solid;\n"
+"	border-bottom: 1px solid;\n"
+"	border-color: #111;\n"
+"}\n"
+"QComboBox:on {\n"
+"	background-color: rgb(197, 255, 252);\n"
+"	border: 1px solid;\n"
+"	border-color: rgb(11, 126, 127);\n"
+"	padding-top: 2px;\n"
+"	padding-left: 4px;\n"
+"}\n"
+"QComboBox QAbstractItemView {\n"
+"	background-color: #fff;\n"
+"	selection-background-color: #38a3a5;\n"
+"}", None))
         self.label_phoneNumber.setText(QCoreApplication.translate("saleDialog", u"N\u00fam. de tel\u00e9fono", None))
         self.label_debtorSurname_feedback.setText("")
         self.label_phoneNumber_feedback.setText("")

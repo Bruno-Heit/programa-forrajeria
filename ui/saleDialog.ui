@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>615</width>
+    <width>653</width>
     <height>295</height>
    </rect>
   </property>
@@ -26,6 +26,19 @@
 	border-color: #0b7e7f;
 	font-family: &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
 	font-size: 16px;
+}
+
+
+#label_productName_feedback,
+#label_productQuantity_feedback,
+#label_totalPaid_feedback,
+#label_debtorName_feedback,
+#label_debtorSurname_feedback,
+#label_phoneNumber_feedback,
+#label_postalCode_feedback {
+	color: #dc2627;
+	border: 1px solid #dc2627;
+	background-color: #e0a4a4;
 }
 
 
@@ -110,6 +123,56 @@ QComboBox QAbstractItemView {
    </property>
    <item>
     <widget class="QFrame" name="sale_data">
+     <property name="styleSheet">
+      <string notr="true">QScrollBar {
+	background-color: #fff;
+	border: 1px solid transparent;
+	border-radius: 5px;
+}
+QScrollBar:groove {
+	border-radius: 5px;
+}
+QScrollBar::handle {
+	background-color: #0b7e7f;
+	border-radius: 5px;
+}
+QScrollBar::handle:pressed {
+	background-color: #35bc88;
+}
+QScrollBar::sub-line {
+	width: 0;
+	height: 0;
+	background: none;
+}
+QScrollBar::add-line {
+	width: 0;
+	height: 0;
+	background: none;
+}
+
+
+/*vertical scrollbars*/
+QScrollBar:vertical {
+	width: 13px;
+}
+QScrollBar::handle:vertical {
+	min-height: 15px;
+}
+QScrollBar::sub-page:vertical {
+	background: none;
+}
+QScrollBar::add-page:vertical {
+	background: none;
+}
+
+/*horizontal scrollbars*/
+QScrollBar:horizontal {
+	height: 13px;
+}
+QScrollBar::handle:horizontal {
+	min-width: 15px;
+}</string>
+     </property>
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>
@@ -222,8 +285,11 @@ QComboBox QAbstractItemView {
          </item>
          <item row="4" column="0" colspan="2">
           <widget class="QLabel" name="label_productQuantity_feedback">
-           <property name="styleSheet">
-            <string notr="true">color: #f00;</string>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>20</height>
+            </size>
            </property>
            <property name="text">
             <string notr="true"/>
@@ -241,8 +307,11 @@ QComboBox QAbstractItemView {
          </item>
          <item row="1" column="0" colspan="2">
           <widget class="QLabel" name="label_productName_feedback">
-           <property name="styleSheet">
-            <string notr="true">color: #f00;</string>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>20</height>
+            </size>
            </property>
            <property name="text">
             <string notr="true"/>
@@ -356,6 +425,92 @@ border-right: 1px solid #111;</string>
            <property name="toolTip">
             <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;El valor total que es abonado en esta compra.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; text-decoration: underline;&quot;&gt;NO PUEDE SER MAYOR AL precio total&lt;/span&gt;, y &lt;span style=&quot; text-decoration: underline;&quot;&gt;si es menor al precio total&lt;/span&gt; la diferencia se agrega como deuda a ese comprador.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
+           <property name="styleSheet">
+            <string>* {
+	background-color: #35bc88;
+	color: #111;
+	border-color: #0b7e7f;
+	font-family: &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
+	font-size: 16px;
+}
+
+
+#label_productName_feedback,
+#label_productQuantity_feedback,
+#label_totalPaid_feedback,
+#label_debtorName_feedback,
+#label_debtorSurname_feedback,
+#label_phoneNumber_feedback,
+#label_postalCode_feedback {
+	color: #dc2627;
+	border: 1px solid #dc2627;
+	background-color: #e0a4a4;
+}
+
+
+*[mandatoryField=&quot;True&quot;] {
+	background-color: rgb(255, 251, 142);
+}
+
+
+QLineEdit {
+	background-color: #fff;
+	border: none;
+	border-top: 1px solid;
+	border-bottom: 1px solid;
+	border-color: #0b7e7f;
+	height: 24px;
+}
+QLineEdit:focus {
+	background-color: rgb(197, 255, 252);
+	border: 1px solid;
+	border-color: #0b7e7f;
+	font-size: 18px;
+}
+
+
+QPushButton {
+	font-size: 16px;
+	background-color: #22577a;
+	color: #fff;
+	border: 1px solid #12476a;
+	border-radius: 2px;
+	min-width: 200px;
+	min-height: 23px;
+}
+QPushButton:hover,
+QPushButton:pressed {
+	background-color: #38a3a5;
+	color: #111;
+	border: 1px inset #289395;
+}
+QPushButton:disabled {
+	background-color: rgb(103, 115, 122);
+	color: #999;
+}
+
+
+/*cambia el estilo del combobox*/
+QComboBox {
+	background-color: #fff;
+	color: #111;
+	border: none;
+	border-top: 1px solid;
+	border-bottom: 1px solid;
+	border-color: #111;
+}
+QComboBox:on {
+	background-color: rgb(197, 255, 252);
+	border: 1px solid;
+	border-color: rgb(11, 126, 127);
+	padding-top: 2px;
+	padding-left: 4px;
+}
+QComboBox QAbstractItemView {
+	background-color: #fff;
+	selection-background-color: #38a3a5;
+}</string>
+           </property>
            <property name="placeholderText">
             <string notr="true">Total abonado. Ej.: 15000</string>
            </property>
@@ -366,8 +521,17 @@ border-right: 1px solid #111;</string>
          </item>
          <item row="1" column="0" colspan="2">
           <widget class="QLabel" name="label_totalPaid_feedback">
-           <property name="styleSheet">
-            <string notr="true">color: #f00;</string>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>20</height>
+            </size>
            </property>
            <property name="text">
             <string notr="true"/>
@@ -499,8 +663,11 @@ border-right: 1px solid #111;</string>
       </item>
       <item row="2" column="4">
        <widget class="QLabel" name="label_debtorSurname_feedback">
-        <property name="styleSheet">
-         <string notr="true">color: #f00;</string>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>20</height>
+         </size>
         </property>
         <property name="text">
          <string/>
@@ -531,8 +698,11 @@ border-right: 1px solid #111;</string>
       </item>
       <item row="4" column="0" colspan="5">
        <widget class="QLabel" name="label_phoneNumber_feedback">
-        <property name="styleSheet">
-         <string notr="true">color: #f00;</string>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>20</height>
+         </size>
         </property>
         <property name="text">
          <string/>
@@ -627,8 +797,11 @@ border-color: rgb(11, 126, 127);</string>
       </item>
       <item row="2" column="1" colspan="2">
        <widget class="QLabel" name="label_debtorName_feedback">
-        <property name="styleSheet">
-         <string notr="true">color: #f00;</string>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>20</height>
+         </size>
         </property>
         <property name="text">
          <string/>
@@ -668,8 +841,11 @@ border-color: rgb(11, 126, 127);</string>
       </item>
       <item row="8" column="0" colspan="5">
        <widget class="QLabel" name="label_postalCode_feedback">
-        <property name="styleSheet">
-         <string notr="true">color: #f00;</string>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>20</height>
+         </size>
         </property>
         <property name="text">
          <string/>

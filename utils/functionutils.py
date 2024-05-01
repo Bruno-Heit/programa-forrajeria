@@ -121,7 +121,7 @@ def getProductNames() -> list[str]:
         return None
     cursor = conn.cursor()
     
-    query = cursor.execute("SELECT nombre FROM Productos;").fetchall()
+    query = cursor.execute("SELECT nombre FROM Productos WHERE eliminado != 1;").fetchall()
     
     # convierto la lista de tuplas en una lista de strings...
     query:list[str] = [q[0] for q in query]

@@ -737,7 +737,7 @@ class MainWindow(QMainWindow):
 
 
         match table_widget.objectName():
-            case "displayTable":                
+            case "displayTable":
                 match curr_index.column():
                     case 1: # nombre
                         makeUpdateQuery(sql="UPDATE Productos SET nombre = ? WHERE IDproducto = ?;",
@@ -794,7 +794,7 @@ class MainWindow(QMainWindow):
                         prev_text = prev_text.replace(",",".") if prev_text else 0.0
                         try:
                             percentage_diff = (float(lineedit_text) - float(prev_text)) * 100 / float(prev_text)
-                            
+                        
                         except ZeroDivisionError: # en caso de fallar porque el valor anterior es 0, hago que sea 0.00001
                             percentage_diff = (float(lineedit_text) - float(prev_text)) * 100 / (float(prev_text) + 0.00001)
                         
@@ -812,7 +812,7 @@ class MainWindow(QMainWindow):
             case "table_sales_data":
                 match curr_index.column():
                     case 0: # detalle de venta
-                        pattern = compile("(\([\s]*P\.[\s]*NORMAL[\s]*\)|\([\s]*P\.[\s]*COMERCIAL[\s]*\))$", IGNORECASE)
+                        pattern = compile("(\([\s]*P[\s]*\.[\s]*NORMAL[\s]*\)|\([\s]*P[\s]*\.[\s]*COMERCIAL[\s]*\))$", IGNORECASE)
                         
                         # verifica si (P. NORMAL) | (P. COMERCIAL) está, sino lo toma de prev_text y lo coloca al final
                         if not search(pattern, lineedit.text()):
