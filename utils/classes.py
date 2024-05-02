@@ -427,7 +427,8 @@ class SaleDialog(QDialog):
             error_message=error_message))
         
         # lineedit nombre (cuenta corriente)
-        self.saleDialog_ui.lineEdit_debtorName.editingFinished.connect(lambda: self.formatField('debtor_name'))
+        self.saleDialog_ui.lineEdit_debtorName.editingFinished.connect(lambda: self.onDebtorNameAndSurnameEditingFinished(
+            field_validated='debtor_name'))
         
         self.debtor_name_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('debtor_name'))
         self.debtor_name_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
@@ -435,7 +436,8 @@ class SaleDialog(QDialog):
             error_message=error_message))
         
         # lineedit apellido (cuenta corriente)
-        self.saleDialog_ui.lineEdit_debtorSurname.editingFinished.connect(lambda: self.formatField('debtor_surname'))
+        self.saleDialog_ui.lineEdit_debtorSurname.editingFinished.connect(lambda: self.onDebtorNameAndSurnameEditingFinished(
+            field_validated='debtor_surname'))
         
         self.debtor_surname_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('debtor_surname'))
         self.debtor_surname_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
@@ -803,26 +805,43 @@ class SaleDialog(QDialog):
 
 
     @Slot()
-    def onDebtorNameAndSurnameEditingFinished(self, field_to_validate:str) -> None:
+    def onDebtorNameAndSurnameEditingFinished(self, field_validated:str) -> None:
         '''
         Es llamado desde la señal 'editingFinished' de 'lineEdit_debtorName'|'lineEdit_debtorSurname'.
         
-        Llama al método 'self.formatField' para formatear los campos y coloca en el validador de nombre/
-        apellido el apellido/nombre respectivamente para luego validar si existe esa combinación de nombre 
-        y apellido.
+        Llama al método 'self.formatField' para formatear los campos y si existe esa combinación de nombre y 
+        apellido busca el número de teléfono, la dirección y el código postal existente del usuario y los 
+        coloca en sus respectivos campos, luego desactiva los campos para evitar su modificación.
         
         Retorna None.
         '''
-        self.formatField(field_to_format=field_to_validate)
+        debtor_data:list[tuple[str,str,str]]
         
-        match field_to_validate:
-            case 'debtor_name':
-                self.debtor_surname_validator.DEBTOR_SURNAME = self.saleDialog_ui.lineEdit_debtorName.text()
-                self.debtor_surname_validator.validate(self.saleDialog_ui.lineEdit_debtorSurname.text(), 0)
+        self.formatField(field_to_format=field_validated)
         
-            case 'debtor_surname':
-                self.debtor_name_validator.DEBTOR_SURNAME = self.saleDialog_ui.lineEdit_debtorName.text()
-                self.debtor_name_validator.validate(self.saleDialog_ui.lineEdit_debtorName.text(), 0)
+        # si ambos campos son válidos es porque ambos campos se llenaron
+        if self.VALID_FIELDS['DEBTOR_NAME'] and self.VALID_FIELDS['DEBTOR_SURNAME']:
+            
+            # obtengo los datos desde la cta. cte.
+            debtor_data = makeReadQuery(
+                sql="SELECT num_telefono, direccion, codigo_postal FROM Deudores WHERE (nombre = ?) AND (apellido = ?);",
+                params=(self.saleDialog_ui.lineEdit_debtorName.text(), self.saleDialog_ui.lineEdit_debtorSurname.text(), ))
+            
+            # los coloco en sus campos (si se encontraron coincidencias)
+            if len(debtor_data) > 0:
+                self.saleDialog_ui.lineEdit_phoneNumber.setText( str(debtor_data[0][0]) )
+                self.saleDialog_ui.lineEdit_direction.setText( str(debtor_data[0][1]) )
+                self.saleDialog_ui.lineEdit_postalCode.setText( str(debtor_data[0][2]) )
+                
+                self.saleDialog_ui.lineEdit_phoneNumber.setEnabled(False)
+                self.saleDialog_ui.lineEdit_direction.setEnabled(False)
+                self.saleDialog_ui.lineEdit_postalCode.setEnabled(False)
+            
+            else:
+                self.saleDialog_ui.lineEdit_phoneNumber.setEnabled(True)
+                self.saleDialog_ui.lineEdit_direction.setEnabled(True)
+                self.saleDialog_ui.lineEdit_postalCode.setEnabled(True)
+        
         return None
 
 
