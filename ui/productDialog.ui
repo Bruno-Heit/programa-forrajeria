@@ -21,7 +21,6 @@
   </property>
   <property name="styleSheet">
    <string notr="true">* {
-/*	background-color: #35bc88;*/
 	color: #111;
 	border-color: #0b7e7f;
 	font-family: &quot;Tahoma&quot;, &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
@@ -30,7 +29,6 @@
 
 
 QDialog {
-/*	background-color: qlineargradient(spread:pad, x1:0, y1:0.273, x2:1, y2:0.835, stop:0 rgba(144, 205, 171, 255), stop:1 rgba(187, 255, 154, 255));*/
 	background-color: qlineargradient(spread:pad, x1:0.149, y1:0.892, x2:0.774, y2:0.0860909, stop:0 rgba(30, 168, 59, 255), stop:1 rgba(153, 228, 184, 255));
 }
 
@@ -50,17 +48,12 @@ QDialog {
 #label_comercialPriceWarning {
 	color: #dc2627;
 	border: 1px solid #dc2627;
-	background-color: #e0a4a4;
+	background-color: rgba(224, 164, 164, 0.7);
 }
 
 
 #frame_productStock {
 	margin-bottom: 5px;
-}
-
-
-*[mandatoryField=&quot;True&quot;] {
-	background-color: rgb(255, 251, 142);
 }
 
 
@@ -145,54 +138,101 @@ QComboBox QAbstractItemView {
    <item>
     <widget class="QFrame" name="mainForm">
      <property name="styleSheet">
-      <string notr="true">QScrollBar {
+      <string notr="true">* {
+	color: #111;
+	border-color: #0b7e7f;
+	font-family: &quot;Tahoma&quot;, &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
+	font-size: 16px;
+}
+
+
+QDialog {
+	background-color: qlineargradient(spread:pad, x1:0.149, y1:0.892, x2:0.774, y2:0.0860909, stop:0 rgba(30, 168, 59, 255), stop:1 rgba(153, 228, 184, 255));
+}
+
+
+#frame_productDescription,
+#frame_measurementUnit {
+	border: none;
+	border-bottom: 1px solid;
+	border-color: #0b7e7f;
+}
+
+
+#label_nameWarning,
+#label_stockWarning,
+#label_categoryWarning,
+#label_unitPriceWarning,
+#label_comercialPriceWarning {
+	color: #dc2627;
+	border: 1px solid #dc2627;
+	background-color: #e0a4a4;
+}
+
+
+#frame_productStock {
+	margin-bottom: 5px;
+}
+
+
+QLineEdit {
 	background-color: #fff;
-	border: 1px solid transparent;
-	border-radius: 5px;
+	border: none;
+	border-top: 1px solid;
+	border-bottom: 1px solid;
+	border-color: #0b7e7f;
+	height: 24px;
 }
-QScrollBar:groove {
-	border-radius: 5px;
-}
-QScrollBar::handle {
-	background-color: #0b7e7f;
-	border-radius: 5px;
-}
-QScrollBar::handle:pressed {
-	background-color: #35bc88;
-}
-QScrollBar::sub-line {
-	width: 0;
-	height: 0;
-	background: none;
-}
-QScrollBar::add-line {
-	width: 0;
-	height: 0;
-	background: none;
+QLineEdit:focus {
+	background-color: rgb(197, 255, 252);
+	border: 1px solid;
+	border-color: #0b7e7f;
+	font-size: 18px;
 }
 
 
-/*vertical scrollbars*/
-QScrollBar:vertical {
-	width: 13px;
+QPushButton {
+	font-size: 16px;
+	background-color: #22577a;
+	color: #fff;
+	border: 1px solid #12476a;
+	border-radius: 2px;
+	min-width: 200px;
+	min-height: 23px;
 }
-QScrollBar::handle:vertical {
-	min-height: 15px;
+QPushButton:hover,
+QPushButton:pressed {
+	background-color: #38a3a5;
+	color: #111;
+	border: 1px inset #289395;
 }
-QScrollBar::sub-page:vertical {
-	background: none;
-}
-QScrollBar::add-page:vertical {
-	background: none;
+QPushButton:disabled {
+	background-color: rgb(103, 115, 122);
+	color: #999;
 }
 
-/*horizontal scrollbars*/
-QScrollBar:horizontal {
-	height: 13px;
+
+/*cambia el estilo del combobox*/
+QComboBox {
+	background-color: #fff;
+	color: #111;
+	border: none;
+	border-top: 1px solid;
+	border-bottom: 1px solid;
+	border-color: #111;
 }
-QScrollBar::handle:horizontal {
-	min-width: 15px;
-}</string>
+QComboBox:on {
+	background-color: rgb(197, 255, 252);
+	border: 1px solid;
+	border-color: rgb(11, 126, 127);
+	padding-top: 2px;
+	padding-left: 4px;
+}
+QComboBox QAbstractItemView {
+	background-color: #fff;
+	selection-background-color: #38a3a5;
+}
+</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>

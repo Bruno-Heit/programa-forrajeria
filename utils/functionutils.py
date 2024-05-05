@@ -353,34 +353,44 @@ def setSearchBarValidator(searchBar:QLineEdit) -> None:
 
 
 #========================================================================================================================
-def createCompleter(type:int = 1 | 2 | 3) -> QCompleter:
+def createCompleter(sql:str=None, params:tuple=None, type:int=None) -> QCompleter:
     '''
     Crea un QCompleter, establece sus atributos y lo coloca dentro de 'lineedit'.
+    El parámetro 'type' sirve para realizar una consulta genérica a la base de datos y obtener todas 
+    las coincidencias del valor de 'type', en cambio los parámetros 'sql' y 'params' sirven para obtener 
+    resultados más precisos al realizar consultas concretas.
     
     PARAMS:
-    - type: valor entero que determina los datos con los que llenar el QCompleter. 
-        - 1: lo carga con nombres de personas con cuenta corriente.
-        - 2: lo carga con apellidos de personas con cuenta corriente.
-        - 3: lo carga con nombres de productos.
+    - sql: (opcional) string con la consulta SELECT a la base de datos. Requiere el parámetro 'params'.
+    - params: (opcional) tuple con los parámetros para la consulta 'sql'. Requiere el parámetro 'sql'.
+    - type: (opcional) valor entero que determina los datos con los que llenar el QCompleter.
+        - 1: lo carga con todos los nombres de personas con cuenta corriente.
+        - 2: lo carga con todos los apellidos de personas con cuenta corriente.
+        - 3: lo carga con todos los nombres de productos.
     
     Retorna un QCompleter.
     '''
     completer:QCompleter
     query:list
     
-    if type == 1: # nombres de personas con cta. corriente
-        query = makeReadQuery("SELECT nombre FROM Deudores;")
-        names = [name[0] for name in query]
-        completer = QCompleter(names)
-        
-    elif type == 2:# apellidos de personas con cta. corriente
-        query = makeReadQuery("SELECT apellido FROM Deudores;")
-        surnames = [surname[0] for surname in query]
-        completer = QCompleter(surnames)
-        
+    if sql and params:
+        query = makeReadQuery(sql, params)
+        results = [res[0] for res in query]
+        completer = QCompleter(results)
     
-    elif type == 3: # nombres de productos
-        completer = QCompleter(getProductNames())
+    else:
+        if type == 1: # nombres de personas con cta. corriente
+            query = makeReadQuery("SELECT nombre FROM Deudores;")
+            names = [name[0] for name in query]
+            completer = QCompleter(names)
+        
+        elif type == 2:# apellidos de personas con cta. corriente
+            query = makeReadQuery("SELECT apellido FROM Deudores;")
+            surnames = [surname[0] for surname in query]
+            completer = QCompleter(surnames)
+        
+        elif type == 3: # nombres de productos
+            completer = QCompleter(getProductNames())
     
     completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
     completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)

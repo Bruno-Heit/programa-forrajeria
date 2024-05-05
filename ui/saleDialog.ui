@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>653</width>
+    <width>615</width>
     <height>295</height>
    </rect>
   </property>
@@ -21,11 +21,15 @@
   </property>
   <property name="styleSheet">
    <string notr="true">* {
-	background-color: #35bc88;
 	color: #111;
 	border-color: #0b7e7f;
-	font-family: &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
+	font-family: &quot;Tahoma&quot;, &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
 	font-size: 16px;
+}
+
+
+QDialog {
+	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 178, 102, 255), stop:0.378531 rgba(230, 177, 61, 255), stop:0.745763 rgba(232, 105, 57, 255), stop:0.982955 rgba(255, 180, 128, 255));
 }
 
 
@@ -38,7 +42,7 @@
 #label_postalCode_feedback {
 	color: #dc2627;
 	border: 1px solid #dc2627;
-	background-color: #e0a4a4;
+	background-color: rgba(224,164,164,0.7)
 }
 
 
@@ -47,11 +51,6 @@
 #lineEdit_postalCode:disabled {
 	background-color: #ccc;
 	color: #888;
-}
-
-
-*[mandatoryField=&quot;True&quot;] {
-	background-color: rgb(255, 251, 142);
 }
 
 
@@ -291,7 +290,7 @@ QScrollBar::handle:horizontal {
            </property>
           </widget>
          </item>
-         <item row="4" column="0" colspan="2">
+         <item row="4" column="0" colspan="2" alignment="Qt::AlignHCenter|Qt::AlignTop">
           <widget class="QLabel" name="label_productQuantity_feedback">
            <property name="maximumSize">
             <size>
@@ -313,7 +312,7 @@ QScrollBar::handle:horizontal {
            </property>
           </widget>
          </item>
-         <item row="1" column="0" colspan="2">
+         <item row="1" column="0" colspan="2" alignment="Qt::AlignHCenter|Qt::AlignTop">
           <widget class="QLabel" name="label_productName_feedback">
            <property name="maximumSize">
             <size>
@@ -527,7 +526,7 @@ QComboBox QAbstractItemView {
            </property>
           </widget>
          </item>
-         <item row="1" column="0" colspan="2">
+         <item row="1" column="0" colspan="2" alignment="Qt::AlignHCenter|Qt::AlignTop">
           <widget class="QLabel" name="label_totalPaid_feedback">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -669,7 +668,7 @@ QComboBox QAbstractItemView {
         </property>
        </widget>
       </item>
-      <item row="2" column="4">
+      <item row="2" column="4" alignment="Qt::AlignRight|Qt::AlignTop">
        <widget class="QLabel" name="label_debtorSurname_feedback">
         <property name="maximumSize">
          <size>
@@ -678,10 +677,16 @@ QComboBox QAbstractItemView {
          </size>
         </property>
         <property name="text">
-         <string/>
+         <string notr="true"/>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::PlainText</enum>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::NoTextInteraction</set>
         </property>
        </widget>
       </item>
@@ -704,7 +709,7 @@ QComboBox QAbstractItemView {
         </property>
        </widget>
       </item>
-      <item row="4" column="0" colspan="5">
+      <item row="4" column="0" colspan="5" alignment="Qt::AlignHCenter|Qt::AlignTop">
        <widget class="QLabel" name="label_phoneNumber_feedback">
         <property name="maximumSize">
          <size>
@@ -713,10 +718,16 @@ QComboBox QAbstractItemView {
          </size>
         </property>
         <property name="text">
-         <string/>
+         <string notr="true"/>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::PlainText</enum>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::NoTextInteraction</set>
         </property>
        </widget>
       </item>
@@ -803,7 +814,7 @@ border-color: rgb(11, 126, 127);</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1" colspan="2">
+      <item row="2" column="1" colspan="2" alignment="Qt::AlignLeft|Qt::AlignTop">
        <widget class="QLabel" name="label_debtorName_feedback">
         <property name="maximumSize">
          <size>
@@ -812,13 +823,16 @@ border-color: rgb(11, 126, 127);</string>
          </size>
         </property>
         <property name="text">
-         <string/>
+         <string notr="true"/>
         </property>
         <property name="textFormat">
          <enum>Qt::PlainText</enum>
         </property>
         <property name="alignment">
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::NoTextInteraction</set>
         </property>
        </widget>
       </item>
@@ -828,16 +842,16 @@ border-color: rgb(11, 126, 127);</string>
          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;(Opcional) número de teléfono del deudor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; si el deudor ya existe en la base de datos es recomendable &lt;/span&gt;&lt;span style=&quot; font-size:11pt; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;, porque creará un registro diferente del mismo deudor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; no lleva ni 0 ni 15, pero sí requiere el código de país (el de Argentina es +54).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="inputMask">
-         <string notr="true">+99-9999-000000000</string>
+         <string notr="true"/>
         </property>
         <property name="text">
-         <string notr="true">+54--</string>
+         <string notr="true"/>
         </property>
         <property name="frame">
          <bool>false</bool>
         </property>
         <property name="cursorPosition">
-         <number>4</number>
+         <number>0</number>
         </property>
         <property name="placeholderText">
          <string notr="true">(Opcional) Ej.: 2323-123456</string>
@@ -847,7 +861,7 @@ border-color: rgb(11, 126, 127);</string>
         </property>
        </widget>
       </item>
-      <item row="8" column="0" colspan="5">
+      <item row="8" column="0" colspan="5" alignment="Qt::AlignHCenter|Qt::AlignTop">
        <widget class="QLabel" name="label_postalCode_feedback">
         <property name="maximumSize">
          <size>
@@ -856,7 +870,16 @@ border-color: rgb(11, 126, 127);</string>
          </size>
         </property>
         <property name="text">
-         <string/>
+         <string notr="true"/>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::PlainText</enum>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::NoTextInteraction</set>
         </property>
        </widget>
       </item>

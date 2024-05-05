@@ -3,12 +3,14 @@ En este archivo se encuentran los QValidators -y sus variantes- que he tenido qu
 para poder lograr una mejor validación de datos en QComboBoxes, QLineEdits, QDateTimeEdits y 
 demás widgets donde el usuario pueda ingresar datos.
 '''
-from PySide6.QtCore import (Signal)
-from PySide6.QtGui import (QValidator, QRegularExpressionValidator)
+from PySide6.QtWidgets import (QLineEdit)
+from PySide6.QtCore import (Signal, QLocale)
+from PySide6.QtGui import (QValidator, QRegularExpressionValidator, QIntValidator)
 
 from utils.dboperations import *
 
 from re import (fullmatch, compile, Pattern, IGNORECASE)
+
 
 
 #¡ tabla INVENTARIO ===================================================================================
@@ -349,26 +351,54 @@ class DebtorPhoneNumberValidator(QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar el número de teléfono de una persona en cuenta corriente.'''
     validationSucceded = Signal()
     validationFailed = Signal(str)
-    
-    # TODO: reimplementar la función para validar el núm. de teléfono
-    def validate(self, text: str, pos: int) -> object:
-        pattern:Pattern = compile("[^;\"']{1,15}")
+
         
-        if text.strip() == "":
-            self.validationFailed.emit("El campo del apellido no puede estar vacío")
-            return QRegularExpressionValidator.State.Intermediate, text, pos
+    def validate(self, text: str, pos: int) -> object:
+        pattern:Pattern = compile("\+?[0-9 -]{0,20}")
+        
+        if text.strip() == "": # si el texto está vacío devuelve Acceptable
+            self.validationSucceded.emit()
+            return QRegularExpressionValidator.State.Acceptable, text, pos
         
         elif fullmatch(pattern, text):
             self.validationSucceded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
         else:
-            self.validationFailed.emit("El apellido es inválido")
+            self.validationFailed.emit("El número de teléfono es inválido")
             return QRegularExpressionValidator.State.Invalid, text, pos
 
 
 
 
+
+class DebtorPostalCodeValidator(QIntValidator):
+    validationSucceded = Signal()
+    validationFailed = Signal(str)
+
+    def __init__(self, parent=None):
+        super(DebtorPostalCodeValidator, self).__init__()
+        self.setRange(1, 9_999)
+        self.setLocale(QLocale(QLocale.Language.Spanish, QLocale.Country.Argentina))
+
+    
+    def validate(self, text: str, pos: int) -> object:
+        
+        if text.strip() == "": # si el texto está vacío devuelve Acceptable
+            self.validationSucceded.emit()
+            return QIntValidator.State.Acceptable, text, pos
+        
+        elif text.isnumeric() and (self.bottom() <= int(text) <= self.top()):
+            self.validationSucceded.emit()
+            return QIntValidator.State.Acceptable, text, pos
+        
+        elif text.isalnum():
+            self.validationFailed.emit("El código postal sólo admite números entre [1, 9.999]")
+            return QIntValidator.State.Invalid, text, pos
+        
+        else:
+            self.validationFailed.emit("El código postal es inválido")
+            return QIntValidator.State.Invalid, text, pos
 
 
 
