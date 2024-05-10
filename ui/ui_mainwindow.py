@@ -530,7 +530,7 @@ class Ui_MainWindow(object):
         self.inventory_searchBar.setBaseSize(QSize(0, 0))
         self.inventory_searchBar.setAcceptDrops(False)
 #if QT_CONFIG(tooltip)
-        self.inventory_searchBar.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Buscar un producto en la tabla seg\u00fan su nombre, caracter\u00edsticas, palabras claves, etc.</span></p></body></html>")
+        self.inventory_searchBar.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Buscar un producto en la tabla seg\u00fan su nombre, caracter\u00edsticas, palabras claves, etc.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.inventory_searchBar.setText(u"")
         self.inventory_searchBar.setMaxLength(255)
@@ -571,7 +571,7 @@ class Ui_MainWindow(object):
         __qtablewidgetitem3.setTextAlignment(Qt.AlignCenter);
         self.displayTable.setHorizontalHeaderItem(3, __qtablewidgetitem3)
         __qtablewidgetitem4 = QTableWidgetItem()
-        __qtablewidgetitem4.setText(u"precio unitario");
+        __qtablewidgetitem4.setText(u"precio normal");
         __qtablewidgetitem4.setTextAlignment(Qt.AlignCenter);
         __qtablewidgetitem4.setBackground(QColor(88, 223, 101));
         self.displayTable.setHorizontalHeaderItem(4, __qtablewidgetitem4)
@@ -581,6 +581,9 @@ class Ui_MainWindow(object):
         __qtablewidgetitem5.setBackground(QColor(88, 153, 171));
         self.displayTable.setHorizontalHeaderItem(5, __qtablewidgetitem5)
         self.displayTable.setObjectName(u"displayTable")
+#if QT_CONFIG(tooltip)
+        self.displayTable.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Para </span><span style=\" font-size:12pt; text-decoration: underline;\">modificar</span><span style=\" font-size:12pt;\"> las </span><span style=\" font-size:12pt; text-decoration: underline;\">caracter\u00edsticas</span><span style=\" font-size:12pt;\"> de un producto, simplemente hacer </span><span style=\" font-size:12pt; font-style:italic;\">doble click</span><span style=\" font-size:12pt;\"> sobre la celda que se quiere modificar e ingresar el nuevo valor.</span></p></body></html>")
+#endif // QT_CONFIG(tooltip)
         self.displayTable.setFrameShape(QFrame.NoFrame)
         self.displayTable.setEditTriggers(QAbstractItemView.DoubleClicked)
         self.displayTable.setProperty("showDropIndicator", False)
@@ -622,7 +625,7 @@ class Ui_MainWindow(object):
         self.btn_add_product_inventory = QPushButton(self.tab1_buttons_2)
         self.btn_add_product_inventory.setObjectName(u"btn_add_product_inventory")
 #if QT_CONFIG(tooltip)
-        self.btn_add_product_inventory.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">A\u00f1adir un producto nuevo a la lista de productos actual (</span><span style=\" font-size:11pt; font-style:italic;\">+</span><span style=\" font-size:11pt;\">). </span></p></body></html>")
+        self.btn_add_product_inventory.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">A\u00f1adir un producto nuevo a la lista de productos actual (</span><span style=\" font-size:12pt; font-style:italic;\">+</span><span style=\" font-size:12pt;\">). </span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.btn_add_product_inventory.setText(u"Nuevo producto")
         self.btn_add_product_inventory.setIconSize(QSize(24, 24))
@@ -635,7 +638,7 @@ class Ui_MainWindow(object):
         self.btn_delete_product_inventory = QPushButton(self.tab1_buttons_2)
         self.btn_delete_product_inventory.setObjectName(u"btn_delete_product_inventory")
 #if QT_CONFIG(tooltip)
-        self.btn_delete_product_inventory.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Borra el producto actualmente seleccionado (</span><span style=\" font-size:11pt; font-style:italic;\">supr</span><span style=\" font-size:11pt;\">).</span></p><p><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:11pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer eliminar un producto.</span></p></body></html>")
+        self.btn_delete_product_inventory.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Borra el producto actualmente seleccionado (</span><span style=\" font-size:12pt; font-style:italic;\">supr</span><span style=\" font-size:12pt;\">).</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:12pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer eliminar un producto.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.btn_delete_product_inventory.setStyleSheet(u"QPushButton {\n"
 "	background-color: #ff4949;\n"
@@ -763,6 +766,9 @@ class Ui_MainWindow(object):
         self.inventory_checkbuttons_buttonGroup.setExclusive(True)
         self.inventory_checkbuttons_buttonGroup.addButton(self.checkbox_unit_prices)
         self.checkbox_unit_prices.setObjectName(u"checkbox_unit_prices")
+#if QT_CONFIG(tooltip)
+        self.checkbox_unit_prices.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt; color:#000000;\">Cambia el </span><span style=\" font-size:12pt; text-decoration: underline; color:#000000;\">precio normal</span><span style=\" font-size:12pt; color:#000000;\"> de los productos seleccionados.</span></p></body></html>")
+#endif // QT_CONFIG(tooltip)
         self.checkbox_unit_prices.setText(u"Precios unitarios")
         self.checkbox_unit_prices.setIconSize(QSize(24, 24))
 
@@ -772,7 +778,7 @@ class Ui_MainWindow(object):
         self.inventory_checkbuttons_buttonGroup.addButton(self.checkbox_comercial_prices)
         self.checkbox_comercial_prices.setObjectName(u"checkbox_comercial_prices")
 #if QT_CONFIG(tooltip)
-        self.checkbox_comercial_prices.setToolTip(u"<html><head/><body><p><span style=\" color:#000000;\">Muestra una columna en la tabla de inventario que permite seleccionar los productos cuyo </span><span style=\" text-decoration: underline; color:#000000;\">precio comercial</span><span style=\" color:#000000;\"> se desee cambiar porcentualmente.</span></p></body></html>")
+        self.checkbox_comercial_prices.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt; color:#000000;\">Cambia el </span><span style=\" font-size:12pt; text-decoration: underline; color:#000000;\">precio comercial</span><span style=\" font-size:12pt; color:#000000;\"> de los productos seleccionados.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.checkbox_comercial_prices.setText(u"Precios comerciales")
         self.checkbox_comercial_prices.setIconSize(QSize(24, 24))
@@ -781,6 +787,9 @@ class Ui_MainWindow(object):
 
         self.percentage_label = QLabel(self.change_percentage_frame)
         self.percentage_label.setObjectName(u"percentage_label")
+#if QT_CONFIG(tooltip)
+        self.percentage_label.setToolTip(u"")
+#endif // QT_CONFIG(tooltip)
         self.percentage_label.setStyleSheet(u"margin-top: 20px;\n"
 "margin-bottom: 0;")
         self.percentage_label.setText(u"Porcentaje de cambio")
@@ -796,7 +805,7 @@ class Ui_MainWindow(object):
         self.lineEdit_percentage_change.setEnabled(False)
         self.lineEdit_percentage_change.setAcceptDrops(False)
 #if QT_CONFIG(tooltip)
-        self.lineEdit_percentage_change.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt; color:#000000;\">Aumenta o disminuye un cierto porcentaje los precios unitarios/precios comerciales seleccionados.</span></p><p><span style=\" font-size:11pt; font-weight:600; color:#000000;\">NOTA:</span><span style=\" font-size:11pt; color:#000000;\"> No es necesario escribir el s\u00edmbolo de porcentaje &quot;%&quot;, simplemente escribir el porcentaje nuevo. </span></p><p><span style=\" font-size:11pt; font-weight:600; color:#000000;\">EJEMPLOS: </span><span style=\" font-size:11pt; color:#000000;\">Para aumentar un 25% un valor, introducir &quot;25&quot;; en cambio, para disminuir el precio un 25%, introducir &quot;-25&quot;.</span></p></body></html>")
+        self.lineEdit_percentage_change.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt; color:#000000;\">Aumenta o disminuye un cierto porcentaje los precios normales/comerciales seleccionados.</span></p><p><span style=\" font-size:12pt; font-weight:600; color:#000000;\">NOTA:</span><span style=\" font-size:12pt; color:#000000;\"> No es necesario escribir el s\u00edmbolo de porcentaje &quot;%&quot;, simplemente escribir el porcentaje nuevo.</span></p><p><span style=\" font-size:12pt; font-weight:600; color:#000000;\">EJ.: </span><span style=\" font-size:12pt; color:#000000;\">Para aumentar un 25% un valor, introducir &quot;25&quot;; en cambio, para disminuir el precio un 25%, introducir &quot;-25&quot;.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_percentage_change.setStyleSheet(u"QLineEdit {\n"
 "	height: 24px;\n"
@@ -902,6 +911,9 @@ class Ui_MainWindow(object):
         self.btn_add_product = QPushButton(self.add_products)
         self.btn_add_product.setObjectName(u"btn_add_product")
         self.btn_add_product.setMaximumSize(QSize(172, 16777215))
+#if QT_CONFIG(tooltip)
+        self.btn_add_product.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Agrega un producto m\u00e1s a la venta actual (</span><span style=\" font-size:12pt; font-style:italic;\">+</span><span style=\" font-size:12pt;\">).</span></p></body></html>")
+#endif // QT_CONFIG(tooltip)
         self.btn_add_product.setIconSize(QSize(24, 24))
 #if QT_CONFIG(shortcut)
         self.btn_add_product.setShortcut(u"+")
@@ -989,8 +1001,9 @@ class Ui_MainWindow(object):
         self.lineEdit_paid.setObjectName(u"lineEdit_paid")
         self.lineEdit_paid.setMaximumSize(QSize(400, 16777215))
 #if QT_CONFIG(tooltip)
-        self.lineEdit_paid.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">La cantidad de dinero pagado en esta venta. Si es </span><span style=\" font-size:11pt; text-decoration: underline;\">menor al total</span><span style=\" font-size:11pt;\">, la diferencia se considera </span><span style=\" font-size:11pt; text-decoration: underline;\">deuda</span><span style=\" font-size:11pt;\">. Si es </span><span style=\" font-size:11pt; text-decoration: underline;\">mayor que el total</span><span style=\" font-size:11pt;\">, se calcula el </span><span style=\" font-size:11pt; text-decoration: underline;\">vuelto</span><span style=\" font-size:11pt;\">.</span></p></body></html>")
+        self.lineEdit_paid.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">La cantidad de dinero pagado en esta venta. Si es </span><span style=\" font-size:12pt; text-decoration: underline;\">menor al total</span><span style=\" font-size:12pt;\">, la diferencia se considera </span><span style=\" font-size:12pt; text-decoration: underline;\">deuda</span><span style=\" font-size:12pt;\">. Si es </span><span style=\" font-size:12pt; text-decoration: underline;\">mayor que el total</span><span style=\" font-size:12pt;\">, se calcula el </span><span style=\" font-size:12pt; text-decoration: underline;\">vuelto</span><span style=\" font-size:12pt;\">.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
+        self.lineEdit_paid.setInputMask(u"")
         self.lineEdit_paid.setText(u"")
         self.lineEdit_paid.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
         self.lineEdit_paid.setPlaceholderText(u"Total abonado ($)")
@@ -1055,7 +1068,7 @@ class Ui_MainWindow(object):
         self.btn_end_sale.setObjectName(u"btn_end_sale")
         self.btn_end_sale.setEnabled(False)
 #if QT_CONFIG(tooltip)
-        self.btn_end_sale.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Guarda los datos de la venta actual y da por terminada la venta (</span><span style=\" font-size:11pt; font-style:italic;\">may\u00fasculas </span><span style=\" font-size:11pt;\">+</span><span style=\" font-size:11pt; font-style:italic;\"> enter</span><span style=\" font-size:11pt;\">).</span></p></body></html>")
+        self.btn_end_sale.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Guarda los datos de la venta actual y da por terminada la venta (</span><span style=\" font-size:12pt; font-style:italic;\">may\u00fasculas </span><span style=\" font-size:12pt;\">+</span><span style=\" font-size:12pt; font-style:italic;\"> enter</span><span style=\" font-size:12pt;\">).</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.btn_end_sale.setIconSize(QSize(24, 24))
 #if QT_CONFIG(shortcut)
@@ -1089,7 +1102,7 @@ class Ui_MainWindow(object):
         self.sales_searchBar.setMaximumSize(QSize(500, 24))
         self.sales_searchBar.setAcceptDrops(False)
 #if QT_CONFIG(tooltip)
-        self.sales_searchBar.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Buscar una venta en la tabla seg\u00fan nombres, caracter\u00edsticas, palabras claves, etc.</span></p></body></html>")
+        self.sales_searchBar.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Buscar una venta en la tabla seg\u00fan nombres, caracter\u00edsticas, palabras claves, etc.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.sales_searchBar.setText(u"")
         self.sales_searchBar.setMaxLength(255)
@@ -1126,6 +1139,10 @@ class Ui_MainWindow(object):
         __qtablewidgetitem11 = QTableWidgetItem()
         self.table_sales_data.setHorizontalHeaderItem(5, __qtablewidgetitem11)
         self.table_sales_data.setObjectName(u"table_sales_data")
+#if QT_CONFIG(tooltip)
+        self.table_sales_data.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Para </span><span style=\" font-size:12pt; text-decoration: underline;\">modificar</span><span style=\" font-size:12pt;\"> un dato de alguna venta hacer </span><span style=\" font-size:12pt; font-style:italic;\">doble click</span><span style=\" font-size:12pt;\"> sobre una celda e ingresar el nuevo valor.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:12pt;\"> si se cambia el </span><span style=\" font-size:12pt; font-style:italic;\">producto vendido</span><span style=\" font-size:12pt;\"> o la </span><span style=\" font-size:12pt; font-style:italic;\">cantidad vendida</span><span style=\" font-size:12pt;\"> de un producto NO se ver\u00e1 afectado el stock de ese producto directamente, para eso es necesario cambiar el stock de ese producto manualmente mediante la pesta\u00f1a de </span><span style=\" font-size:12pt; font-style:italic;\">inventario</span><span style=\" font-siz"
+                        "e:12pt;\">.</span></p></body></html>")
+#endif // QT_CONFIG(tooltip)
         self.table_sales_data.setStyleSheet(u"")
         self.table_sales_data.setFrameShape(QFrame.NoFrame)
         self.table_sales_data.setFrameShadow(QFrame.Plain)
@@ -1170,7 +1187,7 @@ class Ui_MainWindow(object):
         self.btn_add_product_sales = QPushButton(self.sales_buttons)
         self.btn_add_product_sales.setObjectName(u"btn_add_product_sales")
 #if QT_CONFIG(tooltip)
-        self.btn_add_product_sales.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">A\u00f1adir un producto nuevo vendido a la lista de ventas actual (</span><span style=\" font-size:11pt; font-style:italic;\">+</span><span style=\" font-size:11pt;\">).</span></p></body></html>")
+        self.btn_add_product_sales.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">A\u00f1adir un producto nuevo vendido a la lista de ventas actual (</span><span style=\" font-size:12pt; font-style:italic;\">+</span><span style=\" font-size:12pt;\">).</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.btn_add_product_sales.setText(u"Nueva venta")
         self.btn_add_product_sales.setIconSize(QSize(24, 24))
@@ -1183,7 +1200,7 @@ class Ui_MainWindow(object):
         self.btn_delete_product_sales = QPushButton(self.sales_buttons)
         self.btn_delete_product_sales.setObjectName(u"btn_delete_product_sales")
 #if QT_CONFIG(tooltip)
-        self.btn_delete_product_sales.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Borra el producto vendido actualmente seleccionado (</span><span style=\" font-size:11pt; font-style:italic;\">supr</span><span style=\" font-size:11pt;\">).</span></p><p><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:11pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer eliminar un producto.</span></p></body></html>")
+        self.btn_delete_product_sales.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Borra el producto vendido actualmente seleccionado (</span><span style=\" font-size:12pt; font-style:italic;\">supr</span><span style=\" font-size:12pt;\">).</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:12pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer eliminar un producto.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.btn_delete_product_sales.setStyleSheet(u"QPushButton {\n"
 "	background-color: #ff4949;\n"
@@ -1234,7 +1251,7 @@ class Ui_MainWindow(object):
         self.debts_searchBar.setFont(font2)
         self.debts_searchBar.setAcceptDrops(False)
 #if QT_CONFIG(tooltip)
-        self.debts_searchBar.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Buscar una deuda en la tabla seg\u00fan nombres, caracter\u00edsticas, palabras claves, etc.</span></p></body></html>")
+        self.debts_searchBar.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Buscar una deuda en la tabla seg\u00fan nombres, caracter\u00edsticas, palabras claves, etc.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.debts_searchBar.setText(u"")
         self.debts_searchBar.setMaxLength(255)
@@ -1266,6 +1283,9 @@ class Ui_MainWindow(object):
         __qtablewidgetitem14 = QTableWidgetItem()
         self.table_debts.setHorizontalHeaderItem(2, __qtablewidgetitem14)
         self.table_debts.setObjectName(u"table_debts")
+#if QT_CONFIG(tooltip)
+        self.table_debts.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Para </span><span style=\" font-size:12pt; text-decoration: underline;\">modificar</span><span style=\" font-size:12pt;\"> las </span><span style=\" font-size:12pt; text-decoration: underline;\">caracter\u00edsticas</span><span style=\" font-size:12pt;\"> de una deuda simplemente hacer </span><span style=\" font-size:12pt; font-style:italic;\">doble click</span><span style=\" font-size:12pt;\"> sobre la celda que se quiere modificar e ingresar el nuevo valor.</span></p></body></html>")
+#endif // QT_CONFIG(tooltip)
         self.table_debts.setStyleSheet(u"#table_debts QLabel {\n"
 "	font-size: 16px;\n"
 "}\n"
@@ -1320,7 +1340,7 @@ class Ui_MainWindow(object):
         self.btn_add_debt = QPushButton(self.debts_buttons)
         self.btn_add_debt.setObjectName(u"btn_add_debt")
 #if QT_CONFIG(tooltip)
-        self.btn_add_debt.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Agrega una deuda nueva a la tabla (</span><span style=\" font-size:11pt; font-style:italic;\">+</span><span style=\" font-size:11pt;\">).</span></p></body></html>")
+        self.btn_add_debt.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Agrega una deuda nueva a la tabla (</span><span style=\" font-size:12pt; font-style:italic;\">+</span><span style=\" font-size:12pt;\">).</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.btn_add_debt.setText(u"Nueva deuda")
         self.btn_add_debt.setIconSize(QSize(24, 24))
@@ -1333,7 +1353,7 @@ class Ui_MainWindow(object):
         self.btn_delete_debt = QPushButton(self.debts_buttons)
         self.btn_delete_debt.setObjectName(u"btn_delete_debt")
 #if QT_CONFIG(tooltip)
-        self.btn_delete_debt.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Elimina la deuda actualmente seleccionada en la tabla (</span><span style=\" font-size:11pt; font-style:italic;\">supr</span><span style=\" font-size:11pt;\">).</span></p><p><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:11pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer borrar una deuda.</span></p></body></html>")
+        self.btn_delete_debt.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Elimina la deuda actualmente seleccionada en la tabla (</span><span style=\" font-size:12pt; font-style:italic;\">supr</span><span style=\" font-size:12pt;\">).</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:12pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer borrar una deuda.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.btn_delete_debt.setStyleSheet(u"QPushButton {\n"
 "	background-color: #ff4949;\n"
@@ -1413,17 +1433,8 @@ class Ui_MainWindow(object):
         self.tables_ListWidget.setSortingEnabled(False)
         self.tables_ListWidget.setSortingEnabled(__sortingEnabled)
 
-#if QT_CONFIG(tooltip)
-        self.displayTable.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Para <span style=\" text-decoration: underline;\">modificar</span> las <span style=\" text-decoration: underline;\">caracter\u00edsticas</span> de un producto, simplemente hacer <span style=\" font-style:italic;\">doble click</span> sobre la celda que se quiere modificar e ingresar el nuevo valor.</p></body></html>", None))
-#endif // QT_CONFIG(tooltip)
         self.btn_inventory_sideBarToggle.setText("")
-#if QT_CONFIG(tooltip)
-        self.checkbox_unit_prices.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" color:#000000;\">Muestra una columna en la tabla de inventario que permite seleccionar los productos cuyo </span><span style=\" text-decoration: underline; color:#000000;\">precio unitario</span><span style=\" color:#000000;\"> se desee cambiar porcentualmente.</span></p></body></html>", None))
-#endif // QT_CONFIG(tooltip)
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab1_inventory), QCoreApplication.translate("MainWindow", u"INVENTARIO", None))
-#if QT_CONFIG(tooltip)
-        self.btn_add_product.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:11pt;\">Agrega un producto m\u00e1s a la venta actual (</span><span style=\" font-size:11pt; font-style:italic;\">+</span><span style=\" font-size:11pt;\">).</span></p></body></html>", None))
-#endif // QT_CONFIG(tooltip)
         self.btn_add_product.setText(QCoreApplication.translate("MainWindow", u"Agregar producto", None))
         self.label_paid.setText(QCoreApplication.translate("MainWindow", u"ABONA", None))
         self.label_change.setText(QCoreApplication.translate("MainWindow", u"CAMBIO", None))
@@ -1442,9 +1453,6 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem4.setText(QCoreApplication.translate("MainWindow", u"abonado", None));
         ___qtablewidgetitem5 = self.table_sales_data.horizontalHeaderItem(5)
         ___qtablewidgetitem5.setText(QCoreApplication.translate("MainWindow", u"fecha y hora", None));
-#if QT_CONFIG(tooltip)
-        self.table_sales_data.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Para <span style=\" text-decoration: underline;\">modificar</span> un dato de alguna venta hacer <span style=\" font-style:italic;\">doble click</span> sobre una celda e ingresar el nuevo valor.</p><p><span style=\" font-weight:600; text-decoration: underline;\">NOTA:</span> si se cambia el <span style=\" font-style:italic;\">producto vendido</span> o la <span style=\" font-style:italic;\">cantidad vendida</span> de un producto NO se ver\u00e1 afectado el stock de ese producto directamente, para eso es necesario cambiar el stock de ese producto manualmente mediante la pesta\u00f1a de <span style=\" font-style:italic;\">inventario</span>.</p></body></html>", None))
-#endif // QT_CONFIG(tooltip)
         self.btn_delete_product_sales.setText(QCoreApplication.translate("MainWindow", u"Eliminar venta", None))
         self.tab2_toolBox.setItemText(self.tab2_toolBox.indexOf(self.box2_sales_table), QCoreApplication.translate("MainWindow", u"Tabla de ventas", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab2_sales), QCoreApplication.translate("MainWindow", u"VENTAS", None))
@@ -1454,9 +1462,6 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem7.setText(QCoreApplication.translate("MainWindow", u"productos", None));
         ___qtablewidgetitem8 = self.table_debts.horizontalHeaderItem(2)
         ___qtablewidgetitem8.setText(QCoreApplication.translate("MainWindow", u"saldo", None));
-#if QT_CONFIG(tooltip)
-        self.table_debts.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Para <span style=\" text-decoration: underline;\">modificar</span> las <span style=\" text-decoration: underline;\">caracter\u00edsticas</span> de una deuda simplemente hacer <span style=\" font-style:italic;\">doble click</span> sobre la celda que se quiere modificar e ingresar el nuevo valor.</p></body></html>", None))
-#endif // QT_CONFIG(tooltip)
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab3_debts), QCoreApplication.translate("MainWindow", u"CUENTAS CORRIENTES", None))
     # retranslateUi
 

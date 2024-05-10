@@ -3,9 +3,8 @@ En este archivo se encuentran los QValidators -y sus variantes- que he tenido qu
 para poder lograr una mejor validación de datos en QComboBoxes, QLineEdits, QDateTimeEdits y 
 demás widgets donde el usuario pueda ingresar datos.
 '''
-from PySide6.QtWidgets import (QLineEdit)
 from PySide6.QtCore import (Signal, QLocale)
-from PySide6.QtGui import (QValidator, QRegularExpressionValidator, QIntValidator)
+from PySide6.QtGui import (QValidator, QRegularExpressionValidator, QIntValidator, QDoubleValidator)
 
 from utils.dboperations import *
 
@@ -19,10 +18,12 @@ class ProductNameValidator(QValidator):
     validationSucceded = Signal() # se emite cuando el estado es 'Acceptable'. Sirve para esconder el label con feedback
     validationFailed = Signal(str) # se emite cuando el estado es 'Invalid', envía un str con feedback para mostrar
     
+    def __init__(self, parent=None):
+        super(ProductNameValidator, self).__init__()
+        self.pattern:Pattern = compile("[^;\"']{1,50}", flags=IGNORECASE)
+    
     
     def validate(self, text: str, pos: int) -> object:
-        # patrón de input permitido
-        pattern:Pattern = compile("[^;\"']{1,50}", flags=IGNORECASE)
         # lista para verificar si el nombre existe en la base de datos
         names:list = [name[0] for name in makeReadQuery("SELECT nombre FROM Productos WHERE nombre = ?;", (text,))]
         
@@ -34,7 +35,7 @@ class ProductNameValidator(QValidator):
             self.validationFailed.emit("El campo del nombre del producto no puede estar vacío")
             return QValidator.State.Intermediate, text, pos
         
-        elif fullmatch(pattern, text): # si coincide el patrón devuelve Acceptable
+        elif fullmatch(self.pattern, text): # si coincide el patrón devuelve Acceptable
             self.validationSucceded.emit()
             return QValidator.State.Acceptable, text, pos
         
@@ -51,6 +52,10 @@ class ProductStockValidator(QRegularExpressionValidator):
     validationSucceded = Signal()
     validationFailed = Signal(str)
     
+    def __init__(self, parent=None):
+        super(ProductStockValidator, self).__init__()
+        self.pattern:Pattern = compile("[0-9]{1,8}(\.|,)?[0-9]{0,2} ?[a-zA-Z]{0,20}", IGNORECASE)
+    
     
     def fixup(self, text: str) -> str:        
         while text.split(" ")[0].endswith((".", ",")):
@@ -60,13 +65,12 @@ class ProductStockValidator(QRegularExpressionValidator):
     
     
     def validate(self, text: str, pos: int) -> object:
-        pattern:Pattern = compile("[0-9]{1,8}(\.|,)?[0-9]{0,2} ?[a-zA-Z]{0,20}", IGNORECASE)
         
         if text.strip() == "":
             self.validationFailed.emit("El campo de stock no puede estar vacío")
             return QRegularExpressionValidator.State.Intermediate, text, pos
         
-        elif fullmatch(pattern, text):
+        elif fullmatch(self.pattern, text):
             self.validationSucceded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
@@ -86,6 +90,10 @@ class ProductUnitPriceValidator(QRegularExpressionValidator):
     validationSucceded = Signal()
     validationFailed = Signal(str)
     
+    def __init__(self, parent=None):
+        super(ProductUnitPriceValidator, self).__init__()
+        self.pattern:Pattern = compile("[0-9]{1,8}(\.|,)?[0-9]{0,2}")
+    
     
     def fixup(self, text: str) -> str:
         while text.endswith((".", ",")):
@@ -95,13 +103,12 @@ class ProductUnitPriceValidator(QRegularExpressionValidator):
     
     
     def validate(self, text: str, pos: int) -> object:
-        pattern:Pattern = compile("[0-9]{1,8}(\.|,)?[0-9]{0,2}")
         
-        if text.strip() == "":
+        if text == "":
             self.validationFailed.emit("El campo de precio unitario no puede estar vacío")
             return QRegularExpressionValidator.State.Intermediate, text, pos
         
-        elif fullmatch(pattern, text):
+        elif fullmatch(self.pattern, text):
             self.validationSucceded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
@@ -121,6 +128,10 @@ class ProductComercPriceValidator(QRegularExpressionValidator):
     validationSucceded = Signal()
     validationFailed = Signal(str)
     
+    def __init__(self, parent=None):
+        super(ProductComercPriceValidator, self).__init__()
+        self.pattern:Pattern = compile("[0-9]{1,8}(\.|,)?[0-9]{0,2}")
+    
     
     def fixup(self, text: str) -> str:
         while text.endswith((".", ",")):
@@ -130,13 +141,12 @@ class ProductComercPriceValidator(QRegularExpressionValidator):
     
     
     def validate(self, text: str, pos: int) -> object:
-        pattern:Pattern = compile("[0-9]{1,8}(\.|,)?[0-9]{0,2}")
         
         if text.strip() == "":
             self.validationSucceded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
-        elif fullmatch(pattern, text):
+        elif fullmatch(self.pattern, text):
             self.validationSucceded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
@@ -157,11 +167,14 @@ class SaleDetailsValidator(QRegularExpressionValidator):
     validationSucceded = Signal()
     validationFailed = Signal(str)
     
+    def __init__(self, parent=None):
+        super(SaleDetailsValidator, self).__init__()
+        self.pattern:Pattern = compile("[^;\"']{0,256}")
+    
     
     def validate(self, text: str, pos: int) -> object:
-        pattern:Pattern = compile("[^;\"']{0,256}")
         
-        if text.strip() == "" or fullmatch(pattern, text):
+        if text.strip() == "" or fullmatch(self.pattern, text):
             self.validationSucceded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
@@ -181,14 +194,13 @@ class SaleQuantityValidator(QRegularExpressionValidator):
     def __init__(self, parent=None):
         super(SaleQuantityValidator, self).__init__()
         self.AVAILABLE_STOCK:tuple[float,str] = None
+        self.pattern:Pattern = compile("[0-9]{1,8}(\.|,)?[0-9]{0,2}")
     
     
     def setAvailableStock(self, stock:tuple[float,str]) -> None:
         '''
         Coloca el valor de 'stock' en 'self.AVAILABLE_STOCK'.
         
-        La existencia de este método radica en su uso desde 'classes.SaleDialog', donde se necesita comprobar 
-        que la cantidad vendida no sea mayor al stock disponible.
         'stock[0]' representa la cantidad como float en stock del producto, y 'stock[1]' representa la unidad de 
         medida como str.
         
@@ -206,17 +218,16 @@ class SaleQuantityValidator(QRegularExpressionValidator):
     
     
     def validate(self, text: str, pos: int) -> object:
-        pattern:Pattern = compile("[0-9]{1,8}(\.|,)?[0-9]{0,2}")
         
         if text.strip() == "":
-            self.validationFailed.emit("El campo de cantidad no puede estar vacío")
+            self.validationFailed.emit("La cantidad no puede estar vacía")
             return QRegularExpressionValidator.State.Intermediate, text, pos
         
-        elif fullmatch(pattern, text):
+        elif fullmatch(self.pattern, text):
             try:
                 # si el stock disponible existe y es menor que la cantidad introducida devuelve Invalid
                 if self.AVAILABLE_STOCK and float(text.replace(",",".")) > self.AVAILABLE_STOCK[0]:
-                    self.validationFailed.emit(f"La cantidad es mayor al stock disponible (stock: {self.AVAILABLE_STOCK[0]} {self.AVAILABLE_STOCK[1]})")
+                    self.validationFailed.emit(f"Cantidad mayor al stock (stock: {self.AVAILABLE_STOCK[0]} {self.AVAILABLE_STOCK[1]})")
                     return QRegularExpressionValidator.State.Invalid, text, pos
                     
             except TypeError as err:
@@ -242,6 +253,10 @@ class SaleTotalCostValidator(QRegularExpressionValidator):
     validationFailed = Signal(str)
     
     
+    def __init__(self, parent=None):
+        super(SaleTotalCostValidator, self).__init__()
+        self.pattern:Pattern = compile("[0-9]{1,8}(\.|,)?[0-9]{0,2}")
+    
     def fixup(self, text: str) -> str:
         while text.endswith((".", ",")):
             text = text.rstrip(",")
@@ -250,13 +265,11 @@ class SaleTotalCostValidator(QRegularExpressionValidator):
     
     
     def validate(self, text: str, pos: int) -> object:
-        pattern:Pattern = compile("[0-9]{1,8}(\.|,)?[0-9]{0,2}")
-        
         if text.strip() == "":
             self.validationFailed.emit("El campo de costo total no puede estar vacío")
             return QRegularExpressionValidator.State.Intermediate, text, pos
         
-        elif fullmatch(pattern, text):
+        elif fullmatch(self.pattern, text):
             self.validationSucceded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
@@ -271,26 +284,34 @@ class SaleTotalCostValidator(QRegularExpressionValidator):
 
 
 
-class SalePaidValidator(QRegularExpressionValidator):
-    '''Validador para los campos donde el usuario pueda modificar el costo total de un producto.'''
+class SalePaidValidator(QValidator):
+    '''Validador para los campos donde el usuario pueda modificar la cantidad paga de un producto.'''
     validationSucceded = Signal()
-    validationFailed = Signal(str)    
+    validationFailed = Signal(str)
+    
+    def __init__(self, parent=None, is_optional:bool=False):
+        super(SalePaidValidator, self).__init__()
+        self.is_optional = is_optional
+        self.pattern:Pattern = compile("[\d]{0,8}(\.|,)?[\d]{0,2}")
     
     
     def validate(self, text: str, pos: int) -> object:
-        pattern:Pattern = compile("[0-9]{1,8}(\.|,)?[0-9]{0,2}")
         
-        if text.strip() == "":
-            self.validationFailed.emit("El campo del total abonado no puede estar vacío")
-            return QRegularExpressionValidator.State.Intermediate, text, pos
-        
-        elif fullmatch(pattern, text):
+        if self.is_optional and text == "": # si el campo es opcional y está vacío emite Acceptable
             self.validationSucceded.emit()
-            return QRegularExpressionValidator.State.Acceptable, text, pos
+            return QValidator.State.Acceptable, text, pos
         
+        elif not self.is_optional and text == "": # si el campo es obligatorio y está vacío emite Itermediate
+            self.validationFailed.emit("El campo del total abonado no puede estar vacío")
+            return QValidator.State.Intermediate, text, pos
+        
+        elif fullmatch(self.pattern, text):
+            self.validationSucceded.emit()
+            return QIntValidator.State.Acceptable, text, pos
+
         else:
             self.validationFailed.emit("El valor abonado es inválido")
-            return QRegularExpressionValidator.State.Invalid, text, pos
+            return QValidator.State.Invalid, text, pos
 
 
 
@@ -302,15 +323,17 @@ class DebtorNameValidator(QRegularExpressionValidator):
     validationSucceded = Signal()
     validationFailed = Signal(str)
     
+    def __init__(self, parent=None):
+        super(DebtorNameValidator, self).__init__()
+        self.pattern:Pattern = compile("[^;\"']{1,40}")
 
     def validate(self, text: str, pos: int) -> object:
-        pattern:Pattern = compile("[^;\"']{1,40}")
     
         if text.strip() == "":
             self.validationFailed.emit("El campo del nombre no puede estar vacío")
             return QRegularExpressionValidator.State.Intermediate, text, pos
         
-        elif fullmatch(pattern, text):
+        elif fullmatch(self.pattern, text):
             self.validationSucceded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
@@ -327,15 +350,17 @@ class DebtorSurnameValidator(QRegularExpressionValidator):
     validationSucceded = Signal()
     validationFailed = Signal(str)
     
+    def __init__(self, parent=None):
+        super(DebtorSurnameValidator, self).__init__()
+        self.pattern:Pattern = compile("[^;\"']{1,40}")
     
     def validate(self, text: str, pos: int) -> object:
-        pattern:Pattern = compile("[^;\"']{1,40}")
         
         if text.strip() == "":
             self.validationFailed.emit("El campo del apellido no puede estar vacío")
             return QRegularExpressionValidator.State.Intermediate, text, pos
         
-        elif fullmatch(pattern, text):
+        elif fullmatch(self.pattern, text):
             self.validationSucceded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
@@ -352,15 +377,17 @@ class DebtorPhoneNumberValidator(QRegularExpressionValidator):
     validationSucceded = Signal()
     validationFailed = Signal(str)
 
+    def __init__(self, parent=None):
+        super(DebtorPhoneNumberValidator, self).__init__()
+        self.pattern:Pattern = compile("\+?[0-9 -]{0,20}")
         
     def validate(self, text: str, pos: int) -> object:
-        pattern:Pattern = compile("\+?[0-9 -]{0,20}")
         
         if text.strip() == "": # si el texto está vacío devuelve Acceptable
             self.validationSucceded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
-        elif fullmatch(pattern, text):
+        elif fullmatch(self.pattern, text):
             self.validationSucceded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         

@@ -1,7 +1,7 @@
 # SQLITE3
 
-from PySide6.QtWidgets import (QTableWidget, QComboBox, QHeaderView, QTableWidgetItem, QListWidget,
-                               QLineEdit, QLabel, QCompleter, QFrame, QWidget, QDateTimeEdit)
+from PySide6.QtWidgets import (QTableWidget, QComboBox, QHeaderView, QListWidget, QLineEdit, 
+                               QCompleter, QFrame, QWidget, QDateTimeEdit)
 from PySide6.QtCore import (QRegularExpression, QModelIndex, Qt, QPropertyAnimation, 
                             QEasingCurve, QDateTime, QDate, QTime)
 from PySide6.QtGui import (QRegularExpressionValidator)
@@ -9,6 +9,8 @@ from PySide6.QtGui import (QRegularExpressionValidator)
 from resources import (rc_icons)
 from utils.dboperations import *
 from utils.customvalidators import *
+
+from re import (Match, match, search, sub, IGNORECASE)
 
 
 # side bars

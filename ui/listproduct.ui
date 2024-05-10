@@ -7,19 +7,26 @@
     <x>0</x>
     <y>0</y>
     <width>768</width>
-    <height>101</height>
+    <height>110</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
     <width>580</width>
-    <height>91</height>
+    <height>110</height>
    </size>
   </property>
   <property name="styleSheet">
    <string notr="true">* {
 	color: #111;
-	font-family: &quot;Tahoma&quot;;
+	border-color: #0b7e7f;
+	font-family: &quot;Tahoma&quot;, &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
 	font-size: 17px;
 }
 
@@ -31,9 +38,12 @@ QFrame, QWidget {
 
 #label_nameFeedback, 
 #label_quantityFeedback {
-	color: #f00;
 	font-size: 15px;
+	color: #dc2627;
+	border: 1px solid #dc2627;
+	background-color: rgba(224,164,164,0.7);
 }
+
 
 QLineEdit {
 	border: none;
@@ -90,23 +100,20 @@ QComboBox QAbstractItemView {
 	selection-background-color: #38a3a5;
 }</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout" columnstretch="2,2,2,2,0">
-   <property name="sizeConstraint">
-    <enum>QLayout::SetDefaultConstraint</enum>
-   </property>
+  <layout class="QGridLayout" name="gridLayout" columnstretch="2,2,2,2,0" columnminimumwidth="0,0,0,0,0">
    <property name="leftMargin">
     <number>9</number>
    </property>
    <property name="topMargin">
-    <number>5</number>
+    <number>4</number>
    </property>
    <property name="rightMargin">
-    <number>5</number>
+    <number>4</number>
    </property>
    <property name="bottomMargin">
-    <number>5</number>
+    <number>4</number>
    </property>
-   <property name="verticalSpacing">
+   <property name="spacing">
     <number>4</number>
    </property>
    <item row="0" column="0">
@@ -130,7 +137,7 @@ QComboBox QAbstractItemView {
       </size>
      </property>
      <property name="toolTip">
-      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;El nombre del producto vendido.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;El nombre del producto vendido.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="editable">
       <bool>true</bool>
@@ -151,6 +158,12 @@ QComboBox QAbstractItemView {
    </item>
    <item row="0" column="1">
     <widget class="QFrame" name="frame_productQuantity">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -162,6 +175,9 @@ QComboBox QAbstractItemView {
        <width>450</width>
        <height>16777215</height>
       </size>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;La cantidad vendida del producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
@@ -187,6 +203,12 @@ QComboBox QAbstractItemView {
       </property>
       <item>
        <widget class="QLineEdit" name="lineEdit_productQuantity">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="minimumSize">
          <size>
           <width>75</width>
@@ -200,7 +222,7 @@ QComboBox QAbstractItemView {
          </size>
         </property>
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;La cantidad vendida del producto.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;La cantidad vendida del producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="frame">
          <bool>false</bool>
@@ -249,6 +271,12 @@ QComboBox QAbstractItemView {
    </item>
    <item row="0" column="2">
     <widget class="QCheckBox" name="checkBox_comercialPrice">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
        <width>80</width>
@@ -262,7 +290,7 @@ QComboBox QAbstractItemView {
       </size>
      </property>
      <property name="toolTip">
-      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aplica el costo comercial al producto.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Aplica el costo comercial al producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string notr="true">precio comercial</string>
@@ -304,6 +332,9 @@ border-right: 1px solid #111;</string>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
      </property>
+     <property name="textInteractionFlags">
+      <set>Qt::TextSelectableByMouse</set>
+     </property>
     </widget>
    </item>
    <item row="0" column="4">
@@ -322,12 +353,12 @@ border-right: 1px solid #111;</string>
      </property>
      <property name="maximumSize">
       <size>
-       <width>35</width>
-       <height>35</height>
+       <width>30</width>
+       <height>30</height>
       </size>
      </property>
      <property name="toolTip">
-      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Borra el producto de la venta actual (&lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-style:italic;&quot;&gt;Supr.&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Borra el producto de la venta actual (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;Supr.&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string notr="true"/>
@@ -343,69 +374,7 @@ border-right: 1px solid #111;</string>
      </property>
     </widget>
    </item>
-   <item row="2" column="0" colspan="4">
-    <widget class="QLineEdit" name="lineEdit_saleDetail">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>300</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="toolTip">
-      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Descripción adicional de la venta (opcional).&lt;/p&gt;&lt;p&gt;Si este campo se deja vacío se llenará con el producto vendido, la cantidad vendida, la unidad de medida usada para el producto y el tipo de precio que se pagó (comercial o normal).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="inputMask">
-      <string notr="true"/>
-     </property>
-     <property name="text">
-      <string notr="true"/>
-     </property>
-     <property name="frame">
-      <bool>false</bool>
-     </property>
-     <property name="placeholderText">
-      <string notr="true">(Opcional) detalles de la venta</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="2" colspan="2">
-    <widget class="QLabel" name="label_quantityFeedback">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>100</width>
-       <height>20</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>450</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="text">
-      <string notr="true"/>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0" colspan="2">
+   <item row="1" column="0">
     <widget class="QLabel" name="label_nameFeedback">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -428,11 +397,85 @@ border-right: 1px solid #111;</string>
      <property name="text">
       <string notr="true"/>
      </property>
+     <property name="textFormat">
+      <enum>Qt::PlainText</enum>
+     </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::NoTextInteraction</set>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QLabel" name="label_quantityFeedback">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>100</width>
+       <height>20</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>450</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string notr="true"/>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::PlainText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::NoTextInteraction</set>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="4">
+    <widget class="QLineEdit" name="lineEdit_saleDetail">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>300</width>
+       <height>25</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Descripción adicional de la venta (opcional).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Si este campo se deja vacío se llenará con el producto vendido, la cantidad vendida, la unidad de medida usada para el producto y el tipo de precio que se pagó (comercial o normal).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="inputMask">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string notr="true"/>
+     </property>
+     <property name="frame">
+      <bool>false</bool>
+     </property>
+     <property name="placeholderText">
+      <string notr="true">(Opcional) detalles de la venta</string>
      </property>
     </widget>
    </item>

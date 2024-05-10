@@ -1,16 +1,18 @@
 import sys
 
-from PySide6.QtWidgets import (QApplication, QMainWindow, QLineEdit, 
-                               QCheckBox, QAbstractItemView, QDateTimeEdit, 
-                               QListWidgetItem)
-from PySide6.QtCore import (QModelIndex, Qt, QSize, QThread, Slot)
-from PySide6.QtGui import (QIntValidator, QRegularExpressionValidator, QIcon)
+from PySide6.QtWidgets import (QApplication, QMainWindow, QLineEdit, QTableWidgetItem, 
+                               QCheckBox, QAbstractItemView, QDateTimeEdit, QListWidgetItem, 
+                               QLabel)
+from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot)
+from PySide6.QtGui import (QIntValidator, QIcon)
 
 from ui.ui_mainwindow import (Ui_MainWindow)
 from utils.functionutils import *
-from utils.classes import (ProductDialog, SaleDialog, ListItem, DebtorDataDialog, DebtsTablePersonData)
+from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemValues, 
+                           DebtorDataDialog, DebtsTablePersonData, WidgetStyle)
 from utils.workerclasses import *
 from utils.dboperations import *
+from utils.customvalidators import (SalePaidValidator)
 
 from resources import (rc_icons)
 
@@ -41,14 +43,15 @@ class MainWindow(QMainWindow):
 
         set_tables_ListWidgetItemsTooltip(self.ui.tables_ListWidget, getCategoriesDescription())
 
-        # validators
+        # validadores
         setSearchBarValidator(self.ui.inventory_searchBar)
         setSearchBarValidator(self.ui.sales_searchBar)
         setSearchBarValidator(self.ui.debts_searchBar)
+        self.total_paid_validator = SalePaidValidator(self.ui.lineEdit_paid, is_optional=True)
+        self.ui.lineEdit_paid.setValidator(self.total_paid_validator)
 
-        self.ui.lineEdit_percentage_change.setValidator(QIntValidator(-9_999_999, 99_999_999, self.ui.lineEdit_percentage_change))
-        paid_validator = QRegularExpressionValidator("[0-9]{0,9}(\.|,)?[0-9]{0,2}", parent=self.ui.lineEdit_paid)
-        self.ui.lineEdit_paid.setValidator(paid_validator)
+        self.ui.lineEdit_percentage_change.setValidator(
+            QIntValidator(-9_999_999, 99_999_999, self.ui.lineEdit_percentage_change))
 
         # añade íconos a los widgets
         self.addIconsToWidgets()
@@ -62,11 +65,11 @@ class MainWindow(QMainWindow):
         self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
         
         self.IDs_saleDetails:list = [] # var. de 'table_sales_data' que tiene los IDs de las ventas en Detalle_Ventas
-        self.items_objectNames:int = 0 # "ID" en los 'objectName', al crearse un item el nombre se da a partir del contador
-        self.VALID_ITEMS:dict[str:bool] = {} # se usa para verificar si todos los ListItems son válidos para habilitar/deshabilitar 'btn_end_sale'
-        self.ITEMS_VALUES:dict[str:tuple[str,str,bool,str,str,str,float]] = {} # tiene los valores de cada ListItem
+        self.SALES_ITEM_NUM:int = 0 # contador para crear nombres de items en 'input_sales_data'
+        self.DICT_ITEMS_VALUES:dict[str:ListItemValues] = {} # tiene los valores de cada ListItemWidget
+        self.VALID_PAID_FIELD:bool = None # True si lineEdit_paid es válido, sino False
+        self.TOTAL_COST:float = None # guarda el costo total de 'label_total' como float, para no tener que buscarlo con regex
         self.debtor_chosen:tuple[int,str,str] = None # tiene el ID, nombre y apellido del deudor elegido en DebtorDataDialog
-
 
         # variables de deudas
         
@@ -76,35 +79,40 @@ class MainWindow(QMainWindow):
         # TODO: permitir modificar deuda
         
         
-        #?### VARIABLES DE MULTITHREADING ################################
-        # self.READ_THREAD:QThread = QThread()
         
 
         #*## SEÑALES #####################################################
-        #--- INVENTARIO --------------------------------------------------
-        self.ui.btn_side_barToggle.clicked.connect(lambda: toggleSideBar(self.ui.side_bar, self.ui.centralwidget, self.ui.side_bar_body))
         
-        self.ui.btn_inventory_sideBarToggle.clicked.connect(lambda: toggleSideBar(self.ui.inventory_sideBar, self.ui.main_inventory_frame, self.ui.inventory_side_bar_body, 200))
+        #¡--- INVENTARIO --------------------------------------------------
+        self.ui.btn_side_barToggle.clicked.connect(lambda: toggleSideBar(
+            self.ui.side_bar, self.ui.centralwidget, self.ui.side_bar_body))
         
-        # (READ) cargar con productos 'displayTable'
-        self.ui.tables_ListWidget.itemClicked.connect(lambda: self.handleTableToFill(self.ui.displayTable, ACCESSED_BY_LIST=True))
-        self.ui.tables_ListWidget.itemActivated.connect(lambda: self.handleTableToFill(self.ui.displayTable, ACCESSED_BY_LIST=True))
+        self.ui.btn_inventory_sideBarToggle.clicked.connect(lambda: toggleSideBar(
+            self.ui.inventory_sideBar, self.ui.main_inventory_frame, self.ui.inventory_side_bar_body, 200))
+        
+        #* (READ) cargar con productos 'displayTable'
+        self.ui.tables_ListWidget.itemClicked.connect(lambda: self.handleTableToFill(
+            self.ui.displayTable, ACCESSED_BY_LIST=True))
+        self.ui.tables_ListWidget.itemActivated.connect(lambda: self.handleTableToFill(
+            self.ui.displayTable, ACCESSED_BY_LIST=True))
 
-        self.ui.inventory_searchBar.returnPressed.connect(lambda: self.handleTableToFill(self.ui.displayTable, self.ui.inventory_searchBar))
+        self.ui.inventory_searchBar.returnPressed.connect(lambda: self.handleTableToFill(
+            self.ui.displayTable, self.ui.inventory_searchBar))
 
-        # (CREATE) añadir nuevo producto a tabla 'displayTable'
+        #* (CREATE) añadir nuevo producto a tabla 'displayTable'
         self.ui.btn_add_product_inventory.clicked.connect(lambda: self.handleTableCreateRow(self.ui.displayTable))
         
-        # (DELETE) eliminar un producto de 'displayTable'
+        #* (DELETE) eliminar un producto de 'displayTable'
         self.ui.btn_delete_product_inventory.clicked.connect(lambda: self.handleTableDeleteRows(self.ui.displayTable))
         
-        # (UPDATE) modificar celdas de 'displayTable'
-        self.ui.displayTable.doubleClicked.connect(lambda: self.handleTableUpdateItem(self.ui.displayTable, self.ui.displayTable.currentIndex()) )
+        #* (UPDATE) modificar celdas de 'displayTable'
+        self.ui.displayTable.doubleClicked.connect(lambda: self.handleTableUpdateItem(
+            self.ui.displayTable, self.ui.displayTable.currentIndex()) )
         
-        # cambio de selección
+        #* cambio de selección de 'displayTable'
         self.ui.displayTable.itemSelectionChanged.connect(lambda: self.handleSelectionChange(self.ui.displayTable))
         
-        # inventory_sideBar
+        #* inventory_sideBar
         self.ui.inventory_checkbuttons_buttonGroup.buttonPressed.connect(self.handlePressedCheckbutton)
         self.ui.inventory_checkbuttons_buttonGroup.buttonClicked.connect(self.handleClickedCheckbutton)
         
@@ -114,31 +122,39 @@ class MainWindow(QMainWindow):
         
         self.ui.lineEdit_percentage_change.editingFinished.connect(self.handleLineeditPercentageEditingFinished)
 
-        #--- VENTAS ------------------------------------------------------
-        # (READ) cargar con ventas 'table_sales_data'
-        self.ui.tab2_toolBox.currentChanged.connect(lambda curr_index: self.handleTableToFill(self.ui.table_sales_data, SHOW_ALL=True) if curr_index == 1 else None)
+        #¡--- VENTAS ------------------------------------------------------
+        #* (READ) cargar con ventas 'table_sales_data'
+        self.ui.tab2_toolBox.currentChanged.connect(lambda curr_index: self.handleTableToFill(
+            self.ui.table_sales_data, SHOW_ALL=True) if curr_index == 1 else None)
         
-        self.ui.sales_searchBar.returnPressed.connect(lambda: self.handleTableToFill(self.ui.table_sales_data, self.ui.sales_searchBar))
+        self.ui.sales_searchBar.returnPressed.connect(lambda: self.handleTableToFill(
+            self.ui.table_sales_data, self.ui.sales_searchBar))
         
         self.ui.tabWidget.currentChanged.connect(lambda index: self.ui.tab2_toolBox.setCurrentIndex(0) if index == 1 else None)
         
-        # TODO: en classes.py, seguir colocando validators, luego seguir refactorizando el código a partir de acá
-        # (CREATE) añadir una venta a 'table_sales_data'
+        # TODO principal: en classes.py, seguir colocando validators, luego seguir refactorizando el código a partir de acá
+        #* (CREATE) añadir una venta a 'table_sales_data'
         self.ui.btn_add_product_sales.clicked.connect(lambda: self.handleTableCreateRow(self.ui.table_sales_data))
-        # (DELETE) eliminar ventas de 'table_sales_data'
+        
+        #* (DELETE) eliminar ventas de 'table_sales_data'
         self.ui.btn_delete_product_sales.clicked.connect(lambda: self.handleTableDeleteRows(self.ui.table_sales_data))
-        # (UPDATE) modificar celdas de 'table_sales_data'
+        
+        #* (UPDATE) modificar celdas de 'table_sales_data'
         self.ui.table_sales_data.doubleClicked.connect(lambda: self.handleTableUpdateItem(self.ui.table_sales_data, self.ui.table_sales_data.currentIndex()) )
         self.ui.table_sales_data.itemSelectionChanged.connect(lambda: self.handleSelectionChange(self.ui.table_sales_data))
         
-        # formulario de ventas
+        # TODO secundario: refactorizar estas funciones y luego probarlas
+        #* formulario de ventas
         self.ui.btn_add_product.clicked.connect(self.addSalesInputListItem)
+        
+        self.total_paid_validator.validationSucceded.connect(self.onPaidValidationSucceded)
+        self.total_paid_validator.validationFailed.connect(self.onPaidValidationFailed)
+        
+        self.ui.lineEdit_paid.editingFinished.connect(self.onSalePaidEditingFinished)
         
         self.ui.btn_end_sale.clicked.connect(self.handleFinishedSale)
 
-        self.ui.lineEdit_paid.editingFinished.connect(lambda: self.validateSalesFields(None))
-
-        #--- DEUDAS ------------------------------------------------------
+        #¡--- DEUDAS ------------------------------------------------------
         self.ui.tabWidget.currentChanged.connect(lambda curr_index: self.handleTableToFill(self.ui.table_debts, SHOW_ALL=True) if curr_index == 2 else None)
 
 
@@ -179,8 +195,7 @@ class MainWindow(QMainWindow):
 
         return None
 
-
-    #?================ MULTITHREADING ================
+    
     #¡ tablas (READ)
     @Slot(QTableWidget,QLineEdit,bool)
     def handleTableToFill(self, table_widget:QTableWidget, search_bar:QLineEdit=None, ACCESSED_BY_LIST:bool=False, SHOW_ALL:bool=False) -> None:
@@ -1044,7 +1059,7 @@ class MainWindow(QMainWindow):
 
 
 
-    #### INVENTARIO ##################################################
+    #¡### INVENTARIO ##################################################
     # funciones de inventory_sideBar
     def __calculateNewPrices(self, selected_rows:tuple) -> None:
         '''Calcula los aumentos/decrementos en los precios unitarios o comerciales dependiendo de cuál es la checkbox 
@@ -1152,100 +1167,200 @@ class MainWindow(QMainWindow):
 
 
 
-    #### VENTAS ######################################################
-    def __update_self_ValidItems(self, item_action:dict[str:bool] | str) -> None:
-        '''Actualiza el diccionario 'self.VALID_ITEMS' dependiendo de si se modificó, se agregó o se eliminó 
-        un item (si se modificó o agregó, 'item_action' será un dict, sinó será str). Retorna 'None'.'''
-        # si recibe un 'dict' (item_action se recibe por la señal 'allFieldsValid') es porque se agregó un item o se modificó...
-        if isinstance(item_action, dict):
-            self.VALID_ITEMS.update(item_action)
-        # si recibe un 'str' es porque se borró un item...
-        else:
-            if item_action in self.VALID_ITEMS.keys():
-                self.VALID_ITEMS.pop(item_action, 0)
-                self.ITEMS_VALUES.pop(item_action, 1)
+    #¡### VENTAS ######################################################
+    
+    #* MÉTODOS DE VALIDADOR DE 'lineEdit_paid'
+    @Slot()
+    def onPaidValidationSucceded(self) -> None:
+        '''
+        Es llamado desde la señal 'validationSucceded' de 'lineEdit_paid'.
+        
+        Cambia el estilo de 'lineEdit_paid' para representar la validez del campo y el valor de la variable 
+        'self.VALID_PAID_FIELD' a True.
+        
+        Retorna None.
+        '''
+        # si el campo es válido y no está vacío lo pone de color verde, si está vacío le quita el estilo
+        self.ui.lineEdit_paid.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value if self.ui.lineEdit_paid.text().strip() else "")
+        self.VALID_PAID_FIELD = True
+        
+        return None
+    
+    
+    @Slot()
+    def onPaidValidationFailed(self) -> None:
+        '''
+        Es llamado desde la señal 'validationFailed' de 'lineEdit_paid'.
+        
+        Cambia el estilo de 'lineEdit_paid' para representar la invalidez del campo y el valor de la variable 
+        'self.VALID_PAID_FIELD' a False.
+        
+        Retorna None.
+        '''
+        self.ui.lineEdit_paid.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
+        self.VALID_PAID_FIELD = False
+        
+        return None
+    
 
+    #* MÉTODOS DEL FORMULARIO DE VENTAS            
+    @Slot()
+    def onSalePaidEditingFinished(self) -> None:
+        '''
+        Es llamado desde la señal 'editingFinished' de 'lineEdit_paid'.
+        
+        Formatea el campo del QLineEdit y llama al método 'self.setSaleChange' para calcular y mostrar 
+        el cambio.
+        
+        Retorna None.
+        '''
+        field_text:str = self.ui.lineEdit_paid.text()
+        
+        field_text = field_text.replace(".",",")
+        field_text = field_text.strip()
+        field_text = field_text.rstrip(",.") if field_text.endswith((",",".")) else field_text
+        field_text = field_text.lstrip("0") if field_text.startswith("0") else field_text
+        
+        self.ui.lineEdit_paid.setText(field_text)
+        
+        self.setSaleChange()
+        return None
+    
+    
+    def __updateItemsValues(self, list_item:ListItemValues=None, item_to_delete:str=None) -> None:
+        '''
+        Es llamado desde los métodos 'self.onSalesItemFieldValidation' | 'self.onSalesItemDeletion' | 
+        'self.addSalesInputListItem'.
+        
+        Actualiza el diccionario 'self.DICT_ITEMS_VALUES' a partir del valor de 'list_item' ó elimina 
+        el item con nombre 'item_to_delete' del diccionario, y además si es necesario reinicia el 
+        contador 'self.SALES_ITEM_NUM' y desactiva el botón 'btn_end_sale'.
+        
+        PARAMS:
+        - list_item: objeto de tipo 'classes.ListItemValues' con todos los valores actualizados del item. 
+        Es enviado el parámetro cuando el método es llamado desde los métodos 'self.onSalesItemFieldValidation' | 
+        'self.addSalesInputListItem'.
+        - item_to_delete: str que determina cuál item debe ser borrado. Es enviado el parámetro cuando el 
+        método es llamado desde el método 'self.onSalesItemDeletion'.
+        
+        Retorna None.
+        '''
+        if not item_to_delete:
+            self.DICT_ITEMS_VALUES[list_item.object_name] = list_item
+        
+        else:
+            self.DICT_ITEMS_VALUES.pop(item_to_delete)
+            
+            # reinicia el contador de nombres cuando no hay items en 'sales_input_list', y desactiva 'btn_end_sale'
             if self.ui.sales_input_list.count() == 0:
-                self.VALID_ITEMS.clear()
-                self.ITEMS_VALUES.clear()
-                self.items_objectNames = 0
+                self.SALES_ITEM_NUM = 0
+                self.ui.btn_end_sale.setEnabled(False)
+        
         return None
 
 
-    def __update_self_ItemsValues(self) -> float:
+    @Slot(ListItemValues)
+    def onSalesItemFieldValidation(self, list_item:ListItemValues) -> None:
         '''
-        Actualiza con los valores de los items la tupla 'self.ITEMS_VALUES', y de paso calcula el costo total de la 
-        venta.
+        Es llamado desde la señal 'fieldsValidated' de 'classes.ListItemWidget'.
         
-        Retorna un float.
+        Este método hace lo siguiente:
+        - Actualiza 'self.DICT_ITEMS_VALUES'. Para eso llama al método 'self.__updateItemsValues'.
+        - Verifica la validez de todos los items. Para eso llama al método 'self.validateSalesItemsFields'.
+        - Cambia el contenido de 'dateTimeEdit_sale' para mostrar la hora precisa de la venta.
+        
+        PARAMS:
+        - list_item: objeto de tipo 'classes.ListItemValues' con todos los valores actualizados del item.
+        
+        Retorna None.
         '''
-        object_name:str
-        name_combobox:QComboBox
-        product_price:str
-        re_price:Match | None | str | float # intenta dejarlo como float, sino queda como str o None.
-        total_paid:str | float = self.ui.lineEdit_paid.text()
-        total_cost:float = 0.0
+        # actualiza self.DICT_ITEMS_VALUES
+        self.__updateItemsValues(list_item)
+        
+        self.validateSalesItemsFields()
+        
+        # cambia la hora de la venta
+        self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
+        return None
+    
 
-        # obtengo la cantidad abonada y la formateo
-        try:
-            if total_paid:
-                total_paid = total_paid.replace(",",".")
-                if total_paid.endswith("."):
-                    total_paid = total_paid.replace(".","")
-                total_paid = round(float(total_paid), 2)
+    def setSaleChange(self) -> None:
+        '''
+        Es llamado desde el método 'self.onSalePaidEditingFinished'.
+        
+        Si todos los valores de los items son válidos, muestra el cambio a devolver a partir del valor 
+        de 'lineEdit_paid', o si lo abonado es mayor al total se muestra el cambio que se debe dar en 
+        'label_total_change'.
+        
+        Retorna None.
+        '''
+        total_paid:float
+
+        # si self.TOTAL_COST es None significa que hay items con valores inválidos
+        if self.TOTAL_COST:
+            # si no hay un valor en lineEdit_paid, le pone 0
+            if not self.ui.lineEdit_paid.text():
+                self.ui.lineEdit_paid.setText(f"0.0")
+                
+            # obtiene el total abonado
+            total_paid = float(self.ui.lineEdit_paid.text().replace(",","."))
+
+            # verifica si 'self.lineEdit_paid' tiene un valor mayor al total
+            if total_paid > self.TOTAL_COST: # si lo abonado es mayor al total se muestra el cambio
+                self.ui.label_total_change.setText(f"{round(total_paid - self.TOTAL_COST, 2)}")
+
             else:
-                total_paid = 0.0
-        except:
-            pass
-        # recorre los items y accede a los datos
-        for i in range(self.ui.sales_input_list.count()):
-            object_name = self.ui.sales_input_list.itemWidget(self.ui.sales_input_list.item(i)).objectName()
-
-            name_combobox = self.ui.sales_input_list.itemWidget(self.ui.sales_input_list.item(i)).findChild(QComboBox, "comboBox_productName")
-            product_price = self.ui.sales_input_list.itemWidget(self.ui.sales_input_list.item(i)).findChild(QLabel, "label_subtotal").text()
-            self.ui.lineEdit_paid.setText(str(total_paid))
-            # busco el precio del producto
-            re_price = search(">[0-9]+[.]?[0-9]{1,2}<", product_price)
-            try:
-                re_price = float(re_price.group().strip("><")) if re_price else None
-            except:
-                pass
-
-            # coloco en self.ITEMS_VALUES los valores
-            self.ITEMS_VALUES[object_name] = (name_combobox.itemText(name_combobox.currentIndex()),
-                    self.ui.sales_input_list.itemWidget(self.ui.sales_input_list.item(i)).findChild(QLineEdit, "lineEdit_productQuantity").text(),
-                    self.ui.sales_input_list.itemWidget(self.ui.sales_input_list.item(i)).findChild(QCheckBox, "checkBox_comercialPrice").isChecked(),
-                    self.ui.sales_input_list.itemWidget(self.ui.sales_input_list.item(i)).findChild(QLineEdit, "lineEdit_saleDetail").text(),
-                    re_price,
-                    self.ui.dateTimeEdit_sale.text(),
-                    total_paid)
+                self.ui.label_total_change.setText("")
             
-            # calculo el costo total
-            total_cost += re_price
-        return round(total_cost, 2)
+        return None
 
 
-    def __validateSalesInputListItems(self, item_action:dict[str:bool] | str) -> None:
-        '''Si un campo dentro de un item fue modificado, 'item_action' será un diccionario con el 'objectName' del \
-        item. Si los campos son válidos habilita el botón 'btn_end_sale', si alguno no es válido lo deshabilita. \
-        Además cambia el contenido de 'dateTimeEdit_sale' para mostrar la hora precisa de la venta, agrega los valores \
-        a 'self.ITEM_VALUES', coloca el precio total en 'self.label_total' y finalmente crea un QCompleter para \
-        'self.lineEdit_paid' con el precio total.
-        \nRetorna 'None'.'''
-        total_cost:float
-        completer:QCompleter
-
-        # actualiza self.VALID_ITEMS
-        self.__update_self_ValidItems(item_action)
+    def validateSalesItemsFields(self) -> None:
+        '''
+        Es llamado desde los métodos 'self.onSalesItemDeletion' | 'self.onSalesItemFieldValidation'.
         
-        # habilita o deshalibita el botón 'btn_end_sale', actualiza self.ITEM_VALUES 
-        if( len(self.VALID_ITEMS) == self.ui.sales_input_list.count() and all(self.VALID_ITEMS.values()) ) and self.ui.sales_input_list.count() > 0:
+        Este método hace lo siguiente:
+        - Si todos los campos son válidos:
+            - Habilita el botón 'btn_end_sale'.
+            - Obtiene el precio total y lo coloca en 'self.label_total' y lo guarda en 'self.TOTAL_COST', si 
+            hay campos inválidos en items entonces 'self.TOTAL_COST' será None.
+            - Crea un QCompleter para 'self.lineEdit_paid' con el precio total y los subtotales.
+        - Si hay campos inválidos:
+            - Deshabilita el botón 'btn_end_sale'.
+            - Coloca el texto inicial en 'label_total'.
+            - Coloca el valor None en 'self.TOTAL_COST'.
+        
+        Retorna None.
+        '''
+        subtotals:list[float] = [] # lista con los subtotales de los items, es usado por 'completer_values' y
+                                   # y para calcular el costo total
+        total_cost:str # var. aux. que contiene el costo total
+        completer_values:list[str] = [] # lista con todos los valores ('subtotals') y costo total para colocar 
+                                        # en el completer
+        completer:QCompleter # completer para colocar en lineEdit_paid con el total
+        
+        # verifica si 'sales_input_list' no está vacía y si todos los items tienen 'ALL_VALID==True'
+        if self.ui.sales_input_list.count() > 0 and all( [item.ALL_VALID for item in self.DICT_ITEMS_VALUES.values()] ):
             self.ui.btn_end_sale.setEnabled(True)
-            total_cost = self.__update_self_ItemsValues()
-            # pone el precio total
-            self.ui.label_total.setText(f"<html><head/><body><p>TOTAL <span style=\" color: #22577a;\">{total_cost}</span></p></body></html>")
-            # crea el completer
-            completer = QCompleter([str(total_cost)], parent=self.ui.lineEdit_paid)
+            
+            # obtiene los subtotales (para obtener el total y para luego colocarlos en el completer)
+            subtotals = [item.subtotal for item in self.DICT_ITEMS_VALUES.values()]
+            
+            # obtiene el costo total
+            self.TOTAL_COST = round(sum(subtotals), 2)
+            
+            # coloca el costo total en label_total
+            total_cost = str(self.TOTAL_COST).replace(".",",")
+            self.ui.label_total.setText(
+                f"<html><head/><body><p>TOTAL <span style=\" color: #22577a;\">{total_cost}</span></p></body></html>"
+                )
+            
+            # obtengo todos los valores para el completer (total y subtotales)
+            completer_values = [str(value).replace(".",",") for value in subtotals + [total_cost]] # concatena 'subtotals' y 
+                # el costo total, convierte los valores a str y le cambia los "." por ",".
+            
+            # crea el completer para los costos en 'lineEdit_paid'
+            completer = QCompleter(completer_values, parent=self.ui.lineEdit_paid)
             completer.setCompletionMode(completer.CompletionMode.InlineCompletion)
             completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
             self.ui.lineEdit_paid.setCompleter(completer)
@@ -1255,75 +1370,71 @@ class MainWindow(QMainWindow):
         else:
             self.ui.btn_end_sale.setEnabled(False)
             self.ui.label_total.setText("TOTAL")
-
-        # cambia la hora de la venta
-        self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
+            self.TOTAL_COST = None
+        
         return None
     
 
-    def validateSalesFields(self, item_action:dict[str:bool] | str | None) -> None:
-        '''Llama a 'self.__validateSalesInputListItems' para validar los items de 'sales_input_list', valida también \
-        el campo de cantidad abonada 'self.lineEdit_paid' y muestra el cambio a devolver.
-        \n\tSi lo abonado es mayor al total se muestra el cambio que se debe dar en 'label_total_change'.
-        \nRetorna 'None'.'''
-        total_paid:float
-        re_total_cost:Match | float | None
-
-        # si item_action no es None es porque se llamó al método desde una señal de un item, y valido los items...
-        if item_action is not None:
-            self.__validateSalesInputListItems(item_action)
-
-        # sino, se llamó al método desde la señal de 'self.lineEdit_paid'
-        elif self.ui.label_total.text() != "TOTAL":
-            # si no hay un valor en lineEdit_paid, le pone 0
-            if not self.ui.lineEdit_paid.text():
-                self.ui.lineEdit_paid.setText(str(0.0))
-            # formatea el texto de 'self.lineEdit_paid'
-            self.ui.lineEdit_paid.setText(self.ui.lineEdit_paid.text().replace(",","."))
-            if self.ui.lineEdit_paid.text().endswith("."):
-                self.ui.lineEdit_paid.setText(self.ui.lineEdit_paid.text().strip("."))
-
-            # convierte a float el precio total y lo abonado
-            try:
-                re_total_cost = search(">[0-9]+[.]?[0-9]{1,2}<", self.ui.label_total.text())
-                re_total_cost = round(float(re_total_cost.group().strip("><")), 2) if re_total_cost else None
-                total_paid = round(float(self.ui.lineEdit_paid.text()), 2) if self.ui.lineEdit_paid.text() else 0.0
-            except:
-                pass
-
-            # verifica si 'self.lineEdit_paid' tiene un valor mayor al total
-            if total_paid > re_total_cost: # si lo abonado es mayor al total se muestra el cambio
-                self.ui.label_total_change.setText(f"{round(total_paid - re_total_cost, 2)}")
-
-            elif total_paid == re_total_cost:
-                self.ui.label_total_change.setText("")
+    @Slot(QListWidgetItem, str)
+    def onSalesItemDeletion(self, list_widget_item:QListWidgetItem, list_item_name:str) -> None:
+        '''
+        Es llamado desde la señal 'deletedItem' del item actual declarado en 'self.addSalesInputListItem'.
+        
+        Elimina el item referido en 'item_list_widget' del QListWidget 'self.sales_input_list', y llama al método 
+        'self.__updateItemsValues' para borrar el item con nombre 'list_item_name' en 'self.DICT_ITEMS_VALUES', 
+        y llama al método 'self.validateSalesItemsFields' para validar los otros items.
+        
+        PARAMS:
+        - item_list_widget: el QListWidgetItem al que se referencia.
+        - list_item_name: el 'objectName' del objecto 'classes.ListItemWidget' interno de 'item_list_widget'.
+        
+        Retorna None.
+        '''
+        row:int = self.ui.sales_input_list.row(list_widget_item)
+        self.ui.sales_input_list.takeItem(row)
+        self.__updateItemsValues(item_to_delete=list_item_name)
+        self.validateSalesItemsFields()
         return None
 
 
     @Slot()
     def addSalesInputListItem(self) -> None:
-        '''Crea un item que se colocará dentro de 'sales_input_list', y que representa la venta de un producto.
-        \nRetorna 'None'.'''
-        listWidgetItem:QListWidgetItem = QListWidgetItem()
-        name:str = f"item_{self.items_objectNames}"
-        item:ListItem = ListItem(self.ui.sales_input_list, listWidgetItem, name)
-
-        # incremento el contador
-        self.items_objectNames += 1
+        '''
+        Es llamado desde la señal 'clicked' de 'btn_add_product'.
         
-        # conecta la señal 'SignalToParent.allFieldsValid'
-        item.signalToParent.allFieldsValid.connect(lambda dict_item: self.validateSalesFields(dict_item))
-        # conecta la señal 'SignalToParent.deletedItem'
-        item.signalToParent.deletedItem.connect(lambda deleted_item: self.validateSalesFields(deleted_item))
+        Crea un item de tipo 'classes.ListItemWidget' que se colocará dentro de 'sales_input_list', y que representa 
+        la venta de un producto, y conecta sus señales.
+        
+        Retorna None.
+        '''
+        object_name:str = f"item_{self.SALES_ITEM_NUM}"
+        list_widget_item:QListWidgetItem = QListWidgetItem()
+        item:ListItemWidget = ListItemWidget(obj_name=object_name)
+
+        # incremento self.SALES_ITEM_NUM
+        self.SALES_ITEM_NUM += 1
+        
+        #? agrego un elemento vacío a self.DICT_ITEMS_VALUES para evitar falsos positivos y activar el botón 
+        #? 'btn_end_sale' sin querer cuando un elemento es válido y hay otros que no fueron modificados aún...
+        #? de cualquier forma, este item temporal va a ser sobreescrito cuando se modifique/borre el item
+        self.__updateItemsValues(
+            list_item=ListItemValues(
+                object_name=object_name,
+                ALL_VALID=False)
+            )
+        
+        # conecto señales
+        item.fieldsValidated.connect(self.onSalesItemFieldValidation)
+        item.deleteItem.connect(lambda list_item_name: self.onSalesItemDeletion(list_widget_item, list_item_name))
 
         # coloca el widget dentro del item
-        listWidgetItem.setSizeHint(item.size())
-        self.ui.sales_input_list.addItem(listWidgetItem)
-        self.ui.sales_input_list.setItemWidget(listWidgetItem, item)
+        list_widget_item.setSizeHint(item.size())
+        self.ui.sales_input_list.addItem(list_widget_item)
+        self.ui.sales_input_list.setItemWidget(list_widget_item, item)
 
         # pone el foco en el item nuevo
         self.ui.sales_input_list.setFocus()
-        self.ui.sales_input_list.setCurrentItem(listWidgetItem)
+        self.ui.sales_input_list.setCurrentItem(list_widget_item)
         item.findChild(QComboBox, "comboBox_productName").setFocus()
 
         # desactiva btn_end_sale cuando se agrega un producto
@@ -1332,102 +1443,158 @@ class MainWindow(QMainWindow):
 
 
     def __resetListAndFields(self) -> None:
-        '''Limpia la lista 'sales_input_list' y los campos, reinicia las variables e inhabilita el botón de finalizar 
-        venta. Retorna 'None'.'''
+        '''
+        Es llamado desde el método 'self.handleFinishedSale'.
+        
+        Este método hace lo siguiente:
+        - Limpia el QListWidget 'sales_input_list'
+        - Reinicia el contador de nombres 'self.SALES_ITEM_NUM'.
+        - Coloca el texto inicial en 'label_total' y 'label_total_change'.
+        - Borra el texto de 'self.lineEdit_paid'.
+        - Desactiva el botón 'btn_end_sale'.
+        - Asigna el valor None a 'self.debtor_chosen'.
+        
+        Retorna None.
+        '''
+        # limpia 'sales_input_list'
         self.ui.sales_input_list.clear()
-        self.VALID_ITEMS.clear()
-        self.ITEMS_VALUES.clear()
-        self.items_objectNames = 0
+        
+        self.SALES_ITEM_NUM = 0
+        
+        # coloca los textos inicial en los labels
         self.ui.label_total.setText("TOTAL")
         self.ui.label_total_change.setText("")
+        
+        # borra el texto en 'lineEdit_paid'
         self.ui.lineEdit_paid.setText("")
+        
         self.ui.btn_end_sale.setEnabled(False)
+        
         self.debtor_chosen = None
         return None
     
 
     def __assignDebtorChosenOption(self, value:int) -> None:
-        '''Simplemente asigna el valor recibido por la señal 'debtorChosen' en 'self.debtor_chosen'. Retorna 'None'.'''
+        '''
+        Simplemente asigna el valor recibido por la señal 'debtorChosen' en 'self.debtor_chosen'.
+        
+        Retorna None.
+        '''
         self.debtor_chosen = value
         return None
 
 
     @Slot()
     def handleFinishedSale(self) -> None:
-        '''Obtiene los datos de los campos de los items y hace las consultas necesarias a la base de datos.
-        \nSi la cantidad abonada es menor al precio total se crea un Dialog que pide datos del deudor.
-        \nPor cada producto que se vende, hace un INSERT a Detalle_Ventas y Ventas, y si hay una deuda también a Deudas; actualiza el \
-        stock en Productos.
-        \nFinalmente limpia los campos y desactiva el botón 'btn_end_sale'.
-        \nRetorna 'None'.'''
-        item:tuple[str,tuple]
-        total_paid:float
-        re_total_price:Match | float | None
-        total_due:float # contador para verificar qué productos van o no en Deudas, y cuánto resta por pagar de ese producto
-
         '''
-            Decidí que cuando se hacen ventas (sin importar la cantidad de productos diferentes) y el comprador paga 
-            menos del total, esa cantidad sea distribuída entre los primeros productos. 
-            ejemplo: una persona lleva 3 productos -> 1 de $3.000, 1 de $2.000 y otro de $4.000, pero paga $4.000.
-                esos $4.000 se descuentan, primero, del primer producto:
-                    $4.000 - $3.000 = $1.000
-                    $1.000 - $2.000 = $-1.000 <-- -1.000 es lo que queda del 2do producto, más el 3er producto.
-                luego se agrega a Deudas los $1.000 que quedaron del 2do producto y también el 3er producto, pero 
-                no el 1ro que quedó pago.
-        '''
-
-        # si no hay un valor en lineEdit_paid, le pone 0
-        if not self.ui.lineEdit_paid.text():
-            self.ui.lineEdit_paid.setText(str(0.0))
+        Es llamado desde la señal 'clicked' de 'btn_end_sale'.
         
-        # verifico si lo abonado es menor al total para mostrar el Dialog con los datos del deudor
-        try:
-            # obtengo el precio total
-            re_total_price = search(">[0-9]+(\.|,)[0-9]{0,2}<", self.ui.label_total.text())
-            re_total_price = float(re_total_price.group().strip("><")) if re_total_price else None
-            # obtengo el total pagado
-            total_paid = float(self.ui.lineEdit_paid.text())
-            # si lo abonado es menor al total muestra el Dialog para agregar al deudor (si no existe en "Deudores" se crea)
-            if re_total_price and total_paid < re_total_price:
-                dialog = DebtorDataDialog()
-                dialog.setAttribute(Qt.WA_DeleteOnClose, True)
-                dialog.signalToParent.debtorChosen.connect(lambda option: self.__assignDebtorChosenOption(option))
-                dialog.exec()
-        except:
-            pass
+        Este método hace lo siguiente:
+        - Si la cantidad abonada es < al costo total:
+            - Muestra un dialog de tipo 'DebtorDataDialog' con los datos del deudor.
+        - Si la cantidad abonada es >= al costo total:
+            - Obtiene los datos de los campos de los items y hace las consultas INSERT a Ventas y Detalle_Ventas 
+            y la consulta UPDATE a Productos con el nuevo stock.
+            - Limpia los campos. Para eso llama a 'self.__resetListAndFields'.
+            - Desactiva el botón 'btn_end_sale'.
+        
+        Retorna None.
+        '''
+        total_paid:float
+        item:ListItemValues # var. usada en el for
 
-        if total_paid < re_total_price and self.debtor_chosen:
-            total_due = total_paid
-            # recorre cada item y hace las consultas INSERT y UPDATE (a Productos)
-            for item in self.ITEMS_VALUES.items():
-                makeInsertQuery("INSERT INTO Ventas(fecha_hora, detalles_venta) VALUES(?,?);", (item[1][5], item[1][3],))
-                # Deudas y Detalle_Ventas (con IDdeuda)
-                total_due -= item[1][4] # deuda = total abonado - subtotal
-                if total_due < 0: # el producto es deuda
-                    makeInsertQuery("INSERT INTO Deudas(fecha_hora, total_adeudado, IDdeudor) VALUES(?,?,?);", (item[1][5], abs(total_due), self.debtor_chosen[0]))
+        #? Decidí que cuando se hacen ventas (sin importar la cantidad de productos diferentes) y el comprador paga 
+        #? menos del total, esa cantidad sea distribuída entre los primeros productos. 
+        #? ejemplo: una persona lleva 3 productos -> 1 de $3.000, 1 de $2.000 y otro de $4.000, pero paga $4.000.
+        #?     esos $4.000 se descuentan, primero, del primer producto:
+        #?         $4.000 - $3.000 = $1.000
+        #?         $1.000 - $2.000 = $-1.000 <-- -1.000 es lo que queda del 2do producto, más el 3er producto.
+        #?     luego se agrega a Deudas los $1.000 que quedaron del 2do producto y también el 3er producto, pero 
+        #?     no el 1ro que quedó pago.
+        
+        # obtengo el total pagado
+        total_paid = self.ui.lineEdit_paid.text().replace(",",".")
+        total_paid = float(total_paid if total_paid else 0.0)
+        
+        # TODO: refactorizar este código, necesito hacer que cuando se presione 'btn_end_sale' y 
+        # todo: si lo abonado < costo total se muestre el dialog... desde el dialog, si se llenan 
+        # todo: los datos y se presiona 'Ok' que se agreguen los registros a BD, sino que no pase nada...
+        
+        # si lo abonado es menor al total muestra el Dialog para agregar al deudor (si no existe en "Deudores" se crea)
+        if total_paid < self.TOTAL_COST:
+            dialog = DebtorDataDialog()
+            dialog.setAttribute(Qt.WA_DeleteOnClose, True)
+            
+            dialog.debtorChosen.connect(lambda option: self.__assignDebtorChosenOption(option))
+            
+            dialog.exec()
+            
+        else:
+            conn = createConnection("database/inventario.db")
+            cursor = conn.cursor()
+            
+            for item in self.DICT_ITEMS_VALUES.values():
+                try:
+                    # inserta a Ventas
+                    cursor.execute(
+                        "INSERT INTO Ventas(fecha_hora, detalles_venta) VALUES(?,?);",
+                        (self.ui.dateTimeEdit_sale.text(), item.sale_details,)
+                        )
                     
-                    # ? ya probé la consulta de abajo y al parecer funciona bien. Los registros de Detalle_Ventas 
-                    # ? apuntan a donde deben... pero igualmente prefiero estar atento a esto...
-                    makeInsertQuery("INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, (SELECT IDdeuda FROM Deudas WHERE fecha_hora = ? AND IDdeudor = ? ORDER BY IDdeuda DESC LIMIT 1));", 
-                                    (item[1][1], item[1][4], item[1][0], item[1][5], item[1][3], item[1][4] - abs(total_due), item[1][5], self.debtor_chosen[0], ))
-                    total_due = 0
-                else: # el producto NO es deuda
-                    makeInsertQuery("INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, NULL);", (item[1][1], item[1][4], item[1][0], item[1][5], item[1][3], item[1][4],))
-                # actualiza el stock
-                makeUpdateQuery("UPDATE Productos SET stock = stock - ? WHERE nombre = ?;", (item[1][1], item[1][0],))
+                    # inserta a Detalle_Ventas
+                    cursor.execute(
+                        "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) \
+                        VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?),\
+                        (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, NULL);",
+                        (item.quantity, item.subtotal, item.product_name, self.ui.dateTimeEdit_sale.text(),
+                         item.sale_details, item.subtotal,)
+                        )
+                    
+                    # actualiza en Productos
+                    cursor.execute(
+                        "UPDATE Productos SET stock = stock - ? WHERE nombre = ?;",
+                        (item.quantity, item.product_name,)
+                    )
+                    
+                    conn.commit()
+                
+                except sqlite3Error as err:
+                    conn.rollback()
+                    logging.error(f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+                    conn.close()
+            
+            conn.close()
+            
             self.__resetListAndFields()
-
-        elif total_paid >= re_total_price:
-            for item in self.ITEMS_VALUES.items():
-                makeInsertQuery("INSERT INTO Ventas(fecha_hora, detalles_venta) VALUES(?,?);", (item[1][5], item[1][3],))
-                makeInsertQuery("INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, NULL);", (item[1][1], item[1][4], item[1][0], item[1][5], item[1][3], item[1][4],))
-                makeUpdateQuery("UPDATE Productos SET stock = stock - ? WHERE nombre = ?;", (item[1][1], item[1][0],))
-            self.__resetListAndFields()
+            self.ui.btn_end_sale.setEnabled(False)
+        
         return None
+
+        
+        # if total_paid < self.TOTAL_COST and self.debtor_chosen:
+        #     total_due = total_paid
+        #     # recorre cada item y hace las consultas INSERT y UPDATE (a Productos)
+        #     for item in self.ITEMS_VALUES.items():
+        #         makeInsertQuery("INSERT INTO Ventas(fecha_hora, detalles_venta) VALUES(?,?);", (item[1][5], item[1][3],))
+        #         # Deudas y Detalle_Ventas (con IDdeuda)
+        #         total_due -= item[1][4] # deuda = total abonado - subtotal
+        #         if total_due < 0: # el producto es deuda
+        #             makeInsertQuery("INSERT INTO Deudas(fecha_hora, total_adeudado, IDdeudor) VALUES(?,?,?);", (item[1][5], abs(total_due), self.debtor_chosen[0]))
+                    
+        #             # ? ya probé la consulta de abajo y al parecer funciona bien. Los registros de Detalle_Ventas 
+        #             # ? apuntan a donde deben... pero igualmente prefiero estar atento a esto...
+        #             makeInsertQuery("INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, (SELECT IDdeuda FROM Deudas WHERE fecha_hora = ? AND IDdeudor = ? ORDER BY IDdeuda DESC LIMIT 1));", 
+        #                             (item[1][1], item[1][4], item[1][0], item[1][5], item[1][3], item[1][4] - abs(total_due), item[1][5], self.debtor_chosen[0], ))
+        #             total_due = 0
+        #         else: # el producto NO es deuda
+        #             makeInsertQuery("INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, NULL);", (item[1][1], item[1][4], item[1][0], item[1][5], item[1][3], item[1][4],))
+        #         # actualiza el stock
+        #         makeUpdateQuery("UPDATE Productos SET stock = stock - ? WHERE nombre = ?;", (item[1][1], item[1][0],))
+        #     self.__resetListAndFields()
 
 
     
-    #### DEUDAS ######################################################
+    #¡### DEUDAS ######################################################
     def __fillDebtsTable(self) -> None:
         '''Es llamada desde 'handleTableToFill'. Recorre cada item y, dependiendo de la columna en la que esté, crea instancias \
         de las siguientes clases:\n

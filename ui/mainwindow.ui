@@ -825,7 +825,7 @@ QProgressBar::chunk {
                        <bool>false</bool>
                       </property>
                       <property name="toolTip">
-                       <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Buscar un producto en la tabla según su nombre, características, palabras claves, etc.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Buscar un producto en la tabla según su nombre, características, palabras claves, etc.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                       </property>
                       <property name="text">
                        <string notr="true"/>
@@ -878,7 +878,7 @@ QProgressBar::chunk {
                  <item>
                   <widget class="QTableWidget" name="displayTable">
                    <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Para &lt;span style=&quot; text-decoration: underline;&quot;&gt;modificar&lt;/span&gt; las &lt;span style=&quot; text-decoration: underline;&quot;&gt;características&lt;/span&gt; de un producto, simplemente hacer &lt;span style=&quot; font-style:italic;&quot;&gt;doble click&lt;/span&gt; sobre la celda que se quiere modificar e ingresar el nuevo valor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Para &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;modificar&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; las &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;características&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; de un producto, simplemente hacer &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;doble click&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; sobre la celda que se quiere modificar e ingresar el nuevo valor.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
                    <property name="frameShape">
                     <enum>QFrame::NoFrame</enum>
@@ -944,7 +944,7 @@ QProgressBar::chunk {
                    </column>
                    <column>
                     <property name="text">
-                     <string notr="true">precio unitario</string>
+                     <string notr="true">precio normal</string>
                     </property>
                     <property name="textAlignment">
                      <set>AlignCenter</set>
@@ -1022,7 +1022,7 @@ color: #111;</string>
                     <item>
                      <widget class="QPushButton" name="btn_add_product_inventory">
                       <property name="toolTip">
-                       <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Añadir un producto nuevo a la lista de productos actual (&lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-style:italic;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;). &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Añadir un producto nuevo a la lista de productos actual (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;). &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                       </property>
                       <property name="text">
                        <string notr="true">Nuevo producto</string>
@@ -1041,7 +1041,7 @@ color: #111;</string>
                     <item>
                      <widget class="QPushButton" name="btn_delete_product_inventory">
                       <property name="toolTip">
-                       <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Borra el producto actualmente seleccionado (&lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-style:italic;&quot;&gt;supr&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, debe estar seguro de querer eliminar un producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Borra el producto actualmente seleccionado (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;supr&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, debe estar seguro de querer eliminar un producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                       </property>
                       <property name="styleSheet">
                        <string notr="true">QPushButton {
@@ -1281,7 +1281,7 @@ margin-bottom: 5px;</string>
                        <item>
                         <widget class="QCheckBox" name="checkbox_unit_prices">
                          <property name="toolTip">
-                          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Muestra una columna en la tabla de inventario que permite seleccionar los productos cuyo &lt;/span&gt;&lt;span style=&quot; text-decoration: underline; color:#000000;&quot;&gt;precio unitario&lt;/span&gt;&lt;span style=&quot; color:#000000;&quot;&gt; se desee cambiar porcentualmente.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#000000;&quot;&gt;Cambia el &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline; color:#000000;&quot;&gt;precio normal&lt;/span&gt;&lt;span style=&quot; font-size:12pt; color:#000000;&quot;&gt; de los productos seleccionados.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                          </property>
                          <property name="text">
                           <string notr="true">Precios unitarios</string>
@@ -1300,7 +1300,7 @@ margin-bottom: 5px;</string>
                        <item>
                         <widget class="QCheckBox" name="checkbox_comercial_prices">
                          <property name="toolTip">
-                          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Muestra una columna en la tabla de inventario que permite seleccionar los productos cuyo &lt;/span&gt;&lt;span style=&quot; text-decoration: underline; color:#000000;&quot;&gt;precio comercial&lt;/span&gt;&lt;span style=&quot; color:#000000;&quot;&gt; se desee cambiar porcentualmente.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#000000;&quot;&gt;Cambia el &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline; color:#000000;&quot;&gt;precio comercial&lt;/span&gt;&lt;span style=&quot; font-size:12pt; color:#000000;&quot;&gt; de los productos seleccionados.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                          </property>
                          <property name="text">
                           <string notr="true">Precios comerciales</string>
@@ -1318,6 +1318,9 @@ margin-bottom: 5px;</string>
                        </item>
                        <item>
                         <widget class="QLabel" name="percentage_label">
+                         <property name="toolTip">
+                          <string notr="true"/>
+                         </property>
                          <property name="styleSheet">
                           <string notr="true">margin-top: 20px;
 margin-bottom: 0;</string>
@@ -1348,7 +1351,7 @@ margin-bottom: 0;</string>
                           <bool>false</bool>
                          </property>
                          <property name="toolTip">
-                          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; color:#000000;&quot;&gt;Aumenta o disminuye un cierto porcentaje los precios unitarios/precios comerciales seleccionados.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; color:#000000;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt; color:#000000;&quot;&gt; No es necesario escribir el símbolo de porcentaje &amp;quot;%&amp;quot;, simplemente escribir el porcentaje nuevo. &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; color:#000000;&quot;&gt;EJEMPLOS: &lt;/span&gt;&lt;span style=&quot; font-size:11pt; color:#000000;&quot;&gt;Para aumentar un 25% un valor, introducir &amp;quot;25&amp;quot;; en cambio, para disminuir el precio un 25%, introducir &amp;quot;-25&amp;quot;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#000000;&quot;&gt;Aumenta o disminuye un cierto porcentaje los precios normales/comerciales seleccionados.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; color:#000000;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:12pt; color:#000000;&quot;&gt; No es necesario escribir el símbolo de porcentaje &amp;quot;%&amp;quot;, simplemente escribir el porcentaje nuevo.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; color:#000000;&quot;&gt;EJ.: &lt;/span&gt;&lt;span style=&quot; font-size:12pt; color:#000000;&quot;&gt;Para aumentar un 25% un valor, introducir &amp;quot;25&amp;quot;; en cambio, para disminuir el precio un 25%, introducir &amp;quot;-25&amp;quot;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                          </property>
                          <property name="styleSheet">
                           <string notr="true">QLineEdit {
@@ -1567,7 +1570,7 @@ color: #111;</string>
                            </size>
                           </property>
                           <property name="toolTip">
-                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Agrega un producto más a la venta actual (&lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-style:italic;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                           <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Agrega un producto más a la venta actual (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                           </property>
                           <property name="text">
                            <string>Agregar producto</string>
@@ -1662,7 +1665,7 @@ QListWidget::item:selected {
 
 
 #label_total_change {
-	color: #f00;
+	color: #dc2627;
 }
 
 
@@ -1723,7 +1726,10 @@ QListWidget::item:selected {
                         </size>
                        </property>
                        <property name="toolTip">
-                        <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;La cantidad de dinero pagado en esta venta. Si es &lt;/span&gt;&lt;span style=&quot; font-size:11pt; text-decoration: underline;&quot;&gt;menor al total&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;, la diferencia se considera &lt;/span&gt;&lt;span style=&quot; font-size:11pt; text-decoration: underline;&quot;&gt;deuda&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;. Si es &lt;/span&gt;&lt;span style=&quot; font-size:11pt; text-decoration: underline;&quot;&gt;mayor que el total&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;, se calcula el &lt;/span&gt;&lt;span style=&quot; font-size:11pt; text-decoration: underline;&quot;&gt;vuelto&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                        <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;La cantidad de dinero pagado en esta venta. Si es &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;menor al total&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;, la diferencia se considera &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;deuda&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;. Si es &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;mayor que el total&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;, se calcula el &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;vuelto&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="inputMask">
+                        <string notr="true"/>
                        </property>
                        <property name="text">
                         <string notr="true"/>
@@ -1861,7 +1867,7 @@ border-right: 1px solid #111;</string>
                         <bool>false</bool>
                        </property>
                        <property name="toolTip">
-                        <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Guarda los datos de la venta actual y da por terminada la venta (&lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-style:italic;&quot;&gt;mayúsculas &lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-style:italic;&quot;&gt; enter&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                        <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Guarda los datos de la venta actual y da por terminada la venta (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;mayúsculas &lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt; enter&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                        </property>
                        <property name="text">
                         <string>Finalizar venta</string>
@@ -1890,8 +1896,8 @@ border-right: 1px solid #111;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>756</width>
-                <height>498</height>
+                <width>150</width>
+                <height>161</height>
                </rect>
               </property>
               <attribute name="label">
@@ -1937,7 +1943,7 @@ border-right: 1px solid #111;</string>
                   <bool>false</bool>
                  </property>
                  <property name="toolTip">
-                  <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Buscar una venta en la tabla según nombres, características, palabras claves, etc.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Buscar una venta en la tabla según nombres, características, palabras claves, etc.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="text">
                   <string notr="true"/>
@@ -1987,7 +1993,7 @@ border-right: 1px solid #111;</string>
                <item>
                 <widget class="QTableWidget" name="table_sales_data">
                  <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Para &lt;span style=&quot; text-decoration: underline;&quot;&gt;modificar&lt;/span&gt; un dato de alguna venta hacer &lt;span style=&quot; font-style:italic;&quot;&gt;doble click&lt;/span&gt; sobre una celda e ingresar el nuevo valor.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; si se cambia el &lt;span style=&quot; font-style:italic;&quot;&gt;producto vendido&lt;/span&gt; o la &lt;span style=&quot; font-style:italic;&quot;&gt;cantidad vendida&lt;/span&gt; de un producto NO se verá afectado el stock de ese producto directamente, para eso es necesario cambiar el stock de ese producto manualmente mediante la pestaña de &lt;span style=&quot; font-style:italic;&quot;&gt;inventario&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Para &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;modificar&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; un dato de alguna venta hacer &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;doble click&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; sobre una celda e ingresar el nuevo valor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; si se cambia el &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;producto vendido&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; o la &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;cantidad vendida&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; de un producto NO se verá afectado el stock de ese producto directamente, para eso es necesario cambiar el stock de ese producto manualmente mediante la pestaña de &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;inventario&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="styleSheet">
                   <string notr="true"/>
@@ -2117,7 +2123,7 @@ color: #111;</string>
                   <item>
                    <widget class="QPushButton" name="btn_add_product_sales">
                     <property name="toolTip">
-                     <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Añadir un producto nuevo vendido a la lista de ventas actual (&lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-style:italic;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Añadir un producto nuevo vendido a la lista de ventas actual (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                     <property name="text">
                      <string notr="true">Nueva venta</string>
@@ -2136,7 +2142,7 @@ color: #111;</string>
                   <item>
                    <widget class="QPushButton" name="btn_delete_product_sales">
                     <property name="toolTip">
-                     <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Borra el producto vendido actualmente seleccionado (&lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-style:italic;&quot;&gt;supr&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, debe estar seguro de querer eliminar un producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Borra el producto vendido actualmente seleccionado (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;supr&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, debe estar seguro de querer eliminar un producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                     <property name="styleSheet">
                      <string notr="true">QPushButton {
@@ -2245,7 +2251,7 @@ QPushButton:hover {
                  <bool>false</bool>
                 </property>
                 <property name="toolTip">
-                 <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Buscar una deuda en la tabla según nombres, características, palabras claves, etc.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Buscar una deuda en la tabla según nombres, características, palabras claves, etc.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string notr="true"/>
@@ -2298,7 +2304,7 @@ QPushButton:hover {
               <item>
                <widget class="QTableWidget" name="table_debts">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Para &lt;span style=&quot; text-decoration: underline;&quot;&gt;modificar&lt;/span&gt; las &lt;span style=&quot; text-decoration: underline;&quot;&gt;características&lt;/span&gt; de una deuda simplemente hacer &lt;span style=&quot; font-style:italic;&quot;&gt;doble click&lt;/span&gt; sobre la celda que se quiere modificar e ingresar el nuevo valor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Para &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;modificar&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; las &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;características&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; de una deuda simplemente hacer &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;doble click&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; sobre la celda que se quiere modificar e ingresar el nuevo valor.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="styleSheet">
                  <string notr="true">#table_debts QLabel {
@@ -2423,7 +2429,7 @@ color: #111;</string>
                  <item>
                   <widget class="QPushButton" name="btn_add_debt">
                    <property name="toolTip">
-                    <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Agrega una deuda nueva a la tabla (&lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-style:italic;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Agrega una deuda nueva a la tabla (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
                    <property name="text">
                     <string notr="true">Nueva deuda</string>
@@ -2442,7 +2448,7 @@ color: #111;</string>
                  <item>
                   <widget class="QPushButton" name="btn_delete_debt">
                    <property name="toolTip">
-                    <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Elimina la deuda actualmente seleccionada en la tabla (&lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-style:italic;&quot;&gt;supr&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, debe estar seguro de querer borrar una deuda.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Elimina la deuda actualmente seleccionada en la tabla (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;supr&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, debe estar seguro de querer borrar una deuda.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
                    <property name="styleSheet">
                     <string notr="true">QPushButton {
