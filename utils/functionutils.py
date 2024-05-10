@@ -6,8 +6,6 @@ from PySide6.QtCore import (QRegularExpression, QModelIndex, Qt, QPropertyAnimat
                             QEasingCurve, QDateTime, QDate, QTime)
 from PySide6.QtGui import (QRegularExpressionValidator)
 
-from re import (Match, match, search, sub, IGNORECASE)
-
 from resources import (rc_icons)
 from utils.dboperations import *
 from utils.customvalidators import *
@@ -45,6 +43,8 @@ def __toggleSideBarWidgetsVisibility(body:QFrame, signal:int):
         case 1:
             body.show()
     return None
+
+
 #========================================================================================================================
 # tooltips
 def set_tables_ListWidgetItemsTooltip(listWidget:QListWidget, categories_descriptions:tuple[str]) -> None:
@@ -90,7 +90,6 @@ def set_tables_ListWidgetItemsTooltip(listWidget:QListWidget, categories_descrip
             case "Varios":
                 listWidget.item(row).setToolTip(f"<html><head/><body><p><span style=\" font-size:11pt; color: #111;\">{categories_descriptions[16]}</span></p></body></html>")
     return None
-
 
 
 #========================================================================================================================
@@ -182,6 +181,34 @@ def getSelectedTableRows(tableWidget:QTableWidget) -> tuple:
         if index.row() not in selected_indexes:
             selected_indexes.append(index.row())
     return tuple(selected_indexes)
+
+
+def getCurrentProductStock(product_name:str) -> tuple[float,str]:
+        '''
+        Hace una consulta SELECT y obtiene el stock actual del producto ingresado. 
+        
+        Retorna una tupla con el stock como número y la unidad de medida como 'str'.
+        '''
+        conn:Connection | None
+        stock:float
+        measurement_unit:str
+
+        conn = createConnection("database/inventario.db")
+        if not conn:
+            return None
+        cursor = conn.cursor()
+        query = cursor.execute("SELECT stock, unidad_medida FROM Productos WHERE nombre = ?;", (product_name,)).fetchone()
+        if len(query) == 2:
+            stock, measurement_unit = [q for q in query]
+        else:
+            stock = query[0]
+            measurement_unit = ""
+        
+        try:
+            stock = float(stock)
+        except:
+            pass
+        return stock, measurement_unit
 
 
 #========================================================================================================================
