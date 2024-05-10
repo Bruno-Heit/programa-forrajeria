@@ -4,6 +4,7 @@ En este archivo están todas las clases de WORKER THREADS
 from PySide6.QtCore import (QObject, Signal, Slot)
 
 from utils.functionutils import (createConnection)
+from utils.enumclasses import (LoggingMessage)
 
 from sqlite3 import (Connection, Error as sqlite3Error)
 from typing import (Any)
@@ -61,8 +62,9 @@ class DbReadWorker(QObject):
         for n,reg in enumerate(data_query):
             signal = tuple((n, reg))
             self.registerProgress.emit(signal)
-            
+        
         self.finished.emit(1) #* todo bien
+        logging.debug(LoggingMessage.DEBUG_DB_MULT_SELECT_SUCCESS)
         conn.close()
 
 
@@ -107,22 +109,20 @@ class DbDeleteWorker(QObject):
                     cursor.execute(sql, param)
                     conn.commit()
                     self.progress.emit(n)
-                    logging.debug(f">> Consulta DELETE a ID={param[0]} realizada exitosamente...")
-                logging.debug(f">> Todas las consultas DELETE terminadas.")
+                logging.debug(LoggingMessage.DEBUG_DB_MULT_DELETE_SUCCESS)
                 
             elif not sql and mult_sql:
                 for n,param in enumerate(params):
                     for sql in mult_sql:
                         cursor.execute(sql, param[:sql.count("?")])
                         conn.commit()
-                    logging.debug(f">> Consulta DELETE a ID={param[0]} realizada exitosamente...")
                     self.progress.emit(n)
-                logging.debug(f">> Todas las consultas DELETE terminadas.")
+                logging.debug(LoggingMessage.DEBUG_DB_MULT_DELETE_SUCCESS)
                 
             
         except sqlite3Error as err: #! errores de base de datos, consultas, etc.
             conn.rollback()
-            logging.error(f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+            logging.error(LoggingMessage.ERROR_DB_DELETE, f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
             self.finished.emit(err.sqlite_errorcode)
             
         finally:
@@ -164,14 +164,14 @@ class DbInsertWorker(QObject):
         if SINGLE_REG:
             try:
                 cursor.execute(data_sql, data_params) if data_params else cursor.execute(data_sql)
-                logging.debug(f">> Consulta INSERT realizada exitosamente...")
                 
                 conn.commit()
+                logging.debug(LoggingMessage.DEBUG_DB_MULT_INSERT_SUCCESS)
                 self.finished.emit(1) #* todo bien
                 
             except sqlite3Error as err:
                 conn.rollback()
-                logging.error(f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+                logging.error(LoggingMessage.ERROR_DB_INSERT, f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
                 self.finished.emit(err.sqlite_errorcode) #! error al realizar el insert
                 
             finally:
@@ -217,12 +217,11 @@ class DbUpdateWorker(QObject):
                 cursor.execute(sql, param)
                 conn.commit()
                 self.progress.emit(n)
-                logging.debug(f">> Consulta UPDATE a ID={param[0]} realizada exitosamente...")
-            logging.debug(f">> Todas las consultas UPDATE terminadas.")
+            logging.debug(LoggingMessage.DEBUG_DB_MULT_UPDATE_SUCCESS)
             
         except sqlite3Error as err:
             conn.rollback()
-            logging.error(f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+            logging.error(LoggingMessage.ERROR_DB_UPDATE, f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
             self.finished.emit(err.sqlite_errorcode) #! error al realizar el update
                 
         finally:
