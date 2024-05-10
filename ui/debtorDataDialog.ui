@@ -21,17 +21,15 @@
   </property>
   <property name="styleSheet">
    <string notr="true">* {
-	background-color: transparent;
 	color: #111;
-/*	border-color: #0b7e7f;*/
 	border-color: #7f7e0b;
-	font-family: &quot;Tahoma&quot;, &quot;Sans-Serif&quot;;
+	font-family: &quot;Tahoma&quot;, &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
 	font-size: 16px;
 }
 
 
 QDialog {
-	background-color: qlineargradient(spread:pad, x1:0.658, y1:1, x2:0.289, y2:0, stop:0 rgba(203, 132, 96, 255), stop:1 rgba(239, 226, 187, 255));
+	background-color: qlineargradient(spread:pad, x1:0, y1:0.124364, x2:1, y2:0.409182, stop:0 rgba(178, 229, 246, 255), stop:0.393082 rgba(143, 201, 220, 255), stop:0.59306 rgba(67, 118, 134, 255), stop:0.761006 rgba(152, 151, 154, 255), stop:0.795597 rgba(110, 108, 112, 255), stop:0.845912 rgba(110, 108, 112, 255), stop:0.946372 rgba(67, 118, 134, 255), stop:1 rgba(143, 201, 220, 255));
 }
 
 
@@ -39,7 +37,9 @@ QDialog {
 #label_debtorSurname_feedback,
 #label_phoneNumber_feedback,
 #label_postalCode_feedback {
-	color: #f00;
+	color: #dc2627;
+	border: 1px solid #dc2627;
+	background-color: rgba(224,164,164,0.7);
 }
 
 
@@ -121,7 +121,7 @@ QPushButton:disabled {
       <item row="6" column="2" colspan="3">
        <widget class="QLineEdit" name="lineEdit_direction">
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(Opcional) dirección del deudor.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; si el deudor ya existe en la base de datos es recomendable &lt;span style=&quot; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;, porque creará un registro diferente del mismo deudor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;(Opcional) dirección del deudor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; si el deudor ya existe en la base de datos es recomendable &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;, porque creará un registro diferente del mismo deudor.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="inputMask">
          <string notr="true"/>
@@ -147,7 +147,7 @@ QPushButton:disabled {
       <item row="7" column="2" colspan="3">
        <widget class="QLineEdit" name="lineEdit_postalCode">
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(Opcional) código postal del deudor.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; si el deudor ya existe en la base de datos es recomendable &lt;span style=&quot; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;, porque creará un registro diferente del mismo deudor.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; por conveniencia sólo admite códigos postales de Argentina.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;(Opcional) código postal del deudor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; si el deudor ya existe en la base de datos es recomendable &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;, porque creará un registro diferente del mismo deudor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; por conveniencia sólo admite códigos postales de Argentina.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="inputMask">
          <string notr="true"/>
@@ -163,7 +163,7 @@ QPushButton:disabled {
         </property>
        </widget>
       </item>
-      <item row="2" column="4">
+      <item row="2" column="4" alignment="Qt::AlignRight|Qt::AlignTop">
        <widget class="QLabel" name="label_debtorSurname_feedback">
         <property name="text">
          <string notr="true"/>
@@ -182,7 +182,7 @@ QPushButton:disabled {
       <item row="1" column="1" colspan="2">
        <widget class="QLineEdit" name="lineEdit_debtorName">
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nombre del deudor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;El nombre del deudor.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
          <string notr="true"/>
@@ -198,7 +198,7 @@ QPushButton:disabled {
         </property>
        </widget>
       </item>
-      <item row="4" column="0" colspan="5">
+      <item row="4" column="0" colspan="5" alignment="Qt::AlignHCenter|Qt::AlignTop">
        <widget class="QLabel" name="label_phoneNumber_feedback">
         <property name="text">
          <string notr="true"/>
@@ -249,7 +249,7 @@ border-bottom: 1px solid;
 border-color: rgb(11, 126, 127);</string>
         </property>
         <property name="text">
-         <string notr="true">INFORMACIÓN SOBRE EL DEUDOR</string>
+         <string notr="true">DATOS DEL DEUDOR</string>
         </property>
         <property name="textFormat">
          <enum>Qt::PlainText</enum>
@@ -275,7 +275,7 @@ border-color: rgb(11, 126, 127);</string>
       <item row="1" column="4">
        <widget class="QLineEdit" name="lineEdit_debtorSurname">
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Apellido del deudor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;El apellido del deudor.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
          <string notr="true"/>
@@ -298,7 +298,7 @@ border-color: rgb(11, 126, 127);</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1" colspan="2">
+      <item row="2" column="1" colspan="2" alignment="Qt::AlignLeft|Qt::AlignTop">
        <widget class="QLabel" name="label_debtorName_feedback">
         <property name="text">
          <string notr="true"/>
@@ -320,19 +320,19 @@ border-color: rgb(11, 126, 127);</string>
       <item row="3" column="2" colspan="3">
        <widget class="QLineEdit" name="lineEdit_phoneNumber">
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(Opcional) número de teléfono del deudor.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; si el deudor ya existe en la base de datos es recomendable &lt;span style=&quot; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;, porque creará un registro diferente del mismo deudor.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; no lleva ni 0 ni 15, pero sí requiere el código de país (el de Argentina es +54).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;(Opcional) número de teléfono del deudor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; si el deudor ya existe en la base de datos es recomendable &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;, porque creará un registro diferente del mismo deudor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; no lleva ni 0 ni 15, pero sí requiere el código de país (el de Argentina es +54).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="inputMask">
-         <string notr="true">+99-9999-000000000</string>
+         <string notr="true"/>
         </property>
         <property name="text">
-         <string>+54--</string>
+         <string notr="true"/>
         </property>
         <property name="frame">
          <bool>false</bool>
         </property>
         <property name="cursorPosition">
-         <number>18</number>
+         <number>0</number>
         </property>
         <property name="placeholderText">
          <string notr="true">(Opcional) Ej.: 2323-123456</string>
@@ -342,7 +342,7 @@ border-color: rgb(11, 126, 127);</string>
         </property>
        </widget>
       </item>
-      <item row="8" column="0" colspan="5">
+      <item row="8" column="0" colspan="5" alignment="Qt::AlignHCenter|Qt::AlignTop">
        <widget class="QLabel" name="label_postalCode_feedback">
         <property name="text">
          <string notr="true"/>

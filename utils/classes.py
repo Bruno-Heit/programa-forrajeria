@@ -27,8 +27,9 @@ class WidgetStyle(Enum):
     LABEL_NEUTRAL_VAL:str = "color: #555; border: none; background-color: rgba(200,200,200,0.7);"
     FIELD_VALID_VAL:str = "border: 1px solid #40dc26; background-color: rgba(185, 224, 164, 0.7);"
     FIELD_INVALID_VAL:str = "border: 1px solid #dc2627; background-color: rgba(224, 164, 164, 0.7);"
-    
 
+
+# ==============================================================================================================
 
 
 # Dialog con datos de un producto
@@ -1572,61 +1573,7 @@ class ListItemWidget(QWidget):
         return None
 
 
-
-
-
-# subclase con métodos de validación para las clases que manejen datos de deudores
-class DebtorDataValidation():
-    '''Clase que se encarga de llevar a cabo la validación de datos de deudores. Es usada en la clase 'DebtorDataDialog'.'''
-    def __init__(self, name:QLineEdit, surname:QLineEdit, phone_number:QLineEdit, postal_code:QLineEdit):
-        self.name:QLineEdit = name
-        self.surname:QLineEdit = surname
-        self.phone_number:QLineEdit = phone_number
-        self.postal_code:QLineEdit = postal_code
-
-        self.VALID_FIELDS:dict[str:bool] = {'name': None,
-                                            'surname': None,
-                                            'phone_number':True,
-                                            'postal_code':True}
-
-    #### MÉTODOS #####################################################
-    def validateDebtorNameField(self) -> None:
-        '''Valida que el nombre del deudor no esté vacío y cambia el valor de verdad de 'VALID_FIELDS["name"]'. Retorna 'None'.'''
-        self.VALID_FIELDS['name'] = False if self.name.text().strip() == "" else True
-        return None
-    
-
-    def validateDebtorSurnameField(self) -> None:
-        '''Valida que el apellido del deudor no esté vacío y cambia el valor de verdad de 'VALID_FIELDS["surname"]'. Retorna 'None'.'''
-        self.VALID_FIELDS['surname'] = False if self.surname.text().strip() == "" else True
-        return None
-    
-
-    def validateDebtorPhoneNumberField(self) -> None:
-        '''Valida que el número de teléfono del deudor no sea muy corto y cambia el valor de verdad de 'VALID_FIELDS["phone_number"]'. Retorna 'None'.'''
-        phone_number:str = self.phone_number.text().replace(" ", "").replace("+", "").replace("-", "")[2:]
-        
-        # si no está vacío y tiene menos de 6 dígitos (phone_number no tiene los primeros 2 dígitos, por eso pongo 4)...
-        if phone_number != "" and (0 < len(phone_number) < 4):
-            self.VALID_FIELDS['phone_number'] = False
-        else:
-            self.VALID_FIELDS['phone_number'] = True
-        return None
-    
-
-    def validateDebtorPostalCodeField(self) -> None:
-        '''Valida que el código postal del deudor no sea menor a 1 y cambia el valor de verdad de 'VALID_FIELDS["postal_code"]. Retorna 'None'.'''
-        postal_code:int = int(self.postal_code.text().strip().replace(".", "").replace(",", "")) if self.postal_code.text() != "" else ""
-        self.postal_code.setText(str(postal_code))
-
-        if self.postal_code.text() and postal_code < 1:
-            self.VALID_FIELDS['postal_code'] = False
-        else:
-            self.VALID_FIELDS['postal_code'] = True
-        return None
-
-
-
+# ==============================================================================================================
 
 
 # Dialog con datos de deudores
@@ -1635,25 +1582,12 @@ class DebtorDataDialog(QDialog):
     QDialog con datos de deudores. Se usa en 'MainWindow' cuando se presiona 'MainWindow.btn_end_sale' y 
     el total abonado es menor al costo total.
     '''
-    debtorChosen = Signal(object) # emite 
+    debtorChosen = Signal(object)
     
     def __init__(self):
         super(DebtorDataDialog, self).__init__()
         self.debtorData = Ui_debtorDataDialog()
         self.debtorData.setupUi(self)
-        
-        # TODO: modificar este código cancerígeno para en vez de usar la subclase DebtorDataValidation use 
-        # todo: validadores como la gente -__-
-        
-        self.dataValidation = DebtorDataValidation(
-            self.debtorData.lineEdit_debtorName,
-            self.debtorData.lineEdit_debtorSurname,
-            self.debtorData.lineEdit_phoneNumber,
-            self.debtorData.lineEdit_postalCode)
-
-        self.debtorData.lineEdit_debtorName.setCompleter(createCompleter(type=1))
-        self.debtorData.lineEdit_debtorSurname.setCompleter(createCompleter(type=2))
-
         self.debtorData.buttonBox.button(QDialogButtonBox.Ok).setText("Aceptar")
         self.debtorData.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
 
@@ -1665,7 +1599,14 @@ class DebtorDataDialog(QDialog):
                                                       QDialogButtonBox QPushButton[text='Cancelar']:pressed {\
                                                         background-color: #faa;\
                                                       }")
-
+        
+        # TODO: modificar este código cancerígeno para en vez de usar la subclase DebtorDataValidation use 
+        # todo: validadores como la gente -__-
+        
+        # completers
+        self.debtorData.lineEdit_debtorName.setCompleter(createCompleter(type=1))
+        self.debtorData.lineEdit_debtorSurname.setCompleter(createCompleter(type=2))
+        
         self.debtorData.lineEdit_postalCode.setValidator(QIntValidator(1, 9_999))
 
         #--- SEÑALES --------------------------------------------------
@@ -1737,7 +1678,13 @@ class DebtorDataDialog(QDialog):
     
 
     def getFieldsData(self) -> tuple:
-        '''Obtiene todos los datos de los campos y formatea los valores. Retorna una tupla con los valores.'''
+        '''
+        Es llamado desde 'self.handleOkClicked'.
+        
+        Obtiene todos los datos de los campos y formatea los valores.
+        
+        Retorna una tupla con los valores.
+        '''
         # obtengo y formateo el número de teléfono...
         phone_number:str | None = self.debtorData.lineEdit_phoneNumber.text().replace(" ", "")
         re_valid_ph_number:Match | None = match("\+[0-9]{2}-[0-9]{4}-[0-9]*", phone_number)
@@ -1760,7 +1707,7 @@ class DebtorDataDialog(QDialog):
     @Slot()
     def handleOkClicked(self) -> None:
         '''
-        Es llamado una vez que se presiona el botón "Aceptar".
+        Es llamado desde la señal 'clicked' del botón "Aceptar".
         
         Obtiene los datos de los campos formateados e inserta los valores en la base de datos en las tablas de 
         "Deudores" (si no existe el deudor). Al final envía una señal con el ID, nombre y apellido del deudor al 
