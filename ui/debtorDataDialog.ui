@@ -51,10 +51,18 @@ QLineEdit {
 	height: 24px;
 }
 QLineEdit:focus {
-	background-color: rgb(197, 255, 252);
+	background-color: rgba(176, 214, 245, 0.6);
 	border: 1px solid;
 	border-color: #0b7e7f;
 	font-size: 18px;
+}
+
+
+#lineEdit_direction:disabled,
+#lineEdit_phoneNumber:disabled,
+#lineEdit_postalCode:disabled {
+	background-color: rgba(204, 204, 204, 0.6);
+	color: #888;
 }
 
 
@@ -172,7 +180,7 @@ QPushButton:disabled {
          <set>Qt::AlignCenter</set>
         </property>
         <property name="wordWrap">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="textInteractionFlags">
          <set>Qt::NoTextInteraction</set>
@@ -207,7 +215,7 @@ QPushButton:disabled {
          <set>Qt::AlignCenter</set>
         </property>
         <property name="wordWrap">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="textInteractionFlags">
          <set>Qt::NoTextInteraction</set>
@@ -310,7 +318,7 @@ border-color: rgb(11, 126, 127);</string>
          <set>Qt::AlignCenter</set>
         </property>
         <property name="wordWrap">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="textInteractionFlags">
          <set>Qt::NoTextInteraction</set>
@@ -351,7 +359,7 @@ border-color: rgb(11, 126, 127);</string>
          <set>Qt::AlignCenter</set>
         </property>
         <property name="wordWrap">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="textInteractionFlags">
          <set>Qt::NoTextInteraction</set>

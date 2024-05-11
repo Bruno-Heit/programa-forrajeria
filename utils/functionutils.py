@@ -409,12 +409,12 @@ def createCompleter(sql:str=None, params:tuple=None, type:int=None) -> QComplete
     
     else:
         if type == 1: # nombres de personas con cta. corriente
-            query = makeReadQuery("SELECT nombre FROM Deudores;")
+            query = makeReadQuery("SELECT DISTINCT nombre FROM Deudores;")
             names = [name[0] for name in query]
             completer = QCompleter(names)
         
         elif type == 2:# apellidos de personas con cta. corriente
-            query = makeReadQuery("SELECT apellido FROM Deudores;")
+            query = makeReadQuery("SELECT DISTINCT apellido FROM Deudores;")
             surnames = [surname[0] for surname in query]
             completer = QCompleter(surnames)
         

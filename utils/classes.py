@@ -13,23 +13,13 @@ from resources import (rc_icons)
 from utils.functionutils import *
 from utils.workerclasses import *
 from utils.dboperations import *
+from utils.enumclasses import *
 
 from sqlite3 import (Error as sqlite3Error)
 from phonenumbers import (parse, format_number, is_valid_number, PhoneNumber, PhoneNumberFormat, NumberParseException)
-from enum import (Enum)
 
 
-# Enum con estilos generales para labels
-class WidgetStyle(Enum):
-    '''
-    Clase de tipo 'Enum' con estilos generales para aplicar a los widgets.
-    '''
-    LABEL_NEUTRAL_VAL:str = "color: #555; border: none; background-color: rgba(200,200,200,0.7);"
-    FIELD_VALID_VAL:str = "border: 1px solid #40dc26; background-color: rgba(185, 224, 164, 0.7);"
-    FIELD_INVALID_VAL:str = "border: 1px solid #dc2627; background-color: rgba(224, 164, 164, 0.7);"
-
-
-# ==============================================================================================================
+# PRODUCTOS ====================================================================================================
 
 
 # Dialog con datos de un producto
@@ -314,7 +304,7 @@ class ProductDialog(QDialog):
         return None
 
 
-# ==============================================================================================================
+# TABLA VENTAS =================================================================================================
 
 
 # Dialog con datos de la venta -y del deudor si se debe algo/hay algo a favor-
@@ -481,6 +471,8 @@ class SaleDialog(QDialog):
     @Slot(str)
     def validatorOnValidationSucceded(self, field_validated:str) -> None:
         '''
+        Es llamado desde la señal 'validationSucceded' de los validadores.
+        
         Cambia el valor del flag asociado al campo que fue validado 'field_validated' a True, cambia el 
         QSS del campo y esconde el QLabel asociado al campo, excepto si 'debtor_quantity' donde no esconde 
         el QLabel sino que cambia su QSS.
@@ -532,7 +524,7 @@ class SaleDialog(QDialog):
             
             case 'debtor_phone_num':
                 self.VALID_FIELDS['DEBTOR_PHONE_NUMBER'] = True
-                if self.saleDialog_ui.lineEdit_phoneNumber.text() != "":
+                if self.saleDialog_ui.lineEdit_phoneNumber.text() != "" and self.saleDialog_ui.lineEdit_phoneNumber.isEnabled():
                     self.saleDialog_ui.lineEdit_phoneNumber.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
                 else:
                     self.saleDialog_ui.lineEdit_phoneNumber.setStyleSheet("")
@@ -541,7 +533,7 @@ class SaleDialog(QDialog):
             
             case 'debtor_postal_code':
                 self.VALID_FIELDS['DEBTOR_POSTAL_CODE'] = True
-                if self.saleDialog_ui.lineEdit_postalCode.text() != "":
+                if self.saleDialog_ui.lineEdit_postalCode.text() != "" and self.saleDialog_ui.lineEdit_postalCode.isEnabled():
                     self.saleDialog_ui.lineEdit_postalCode.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
                 else:
                     self.saleDialog_ui.lineEdit_postalCode.setStyleSheet("")
@@ -555,6 +547,8 @@ class SaleDialog(QDialog):
     @Slot(str, str)
     def validatorOnValidationFailed(self, field_validated:str, error_message:str) -> None:
         '''
+        Es llamado desde la señal 'validationFailed' de los validadores.
+        
         Cambia el valor del flag asociado al campo que fue validado 'field_validated' a False, cambia el 
         QSS del campo y muestra el QLabel asociado al campo con el mensaje 'error_message' con feedback.
         
@@ -832,14 +826,14 @@ class SaleDialog(QDialog):
         # crea QCompleters
         if field_validated == 'debtor_name': # crea completer para apellidos que coincidan con el nombre
             self.saleDialog_ui.lineEdit_debtorSurname.setCompleter(
-                createCompleter(sql="SELECT apellido FROM Deudores WHERE nombre = ?",
+                createCompleter(sql="SELECT DISTINCT apellido FROM Deudores WHERE nombre = ?",
                                 params=(self.saleDialog_ui.lineEdit_debtorName.text(),)
                                 )
                 )
         
         elif field_validated == 'debtor_surname': # crea completer para nombres que coincidan con el apellido
             self.saleDialog_ui.lineEdit_debtorName.setCompleter(
-                createCompleter(sql="SELECT nombre FROM Deudores WHERE apellido = ?",
+                createCompleter(sql="SELECT DISTINCT nombre FROM Deudores WHERE apellido = ?",
                                 params=(self.saleDialog_ui.lineEdit_debtorSurname.text(),)
                                 )
                 )
@@ -852,14 +846,14 @@ class SaleDialog(QDialog):
                 params=(self.saleDialog_ui.lineEdit_debtorName.text(), self.saleDialog_ui.lineEdit_debtorSurname.text(), ))
             
             # los coloco en sus campos (si se encontraron coincidencias)
-            if len(debtor_data) > 0:
-                self.saleDialog_ui.lineEdit_phoneNumber.setText( str(debtor_data[0][0]) )
-                self.saleDialog_ui.lineEdit_direction.setText( str(debtor_data[0][1]) )
-                self.saleDialog_ui.lineEdit_postalCode.setText( str(debtor_data[0][2]) )
-                
+            if len(debtor_data) > 0:    
                 self.saleDialog_ui.lineEdit_phoneNumber.setEnabled(False)
                 self.saleDialog_ui.lineEdit_direction.setEnabled(False)
                 self.saleDialog_ui.lineEdit_postalCode.setEnabled(False)
+            
+                self.saleDialog_ui.lineEdit_phoneNumber.setText( str(debtor_data[0][0]) )
+                self.saleDialog_ui.lineEdit_direction.setText( str(debtor_data[0][1]) )
+                self.saleDialog_ui.lineEdit_postalCode.setText( str(debtor_data[0][2]) )
             
             else:
                 self.saleDialog_ui.lineEdit_phoneNumber.setEnabled(True)
@@ -1173,7 +1167,7 @@ class SaleDialog(QDialog):
         return None
 
 
-# ==============================================================================================================
+# FORMULARIO VENTAS ============================================================================================
 
 
 # valores de los campos de ListItemWidget
@@ -1573,7 +1567,7 @@ class ListItemWidget(QWidget):
         return None
 
 
-# ==============================================================================================================
+# DEUDORES =====================================================================================================
 
 
 # Dialog con datos de deudores
@@ -1582,7 +1576,7 @@ class DebtorDataDialog(QDialog):
     QDialog con datos de deudores. Se usa en 'MainWindow' cuando se presiona 'MainWindow.btn_end_sale' y 
     el total abonado es menor al costo total.
     '''
-    debtorChosen = Signal(object)
+    debtorChosen = Signal(object) # emite una tuple[IDdeudor,nombre,apellido] una vez elegido deudor
     
     def __init__(self):
         super(DebtorDataDialog, self).__init__()
@@ -1599,108 +1593,308 @@ class DebtorDataDialog(QDialog):
                                                       QDialogButtonBox QPushButton[text='Cancelar']:pressed {\
                                                         background-color: #faa;\
                                                       }")
-        
-        # TODO: modificar este código cancerígeno para en vez de usar la subclase DebtorDataValidation use 
-        # todo: validadores como la gente -__-
+        # esconde los labels de feedback
+        self.debtorData.label_debtorName_feedback.hide()
+        self.debtorData.label_debtorSurname_feedback.hide()
+        self.debtorData.label_phoneNumber_feedback.hide()
+        self.debtorData.label_postalCode_feedback.hide()
         
         # completers
         self.debtorData.lineEdit_debtorName.setCompleter(createCompleter(type=1))
         self.debtorData.lineEdit_debtorSurname.setCompleter(createCompleter(type=2))
+
+        # TODO: colocar validadores para los campos que necesiten
+        # validadores
+        self.debtor_name_validator = DebtorNameValidator(self.debtorData.lineEdit_debtorName)
+        self.debtor_surname_validator = DebtorSurnameValidator(self.debtorData.lineEdit_debtorSurname)
+        self.phone_number_validator = DebtorPhoneNumberValidator(self.debtorData.lineEdit_phoneNumber)
+        self.postal_code_validator = DebtorPostalCodeValidator(self.debtorData.lineEdit_postalCode)
+        self.debtorData.lineEdit_debtorName.setValidator(self.debtor_name_validator)
+        self.debtorData.lineEdit_debtorSurname.setValidator(self.debtor_surname_validator)
+        self.debtorData.lineEdit_phoneNumber.setValidator(self.phone_number_validator)
+        self.debtorData.lineEdit_postalCode.setValidator(self.postal_code_validator)
         
-        self.debtorData.lineEdit_postalCode.setValidator(QIntValidator(1, 9_999))
+        # variables
+        self.VALID_FIELDS:dict[str,bool] = {
+            'DEBTOR_NAME':None,
+            'DEBTOR_SURNAME':None,
+            'DEBTOR_PHONE_NUMBER':True,
+            'DEBTOR_POSTAL_CODE':True
+        }
+        
 
         #--- SEÑALES --------------------------------------------------
-        self.debtorData.lineEdit_debtorName.textChanged.connect(lambda: self.validateFields(type='name'))
+        # nombre
+        self.debtor_name_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('DEBTOR_NAME'))
+        self.debtor_name_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
+            field_validated='DEBTOR_NAME',
+            error_message=error_message))
         
-        self.debtorData.lineEdit_debtorSurname.textChanged.connect(lambda: self.validateFields(type='surname'))
+        self.debtorData.lineEdit_debtorName.editingFinished.connect(lambda: self.onDebtorNameAndSurnameEditingFinished(
+            field_validated='DEBTOR_NAME'))
         
-        self.debtorData.lineEdit_phoneNumber.textChanged.connect(lambda: self.validateFields(type='phone_number'))
+        # apellido
+        self.debtor_surname_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('DEBTOR_SURNAME'))
+        self.debtor_surname_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
+            field_validated='DEBTOR_SURNAME',
+            error_message=error_message))
         
-        self.debtorData.lineEdit_postalCode.textChanged.connect(lambda: self.validateFields(type='postal_code'))
-        # Ok
+        self.debtorData.lineEdit_debtorSurname.editingFinished.connect(lambda: self.onDebtorNameAndSurnameEditingFinished(
+            field_validated='DEBTOR_SURNAME'))
+        
+        # número de teléfono
+        self.phone_number_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('DEBTOR_PHONE_NUMBER'))
+        self.phone_number_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
+            field_validated='DEBTOR_PHONE_NUMBER',
+            error_message=error_message))
+        
+        self.debtorData.lineEdit_phoneNumber.editingFinished.connect(lambda: self.formatField('DEBTOR_PHONE_NUMBER'))
+        
+        # código postal
+        self.postal_code_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('DEBTOR_POSTAL_CODE'))
+        self.postal_code_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
+            field_validated='DEBTOR_POSTAL_CODE',
+            error_message=error_message))
+        
+        # botón "Aceptar"
         self.debtorData.buttonBox.accepted.connect(lambda: self.handleOkClicked())
-        # Cancel
-        self.debtorData.buttonBox.rejected.connect(lambda: self.signalToParent.debtorChosen.emit(0))
 
     #### MÉTODOS #####################################################
     @Slot(str)
-    def validateFields(self, type:str) -> None:
+    def validatorOnValidationSucceded(self, field_validated:str) -> None:
         '''
-        Llama a métodos de la clase 'DebtorDataValidation' para validar el campo especificado en el argumento 'type', 
-        y cambia el estilo de los campos y los labels de feedback correspondientes de acuerdo a la validación. 
-        Al final activa o desactiva el botón "Aceptar".
+        Es llamado desde la señal 'validationSucceded' de los validadores.
+        
+        Cambia el valor del flag asociado al campo que fue validado 'field_validated' a True, cambia el 
+        QSS del campo y esconde el QLabel asociado al campo.
+        Al finalizar, llama a 'self.verifyFieldsValidity' para comprobar si el resto de campos son válidos.
+        
+        PARAMS:
+        - field_validated: el campo que se valida. Admite los siguientes valores:
+            - DEBTOR_NAME: se valida el campo de nombre del deudor.
+            - DEBTOR_SURNAME: se valida el campo de apellido del deudor
+            - DEBTOR_PHONE_NUMBER: se valida el campo de número de teléfono del deudor.
+            - DEBTOR_POSTAL_CODE: se valida el campo de código postal del deudor.
         
         Retorna None.
         '''
-        match type:
-            case 'name':
-                self.dataValidation.validateDebtorNameField()
-                if not self.dataValidation.VALID_FIELDS['name']:
-                    self.debtorData.label_debtorName_feedback.setText("Se necesita un nombre")
-                    self.debtorData.lineEdit_debtorName.setStyleSheet("border: 1px solid #f00; background-color: rgb(255, 185, 185);")
-                else:
-                    self.debtorData.label_debtorName_feedback.setText("")
-                    self.debtorData.lineEdit_debtorName.setStyleSheet("border: 1px solid #0f0; background-color: rgb(185, 255, 185);")
-
-            case 'surname':
-                self.dataValidation.validateDebtorSurnameField()
-                if not self.dataValidation.VALID_FIELDS['surname']:
-                    self.debtorData.label_debtorSurname_feedback.setText("Se necesita un apellido")
-                    self.debtorData.lineEdit_debtorSurname.setStyleSheet("border: 1px solid #f00; background-color: rgb(255, 185, 185);")
-                else:
-                    self.debtorData.label_debtorSurname_feedback.setText("")
-                    self.debtorData.lineEdit_debtorSurname.setStyleSheet("border: 1px solid #0f0; background-color: rgb(185, 255, 185);")
+        match field_validated:
+            case 'DEBTOR_NAME':
+                self.VALID_FIELDS['DEBTOR_NAME'] = True
+                self.debtorData.lineEdit_debtorName.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
+                self.debtorData.label_debtorName_feedback.hide()
             
-            case 'phone_number':
-                self.dataValidation.validateDebtorPhoneNumberField()
-                if not self.dataValidation.VALID_FIELDS['phone_number']:
-                    self.debtorData.label_phoneNumber_feedback.setText("El número de teléfono es muy corto (mín.: 6)")
-                    self.debtorData.lineEdit_phoneNumber.setStyleSheet("border: 1px solid #f00; background-color: rgb(255, 185, 185);")
+            case 'DEBTOR_SURNAME':
+                self.VALID_FIELDS['DEBTOR_SURNAME'] = True
+                self.debtorData.lineEdit_debtorSurname.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
+                self.debtorData.label_debtorSurname_feedback.hide()
+            
+            case 'DEBTOR_PHONE_NUMBER':
+                self.VALID_FIELDS['DEBTOR_PHONE_NUMBER'] = True
+                if self.debtorData.lineEdit_phoneNumber.text() != "" and self.debtorData.lineEdit_phoneNumber.isEnabled():
+                    self.debtorData.lineEdit_phoneNumber.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
                 else:
-                    self.debtorData.label_phoneNumber_feedback.setText("")
-                    self.debtorData.lineEdit_phoneNumber.setStyleSheet("border: 1px solid #0f0; background-color: rgb(185, 255, 185);")
-
-            case 'postal_code':
-                self.dataValidation.validateDebtorPostalCodeField()
-                if not self.dataValidation.VALID_FIELDS['postal_code']:
-                    self.debtorData.label_postalCode_feedback.setText("El código postal debe ser mayor a 1")
-                    self.debtorData.lineEdit_postalCode.setStyleSheet("border: 1px solid #f00; background-color: rgb(255, 185, 185);")
+                    self.debtorData.lineEdit_phoneNumber.setStyleSheet("")
+                
+                self.debtorData.label_phoneNumber_feedback.hide()
+            
+            case 'DEBTOR_POSTAL_CODE':
+                self.VALID_FIELDS['DEBTOR_POSTAL_CODE'] = True
+                if self.debtorData.lineEdit_postalCode.text() != "" and self.debtorData.lineEdit_postalCode.isEnabled():
+                    self.debtorData.lineEdit_postalCode.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
                 else:
-                    self.debtorData.label_postalCode_feedback.setText("")
-                    self.debtorData.lineEdit_postalCode.setStyleSheet("border: 1px solid #0f0; background-color: rgb(185, 255, 185);")
+                    self.debtorData.lineEdit_postalCode.setStyleSheet("")
+                    
+                self.debtorData.label_postalCode_feedback.hide()
         
+        self.verifyFieldsValidity()
+        
+        return None
+    
+    
+    @Slot(str, str)
+    def validatorOnValidationFailed(self, field_validated:str, error_message:str) -> None:
+        '''
+        Es llamado desde la señal 'validationFailed' de los validadores.
+        
+        Cambia el valor del flag asociado al campo que fue validado 'field_validated' a False, cambia el 
+        QSS del campo y muestra el QLabel asociado al campo con el mensaje 'error_message' con feedback.
+        
+        PARAMS:
+        - field_validated: el campo que se valida. Admite los siguientes valores:
+            - DEBTOR_NAME: se valida el campo de nombre del deudor.
+            - DEBTOR_SURNAME: se valida el campo de apellido del deudor
+            - DEBTOR_PHONE_NUMBER: se valida el campo de número de teléfono del deudor.
+            - DEBTOR_POSTAL_CODE: se valida el campo de código postal del deudor.
+        
+        Retorna None.
+        '''
+        match field_validated:
+            case 'DEBTOR_NAME':
+                self.VALID_FIELDS['DEBTOR_NAME'] = False
+                self.debtorData.lineEdit_debtorName.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
+                self.debtorData.label_debtorName_feedback.show()
+                self.debtorData.label_debtorName_feedback.setText(error_message)
+            
+            case 'DEBTOR_SURNAME':
+                self.VALID_FIELDS['DEBTOR_SURNAME'] = False
+                self.debtorData.lineEdit_debtorSurname.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
+                self.debtorData.label_debtorSurname_feedback.show()
+                self.debtorData.label_debtorSurname_feedback.setText(error_message)
+            
+            case 'DEBTOR_PHONE_NUMBER':
+                self.VALID_FIELDS['DEBTOR_PHONE_NUMBER'] = False
+                self.debtorData.lineEdit_phoneNumber.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
+                self.debtorData.label_phoneNumber_feedback.show()
+                self.debtorData.label_phoneNumber_feedback.setText(error_message)
+            
+            case 'DEBTOR_POSTAL_CODE':
+                self.VALID_FIELDS['DEBTOR_POSTAL_CODE'] = False
+                self.debtorData.lineEdit_postalCode.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
+                self.debtorData.label_postalCode_feedback.show()
+                self.debtorData.label_postalCode_feedback.setText(error_message)
+        
+        self.verifyFieldsValidity()
+        return None
+    
+    
+    @Slot(str)
+    def formatField(self, field_to_format:str) -> None:
+        '''
+        Es llamado desde la señal 'editingFinished' de 'lineEdit_phoneNumber' | desde el método 
+        'self.onDebtorNameAndSurnameEditingFinished'.
+        
+        Dependiendo del campo 'field_to_format' formatea el texto y lo asigna en el campo correspondiente.
+        
+        PARAMS:
+        - field_to_format: el campo a formatear. Admite los siguientes valores:
+            - DEBTOR_NAME: formatea el campo de nombre del deudor.
+            - DEBTOR_SURNAME: formatea el campo de apellido del deudor.
+            - DEBTOR_PHONE_NUMBER: formatea el campo de teléfono del deudor.
+
+        Retorna None.
+        '''
+        field_text:str
+        phone_number:PhoneNumber # se usa cuando el campo a formatear es el de núm. de teléfono
+        
+        match field_to_format:
+            case 'DEBTOR_NAME': # pasa a minúsculas y pone en mayúsculas la primera letra de cada nombre
+                field_text = self.debtorData.lineEdit_debtorName.text()
+                field_text = field_text.lower().title()
+                self.debtorData.lineEdit_debtorName.setText(field_text)
+            
+            case 'DEBTOR_SURNAME': # pasa a minúsculas y pone en mayúsculas la primera letra de cada apellido
+                field_text = self.debtorData.lineEdit_debtorSurname.text()
+                field_text = field_text.lower().title()
+                self.debtorData.lineEdit_debtorSurname.setText(field_text)
+            
+            case 'DEBTOR_PHONE_NUMBER': # agrega un "+" al principio (si no tiene) y formatea el núm. estilo internacional
+                field_text = self.debtorData.lineEdit_phoneNumber.text()
+                try:
+                    phone_number = parse(f"+{field_text}")
+                    if is_valid_number(phone_number):
+                        field_text = format_number(phone_number, PhoneNumberFormat.INTERNATIONAL)
+                
+                except NumberParseException as err:
+                    logging.error(err)
+                    field_text = self.debtorData.lineEdit_phoneNumber.text()
+                
+                self.debtorData.lineEdit_phoneNumber.setText(field_text)
+        
+        return None
+    
+    
+    def verifyFieldsValidity(self) -> None:
+        '''
+        Es llamado desde los métodos 'self.validatorOnValidationSucceded' | 'self.validatorOnValidationFailed'.
+        
+        Verifica si todos los campos son válidos y activa o desactiva el botón "Aceptar".
+        
+        Retorna None.
+        '''
         # activa o desactiva el botón "Aceptar" si todos los campos son válidos
-        if all(self.dataValidation.VALID_FIELDS.values()):
+        if all(self.VALID_FIELDS.values()):
             self.debtorData.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
         else:
             self.debtorData.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
         return None
     
 
-    def getFieldsData(self) -> tuple:
+    @Slot()
+    def onDebtorNameAndSurnameEditingFinished(self, field_validated:str) -> None:
+        '''
+        Es llamado desde la señal 'editingFinished' de 'lineEdit_debtorName' | 'lineEdit_debtorSurname'.
+        
+        Crea un QCompleter para el campo opuesto, es decir, si 'field_validated' es 'DEBTOR_NAME' crea un 
+        completer para 'DEBTOR_SURNAME', y viceversa.
+        Llama al método 'self.formatField' para formatear los campos y si existe esa combinación de nombre y 
+        apellido busca el número de teléfono, la dirección y el código postal existente del usuario y los 
+        coloca en sus respectivos campos, luego desactiva los campos para evitar su modificación.
+        
+        Retorna None.
+        '''
+        debtor_data:list[tuple[str,str,str]]
+        
+        self.formatField(field_to_format=field_validated)
+        
+        # crea QCompleters
+        if field_validated == 'DEBTOR_NAME': # crea completer para apellidos que coincidan con el nombre
+            self.debtorData.lineEdit_debtorSurname.setCompleter(
+                createCompleter(sql="SELECT DISTINCT apellido FROM Deudores WHERE nombre = ?",
+                                params=(self.debtorData.lineEdit_debtorName.text(),)
+                                )
+                )
+        
+        elif field_validated == 'DEBTOR_SURNAME': # crea completer para nombres que coincidan con el apellido
+            self.debtorData.lineEdit_debtorName.setCompleter(
+                createCompleter(sql="SELECT DISTINCT nombre FROM Deudores WHERE apellido = ?",
+                                params=(self.debtorData.lineEdit_debtorSurname.text(),)
+                                )
+                )
+        
+        # si ambos campos son válidos es porque ambos campos se llenaron, y coloca los datos en los campos restantes
+        if self.VALID_FIELDS['DEBTOR_NAME'] and self.VALID_FIELDS['DEBTOR_SURNAME']:
+            # obtengo los datos desde la cta. cte.
+            debtor_data = makeReadQuery(
+                sql="SELECT num_telefono, direccion, codigo_postal FROM Deudores WHERE (nombre = ?) AND (apellido = ?);",
+                params=(self.debtorData.lineEdit_debtorName.text(), self.debtorData.lineEdit_debtorSurname.text(), ))
+            
+            # los coloco en sus campos (si se encontraron coincidencias)
+            if len(debtor_data) > 0:
+                self.debtorData.lineEdit_phoneNumber.setEnabled(False)
+                self.debtorData.lineEdit_direction.setEnabled(False)
+                self.debtorData.lineEdit_postalCode.setEnabled(False)
+                
+                self.debtorData.lineEdit_phoneNumber.setText( str(debtor_data[0][0]) )
+                self.debtorData.lineEdit_direction.setText( str(debtor_data[0][1]) )
+                self.debtorData.lineEdit_postalCode.setText( str(debtor_data[0][2]) )
+            
+            else:
+                self.debtorData.lineEdit_phoneNumber.setEnabled(True)
+                self.debtorData.lineEdit_direction.setEnabled(True)
+                self.debtorData.lineEdit_postalCode.setEnabled(True)
+        
+        return None
+    
+    
+    # botón Aceptar
+
+    def getFieldsData(self) -> dict[str, str]:
         '''
         Es llamado desde 'self.handleOkClicked'.
         
-        Obtiene todos los datos de los campos y formatea los valores.
+        Obtiene todos los datos de los campos y los formatea de ser necesario.
         
-        Retorna una tupla con los valores.
+        Retorna un dict[str,str] con los valores.
         '''
-        # obtengo y formateo el número de teléfono...
-        phone_number:str | None = self.debtorData.lineEdit_phoneNumber.text().replace(" ", "")
-        re_valid_ph_number:Match | None = match("\+[0-9]{2}-[0-9]{4}-[0-9]*", phone_number)
-        # si no coincide con el patrón es porque debe estar vacío
-        if not re_valid_ph_number:
-            phone_number = ""
-
-        if phone_number.endswith("-"):
-            phone_number.rstrip("-")
-        
-        # guardo los valores
-        values = (self.debtorData.lineEdit_debtorName.text().title(),
-                  self.debtorData.lineEdit_debtorSurname.text().title(),
-                  phone_number,
-                  self.debtorData.lineEdit_direction.text().title(),
-                  self.debtorData.lineEdit_postalCode.text())
+        # title() hace que cada palabra comience con mayúsculas...
+        values = {
+            'name':self.debtorData.lineEdit_debtorName.text().title(), # 0, nombre
+            'surname':self.debtorData.lineEdit_debtorSurname.text().title(), # 1, apellido
+            'phone_num':self.debtorData.lineEdit_phoneNumber.text(), # 2, número de teléfono
+            'direction':self.debtorData.lineEdit_direction.text().title(), # 3, dirección
+            'postal_code':self.debtorData.lineEdit_postalCode.text() # 4, código postal
+        }
         return values
     
 
@@ -1710,45 +1904,49 @@ class DebtorDataDialog(QDialog):
         Es llamado desde la señal 'clicked' del botón "Aceptar".
         
         Obtiene los datos de los campos formateados e inserta los valores en la base de datos en las tablas de 
-        "Deudores" (si no existe el deudor). Al final envía una señal con el ID, nombre y apellido del deudor al 
-        método 'MainWindow.handleFinishedSale' confirmando que se eligió un deudor.
+        "Deudores" (si no existe el deudor). Al final emite la señal 'debtorChosen' con el "IDdeudor", "nombre" 
+        y "apellido" del deudor al método 'MainWindow.handleFinishedSale' confirmando que se eligió un deudor.
         
         Retorna None.
         '''
         # obtiene los valores formateados de los campos...
-        values:tuple = self.getFieldsData()
-        sql:str
-        params:tuple
-        query:int
+        values:dict[str,str] = self.getFieldsData()
+        count_query:int
+        query:tuple # tiene una tupla con IDdeudor, nombre y apellido
 
         # verifica si el deudor existe en Deudores
-        sql  = "SELECT COUNT(*) FROM Deudores WHERE nombre = ? AND apellido = ?;"
-        params = (values[0], values[1],)
-        query = makeReadQuery(sql, params)[0][0] # si el deudor no existe devuelve 0
+        count_query = makeReadQuery(
+            sql="SELECT COUNT(*) FROM Deudores WHERE nombre = ? AND apellido = ?;",
+            params=(values['name'], values['surname'],)
+            )[0][0] # si el deudor no existe devuelve 0
 
         try:
             conn = createConnection("database/inventario.db")
             cursor = conn.cursor()
             
             # si no existe ese deudor, lo agrega...
-            if not query:
+            if not count_query:
                 # declara la consulta sql y params de Deudores y hace la consulta...
-                sql = "INSERT INTO Deudores(nombre, apellido, num_telefono, direccion, codigo_postal) VALUES(?, ?, ?, ?, ?);"
-                params = (values[0], values[1], values[2], values[3], values[4],)
-                cursor.execute(sql, params)
+                cursor.execute(
+                    "INSERT INTO Deudores(nombre, apellido, num_telefono, direccion, codigo_postal) VALUES(?, ?, ?, ?, ?);",
+                    (values['name'], values['surname'], values['phone_num'], values['direction'], values['postal_code'],)
+                    )
+                
                 conn.commit()
+                logging.debug(LoggingMessage.DEBUG_DB_SINGLE_INSERT_SUCCESS)
 
             # trae el ID, el nombre y el apellido del deudor para luego mandarlo a MainWindow en la señal 'debtorChosen'
             query = makeReadQuery(
-                "SELECT IDdeudor, nombre, apellido FROM Deudores WHERE nombre = ? AND apellido = ?;",
-                (values[0], values[1],))[0]
+                sql="SELECT IDdeudor, nombre, apellido FROM Deudores WHERE (nombre = ?) AND (apellido = ?);",
+                params=(values['name'], values['surname'],)
+                )[0]
 
-            # envía señal comunicando que sí se eligió un deudor
+            # envía señal comunicando que sí se eligió un deudor, y envía un tuple(IDdeudor, nombre y apellido)
             self.debtorChosen.emit(query)
             
         except sqlite3Error as err:
             conn.rollback()
-            print(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+            logging.error(LoggingMessage.ERROR_DB_INSERT, f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
         
         finally:
             conn.close()

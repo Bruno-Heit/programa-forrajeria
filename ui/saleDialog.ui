@@ -49,7 +49,7 @@ QDialog {
 #lineEdit_direction:disabled,
 #lineEdit_phoneNumber:disabled,
 #lineEdit_postalCode:disabled {
-	background-color: #ccc;
+	background-color: rgba(204, 204, 204, 0.6);
 	color: #888;
 }
 

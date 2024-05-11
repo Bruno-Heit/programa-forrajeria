@@ -161,6 +161,7 @@ class DbInsertWorker(QObject):
             self.finished.emit(0) #! error con la comunicación de la base de datos
         cursor = conn.cursor()
         
+        # si se inserta 1 solo registro...
         if SINGLE_REG:
             try:
                 cursor.execute(data_sql, data_params) if data_params else cursor.execute(data_sql)
@@ -176,6 +177,13 @@ class DbInsertWorker(QObject):
                 
             finally:
                 conn.close()
+        
+        # si se insertan más de 1 registro...
+        else:
+            # TODO: implementar múltiples INSERT a base de datos (lo necesito para recibir consultas INSERT
+            # todo: desde el formulario de ventas)
+            pass
+            
         return None
 
 

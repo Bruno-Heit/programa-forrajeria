@@ -13,6 +13,7 @@ from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemVa
 from utils.workerclasses import *
 from utils.dboperations import *
 from utils.customvalidators import (SalePaidValidator)
+from utils.enumclasses import (LoggingMessage)
 
 from resources import (rc_icons)
 
@@ -69,7 +70,6 @@ class MainWindow(QMainWindow):
         self.DICT_ITEMS_VALUES:dict[str:ListItemValues] = {} # tiene los valores de cada ListItemWidget
         self.VALID_PAID_FIELD:bool = None # True si lineEdit_paid es válido, sino False
         self.TOTAL_COST:float = None # guarda el costo total de 'label_total' como float, para no tener que buscarlo con regex
-        self.debtor_chosen:tuple[int,str,str] = None # tiene el ID, nombre y apellido del deudor elegido en DebtorDataDialog
 
         # variables de deudas
         
@@ -501,7 +501,7 @@ class MainWindow(QMainWindow):
                 else:
                     self.ui.table_debts.resizeRowsToContents()
             
-        logging.debug(f">> WORKER terminó de ejecutarse.")
+        logging.debug(LoggingMessage.WORKER_SUCCESS)
         return None
 
 
@@ -1442,48 +1442,6 @@ class MainWindow(QMainWindow):
         return None
 
 
-    def __resetListAndFields(self) -> None:
-        '''
-        Es llamado desde el método 'self.handleFinishedSale'.
-        
-        Este método hace lo siguiente:
-        - Limpia el QListWidget 'sales_input_list'
-        - Reinicia el contador de nombres 'self.SALES_ITEM_NUM'.
-        - Coloca el texto inicial en 'label_total' y 'label_total_change'.
-        - Borra el texto de 'self.lineEdit_paid'.
-        - Desactiva el botón 'btn_end_sale'.
-        - Asigna el valor None a 'self.debtor_chosen'.
-        
-        Retorna None.
-        '''
-        # limpia 'sales_input_list'
-        self.ui.sales_input_list.clear()
-        
-        self.SALES_ITEM_NUM = 0
-        
-        # coloca los textos inicial en los labels
-        self.ui.label_total.setText("TOTAL")
-        self.ui.label_total_change.setText("")
-        
-        # borra el texto en 'lineEdit_paid'
-        self.ui.lineEdit_paid.setText("")
-        
-        self.ui.btn_end_sale.setEnabled(False)
-        
-        self.debtor_chosen = None
-        return None
-    
-
-    def __assignDebtorChosenOption(self, value:int) -> None:
-        '''
-        Simplemente asigna el valor recibido por la señal 'debtorChosen' en 'self.debtor_chosen'.
-        
-        Retorna None.
-        '''
-        self.debtor_chosen = value
-        return None
-
-
     @Slot()
     def handleFinishedSale(self) -> None:
         '''
@@ -1491,44 +1449,34 @@ class MainWindow(QMainWindow):
         
         Este método hace lo siguiente:
         - Si la cantidad abonada es < al costo total:
-            - Muestra un dialog de tipo 'DebtorDataDialog' con los datos del deudor.
+            - Instancia y muestra un dialog de tipo 'DebtorDataDialog' con los datos del deudor, además conecta 
+            su señal 'debtorChosen' al método 'self.finishedSaleOnDebtorChosen'.
         - Si la cantidad abonada es >= al costo total:
             - Obtiene los datos de los campos de los items y hace las consultas INSERT a Ventas y Detalle_Ventas 
             y la consulta UPDATE a Productos con el nuevo stock.
-            - Limpia los campos. Para eso llama a 'self.__resetListAndFields'.
-            - Desactiva el botón 'btn_end_sale'.
+            - Al finalizar, llama al método 'self.__resetFieldsOnFinishedSale' para realizar los reinicios necesarios.
         
         Retorna None.
         '''
         total_paid:float
-        item:ListItemValues # var. usada en el for
-
-        #? Decidí que cuando se hacen ventas (sin importar la cantidad de productos diferentes) y el comprador paga 
-        #? menos del total, esa cantidad sea distribuída entre los primeros productos. 
-        #? ejemplo: una persona lleva 3 productos -> 1 de $3.000, 1 de $2.000 y otro de $4.000, pero paga $4.000.
-        #?     esos $4.000 se descuentan, primero, del primer producto:
-        #?         $4.000 - $3.000 = $1.000
-        #?         $1.000 - $2.000 = $-1.000 <-- -1.000 es lo que queda del 2do producto, más el 3er producto.
-        #?     luego se agrega a Deudas los $1.000 que quedaron del 2do producto y también el 3er producto, pero 
-        #?     no el 1ro que quedó pago.
+        item:ListItemValues # var. usada en el 'for' que recorre 'self.DICT_ITEMS_VALUES'
         
         # obtengo el total pagado
         total_paid = self.ui.lineEdit_paid.text().replace(",",".")
         total_paid = float(total_paid if total_paid else 0.0)
         
-        # TODO: refactorizar este código, necesito hacer que cuando se presione 'btn_end_sale' y 
-        # todo: si lo abonado < costo total se muestre el dialog... desde el dialog, si se llenan 
-        # todo: los datos y se presiona 'Ok' que se agreguen los registros a BD, sino que no pase nada...
-        
-        # si lo abonado es menor al total muestra el Dialog para agregar al deudor (si no existe en "Deudores" se crea)
+        # si lo abonado es menor al total muestra el Dialog para manejar deudores
         if total_paid < self.TOTAL_COST:
             dialog = DebtorDataDialog()
             dialog.setAttribute(Qt.WA_DeleteOnClose, True)
             
-            dialog.debtorChosen.connect(lambda option: self.__assignDebtorChosenOption(option))
+            dialog.debtorChosen.connect(lambda debtor_chosen: self.finishedSaleOnDebtorChosen(
+                debtor_chosen=debtor_chosen,
+                total_paid=total_paid))
             
             dialog.exec()
-            
+        
+        # si lo abonado es >= al costo total realiza INSERT a Ventas y Detalle_Ventas, y UPDATE a Productos
         else:
             conn = createConnection("database/inventario.db")
             cursor = conn.cursor()
@@ -1565,10 +1513,12 @@ class MainWindow(QMainWindow):
             
             conn.close()
             
-            self.__resetListAndFields()
-            self.ui.btn_end_sale.setEnabled(False)
+            self.__resetFieldsOnFinishedSale()
         
         return None
+
+        # TODO: escribir código de función que reciba datos de deudor de la señal 'debtorChosen' declarada 
+        # todo: en 'handleFinishedSale'
 
         
         # if total_paid < self.TOTAL_COST and self.debtor_chosen:
@@ -1592,7 +1542,91 @@ class MainWindow(QMainWindow):
         #         makeUpdateQuery("UPDATE Productos SET stock = stock - ? WHERE nombre = ?;", (item[1][1], item[1][0],))
         #     self.__resetListAndFields()
 
-
+    @Slot(tuple)
+    def finishedSaleOnDebtorChosen(self, debtor_chosen:tuple, total_paid:float) -> None:
+        '''
+        Es llamado desde la señal 'debtorChosen' del objeto de tipo 'DebtorDataDialog' instanciado en 
+        el método 'self.handleFinishedSale'.
+        
+        Este método hace lo siguiente:
+        - Instancia un WORKER para realizar las consultas.
+        - Obtiene los datos de los campos de los items y hace las consultas INSERT a Ventas y Detalle_Ventas 
+        y la consulta UPDATE a Productos con el nuevo stock.
+        - Al finalizar, llama al método 'self.__resetFieldsOnFinishedSale' para realizar los reinicios necesarios.
+        
+        PARAMS:
+        - debtor_chosen: tuple[IDdeudor, nombre, apellido] con datos del deudor emitidos desde 'DebtorDataDialog'.
+        
+        Retorna None.
+        '''
+        total_due:float = total_paid # acumulador, inicia con el valor del total abonado y se va descontando de ahí 
+                                     # cada subtotal (el precio de cada producto)
+        
+        #? Decidí que cuando se hacen ventas (sin importar la cantidad de productos diferentes) y el comprador paga 
+        #? menos del total, esa cantidad sea distribuída entre los primeros productos. 
+        #? ejemplo: una persona lleva 3 productos -> 1 de $3.000, 1 de $2.000 y otro de $4.000, pero paga $4.000.
+        #?     esos $4.000 se descuentan, primero, del primer producto:
+        #?         $4.000 - $3.000 = $1.000
+        #?         $1.000 - $2.000 = $-1.000 <-- -1.000 es lo que queda del 2do producto, más el 3er producto.
+        #?     luego se agrega a Deudas los $1.000 que quedaron del 2do producto y también el 3er producto, pero 
+        #?     no el 1ro que quedó pago.
+        
+        # TODO: en workerclasses.py, implementar múltiples INSERT, y hacer los INSERT y el UPDATE usando WORKERS,
+        # todo: y luego hacer lo mismo en 'handleFinishedSale' con las consultas que no tienen deuda ni deudor.
+        
+        # recorre cada item y hace las consultas INSERT y UPDATE (a Productos)
+        for item in self.ITEMS_VALUES.items():
+            makeInsertQuery("INSERT INTO Ventas(fecha_hora, detalles_venta) VALUES(?,?);", (item[1][5], item[1][3],))
+            # Deudas y Detalle_Ventas (con IDdeuda)
+            total_due -= item[1][4] # deuda = total abonado - subtotal
+            if total_due < 0: # el producto es deuda
+                makeInsertQuery("INSERT INTO Deudas(fecha_hora, total_adeudado, IDdeudor) VALUES(?,?,?);", (item[1][5], abs(total_due), self.debtor_chosen[0]))
+                
+                # ? ya probé la consulta de abajo y al parecer funciona bien. Los registros de Detalle_Ventas 
+                # ? apuntan a donde deben... pero igualmente prefiero estar atento a esto...
+                makeInsertQuery("INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, (SELECT IDdeuda FROM Deudas WHERE fecha_hora = ? AND IDdeudor = ? ORDER BY IDdeuda DESC LIMIT 1));", 
+                                (item[1][1], item[1][4], item[1][0], item[1][5], item[1][3], item[1][4] - abs(total_due), item[1][5], self.debtor_chosen[0], ))
+                total_due = 0
+            else: # el producto NO es deuda
+                makeInsertQuery("INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, NULL);", (item[1][1], item[1][4], item[1][0], item[1][5], item[1][3], item[1][4],))
+            # actualiza el stock
+            makeUpdateQuery("UPDATE Productos SET stock = stock - ? WHERE nombre = ?;", (item[1][1], item[1][0],))
+            
+        self.__resetListAndFields()
+        
+        return None
+    
+    
+    def __resetFieldsOnFinishedSale(self) -> None:
+        '''
+        Es llamado desde el método 'self.handleFinishedSale'.
+        
+        Luego de realizadas las consultas INSERT y UPDATE a base de datos, éste método se encarga de realizar 
+        los reinicios finales para poder concretar otra venta.
+        Este método hace lo siguiente:
+        - Limpia los campos y reasigna el por defecto a 'label_total'.
+        - Desactiva el botón 'btn_end_sale'.
+        
+        Retorna None.
+        '''
+        # limpia 'sales_input_list'
+        self.ui.sales_input_list.clear()
+        
+        self.SALES_ITEM_NUM = 0
+        
+        # coloca los textos inicial en los labels
+        self.ui.label_total.setText("TOTAL")
+        self.ui.label_total_change.setText("")
+        
+        # borra el texto en 'lineEdit_paid'
+        self.ui.lineEdit_paid.setText("")
+        
+        self.ui.btn_end_sale.setEnabled(False)
+        
+        self.debtor_chosen = None
+        self.ui.btn_end_sale.setEnabled(False)
+        return None
+    
     
     #¡### DEUDAS ######################################################
     def __fillDebtsTable(self) -> None:
