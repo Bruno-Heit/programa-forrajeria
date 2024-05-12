@@ -104,13 +104,15 @@ class DbDeleteWorker(QObject):
         cursor = conn.cursor()
         
         try:
+            # se borra de una sola tabla (ej.: Productos)
             if sql and not mult_sql:
                 for n,param in enumerate(params):
                     cursor.execute(sql, param)
                     conn.commit()
                     self.progress.emit(n)
                 logging.debug(LoggingMessage.DEBUG_DB_MULT_DELETE_SUCCESS)
-                
+            
+            # se borra de más de una tabla (ej.: Detalle_Ventas, Ventas y Deudas)
             elif not sql and mult_sql:
                 for n,param in enumerate(params):
                     for sql in mult_sql:
@@ -118,11 +120,11 @@ class DbDeleteWorker(QObject):
                         conn.commit()
                     self.progress.emit(n)
                 logging.debug(LoggingMessage.DEBUG_DB_MULT_DELETE_SUCCESS)
-                
             
+        
         except sqlite3Error as err: #! errores de base de datos, consultas, etc.
             conn.rollback()
-            logging.error(LoggingMessage.ERROR_DB_DELETE, f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+            logging.critical(LoggingMessage.ERROR_DB_DELETE, f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
             self.finished.emit(err.sqlite_errorcode)
             
         finally:
@@ -137,18 +139,18 @@ class DbDeleteWorker(QObject):
 
 class DbInsertWorker(QObject):
     '''Clase WORKER que se encarga de ejecutar las consultas de tipo INSERT a la base de datos.'''
-    finished = Signal(int) # emite 0 si no se pudo establecer comunicación con la base de datos, sino 1.
+    progress = Signal(int)
+    finished = Signal(int)
     
     
     @Slot(str,tuple,bool)
-    def executeInsertQuery(self, data_sql:str, data_params:tuple=None, SINGLE_REG:bool=True) -> None:
+    def executeInsertQuery(self, data_sql:str, data_params:tuple=None) -> None:
         '''
         Hace la consulta INSERT a la base de datos.
         
         PARAMS:
         - data_sql: la consulta con el registro a insertar.
         - data_params: los parámetros de la consulta 'data_sql'. Por defecto es None.
-        - SINGLE_REG: flag que determina si solo se inserta un registro. Por defecto es True.
         
         SEÑALES:
         La señal 'finished' emite:
@@ -161,29 +163,21 @@ class DbInsertWorker(QObject):
             self.finished.emit(0) #! error con la comunicación de la base de datos
         cursor = conn.cursor()
         
-        # si se inserta 1 solo registro...
-        if SINGLE_REG:
-            try:
-                cursor.execute(data_sql, data_params) if data_params else cursor.execute(data_sql)
-                
-                conn.commit()
-                logging.debug(LoggingMessage.DEBUG_DB_MULT_INSERT_SUCCESS)
-                self.finished.emit(1) #* todo bien
-                
-            except sqlite3Error as err:
-                conn.rollback()
-                logging.error(LoggingMessage.ERROR_DB_INSERT, f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
-                self.finished.emit(err.sqlite_errorcode) #! error al realizar el insert
-                
-            finally:
-                conn.close()
-        
-        # si se insertan más de 1 registro...
-        else:
-            # TODO: implementar múltiples INSERT a base de datos (lo necesito para recibir consultas INSERT
-            # todo: desde el formulario de ventas)
-            pass
+        try:
+            cursor.execute(data_sql, data_params) if data_params else cursor.execute(data_sql)
             
+            conn.commit()
+            logging.debug(LoggingMessage.DEBUG_DB_MULT_INSERT_SUCCESS)
+            self.finished.emit(1) #* todo bien
+            
+        except sqlite3Error as err:
+            conn.rollback()
+            logging.critical(LoggingMessage.ERROR_DB_INSERT, f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+            self.finished.emit(err.sqlite_errorcode) #! error al realizar el insert
+            
+        finally:
+            conn.close()
+        
         return None
 
 
@@ -229,7 +223,7 @@ class DbUpdateWorker(QObject):
             
         except sqlite3Error as err:
             conn.rollback()
-            logging.error(LoggingMessage.ERROR_DB_UPDATE, f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+            logging.critical(LoggingMessage.ERROR_DB_UPDATE, f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
             self.finished.emit(err.sqlite_errorcode) #! error al realizar el update
                 
         finally:

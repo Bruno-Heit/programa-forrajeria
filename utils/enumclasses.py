@@ -20,20 +20,20 @@ class WidgetStyle(StrEnum):
 # mensajes predeterminados para logging
 class LoggingMessage(StrEnum):
     '''Clase de tipo 'strEnum' con mensajes predeterminados para mostrar en las funciones de logging.'''
-    DEBUG_DB_SINGLE_SELECT_SUCCESS = ">> Consulta SELECT realizada exitosamente"
-    DEBUG_DB_MULT_SELECT_SUCCESS = ">> Todas las consultas SELECT finalizadas exitosamente"
-    ERROR_DB_SELECT = ">> Error en consulta SELECT"
+    DEBUG_DB_SINGLE_SELECT_SUCCESS = "Consulta SELECT realizada exitosamente"
+    DEBUG_DB_MULT_SELECT_SUCCESS = "Todas las consultas SELECT finalizadas exitosamente"
+    ERROR_DB_SELECT = "Error en consulta SELECT"
     
-    DEBUG_DB_SINGLE_UPDATE_SUCCESS = ">> Consulta UPDATE realizada exitosamente"
-    DEBUG_DB_MULT_UPDATE_SUCCESS = ">> Todas las consultas UPDATE finalizadas exitosamente"
-    ERROR_DB_UPDATE = ">> Error en consulta UPDATE"
+    DEBUG_DB_SINGLE_UPDATE_SUCCESS = "Consulta UPDATE realizada exitosamente"
+    DEBUG_DB_MULT_UPDATE_SUCCESS = "Todas las consultas UPDATE finalizadas exitosamente"
+    ERROR_DB_UPDATE = "Error en consulta UPDATE"
     
-    DEBUG_DB_SINGLE_INSERT_SUCCESS = ">> Consulta INSERT realizada exitosamente"
-    DEBUG_DB_MULT_INSERT_SUCCESS = ">> Todas las consultas INSERT finalizadas exitosamente"
-    ERROR_DB_INSERT = ">> Error en consulta INSERT"
+    DEBUG_DB_SINGLE_INSERT_SUCCESS = "Consulta INSERT realizada exitosamente"
+    DEBUG_DB_MULT_INSERT_SUCCESS = "Todas las consultas INSERT finalizadas exitosamente"
+    ERROR_DB_INSERT = "Error en consulta INSERT"
     
-    DEBUG_DB_SINGLE_DELETE_SUCCESS = ">> Consulta DELETE realizada exitosamente"
-    DEBUG_DB_MULT_DELETE_SUCCESS = ">> Todas las consultas DELETE finalizadas exitosamente"
-    ERROR_DB_DELETE = ">> Error en consulta DELETE"
+    DEBUG_DB_SINGLE_DELETE_SUCCESS = "Consulta DELETE realizada exitosamente"
+    DEBUG_DB_MULT_DELETE_SUCCESS = "Todas las consultas DELETE finalizadas exitosamente"
+    ERROR_DB_DELETE = "Error en consulta DELETE"
     
-    WORKER_SUCCESS = ">> WORKER terminó de ejecutarse correctamente"
+    WORKER_SUCCESS = "WORKER terminó de ejecutarse correctamente"

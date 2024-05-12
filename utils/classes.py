@@ -1160,7 +1160,7 @@ class SaleDialog(QDialog):
             
         except sqlite3Error as err:
             conn.rollback()
-            logging.error(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+            logging.critical(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
         
         finally:
             conn.close()
@@ -1935,18 +1935,19 @@ class DebtorDataDialog(QDialog):
                 conn.commit()
                 logging.debug(LoggingMessage.DEBUG_DB_SINGLE_INSERT_SUCCESS)
 
-            # trae el ID, el nombre y el apellido del deudor para luego mandarlo a MainWindow en la señal 'debtorChosen'
+            # trae (ID, el nombre y el apellido) del deudor para mandarlo a MainWindow en la señal 'debtorChosen'
             query = makeReadQuery(
                 sql="SELECT IDdeudor, nombre, apellido FROM Deudores WHERE (nombre = ?) AND (apellido = ?);",
                 params=(values['name'], values['surname'],)
                 )[0]
 
-            # envía señal comunicando que sí se eligió un deudor, y envía un tuple(IDdeudor, nombre y apellido)
+            # emite señal avisando que SÍ se eligió un deudor, con un tuple(IDdeudor, nombre y apellido)
             self.debtorChosen.emit(query)
             
         except sqlite3Error as err:
             conn.rollback()
-            logging.error(LoggingMessage.ERROR_DB_INSERT, f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+            
+            logging.critical(LoggingMessage.ERROR_DB_INSERT, f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
         
         finally:
             conn.close()

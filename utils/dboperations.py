@@ -78,7 +78,7 @@ def makeUpdateQuery(sql:str, params:tuple) -> None:
     
     except sqlite3Error as err:
         conn.rollback()
-        logging.error(f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+        logging.critical(f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
     
     finally:
         conn.close()
@@ -106,7 +106,7 @@ def makeInsertQuery(sql:str, params:tuple = None) -> None:
     
     except sqlite3Error as err:
         conn.rollback()
-        logging.error(f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+        logging.critical(f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
     
     finally:
         conn.close()

@@ -1508,7 +1508,7 @@ class MainWindow(QMainWindow):
                 
                 except sqlite3Error as err:
                     conn.rollback()
-                    logging.error(f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+                    logging.critical(f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
                     conn.close()
             
             conn.close()
@@ -1570,9 +1570,6 @@ class MainWindow(QMainWindow):
         #?         $1.000 - $2.000 = $-1.000 <-- -1.000 es lo que queda del 2do producto, más el 3er producto.
         #?     luego se agrega a Deudas los $1.000 que quedaron del 2do producto y también el 3er producto, pero 
         #?     no el 1ro que quedó pago.
-        
-        # TODO: en workerclasses.py, implementar múltiples INSERT, y hacer los INSERT y el UPDATE usando WORKERS,
-        # todo: y luego hacer lo mismo en 'handleFinishedSale' con las consultas que no tienen deuda ni deudor.
         
         # recorre cada item y hace las consultas INSERT y UPDATE (a Productos)
         for item in self.ITEMS_VALUES.items():
@@ -1647,7 +1644,11 @@ class MainWindow(QMainWindow):
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(
+        format='%(asctime)s -- (%(levelname)s) %(module)s.%(funcName)s:%(message)s',
+        level=logging.DEBUG,
+        datefmt='%A %d/%m/%Y %H:%M:%S')
+    
     app = QApplication(sys.argv)
     mainWindow = MainWindow()
     mainWindow.show()
