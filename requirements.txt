@@ -3,3 +3,4 @@ PySide6_Addons==6.5.3
 PySide6-Essentials==6.5.3
 shiboken6==6.5.3
 Python==3.11.3
+phonenumbers==8.13.35

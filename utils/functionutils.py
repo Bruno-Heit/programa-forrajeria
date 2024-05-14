@@ -1,11 +1,17 @@
 # SQLITE3
-from sqlite3 import Connection
-from PySide6.QtWidgets import (QTableWidget, QComboBox, QHeaderView, QTableWidgetItem, QListWidget,
-                               QLineEdit, QLabel, QCompleter, QFrame, QWidget, QDateTimeEdit)
+
+from PySide6.QtWidgets import (QTableWidget, QComboBox, QHeaderView, QListWidget, QLineEdit, 
+                               QCompleter, QFrame, QWidget, QDateTimeEdit)
 from PySide6.QtCore import (QRegularExpression, QModelIndex, Qt, QPropertyAnimation, 
                             QEasingCurve, QDateTime, QDate, QTime)
 from PySide6.QtGui import (QRegularExpressionValidator)
+
+from resources import (rc_icons)
+from utils.dboperations import *
+from utils.customvalidators import *
+
 from re import (Match, match, search, sub, IGNORECASE)
+
 
 # side bars
 def toggleSideBar(side_bar:QFrame, parent:QWidget|QFrame, body:QFrame, max_width:int=250) -> None:
@@ -39,7 +45,9 @@ def __toggleSideBarWidgetsVisibility(body:QFrame, signal:int):
         case 1:
             body.show()
     return None
-#------------------------------------------------
+
+
+#========================================================================================================================
 # tooltips
 def set_tables_ListWidgetItemsTooltip(listWidget:QListWidget, categories_descriptions:tuple[str]) -> None:
     '''Recibe una tupla con las descripciones de las categorías y crea los tooltips para cada item de 'tables_ListWidget'.
@@ -86,22 +94,12 @@ def set_tables_ListWidgetItemsTooltip(listWidget:QListWidget, categories_descrip
     return None
 
 
-
-#------------------------------------------------
-def createConnection(db_name:str) -> Connection | None:
-    '''Crea una conexión a la base de datos y devuelve la conexión, si no se pudo devuelve None.'''
-    from sqlite3 import connect
-    from sqlite3 import Error
-    try:
-        connection = connect(db_name)
-    except Error as e:
-        return None
-    return connection
-
-
+#========================================================================================================================
 def getProductsCategories() -> list[str] | None:
-    '''Hace una consulta SELECT a la base de datos y toma las categorías que hay. Devuelve una lista con las categorías. 
-    Si hubo un error conectándose a la base  de datos devuelve 'None'.'''
+    '''
+    Hace una consulta SELECT a la base de datos y toma las categorías que hay. Devuelve una lista con las 
+    categorías. 
+    '''
     connection = createConnection("database/inventario.db")
     if not connection:
         return None
@@ -114,23 +112,30 @@ def getProductsCategories() -> list[str] | None:
 
 
 def getProductNames() -> list[str]:
-    '''Hace una consulta SELECT a la base de datos y obtiene todos los nombres de productos que hay. Retorna una 
-    lista con los nombres.'''
+    '''
+    Hace una consulta SELECT a la base de datos y obtiene todos los nombres de productos que hay.
+    
+    Retorna una lista con los nombres.
+    '''
     conn = createConnection("database/inventario.db")
     if not conn:
         return None
     cursor = conn.cursor()
-    sql = "SELECT nombre FROM Productos;"
-    query = cursor.execute(sql).fetchall()
+    
+    query = cursor.execute("SELECT nombre FROM Productos WHERE eliminado != 1;").fetchall()
+    
     # convierto la lista de tuplas en una lista de strings...
     query:list[str] = [q[0] for q in query]
+    
     conn.close()
     return query
 
 
 def getCategoriesDescription() -> tuple[str] | None:
-    '''Hace una consulta SELECT a la base de datos y toma las descripciones de las categorías que hay. Devuelve una tupla 
-    con las categorías. Si hubo un error conectándose a la base  de datos devuelve 'None'.'''
+    '''
+    Hace una consulta SELECT a la base de datos y toma las descripciones de las categorías que hay. Devuelve una tupla 
+    con las categorías.
+    '''
     connection = createConnection("database/inventario.db")
     if not connection:
         return None
@@ -144,7 +149,11 @@ def getCategoriesDescription() -> tuple[str] | None:
 
 
 def setTableWidthPolitics(tableWidget:QTableWidget) -> None:
-    '''Recibe un 'QTableWidget' y especifica las políticas de ancho de las columnas. Retorna un 'QHeaderView'.'''
+    '''
+    Recibe un 'QTableWidget' y especifica las políticas de ancho de las columnas. 
+    
+    Retorna None.
+    '''
     match tableWidget.objectName():
         case "displayTable":
             header = tableWidget.horizontalHeader()
@@ -167,123 +176,6 @@ def setTableWidthPolitics(tableWidget:QTableWidget) -> None:
     return None
 
 
-def getTableWidgetRowCount(count_sql:str=None, count_params:tuple=None) -> int:
-    '''Dependiendo del QTableWidget del parámetro, hace una consulta SELECT a la base de datos y obtiene la cantidad 
-    de filas que debe tener la tabla. Retorna la cantidad como 'int'.'''
-    row_count:int
-    conn = createConnection("database/inventario.db")
-    if not conn:
-        return
-    cursor = conn.cursor()
-    # si no se pasó un sql y count_params hago de cuenta que la tabla es 'displayTable' y se seleccionó "MOSTRAR TODOS"...
-    if not count_sql and not count_params:
-        count_sql:str = "SELECT COUNT(*) FROM Productos;"
-        row_count = cursor.execute(count_sql).fetchone()[0]
-    elif count_sql and not count_params:
-        row_count = cursor.execute(count_sql).fetchone()[0]
-    else:
-        row_count = cursor.execute(count_sql, count_params).fetchone()[0]
-    conn.close()
-    return row_count
-
-
-def getIDsFromTable() -> tuple:
-    '''Hace una consulta SELECT y obtiene los IDs de "Ventas" y de "Deudas". Retorna una tupla con los IDs.'''
-    sql:str
-    sql = "SELECT v.IDventa, d.IDdeuda FROM Detalle_Ventas as dv \
-        INNER JOIN Productos AS p ON dv.IDproducto = p.IDproducto \
-        INNER JOIN Ventas AS v ON dv.IDventa = v.IDventa;"
-    ids = [q[0] for q in makeReadQuery(sql)]
-    return tuple(ids)
-
-
-# READ QUERY
-def makeReadQuery(sql:str, params:tuple = None) -> list:
-    '''Hace la consulta SELECT a la base de datos y devuelve los valores de las filas seleccionadas. Retorna una 'list' 
-    con los valores.'''
-    conn = createConnection("database/inventario.db")
-    if not conn:
-        return
-    cursor = conn.cursor()
-    if not params:
-        query = cursor.execute(sql).fetchall()
-    else:
-        query = cursor.execute(sql, params).fetchall()
-    conn.close()
-    return query
-
-
-def setTableWidgetContent(tableWidget:QTableWidget, row_count:int=None, query:list=None) -> tuple | None:
-    '''Recibe un QTableWidget, la cantidad de filas que tiene y una consulta SELECT ya hecha con los valores de la base 
-    de datos.
-    \n\tColoca todos los datos de la query en el QTableWidget. 
-    Dependiendo del parámetro QTableWidget, retorna una tupla con los IDs de la tabla correspondiente o 'None'.'''
-    n_row:int = 0
-    id_list:list = []
-
-    # guardo en una lista todos los IDs (no me interesan los IDs de Deudas)
-    match tableWidget.objectName():
-        case "table_debts":
-            pass
-        case _:
-            for id_col in query:
-                id_list.append(id_col[0])
-            id_list = tuple(id_list)
-
-    # limpia la tabla
-    tableWidget.clearContents()
-    # determina la cantidad de filas que tendrá la tabla
-    tableWidget.setRowCount(row_count)
-    
-    # y dependiendo de cuál tabla se seleccionó la llena con sus respectivos valores...
-    match tableWidget.objectName():
-        case "displayTable":
-            for row in query:
-                tableWidget.setItem(n_row, 0, QTableWidgetItem(str(row[1])) ) # col.0 tiene categoría
-                tableWidget.setItem(n_row, 1, QTableWidgetItem(str(row[2])) ) # col.1 tiene nombre
-                tableWidget.setItem(n_row, 2, QTableWidgetItem(str(row[3]) if str(row[3]) != None else "") ) # col.2 tiene descripción
-                stock:float = row[4]
-                if stock.is_integer():
-                    try:
-                        stock = int(stock)
-                    except ValueError:
-                        pass
-                tableWidget.setItem(n_row, 3, QTableWidgetItem(str(f"{stock} {row[5]}")) ) # col.3 tiene stock y unidad_medida
-                tableWidget.setItem(n_row, 4, QTableWidgetItem(str(row[6])) ) # col.4 tiene precio_unit
-                tableWidget.setItem(n_row, 5, QTableWidgetItem(str(row[7]) if row[7] != None else "") ) # col.5 tiene precio_comerc
-                n_row += 1
-        
-        case "table_sales_data":
-            for row in query:
-                tableWidget.setItem(n_row, 0, QTableWidgetItem(str(row[1]) if row[1] != None else "") ) # columna 0 tiene detalles_venta
-                quantity = row[3]
-                if quantity.is_integer():
-                    try:
-                        quantity = int(quantity)
-                    except ValueError:
-                        pass
-                measurement_unit = str(row[4]) if row[4] != None else ""
-                tableWidget.setItem(n_row, 1, QTableWidgetItem(str(f"{quantity} {measurement_unit}")) ) # col.1 tiene cantidad y unidad_medida
-                tableWidget.setItem(n_row, 2, QTableWidgetItem(str(row[2])) ) # col.2 tiene nombre
-                tableWidget.setItem(n_row, 3, QTableWidgetItem(str(row[5])) ) # col.3 tiene costo_total
-                tableWidget.setItem(n_row, 4, QTableWidgetItem(str(row[6])) ) # col.4 tiene abonado
-                tableWidget.setItem(n_row, 5, QTableWidgetItem(str(row[7]) if str(row[7]) != None else "") ) # col.5 tiene fecha_hora
-                n_row += 1
-
-        case "table_debts":
-            # for row in query:
-            #     tableWidget.setItem(n_row, 0, QTableWidgetItem())
-            # TODO: seguir poniendo funcionalidad acá (antes necesito ir a MainWindow y declarar las consultas sql)
-            pass
-
-    # al final, redimensiona las filas acorde al contenido...
-    tableWidget.resizeRowsToContents()
-    if id_list:
-        return tuple(id_list)
-    else:
-        return None
-
-
 def getSelectedTableRows(tableWidget:QTableWidget) -> tuple:
     '''Obtiene todas las filas seleccionadas del QTableWidget. Retorna una tupla con las filas.'''
     selected_indexes:list = []
@@ -293,60 +185,66 @@ def getSelectedTableRows(tableWidget:QTableWidget) -> tuple:
     return tuple(selected_indexes)
 
 
-# DELETE QUERY
-def makeDeleteQuery(tableWidget:QTableWidget, rows_to_delete:tuple, ids:tuple, items_to_delete:tuple = None) -> None:
-    '''Declara las consultas sql y los parámetros para hacer la consulta DELETE a la base de datos con las filas 
-    seleccionadas. El parámetro 'items_to_delete' no es necesario, funciona como una "medida de seguridad", es otro 
-    valor a tener en cuenta -además del ID del registro- para borrar un registro. Retorna 'None'.'''
-    pos:int = 0
-    connection = createConnection("database/inventario.db")
-    if not connection:
-        return None
-    cursor = connection.cursor()
-    # NOTE: sql no admite múltiples DELETE, así que se deben hacer 1 por 1
-    match tableWidget.objectName():
-        case "displayTable":
-            while pos < len(rows_to_delete):
-                cursor.execute("DELETE FROM Productos WHERE IDproducto = ? AND nombre = ?", (ids[rows_to_delete[pos]], items_to_delete[pos], ) )
-                pos += 1
+def getCurrentProductStock(product_name:str) -> tuple[float,str]:
+        '''
+        Hace una consulta SELECT y obtiene el stock actual del producto ingresado. 
         
-        case "table_sales_data":
-            while pos < len(rows_to_delete):
-                cursor.execute("DELETE FROM Detalle_Ventas WHERE ID_detalle_venta = ?;", (ids[rows_to_delete[pos]], ) )
-                # obtengo el IDventa desde Detalle_Ventas
-                IDventa = makeReadQuery("SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?", (ids[rows_to_delete[pos]], ))[0][0]
-                IDdeuda = makeReadQuery("SELECT IDdeuda FROM Detalle_Ventas WHERE ID_detalle_venta = ?", (ids[rows_to_delete[pos]], ))[0][0]
-                # hago los DELETE a Ventas y Deudas
-                cursor.execute("DELETE FROM Ventas WHERE IDventa = ? AND fecha_hora = ?;", (IDventa, items_to_delete[pos]) )
-                cursor.execute("DELETE FROM Deudas WHERE IDdeuda = ? AND fecha_hora = ?;", (IDdeuda, items_to_delete[pos]) )
-                pos += 1
-            
-    connection.commit()
-    connection.close()
+        Retorna una tupla con el stock como número y la unidad de medida como 'str'.
+        '''
+        conn:Connection | None
+        stock:float
+        measurement_unit:str
+
+        conn = createConnection("database/inventario.db")
+        if not conn:
+            return None
+        cursor = conn.cursor()
+        query = cursor.execute("SELECT stock, unidad_medida FROM Productos WHERE nombre = ?;", (product_name,)).fetchone()
+        if len(query) == 2:
+            stock, measurement_unit = [q for q in query]
+        else:
+            stock = query[0]
+            measurement_unit = ""
+        
+        try:
+            stock = float(stock)
+        except:
+            pass
+        return stock, measurement_unit
+
+
+#========================================================================================================================
+def removeTableCellsWidgets(table_widget:QTableWidget) -> None:
+    '''
+    Recorre 'table_widget' y borra todos los widgets creados en las celdas. 
+    
+    Retorna None.
+    '''
+    # si cell_widget es un QComboBox|QLineEdit|QDateTimeEdit lo elimina...
+    for row in range(table_widget.rowCount()):
+        for col in range(table_widget.columnCount()):
+            if isinstance(table_widget.cellWidget(row, col), (QComboBox, QLineEdit, QDateTimeEdit)):
+                table_widget.removeCellWidget(row, col)
     return None
 
 
-def removeTableCellsWidgets(tableWidget:QTableWidget) -> None:
-    '''Recorre la tabla y borra todos los widgets creados en las celdas. Retorna 'None'.'''
-    # si cell_widget es un QComboBox o un QLineEdit lo elimina...
-    for row in range(tableWidget.rowCount()):
-        for col in range(tableWidget.columnCount()):
-            cell_widget = tableWidget.cellWidget(row, col)
-            if isinstance(cell_widget, (QComboBox, QLineEdit, QDateTimeEdit)):
-                tableWidget.removeCellWidget(row, col)
-    return None
-
-
-def createTableColumnComboBox(tableWidget:QTableWidget, curr_index:QModelIndex, curr_text:str) -> QComboBox:
-    '''Crea el combobox que se encontrará dentro de la celda de la columna especificada por 'curr_index' en la tabla 
-    'tableWidget'.\n
-    'curr_text' representa al elemento que está seleccionado inicialmente en la combobox.
-    \nRetorna un 'QComboBox'.'''
-    combobox = QComboBox(tableWidget)
+def createTableColumnComboBox(table_widget:QTableWidget, curr_index:QModelIndex, curr_text:str) -> QComboBox:
+    '''
+    Crea el combobox que se encontrará dentro de la celda de la columna especificada por 'curr_index' en la tabla 
+    'table_widget'.
+    
+    PARAMS:
+    - table_widget: el QTableWidget donde se colocará el QComboBox.
+    - curr_index: índice seleccionado de la celda de 'table_widget'.
+    - curr_text: el elemento que está seleccionado inicialmente en el QComboBox.
+    
+    Retorna un QComboBox.
+    '''
+    combobox = QComboBox(table_widget)
     combobox.setEditable(False)
     combobox.setFrame(False)
 
-    match tableWidget.objectName():
+    match table_widget.objectName():
         case "displayTable":
             combobox.addItems(getProductsCategories())
             combobox.setPlaceholderText("Elegir categoría")
@@ -357,189 +255,124 @@ def createTableColumnComboBox(tableWidget:QTableWidget, curr_index:QModelIndex, 
         
     # coloca como índice actual el que tenga el string 'curr_text', sino hay el índice actual es -1
     combobox.setCurrentIndex(combobox.findText(curr_text))
-    tableWidget.setCellWidget(curr_index.row(), curr_index.column(), combobox)
+    table_widget.setCellWidget(curr_index.row(), curr_index.column(), combobox)
     return combobox
 
 
-def getUpdateSqlAndParameters(tableWidget:QTableWidget, lineEdit:QLineEdit, curr_index:QModelIndex, ids:tuple) -> tuple[str, tuple[str]]:
-    '''Recibe el 'QTableWidget', el item que fue modificado, el 'QLineEdit' y los IDs de los elementos. Retorna una 
-    tupla con la consulta Sql y una tupla con los parámetros que recibe la consulta.'''
-    sql:str
-    params:tuple
-    re_stock:Match | None
-    re_unit:Match | None
+def createTableColumnLineEdit(table_widget:QTableWidget, curr_index:QModelIndex) -> QLineEdit:
+    '''
+    Crea un QLineEdit para ser colocado en la celda de 'table_widget' seleccionada con índice 'curr_index', y 
+    dependiendo de la columna donde esté la celda le aplica un validador al QLineEdit y/o un QCompleter.
     
-    match tableWidget.objectName():
+    Retorna un QLineEdit.
+    '''
+    lineedit:QLineEdit = QLineEdit(table_widget)
+
+    lineedit.setText(table_widget.item(curr_index.row(), curr_index.column()).text())
+    
+    # a continuación coloca validators y completers dependiendo de la columna...
+    match table_widget.objectName():
         case "displayTable":
-            params = (lineEdit.text(), str(ids[curr_index.row()]))
             match curr_index.column():
-                case 1: # columna de nombre
-                    sql = "UPDATE Productos SET nombre = ? WHERE IDproducto = ?;"
-                case 2: # columna de descripción
-                    sql = "UPDATE Productos SET descripcion = ? WHERE IDproducto = ?;"
-                case 3: # columna de stock
-                    re_stock = match("[0-9]+(\.)?[0-9]{0,2}", lineEdit.text())
-                    re_stock = re_stock.group() if re_stock is not None else None
-                    re_unit = search("[a-zA-Z]*$", lineEdit.text(), IGNORECASE)
-                    re_unit = re_unit.group() if re_unit is not None else None
-                    if re_stock:
-                        params = (re_stock, re_unit, str(ids[curr_index.row()]))
-                        sql = "UPDATE Productos SET stock = ?, unidad_medida = ? WHERE IDproducto = ?;"
+                case 1: # nombre
+                    lineedit.setCompleter(createCompleter(type=3))
+                    lineedit.setValidator(ProductNameValidator(lineedit))
+                
+                case 3: # stock
+                    lineedit.setValidator(ProductStockValidator(lineedit))
+                
                 case 4: # precio unitario
-                    sql = "UPDATE Productos SET precio_unit = ? WHERE IDproducto = ?;"
+                    lineedit.setValidator(ProductUnitPriceValidator(lineedit))
+                
                 case 5: # precio comercial
-                    sql = "UPDATE Productos SET precio_comerc = ? WHERE IDproducto = ?;"
+                    lineedit.setValidator(ProductComercPriceValidator(lineedit))
+        
         
         case "table_sales_data":
-            params = (lineEdit.text(), str(ids[curr_index.row()]))
             match curr_index.column():
                 case 0: # detalle de venta
-                    sql = "UPDATE Ventas SET detalles_venta = ? WHERE IDventa = (SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?);"
+                    lineedit.setValidator(SaleDetailsValidator(lineedit))
+                
                 case 1: # cantidad
-                    sql = "UPDATE Detalle_Ventas SET cantidad = ? WHERE ID_detalle_venta = ?;"
+                    lineedit.setValidator(SaleQuantityValidator(lineedit))
+                    # sólo permite editar la cantidad, no la unidad
+                    lineedit.setText(table_widget.item(curr_index.row(), curr_index.column()).text().split(" ")[0].strip())
+                
                 case 3: # costo total
-                    sql = "UPDATE Detalle_Ventas SET costo_total = ? WHERE ID_detalle_venta = ?;"
+                    lineedit.setValidator(SaleTotalCostValidator(lineedit))
+                
                 case 4: # abonado
-                    sql = "UPDATE Detalle_Ventas SET abonado = ? WHERE ID_detalle_venta = ?;"
-            
-    return sql, params
+                    # completer con costo total (misma fila, columna 3)
+                    lineedit.setCompleter( QCompleter( [table_widget.item(curr_index.row(), 3).text()] ) )
+                    lineedit.setValidator(SalePaidValidator(lineedit))
 
-
-def validateColumnUpdatedValue(tableWidget:QTableWidget, curr_index:QModelIndex, lineEdit:QLineEdit, prev_text:str, labelFeedback:QLabel) -> None:
-    '''Valida el valor ingresado para el 'QLineEdit' en la celda ubicada en la columna de la tabla actual; \
-    modifica el texto de 'labelFeedback' dependiendo del error si hubo alguno.\n
-    'prev_text' es la cadena de texto que había antes en la celda.\n
-    \nRetorna 'None'.'''
-    valid:bool = True
-    text_stock:str # guarda el texto completo del stock.
-    aux_stock:str # variable auxiliar. Contiene la cantidad de la celda en "stock" de 'displayTable'.
-
-    match tableWidget.objectName():
-        case "displayTable":
-            # verifica si el campo está vacío...
-            if lineEdit.text().strip() == "" and (curr_index.column() != 2 and curr_index.column() != 5): # col.2 (descripción) y 5 (precio comer.) son opcionales...
-                valid = False
-                # pone como contenido en la celda lo que estaba antes...
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(prev_text)
-                labelFeedback.show()
-                labelFeedback.setStyleSheet("font-family: 'Verdana'; font-size: 16px; letter-spacing: 0px; word-spacing: 0px;color: #f00; border: 1px solid #f00; background-color: rgb(255, 185, 185);")
-                # y dependiendo de la columa seleccionada muestra un mensaje diferente...
-                match curr_index.column():
-                    case 1: # columna de nombre del producto
-                        labelFeedback.setText("El campo del nombre del producto no puede estar vacío")
-                    case 3: # columna de stock
-                        labelFeedback.setText("El campo de stock no puede estar vacío")
-                    case 4: # columna de precio unitario
-                        labelFeedback.setText("El campo de precio unitario no puede estar vacío")
-
-            # si es 'float' lo formatea...
-            if curr_index.column() == 3: # stock
-                text_stock = lineEdit.text()
-                aux_stock = lineEdit.text().split(" ")[0]
-                aux_stock = aux_stock.replace(",",".")
-                if aux_stock.endswith("."):
-                    aux_stock = aux_stock.strip(".")
-                text_stock = sub("[0-9]{1,8}(\.|,)?[0-9]{0,2}", aux_stock, text_stock, count=1)
-                lineEdit.setText(text_stock)
-
-            elif (curr_index.column() == 4 or curr_index.column() == 5): # precio unitario/precio comercial
-                lineEdit.setText(lineEdit.text().replace(",", "."))
-                # y si termina con "," ó "."...
-                if lineEdit.text().endswith("."):
-                    lineEdit.setText(lineEdit.text().rstrip("."))
-
-            if valid:
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(lineEdit.text())
-                labelFeedback.hide()
-        
-        case "table_sales_data":
-            # si es 'float' lo formatea...
-            if (curr_index.column() == 3 or curr_index.column() == 4):
-                lineEdit.setText(lineEdit.text().replace(",", "."))
-                # y si termina con "," ó "."...
-                if lineEdit.text().replace(",", ".").endswith("."):
-                    lineEdit.setText(lineEdit.text().rstrip(",."))
-            
-            # si el campo está vacío...
-            if curr_index.column() != 0 and lineEdit.text().strip() == "": # col.0 (detalle de venta) es opcional...
-                valid = False
-
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(prev_text)
-                labelFeedback.show()
-                labelFeedback.setStyleSheet("font-family: 'Verdana'; font-size: 16px; letter-spacing: 0px; word-spacing: 0px; color: #f00; border: 1px solid #f00; background-color: rgb(255, 185, 185);")
-                # diferente mensaje de error dependiendo de la columna...
-                match curr_index.column():
-                    case 1: # cantidad
-                        labelFeedback.setText("El campo de cantidad no puede estar vacío")
-                    case 2: # producto
-                        labelFeedback.setText("El campo de producto no puede estar vacío")
-                    case 3: # costo total
-                        labelFeedback.setText("El campo de costo total no puede estar vacío")
-                    case 4: # abonado
-                        labelFeedback.setText("El campo del total abonado no puede estar vacío")
-                    case 5: # fecha y hora
-                        labelFeedback.setText("El campo de fecha y hora no puede estar vacío")
-
-            if valid:
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(lineEdit.text())
-                labelFeedback.hide()
-
-
-        case "":
-            pass
+    table_widget.setCellWidget(curr_index.row(), curr_index.column(), lineedit)
     
-    return None
+    return lineedit
 
 
-# UPDATE QUERY
-def makeUpdateQuery(sql:str, params:tuple, inv_prices:bool=None) -> None:
-    '''Hace la consulta UPDATE a la base de datos.\n
-    'inv_prices' determina si hacer un UPDATE normal ó si es para actualizar los precios que fueron modificados de \n
-    la tabla 'displayTable' usando porcentajes, en cuyo caso se usa la instrucción 'executemany()'.
-    \nRetorna 'None'.'''
-    conn = createConnection("database/inventario.db")
-    if not conn:
-        return None
-    cursor = conn.cursor()
-    if not inv_prices:
-        cursor.execute(sql, params)
-    else:
-        cursor.executemany(sql, params)
-    conn.commit()
-    conn.close()
-    return None
+def createTableColumnDateTimeEdit(table_widget:QTableWidget, curr_index:QModelIndex) -> QDateTimeEdit:
+    '''
+    Crea un QDateTimeEdit en 'table_widget' y en la celda indicada por 'curr_index'. Además le asigna un estilo 
+    QSS.
+    
+    Retorna un QDateTimeEdit.
+    '''
+    datetimeedit = QDateTimeEdit(parent=table_widget)
+    curr_datetime:QDateTime = QDateTime()
+    date:QDate
+    time:QTime
+
+    datetimeedit.setMinimumDateTime(QDateTime().fromString("1/1/2022 00:00", "d/M/yyyy HH:mm"))
+    datetimeedit.setCalendarPopup(True)
+    
+    # por alguna razón, QDateTime().fromString() no me funcionó, así que obtengo la fecha y la hora separadas...
+    cell_datetime = table_widget.item(curr_index.row(), curr_index.column()).text()
+    date = QDate().fromString(cell_datetime.split(" ")[0].strip(), "d/M/yyyy")
+    time = QTime().fromString(cell_datetime.split(" ")[1].strip(), "HH:mm")
+    
+    # y las junto en el curr_datetime...
+    curr_datetime.setDate(date)
+    curr_datetime.setTime(time)
+    
+    # al final asigno la fecha y la hora al datetimeedit
+    datetimeedit.setDateTime(curr_datetime)
+    
+    # le asigno un estilo
+    datetimeedit.setStyleSheet(
+            "QDateTimeEdit {\
+                background-color: #fff;\
+            }\
+            \
+            \
+            QCalendarWidget QAbstractItemView {\
+                background-color: #fff;\
+                selection-background-color: #38a3a5;\
+            }\
+            QCalendarWidget QToolButton {\
+                background-color: #22577a;\
+                color: #fff;\
+            }\
+            QCalendarWidget QToolButton:hover,\
+            QCalendarWidget QToolButton:pressed {\
+                background-color: #38a3a5;\
+                color: #111;\
+            }\
+            \
+            \
+            QCalendarWidget QWidget#qt_calendar_prevmonth{\
+                qproperty-icon: url(':/icons/arrow-left-white.svg')\
+            }\
+            QCalendarWidget QWidget#qt_calendar_nextmonth{\
+                qproperty-icon: url(':/icons/arrow-right-white.svg')\
+            }")
+    
+    table_widget.setCellWidget(curr_index.row(), curr_index.column(), datetimeedit)
+
+    return datetimeedit
 
 
-def overwriteTableCellOldValue(tableWidget:QTableWidget, curr_index:QModelIndex, params:tuple = None, cb_curr_text:str = None) -> None:
-    '''Reemplaza el valor anterior de la celda en la posición 'curr_index' en 'tableWidget' con el nuevo valor.\n
-    'params' es por si la celda tiene un QLineEdit: la 1ra posición es a la que hay que acceder para obtener el 
-    contenido, y la 2da posición es sólo por si el contenido está compuesto por 2 tipos de valores (ej.: el stock en 
-    'displayTable').\n
-    'cb_curr_text' es por si la celda tiene un QComboBox: representa al texto del combobox.
-    \nRetorna 'None'.'''
-    # coloca el valor nuevo en la celda
-    match tableWidget.objectName():
-        case "displayTable":
-            if curr_index.column() == 0: # categoría
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(cb_curr_text)
-            elif curr_index.column() == (1 or 2 or 4 or 5): # nombre/descripción/precio unitario/precio comercial
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(str(params[0]).strip())
-            elif curr_index.column() == 3: # stock
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(f"{params[0]} {str(params[1]).strip()}")
-        
-        case "table_sales_data":
-            if curr_index.column() == 1: # cantidad (int|float + str)
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(f"{params[0]} {params[1]}")
-            elif curr_index.column() == 2: # producto
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(f"{cb_curr_text}")
-            else: # detalle de venta/costo total/abonado/fecha y hora
-                tableWidget.item(curr_index.row(), curr_index.column()).setText(f"{str(params[0]).strip()}")
-
-        case "":
-            pass
-    return None
-
-
+#========================================================================================================================
 def setSearchBarValidator(searchBar:QLineEdit) -> None:
     '''Coloca un 'Validator' en el 'searchBar' de entrada. Retorna 'None'.'''
     re = QRegularExpression("[^;,.?¿\'\'\"\"\t\r]*")
@@ -548,107 +381,52 @@ def setSearchBarValidator(searchBar:QLineEdit) -> None:
     return None
 
 
-def createTableColumnLineEdit(tableWidget:QTableWidget, curr_index:QModelIndex) -> QLineEdit:
-    '''crea un 'QLineEdit' para ser colocado en la celda seleccionada, y dependiendo de la columna donde esté la celda 
-    le aplica un 'Validator' al lineedit; además, si la celda seleccionada es de un nombre de un producto se le aplica un 
-    'QCompleter' al LineEdit. Retorna un 'QLineEdit'.'''
-    float_re:QRegularExpression = QRegularExpression("[0-9]{0,7}(\.|,)?[0-9]{0,2}")
+#========================================================================================================================
+def createCompleter(sql:str=None, params:tuple=None, type:int=None) -> QCompleter:
+    '''
+    Crea un QCompleter, establece sus atributos y lo coloca dentro de 'lineedit'.
+    El parámetro 'type' sirve para realizar una consulta genérica a la base de datos y obtener todas 
+    las coincidencias del valor de 'type', en cambio los parámetros 'sql' y 'params' sirven para obtener 
+    resultados más precisos al realizar consultas concretas.
+    
+    PARAMS:
+    - sql: (opcional) string con la consulta SELECT a la base de datos. Requiere el parámetro 'params'.
+    - params: (opcional) tuple con los parámetros para la consulta 'sql'. Requiere el parámetro 'sql'.
+    - type: (opcional) valor entero que determina los datos con los que llenar el QCompleter.
+        - 1: lo carga con todos los nombres de personas con cuenta corriente.
+        - 2: lo carga con todos los apellidos de personas con cuenta corriente.
+        - 3: lo carga con todos los nombres de productos.
+    
+    Retorna un QCompleter.
+    '''
     completer:QCompleter
-    lineedit:QLineEdit = QLineEdit(tableWidget)
-
-    lineedit.setText(tableWidget.item(curr_index.row(), curr_index.column()).text())
-    match tableWidget.objectName():
-        case "displayTable":
-            match curr_index.column():
-                case 1: # nombre
-                    completer = createCompleter(lineedit, 3)
-                    lineedit.setCompleter(completer)
-                case 3: # stock
-                    lineedit.setValidator(QRegularExpressionValidator("[0-9]{0,8}(\.|,)?[0-9]{0,2} ?[a-zA-Z]{0,20}", lineedit))
-                case 4: # precio unitario
-                    lineedit.setValidator(QRegularExpressionValidator(float_re, lineedit))
-                case 5: # precio comercial
-                    lineedit.setValidator(QRegularExpressionValidator(float_re, lineedit))
-        
-        case "table_sales_data":
-            match curr_index.column():
-                case 1: # cantidad
-                    lineedit.setValidator(QRegularExpressionValidator("[0-9]{0,8}(\.|,)?[0-9]{0,2}", lineedit))
-                    lineedit.setText(tableWidget.item(curr_index.row(), curr_index.column()).text().split(" ")[0].strip())
-                case 3: # costo total
-                    lineedit.setValidator(QRegularExpressionValidator(float_re, lineedit))
-                case 4: # abonado
-                    lineedit.setValidator(QRegularExpressionValidator(float_re, lineedit))
-
-    tableWidget.setCellWidget(curr_index.row(), curr_index.column(), lineedit)
-    return lineedit
-
-
-# INSERT QUERY
-def makeInsertQuery(sql:str, params:tuple = None) -> None:
-    '''Hace la consulta INSERT a la base de datos. Retorna 'None'.'''
-    conn = createConnection("database/inventario.db")
-    if not conn:
-        return None
-    cursor = conn.cursor()
+    query:list
+    
     if sql and params:
-        cursor.execute(sql, params)
+        query = makeReadQuery(sql, params)
+        results = [res[0] for res in query]
+        completer = QCompleter(results)
+    
     else:
-        cursor.execute(sql)
-    conn.commit()
-    conn.close()
-    return None
-
-
-def getDebtorNamesOrSurnames(type:int = 1 | 2) -> list[str]:
-    '''Hace una consulta SELECT a la base de datos y obtiene los nombres ó apellidos de los deudores. Si 'type' es 1 
-    trae los nombres, si es 2 trae los apellidos. Retorna una lista de strings.'''
-    column:str = "nombre" if type == 1 else "apellido"
-    sql = f"SELECT {column} FROM Deudores;"
-    query = makeReadQuery(sql)
-    return query
-
-
-def createCompleter(widget:QLineEdit, type:int = 1 | 2 | 3) -> None:
-    '''Recibe un 'QLineEdit'; crea un 'QCompleter', establece sus atributos y lo coloca dentro del widget. 
-    \nSi 'type' es 1 carga el 'QCompleter' con nombres de deudores, si es 2 lo carga con los apellidos, si \
-    es 3 lo carga con nombres de productos.
-    \nRetorna 'None'.'''
-    completer:QCompleter
-    if type == 1 or type == 2: # nombres o apellidos de deudores
-        names_or_surnames = [q[0] for q in getDebtorNamesOrSurnames(type)]
-        completer = QCompleter(names_or_surnames, parent=widget)
-    elif type == 3: # nombres de productos
-        completer = QCompleter(getProductNames(), parent=widget)
+        if type == 1: # nombres de personas con cta. corriente
+            query = makeReadQuery("SELECT DISTINCT nombre FROM Deudores;")
+            names = [name[0] for name in query]
+            completer = QCompleter(names)
+        
+        elif type == 2:# apellidos de personas con cta. corriente
+            query = makeReadQuery("SELECT DISTINCT apellido FROM Deudores;")
+            surnames = [surname[0] for surname in query]
+            completer = QCompleter(surnames)
+        
+        elif type == 3: # nombres de productos
+            completer = QCompleter(getProductNames())
+    
     completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
     completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
     completer.setMaxVisibleItems(10)
 
-    widget.setCompleter(completer)
-    return None
+    return completer
 
 
-def createTableColumnDateTimeEdit(tableWidget:QTableWidget, curr_index:QModelIndex) -> QDateTimeEdit:
-    '''Crea un 'QDateTimeEdit' en el 'tableWidget' indicado y en la celda indicada por 'curr_index'. Retorna un 
-    'QDateTimeEdit'.'''
-    dateTimeEdit = QDateTimeEdit(parent=tableWidget)
-    curr_datetime:QDateTime = QDateTime()
-    date:QDate
-    time:QTime
-
-    dateTimeEdit.setMinimumDateTime(QDateTime().fromString("1/1/2022 00:00", "d/M/yyyy HH:mm"))
-    dateTimeEdit.setCalendarPopup(True)
-    # por alguna razón, QDateTime().fromString() no me funcionó, así que obtengo la fecha y la hora separadas...
-    cell_datetime = tableWidget.item(curr_index.row(), curr_index.column()).text()
-    date = QDate().fromString(cell_datetime.split(" ")[0].strip(), "d/M/yyyy") # bien
-    time = QTime().fromString(cell_datetime.split(" ")[1].strip(), "HH:mm") # bien
-    # y las junto en el curr_datetime...
-    curr_datetime.setDate(date)
-    curr_datetime.setTime(time)
-    # al final asigno la fecha y la hora al dateTimeEdit
-    dateTimeEdit.setDateTime(curr_datetime)
-    tableWidget.setCellWidget(curr_index.row(), curr_index.column(), dateTimeEdit)
-
-    return dateTimeEdit
 
 

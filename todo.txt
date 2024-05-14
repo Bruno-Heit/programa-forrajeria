@@ -1,34 +1,25 @@
-CAMBIOS A CORTO PLAZO:
-	. búsqueda: permitir ingresar un término y buscar en todas las tablas hasta que se encuentre el 
-	  término buscado.
-	. búsqueda: al estar el usuario dentro de 'searchBar', cambiar el atajo de teclado del botón 
-	  'btn_search' para que permita con 'enter' realizar la búsqueda. Cuando el usuario salga de 
-	  'searchBar' que se saque el atajo de teclado para el botón.
-	. (UPDATE) dentro de la tabla 'displayTable', cuando se modifica un item que reciba la señal 
-	  y aparezca el botón 'btn_confirmChanges'. Que al presionarse ese botón se haga un 'update' 
-	  de todas las filas modificadas.
-	. (DELETE) al presionar el botón 'btn_deleteRow', que aparezca un mensaje que avise al usuario 
-	  que debe seleccionar las filas a borrar en la tabla 'displayTable'. 
-	  Dentro de la tabla 'displayTable' se debe cambiar el modo de selección a "filas", y luego dejar 
-	  que el usuario elija las filas que quiera borrar. 
-          Al terminar de seleccionar las filas a borrar debe aparecer un mensaje que pregunte al usuario 
-	  si está seguro de hacerlo, y al elegir que sí haga un 'DELETE' por cada fila a la base de datos.
-	. (side_bar) al presionarse el botón 'btn_side_barToggle' que se despliegue la barra lateral, y 
-	  al presionarse otra vez que se cierre.
+CAMBIOS A HACER/IMPLEMENTACIONES NUEVAS:
+	☑ Permitir hacer un READ de cualquier tabla.
+	☑ Permitir hacer un CREATE de cualquier tabla.
+	☑ Permitir hacer un DELETE de cualquier tabla.
+	☑ Permitir hacer un UPDATE de cualquier tabla.
 
-CAMBIOS A MEDIO PLAZO:
-	. Permitir hacer un CREATE de tablas nuevas.
-	. Permitir hacer un READ de cualquier tabla.
-	. Permitir hacer un UPDATE de cualquier tabla.
-	. Permitir hacer un DELETE de cualquier tabla.
-	. Permitir cambiar el nombre de cualquier tabla.
-	. Permitir seleccionar qué columnas mostrar y cuáles no mostrar.
 
-CAMBIOS A LARGO PLAZO:
-	. Implementar el sistema de ventas del día.
-	. Cada vez que se agregue a la tabla de ventas un objeto vendido (o la cantidad especificada) se 
+	☐ Validar con 'phonenumbers' los números de teléfono introducidos, y hacer mención del uso de ese módulo (
+	 tiene lincencia APACHE).
+
+	☐ Guardar datos de hasta 5 años de antigüedad (por seguridad).
+	☐ Mostrar datos en tablas principalmente de los últimos 2 días, con posibilidad de expandir a los días deseados.
+
+	☐ Modificar las tablas para que al efectuarse un DELETE en una tabla "padre" se borren los registros "hijos" 
+	 en cascada (evita errores de clave foránea).
+
+	☑ Implementar el sistema de ventas del día.
+	☑ Cada vez que se agregue a la tabla de ventas un objeto vendido (o la cantidad especificada) se 
 	  debe modificar el stock total en la tabla donde se encuentra ese objeto.
-	. Implementar el sistema de deudas.
+	☐ Implementar el sistema de deudas.
+
+	☐ Implementar copias de seguridad (idealmente 3 copias, 2 en disco, 1 en otro dispositivo (principio 321)).
 
 
 
@@ -38,16 +29,16 @@ ORDEN DE INTRODUCCIÓN DE DATOS A BASE DE DATOS:
 
 	1. (INVENTARIO) LLENAR TABLA 'Categorias' (una vez llena, a no ser que se agreguen categorías nuevas, sólo 
            		referenciar los productos de 'Productos' a esta tabla).
-	2. (INVENTARIO) INTRODUCIR PRODUCTOS EN TABLA 'Productos'.
+	2.(INVENTARIO) INTRODUCIR PRODUCTOS EN TABLA 'Productos'.
 
 	3. (VENTA) INTRODUCIR VENTAS EN TABLA 'Ventas'.
 	4. (VENTA) INTRODUCIR DETALLES DE LAS VENTAS EN TABLA 'Detalle_Ventas'.
 	
 	5. (DEUDAS) INTRODUCIR DEUDORES EN TABLA 'Deudores' (sólo si en 'Detalle_Ventas' el registro tiene en la columna 
-		    'pagado=0', sino no)
+		    'pagado != precio total', sino no)
 		    NOTA: ALGUNOS CAMPOS SON OPCIONALES, A DECISIÓN DEL VENDEDOR.
 	6. (DEUDAS) INTRODUCIR DEUDAS EN TABLA 'Deudas' (sólo si en 'Detalle_Ventas' el registro tiene en la columna 
-		    'pagado=0', sino no).
+		    'pagado != precio total', sino no).
 
 
 	NOTAS:
@@ -55,72 +46,6 @@ ORDEN DE INTRODUCCIÓN DE DATOS A BASE DE DATOS:
 		 EN 'Detalle_Ventas.cantidad'.
 		.CUANDO EN UNA VENTA 'Detalle_Ventas.pagado=0', AÑADIR UN REGISTRO EN 'Deudores' CON INFORMACIÓN SOBRE 
 		 EL DEUDOR, Y EN 'DEUDAS' CON INFORMACIÓN SOBRE LA DEUDA.
-
-################################################################################################################
-
-TAB INVENTARIO:
-	.Al estar en el tab 'tab1_inventory', el botón para eliminar registros 'btn_delete_product_inventory' debe tener 
-	 un shortcut de teclado con la tecla 'supr'.
-	.Al estar en el tab 'tab1_inventory', el botón para agregar registros 'btn_add_product_inventory' debe tener 
-	 un shortcut de teclado con la tecla '+'.
-	.Al estar en el tab 'tab1_inventory', el botón para buscar un elemento 'btn_search_inventory' debe 
-	 tener un shortcut de teclado con la tecla 'enter' SÓLO CUANDO EL CURSOR ESTÉ EN LA BARRA DE BÚSQUEDA 
-	 'inventory_searchBar'.
-
-
-################################################################################################################
-
-TAB VENTAS:
-	.cuando se introduzca un "nombre de producto", se debe obtener automáticamente su categoría desde la base de 
-	 datos. Si la categoría es:
-		indumentaria -> se debe mostrar una opción para ingresar el talle.
-
-		.Además se debe obtener la unidad de medida que usa ese producto específico, y mostrar una opción para 
-		 ingresar la cantidad de ese producto que se vendió.
-		.Una persona debe ser capaz de realizar una compra de más de 1 producto, así que se debe poder guardar 
-		 un registro de los productos (por arrays, por ejemplo) que se venden en una sola venta, luego realizar 
-		 el INSERT a la base de datos.
-		.Al final de cada venta se debe obtener la fecha y hora de la venta.
-
-	.AL FINAL DE CADA VENTA SE DEBE RESTAR (EN LA BASE DE DATOS) DEL INVENTARIO EL PRODUCTO QUE SE VENDIÓ.	
-
-	.Al estar en el tab 'tab2_sales' en el formulario de ventas, el botón para agregar productos 'btn_add_product' 
-	 debe tener un shortcut de teclado con la tecla '+'.
-
-	.Al estar en el tab 'tab2_sales' en la tabla de ventas, el botón para eliminar registros 'btn_delete_product_sales' 
-	 debe tener un shortcut de teclado con la tecla 'supr'.
-	.Al estar en el tab 'tab2_sales' en la tabla de ventas, el botón para agregar registros 'btn_add_product_sales' 
-	 debe tener un shortcut de teclado con la tecla '+'.
-	.Al estar en el tab 'tab2_sales' en la tabla de ventas, el botón para buscar un elemento 'btn_search_sales' 
-	 debe tener un shortcut de teclado con la tecla 'enter' SÓLO CUANDO EL CURSOR ESTÉ EN LA BARRA DE BÚSQUEDA 
-	 'sales_searchBar'.
-
-
-################################################################################################################
-
-TAB DEUDAS:
-	.Al estar en el tab 'tab3_debts', el botón para eliminar registros 'btn_delete_debt' debe tener 
-	 un shortcut de teclado con la tecla 'supr'.
-	.Al estar en el tab 'tab3_debts', el botón para agregar registros 'btn_add_debt' debe tener 
-	 un shortcut de teclado con la tecla '+'.
-	.Al estar en el tab 'tab3_debts', el botón para buscar un elemento 'btn_search_debts' debe 
-	 tener un shortcut de teclado con la tecla 'enter' SÓLO CUANDO EL CURSOR ESTÉ EN LA BARRA DE BÚSQUEDA 
-	 'debts_searchBar'.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

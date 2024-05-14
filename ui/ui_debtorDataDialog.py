@@ -26,17 +26,15 @@ class Ui_debtorDataDialog(object):
         debtorDataDialog.resize(613, 263)
         debtorDataDialog.setMinimumSize(QSize(613, 263))
         debtorDataDialog.setStyleSheet(u"* {\n"
-"	background-color: transparent;\n"
 "	color: #111;\n"
-"/*	border-color: #0b7e7f;*/\n"
 "	border-color: #7f7e0b;\n"
-"	font-family: \"Tahoma\", \"Sans-Serif\";\n"
+"	font-family: \"Tahoma\", \"Verdana\", \"Sans-Serif\";\n"
 "	font-size: 16px;\n"
 "}\n"
 "\n"
 "\n"
 "QDialog {\n"
-"	background-color: qlineargradient(spread:pad, x1:0.658, y1:1, x2:0.289, y2:0, stop:0 rgba(203, 132, 96, 255), stop:1 rgba(239, 226, 187, 255));\n"
+"	background-color: qlineargradient(spread:pad, x1:0, y1:0.124364, x2:1, y2:0.409182, stop:0 rgba(178, 229, 246, 255), stop:0.393082 rgba(143, 201, 220, 255), stop:0.59306 rgba(67, 118, 134, 255), stop:0.761006 rgba(152, 151, 154, 255), stop:0.795597 rgba(110, 108, 112, 255), stop:0.845912 rgba(110, 108, 112, 255), stop:0.946372 rgba(67, 118, 134, 255), stop:1 rgba(143, 201, 220, 255));\n"
 "}\n"
 "\n"
 "\n"
@@ -44,7 +42,9 @@ class Ui_debtorDataDialog(object):
 "#label_debtorSurname_feedback,\n"
 "#label_phoneNumber_feedback,\n"
 "#label_postalCode_feedback {\n"
-"	color: #f00;\n"
+"	color: #dc2627;\n"
+"	border: 1px solid #dc2627;\n"
+"	background-color: rgba(224,164,164,0.7);\n"
 "}\n"
 "\n"
 "\n"
@@ -56,10 +56,19 @@ class Ui_debtorDataDialog(object):
 "	height: 24px;\n"
 "}\n"
 "QLineEdit:focus {\n"
-"	background-color: rgb(197, 255, 252);\n"
+"	background-c"
+                        "olor: rgba(176, 214, 245, 0.6);\n"
 "	border: 1px solid;\n"
 "	border-color: #0b7e7f;\n"
 "	font-size: 18px;\n"
+"}\n"
+"\n"
+"\n"
+"#lineEdit_direction:disabled,\n"
+"#lineEdit_phoneNumber:disabled,\n"
+"#lineEdit_postalCode:disabled {\n"
+"	background-color: rgba(204, 204, 204, 0.6);\n"
+"	color: #888;\n"
 "}\n"
 "\n"
 "\n"
@@ -69,8 +78,7 @@ class Ui_debtorDataDialog(object):
 "	color: #fff;\n"
 "	border: 1px solid #12476a;\n"
 "	border-radius: 2px;\n"
-"	mi"
-                        "n-width: 200px;\n"
+"	min-width: 200px;\n"
 "	min-height: 23px;\n"
 "}\n"
 "QPushButton:hover,\n"
@@ -98,7 +106,7 @@ class Ui_debtorDataDialog(object):
         self.lineEdit_direction = QLineEdit(self.debtor_data)
         self.lineEdit_direction.setObjectName(u"lineEdit_direction")
 #if QT_CONFIG(tooltip)
-        self.lineEdit_direction.setToolTip(u"<html><head/><body><p>(Opcional) direcci\u00f3n del deudor.</p><p><span style=\" font-weight:600; text-decoration: underline;\">NOTA:</span> si el deudor ya existe en la base de datos es recomendable <span style=\" text-decoration: underline;\">no llenar este campo</span>, porque crear\u00e1 un registro diferente del mismo deudor.</p></body></html>")
+        self.lineEdit_direction.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">(Opcional) direcci\u00f3n del deudor.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:12pt;\"> si el deudor ya existe en la base de datos es recomendable </span><span style=\" font-size:12pt; text-decoration: underline;\">no llenar este campo</span><span style=\" font-size:12pt;\">, porque crear\u00e1 un registro diferente del mismo deudor.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_direction.setInputMask(u"")
         self.lineEdit_direction.setText(u"")
@@ -115,7 +123,7 @@ class Ui_debtorDataDialog(object):
         self.lineEdit_postalCode = QLineEdit(self.debtor_data)
         self.lineEdit_postalCode.setObjectName(u"lineEdit_postalCode")
 #if QT_CONFIG(tooltip)
-        self.lineEdit_postalCode.setToolTip(u"<html><head/><body><p>(Opcional) c\u00f3digo postal del deudor.</p><p><span style=\" font-weight:600; text-decoration: underline;\">NOTA:</span> si el deudor ya existe en la base de datos es recomendable <span style=\" text-decoration: underline;\">no llenar este campo</span>, porque crear\u00e1 un registro diferente del mismo deudor.</p><p><span style=\" font-weight:600; text-decoration: underline;\">NOTA:</span> por conveniencia s\u00f3lo admite c\u00f3digos postales de Argentina.</p></body></html>")
+        self.lineEdit_postalCode.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">(Opcional) c\u00f3digo postal del deudor.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:12pt;\"> si el deudor ya existe en la base de datos es recomendable </span><span style=\" font-size:12pt; text-decoration: underline;\">no llenar este campo</span><span style=\" font-size:12pt;\">, porque crear\u00e1 un registro diferente del mismo deudor.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:12pt;\"> por conveniencia s\u00f3lo admite c\u00f3digos postales de Argentina.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_postalCode.setInputMask(u"")
         self.lineEdit_postalCode.setText(u"")
@@ -128,15 +136,15 @@ class Ui_debtorDataDialog(object):
         self.label_debtorSurname_feedback.setObjectName(u"label_debtorSurname_feedback")
         self.label_debtorSurname_feedback.setText(u"")
         self.label_debtorSurname_feedback.setAlignment(Qt.AlignCenter)
-        self.label_debtorSurname_feedback.setWordWrap(True)
+        self.label_debtorSurname_feedback.setWordWrap(False)
         self.label_debtorSurname_feedback.setTextInteractionFlags(Qt.NoTextInteraction)
 
-        self.debtor_data_GridLayout.addWidget(self.label_debtorSurname_feedback, 2, 4, 1, 1)
+        self.debtor_data_GridLayout.addWidget(self.label_debtorSurname_feedback, 2, 4, 1, 1, Qt.AlignRight|Qt.AlignTop)
 
         self.lineEdit_debtorName = QLineEdit(self.debtor_data)
         self.lineEdit_debtorName.setObjectName(u"lineEdit_debtorName")
 #if QT_CONFIG(tooltip)
-        self.lineEdit_debtorName.setToolTip(u"<html><head/><body><p>Nombre del deudor.</p></body></html>")
+        self.lineEdit_debtorName.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">El nombre del deudor.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_debtorName.setText(u"")
         self.lineEdit_debtorName.setFrame(False)
@@ -149,10 +157,10 @@ class Ui_debtorDataDialog(object):
         self.label_phoneNumber_feedback.setObjectName(u"label_phoneNumber_feedback")
         self.label_phoneNumber_feedback.setText(u"")
         self.label_phoneNumber_feedback.setAlignment(Qt.AlignCenter)
-        self.label_phoneNumber_feedback.setWordWrap(True)
+        self.label_phoneNumber_feedback.setWordWrap(False)
         self.label_phoneNumber_feedback.setTextInteractionFlags(Qt.NoTextInteraction)
 
-        self.debtor_data_GridLayout.addWidget(self.label_phoneNumber_feedback, 4, 0, 1, 5)
+        self.debtor_data_GridLayout.addWidget(self.label_phoneNumber_feedback, 4, 0, 1, 5, Qt.AlignHCenter|Qt.AlignTop)
 
         self.label_surnameMark = QLabel(self.debtor_data)
         self.label_surnameMark.setObjectName(u"label_surnameMark")
@@ -182,7 +190,7 @@ class Ui_debtorDataDialog(object):
 "margin-bottom: 7px;\n"
 "border-bottom: 1px solid;\n"
 "border-color: rgb(11, 126, 127);")
-        self.label_debtorInfo.setText(u"INFORMACI\u00d3N SOBRE EL DEUDOR")
+        self.label_debtorInfo.setText(u"DATOS DEL DEUDOR")
         self.label_debtorInfo.setTextFormat(Qt.PlainText)
         self.label_debtorInfo.setAlignment(Qt.AlignCenter)
         self.label_debtorInfo.setTextInteractionFlags(Qt.NoTextInteraction)
@@ -201,7 +209,7 @@ class Ui_debtorDataDialog(object):
         self.lineEdit_debtorSurname = QLineEdit(self.debtor_data)
         self.lineEdit_debtorSurname.setObjectName(u"lineEdit_debtorSurname")
 #if QT_CONFIG(tooltip)
-        self.lineEdit_debtorSurname.setToolTip(u"<html><head/><body><p>Apellido del deudor.</p></body></html>")
+        self.lineEdit_debtorSurname.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">El apellido del deudor.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_debtorSurname.setText(u"")
         self.lineEdit_debtorSurname.setFrame(False)
@@ -220,19 +228,20 @@ class Ui_debtorDataDialog(object):
         self.label_debtorName_feedback.setText(u"")
         self.label_debtorName_feedback.setTextFormat(Qt.PlainText)
         self.label_debtorName_feedback.setAlignment(Qt.AlignCenter)
-        self.label_debtorName_feedback.setWordWrap(True)
+        self.label_debtorName_feedback.setWordWrap(False)
         self.label_debtorName_feedback.setTextInteractionFlags(Qt.NoTextInteraction)
 
-        self.debtor_data_GridLayout.addWidget(self.label_debtorName_feedback, 2, 1, 1, 2)
+        self.debtor_data_GridLayout.addWidget(self.label_debtorName_feedback, 2, 1, 1, 2, Qt.AlignLeft|Qt.AlignTop)
 
         self.lineEdit_phoneNumber = QLineEdit(self.debtor_data)
         self.lineEdit_phoneNumber.setObjectName(u"lineEdit_phoneNumber")
 #if QT_CONFIG(tooltip)
-        self.lineEdit_phoneNumber.setToolTip(u"<html><head/><body><p>(Opcional) n\u00famero de tel\u00e9fono del deudor.</p><p><span style=\" font-weight:600; text-decoration: underline;\">NOTA:</span> si el deudor ya existe en la base de datos es recomendable <span style=\" text-decoration: underline;\">no llenar este campo</span>, porque crear\u00e1 un registro diferente del mismo deudor.</p><p><span style=\" font-weight:600; text-decoration: underline;\">NOTA:</span> no lleva ni 0 ni 15, pero s\u00ed requiere el c\u00f3digo de pa\u00eds (el de Argentina es +54).</p></body></html>")
+        self.lineEdit_phoneNumber.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">(Opcional) n\u00famero de tel\u00e9fono del deudor.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:12pt;\"> si el deudor ya existe en la base de datos es recomendable </span><span style=\" font-size:12pt; text-decoration: underline;\">no llenar este campo</span><span style=\" font-size:12pt;\">, porque crear\u00e1 un registro diferente del mismo deudor.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:12pt;\"> no lleva ni 0 ni 15, pero s\u00ed requiere el c\u00f3digo de pa\u00eds (el de Argentina es +54).</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        self.lineEdit_phoneNumber.setInputMask(u"+99-9999-000000000")
+        self.lineEdit_phoneNumber.setInputMask(u"")
+        self.lineEdit_phoneNumber.setText(u"")
         self.lineEdit_phoneNumber.setFrame(False)
-        self.lineEdit_phoneNumber.setCursorPosition(18)
+        self.lineEdit_phoneNumber.setCursorPosition(0)
         self.lineEdit_phoneNumber.setPlaceholderText(u"(Opcional) Ej.: 2323-123456")
         self.lineEdit_phoneNumber.setClearButtonEnabled(True)
 
@@ -242,10 +251,10 @@ class Ui_debtorDataDialog(object):
         self.label_postalCode_feedback.setObjectName(u"label_postalCode_feedback")
         self.label_postalCode_feedback.setText(u"")
         self.label_postalCode_feedback.setAlignment(Qt.AlignCenter)
-        self.label_postalCode_feedback.setWordWrap(True)
+        self.label_postalCode_feedback.setWordWrap(False)
         self.label_postalCode_feedback.setTextInteractionFlags(Qt.NoTextInteraction)
 
-        self.debtor_data_GridLayout.addWidget(self.label_postalCode_feedback, 8, 0, 1, 5)
+        self.debtor_data_GridLayout.addWidget(self.label_postalCode_feedback, 8, 0, 1, 5, Qt.AlignHCenter|Qt.AlignTop)
 
         self.debtor_data_GridLayout.setColumnStretch(1, 1)
         self.debtor_data_GridLayout.setColumnStretch(2, 1)
@@ -278,6 +287,5 @@ class Ui_debtorDataDialog(object):
         self.label_phoneNumber.setText(QCoreApplication.translate("debtorDataDialog", u"N\u00fam. de tel\u00e9fono", None))
         self.label_postalCode.setText(QCoreApplication.translate("debtorDataDialog", u"C\u00f3digo postal", None))
         self.label_direction.setText(QCoreApplication.translate("debtorDataDialog", u"Direcci\u00f3n", None))
-        self.lineEdit_phoneNumber.setText(QCoreApplication.translate("debtorDataDialog", u"+54--", None))
     # retranslateUi
 

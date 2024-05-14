@@ -21,16 +21,36 @@
   </property>
   <property name="styleSheet">
    <string notr="true">* {
-	background-color: #35bc88;
 	color: #111;
 	border-color: #0b7e7f;
-	font-family: &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
+	font-family: &quot;Tahoma&quot;, &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
 	font-size: 16px;
 }
 
 
-*[mandatoryField=&quot;True&quot;] {
-	background-color: rgb(255, 251, 142);
+QDialog {
+	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 178, 102, 255), stop:0.378531 rgba(230, 177, 61, 255), stop:0.745763 rgba(232, 105, 57, 255), stop:0.982955 rgba(255, 180, 128, 255));
+}
+
+
+#label_productName_feedback,
+#label_productQuantity_feedback,
+#label_totalPaid_feedback,
+#label_debtorName_feedback,
+#label_debtorSurname_feedback,
+#label_phoneNumber_feedback,
+#label_postalCode_feedback {
+	color: #dc2627;
+	border: 1px solid #dc2627;
+	background-color: rgba(224,164,164,0.7)
+}
+
+
+#lineEdit_direction:disabled,
+#lineEdit_phoneNumber:disabled,
+#lineEdit_postalCode:disabled {
+	background-color: rgba(204, 204, 204, 0.6);
+	color: #888;
 }
 
 
@@ -110,6 +130,56 @@ QComboBox QAbstractItemView {
    </property>
    <item>
     <widget class="QFrame" name="sale_data">
+     <property name="styleSheet">
+      <string notr="true">QScrollBar {
+	background-color: #fff;
+	border: 1px solid transparent;
+	border-radius: 5px;
+}
+QScrollBar:groove {
+	border-radius: 5px;
+}
+QScrollBar::handle {
+	background-color: #0b7e7f;
+	border-radius: 5px;
+}
+QScrollBar::handle:pressed {
+	background-color: #35bc88;
+}
+QScrollBar::sub-line {
+	width: 0;
+	height: 0;
+	background: none;
+}
+QScrollBar::add-line {
+	width: 0;
+	height: 0;
+	background: none;
+}
+
+
+/*vertical scrollbars*/
+QScrollBar:vertical {
+	width: 13px;
+}
+QScrollBar::handle:vertical {
+	min-height: 15px;
+}
+QScrollBar::sub-page:vertical {
+	background: none;
+}
+QScrollBar::add-page:vertical {
+	background: none;
+}
+
+/*horizontal scrollbars*/
+QScrollBar:horizontal {
+	height: 13px;
+}
+QScrollBar::handle:horizontal {
+	min-width: 15px;
+}</string>
+     </property>
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>
@@ -204,7 +274,7 @@ QComboBox QAbstractItemView {
          <item row="0" column="1">
           <widget class="QComboBox" name="comboBox_productName">
            <property name="toolTip">
-            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;El nombre del producto vendido.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; en caso de buscar un producto que no está en esta lista de productos se debe agregar ese producto antes a la base de datos mediante la sección de &lt;span style=&quot; font-style:italic;&quot;&gt;INVENTARIO.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;El nombre del producto vendido.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; en caso de buscar un producto que no está en esta lista de productos se debe agregar ese producto antes a la base de datos mediante la sección de &lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-style:italic;&quot;&gt;INVENTARIO.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="editable">
             <bool>true</bool>
@@ -220,10 +290,13 @@ QComboBox QAbstractItemView {
            </property>
           </widget>
          </item>
-         <item row="4" column="0" colspan="2">
+         <item row="4" column="0" colspan="2" alignment="Qt::AlignHCenter|Qt::AlignTop">
           <widget class="QLabel" name="label_productQuantity_feedback">
-           <property name="styleSheet">
-            <string notr="true">color: #f00;</string>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>20</height>
+            </size>
            </property>
            <property name="text">
             <string notr="true"/>
@@ -239,10 +312,13 @@ QComboBox QAbstractItemView {
            </property>
           </widget>
          </item>
-         <item row="1" column="0" colspan="2">
+         <item row="1" column="0" colspan="2" alignment="Qt::AlignHCenter|Qt::AlignTop">
           <widget class="QLabel" name="label_productName_feedback">
-           <property name="styleSheet">
-            <string notr="true">color: #f00;</string>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>20</height>
+            </size>
            </property>
            <property name="text">
             <string notr="true"/>
@@ -268,7 +344,7 @@ QComboBox QAbstractItemView {
          <item row="2" column="1">
           <widget class="QLineEdit" name="lineEdit_productQuantity">
            <property name="toolTip">
-            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;La cantidad del producto vendido.&lt;/p&gt;&lt;p&gt;Admite valores decimales.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;La cantidad del producto vendido.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Admite valores decimales.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="placeholderText">
             <string notr="true">Cantidad vendida. Ej.: 5</string>
@@ -281,7 +357,7 @@ QComboBox QAbstractItemView {
          <item row="3" column="1">
           <widget class="QCheckBox" name="checkBox_comercialPrice">
            <property name="toolTip">
-            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Si la casilla está &lt;span style=&quot; text-decoration: underline;&quot;&gt;desmarcada&lt;/span&gt; el precio calculado del producto es en base al &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;precio unitario&lt;/span&gt;.&lt;/p&gt;&lt;p&gt;Si la casilla está &lt;span style=&quot; text-decoration: underline;&quot;&gt;marcada&lt;/span&gt; el precio total calculado se basa en el &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;precio comercial&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Si la casilla está &lt;/span&gt;&lt;span style=&quot; font-size:11pt; text-decoration: underline;&quot;&gt;desmarcada&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; el precio calculado del producto es en base al &lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;precio unitario&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Si la casilla está &lt;/span&gt;&lt;span style=&quot; font-size:11pt; text-decoration: underline;&quot;&gt;marcada&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; el precio total calculado se basa en el &lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;precio comercial&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
             <string notr="true">Aplicar precio comercial</string>
@@ -354,7 +430,93 @@ border-right: 1px solid #111;</string>
          <item row="0" column="1">
           <widget class="QLineEdit" name="lineEdit_totalPaid">
            <property name="toolTip">
-            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;El valor total que es abonado en esta compra.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; text-decoration: underline;&quot;&gt;NO PUEDE SER MAYOR AL precio total&lt;/span&gt;, y &lt;span style=&quot; text-decoration: underline;&quot;&gt;si es menor al precio total&lt;/span&gt; la diferencia se agrega como deuda a ese comprador.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;El valor total que es abonado en esta compra.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; si es diferente al costo se pedirán los datos del comprador y la diferencia se agregará a la base de datos como saldo a favor/en contra.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="styleSheet">
+            <string>* {
+	background-color: #35bc88;
+	color: #111;
+	border-color: #0b7e7f;
+	font-family: &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
+	font-size: 16px;
+}
+
+
+#label_productName_feedback,
+#label_productQuantity_feedback,
+#label_totalPaid_feedback,
+#label_debtorName_feedback,
+#label_debtorSurname_feedback,
+#label_phoneNumber_feedback,
+#label_postalCode_feedback {
+	color: #dc2627;
+	border: 1px solid #dc2627;
+	background-color: #e0a4a4;
+}
+
+
+*[mandatoryField=&quot;True&quot;] {
+	background-color: rgb(255, 251, 142);
+}
+
+
+QLineEdit {
+	background-color: #fff;
+	border: none;
+	border-top: 1px solid;
+	border-bottom: 1px solid;
+	border-color: #0b7e7f;
+	height: 24px;
+}
+QLineEdit:focus {
+	background-color: rgb(197, 255, 252);
+	border: 1px solid;
+	border-color: #0b7e7f;
+	font-size: 18px;
+}
+
+
+QPushButton {
+	font-size: 16px;
+	background-color: #22577a;
+	color: #fff;
+	border: 1px solid #12476a;
+	border-radius: 2px;
+	min-width: 200px;
+	min-height: 23px;
+}
+QPushButton:hover,
+QPushButton:pressed {
+	background-color: #38a3a5;
+	color: #111;
+	border: 1px inset #289395;
+}
+QPushButton:disabled {
+	background-color: rgb(103, 115, 122);
+	color: #999;
+}
+
+
+/*cambia el estilo del combobox*/
+QComboBox {
+	background-color: #fff;
+	color: #111;
+	border: none;
+	border-top: 1px solid;
+	border-bottom: 1px solid;
+	border-color: #111;
+}
+QComboBox:on {
+	background-color: rgb(197, 255, 252);
+	border: 1px solid;
+	border-color: rgb(11, 126, 127);
+	padding-top: 2px;
+	padding-left: 4px;
+}
+QComboBox QAbstractItemView {
+	background-color: #fff;
+	selection-background-color: #38a3a5;
+}</string>
            </property>
            <property name="placeholderText">
             <string notr="true">Total abonado. Ej.: 15000</string>
@@ -364,10 +526,19 @@ border-right: 1px solid #111;</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="0" colspan="2">
+         <item row="1" column="0" colspan="2" alignment="Qt::AlignHCenter|Qt::AlignTop">
           <widget class="QLabel" name="label_totalPaid_feedback">
-           <property name="styleSheet">
-            <string notr="true">color: #f00;</string>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>20</height>
+            </size>
            </property>
            <property name="text">
             <string notr="true"/>
@@ -389,27 +560,7 @@ border-right: 1px solid #111;</string>
       <item>
        <widget class="QDateTimeEdit" name="dateTimeEdit">
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fecha y hora de la compra.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; no es necesario que sea exacta, pero por conveniencia debe ser al menos aproximada.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QDateTimeEdit {
-	background-color: #fff;
-}
-
-
-QCalendarWidget QAbstractItemView {
-	background-color: #fff;
-	selection-background-color: #38a3a5;
-}
-QCalendarWidget QToolButton {
-	background-color: #22577a;
-	color: #fff;
-}
-QCalendarWidget QToolButton:hover,
-QCalendarWidget QToolButton:pressed {
-	background-color: #38a3a5;
-	color: #111;
-}</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Fecha y hora de la compra.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; no es necesario que sea exacta, pero por conveniencia debe ser al menos aproximada.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="frame">
          <bool>true</bool>
@@ -475,7 +626,7 @@ QCalendarWidget QToolButton:pressed {
       <item row="6" column="2" colspan="3">
        <widget class="QLineEdit" name="lineEdit_direction">
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(Opcional) dirección del deudor.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; si el deudor ya existe en la base de datos es recomendable &lt;span style=&quot; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;, porque creará un registro diferente del mismo deudor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;(Opcional) dirección del deudor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; si el deudor ya existe en la base de datos es recomendable &lt;/span&gt;&lt;span style=&quot; font-size:11pt; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;, porque creará un registro diferente del mismo deudor.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="inputMask">
          <string notr="true"/>
@@ -501,7 +652,7 @@ QCalendarWidget QToolButton:pressed {
       <item row="7" column="2" colspan="3">
        <widget class="QLineEdit" name="lineEdit_postalCode">
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(Opcional) código postal del deudor.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; si el deudor ya existe en la base de datos es recomendable &lt;span style=&quot; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;, porque creará un registro diferente del mismo deudor.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; por conveniencia sólo admite códigos postales de Argentina.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;(Opcional) código postal del deudor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; si el deudor ya existe en la base de datos es recomendable &lt;/span&gt;&lt;span style=&quot; font-size:11pt; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;, porque creará un registro diferente del mismo deudor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; por conveniencia sólo admite códigos postales de Argentina.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="inputMask">
          <string notr="true"/>
@@ -517,23 +668,32 @@ QCalendarWidget QToolButton:pressed {
         </property>
        </widget>
       </item>
-      <item row="2" column="4">
+      <item row="2" column="4" alignment="Qt::AlignRight|Qt::AlignTop">
        <widget class="QLabel" name="label_debtorSurname_feedback">
-        <property name="styleSheet">
-         <string notr="true">color: #f00;</string>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>20</height>
+         </size>
         </property>
         <property name="text">
-         <string/>
+         <string notr="true"/>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::PlainText</enum>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::NoTextInteraction</set>
         </property>
        </widget>
       </item>
       <item row="1" column="1" colspan="2">
        <widget class="QLineEdit" name="lineEdit_debtorName">
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nombre del deudor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Nombre del deudor.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
          <string notr="true"/>
@@ -549,16 +709,25 @@ QCalendarWidget QToolButton:pressed {
         </property>
        </widget>
       </item>
-      <item row="4" column="0" colspan="5">
+      <item row="4" column="0" colspan="5" alignment="Qt::AlignHCenter|Qt::AlignTop">
        <widget class="QLabel" name="label_phoneNumber_feedback">
-        <property name="styleSheet">
-         <string notr="true">color: #f00;</string>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>20</height>
+         </size>
         </property>
         <property name="text">
-         <string/>
+         <string notr="true"/>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::PlainText</enum>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::NoTextInteraction</set>
         </property>
        </widget>
       </item>
@@ -622,7 +791,7 @@ border-color: rgb(11, 126, 127);</string>
       <item row="1" column="4">
        <widget class="QLineEdit" name="lineEdit_debtorSurname">
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Apellido del deudor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Apellido del deudor.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
          <string notr="true"/>
@@ -645,13 +814,16 @@ border-color: rgb(11, 126, 127);</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1" colspan="2">
+      <item row="2" column="1" colspan="2" alignment="Qt::AlignLeft|Qt::AlignTop">
        <widget class="QLabel" name="label_debtorName_feedback">
-        <property name="styleSheet">
-         <string notr="true">color: #f00;</string>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>20</height>
+         </size>
         </property>
         <property name="text">
-         <string/>
+         <string notr="true"/>
         </property>
         <property name="textFormat">
          <enum>Qt::PlainText</enum>
@@ -659,24 +831,27 @@ border-color: rgb(11, 126, 127);</string>
         <property name="alignment">
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
+        <property name="textInteractionFlags">
+         <set>Qt::NoTextInteraction</set>
+        </property>
        </widget>
       </item>
       <item row="3" column="2" colspan="3">
        <widget class="QLineEdit" name="lineEdit_phoneNumber">
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(Opcional) número de teléfono del deudor.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; si el deudor ya existe en la base de datos es recomendable &lt;span style=&quot; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;, porque creará un registro diferente del mismo deudor.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; no lleva ni 0 ni 15, pero sí requiere el código de país (el de Argentina es +54).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;(Opcional) número de teléfono del deudor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; si el deudor ya existe en la base de datos es recomendable &lt;/span&gt;&lt;span style=&quot; font-size:11pt; text-decoration: underline;&quot;&gt;no llenar este campo&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;, porque creará un registro diferente del mismo deudor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; no lleva ni 0 ni 15, pero sí requiere el código de país (el de Argentina es +54).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="inputMask">
-         <string notr="true">+99-9999-000000000</string>
+         <string notr="true"/>
         </property>
         <property name="text">
-         <string notr="true">+54--</string>
+         <string notr="true"/>
         </property>
         <property name="frame">
          <bool>false</bool>
         </property>
         <property name="cursorPosition">
-         <number>4</number>
+         <number>0</number>
         </property>
         <property name="placeholderText">
          <string notr="true">(Opcional) Ej.: 2323-123456</string>
@@ -686,13 +861,25 @@ border-color: rgb(11, 126, 127);</string>
         </property>
        </widget>
       </item>
-      <item row="8" column="0" colspan="5">
+      <item row="8" column="0" colspan="5" alignment="Qt::AlignHCenter|Qt::AlignTop">
        <widget class="QLabel" name="label_postalCode_feedback">
-        <property name="styleSheet">
-         <string notr="true">color: #f00;</string>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>20</height>
+         </size>
         </property>
         <property name="text">
-         <string/>
+         <string notr="true"/>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::PlainText</enum>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::NoTextInteraction</set>
         </property>
        </widget>
       </item>
