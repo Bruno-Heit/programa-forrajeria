@@ -1180,6 +1180,9 @@ class ListItemValues():
         self.object_name:str = object_name
         
         self.product_name:str = product_name
+        
+        self.product_id:int
+        
         self.quantity:float = quantity
         self.subtotal:float = subtotal
         
@@ -1246,13 +1249,13 @@ class ListItemWidget(QWidget):
         self.listItem.comboBox_productName.currentIndexChanged.connect(self.validateProductNameField)
         
         # cantidad de producto
-        self.listItem.lineEdit_productQuantity.editingFinished.connect(self.formatQuantityField)
+        self.listItem.lineEdit_productQuantity.editingFinished.connect(self.onQuantityEditingFinished)
         
         self.quantity_validator.validationSucceded.connect(self.validatorOnValidationSucceded)
         self.quantity_validator.validationFailed.connect(self.validatorOnValidationFailed)
         
         # checkbox tipo de precio
-        self.listItem.checkBox_comercialPrice.stateChanged.connect(self.handleNameAndQuantityAndPriceChange)
+        self.listItem.checkBox_comercialPrice.stateChanged.connect(lambda: self.handleNameAndQuantityAndPriceChange(True))
         
         # botón borrar elemento
         self.listItem.btn_deleteCurrentProduct.clicked.connect(self.deleteCurrentItem)
@@ -1393,15 +1396,17 @@ class ListItemWidget(QWidget):
             if self.VALID_FIELDS['PRODUCT_QUANTITY']:
                 self.handleNameAndQuantityAndPriceChange()
                 
-                # actualiza 'self.field_values'
-                self.field_values.product_name = self.listItem.comboBox_productName.itemText(
-                    self.listItem.comboBox_productName.currentIndex())
+            # actualiza 'self.field_values'
+            self.field_values.product_name = self.listItem.comboBox_productName.itemText(
+                self.listItem.comboBox_productName.currentIndex())
+            
+            self.verifyFieldsValidity()
         
         return None
 
 
     @Slot()
-    def handleNameAndQuantityAndPriceChange(self) -> None:
+    def handleNameAndQuantityAndPriceChange(self, called_from_checkbox:bool=False) -> None:
         '''
         Es llamado desde:
         - self.validateProductNameField: cuando el índice de 'comboBox_productName' cambia.
@@ -1411,6 +1416,11 @@ class ListItemWidget(QWidget):
         Asigna el valor True|False a 'ListItemValues.is_comercial_price' dependiendo del estado de 
         'checkBox_comercialPrice', cambia el texto del QLabel de subtotal, coloca los detalles de la 
         venta en su QLineEdit. Por último, al finalizar llama a 'self.verifyFieldsValidity'.
+        
+        PARAMS:
+        - called_from_checkbox: flag que determina si el método es llamado desde la señal 'clicked' de 
+        'checkBox_comercialPrice'. Por defecto es False. Sirve para no llamar tantas veces al método 
+        'self.verifyFieldsValidity'.
         
         Este método llama a:
         - self.__setDetailsAndCost: para actualizar los detalles de venta y el costo total.
@@ -1424,12 +1434,14 @@ class ListItemWidget(QWidget):
         # cambia los detalles de venta y el label con el costo total
         self.__setDetailsAndCost()
         
-        self.verifyFieldsValidity()
+        #? llama a verificar los otros campos solo si cambia el estado de 'checkBox_comercialPrice', sino hace muchas 
+        #? llamadas a self.verifyFieldsValidity() al pedo...
+        self.verifyFieldsValidity() if called_from_checkbox else None
         return None
 
 
     @Slot()
-    def formatQuantityField(self) -> None:
+    def onQuantityEditingFinished(self) -> None:
         '''
         Es llamado desde la señal 'editingFinished' de 'lineEdit_productQuantity'.
         
@@ -1452,13 +1464,15 @@ class ListItemWidget(QWidget):
         # actualiza 'self.field_values'
         self.field_values.quantity = float(field_text)
         
+        self.verifyFieldsValidity()
+        
         return None
 
 
     def verifyFieldsValidity(self) -> None:
         '''
         Es llamado desde los métodos 'self.validatorOnValidationSucceded'|'self.validatorOnValidationFailed'|
-        'self.handleNameAndQuantityAndPriceChange'.
+        'self.handleNameAndQuantityAndPriceChange'|'self.onQuantityEditingFinished'|'self.validateProductNameField'.
         
         Revisa si los campos de nombre y cantidad tienen valores válidos y emite la señal 'fieldsValidated' 
         a MainWindow con 'self.field_values', objeto de tipo 'ListItemValues'.
@@ -1567,7 +1581,7 @@ class ListItemWidget(QWidget):
         return None
 
 
-# DEUDORES =====================================================================================================
+# DEUDORES (VENTA FINALIZADA) ==================================================================================
 
 
 # Dialog con datos de deudores
@@ -1576,7 +1590,7 @@ class DebtorDataDialog(QDialog):
     QDialog con datos de deudores. Se usa en 'MainWindow' cuando se presiona 'MainWindow.btn_end_sale' y 
     el total abonado es menor al costo total.
     '''
-    debtorChosen = Signal(object) # emite una tuple[IDdeudor,nombre,apellido] una vez elegido deudor
+    debtorChosen = Signal(int) # emite el IDdeudor una vez elegido deudor
     
     def __init__(self):
         super(DebtorDataDialog, self).__init__()
@@ -1603,7 +1617,6 @@ class DebtorDataDialog(QDialog):
         self.debtorData.lineEdit_debtorName.setCompleter(createCompleter(type=1))
         self.debtorData.lineEdit_debtorSurname.setCompleter(createCompleter(type=2))
 
-        # TODO: colocar validadores para los campos que necesiten
         # validadores
         self.debtor_name_validator = DebtorNameValidator(self.debtorData.lineEdit_debtorName)
         self.debtor_surname_validator = DebtorSurnameValidator(self.debtorData.lineEdit_debtorSurname)
@@ -1904,8 +1917,8 @@ class DebtorDataDialog(QDialog):
         Es llamado desde la señal 'clicked' del botón "Aceptar".
         
         Obtiene los datos de los campos formateados e inserta los valores en la base de datos en las tablas de 
-        "Deudores" (si no existe el deudor). Al final emite la señal 'debtorChosen' con el "IDdeudor", "nombre" 
-        y "apellido" del deudor al método 'MainWindow.handleFinishedSale' confirmando que se eligió un deudor.
+        "Deudores" (si no existe el deudor). Al final emite la señal 'debtorChosen' con el "IDdeudor" del deudor 
+        al método 'MainWindow.handleFinishedSale' confirmando que se eligió un deudor.
         
         Retorna None.
         '''
@@ -1913,6 +1926,7 @@ class DebtorDataDialog(QDialog):
         values:dict[str,str] = self.getFieldsData()
         count_query:int
         query:tuple # tiene una tupla con IDdeudor, nombre y apellido
+        query_to_dict:dict[str,str] # el tuple 'query' convertido a dict
 
         # verifica si el deudor existe en Deudores
         count_query = makeReadQuery(
@@ -1937,11 +1951,11 @@ class DebtorDataDialog(QDialog):
 
             # trae (ID, el nombre y el apellido) del deudor para mandarlo a MainWindow en la señal 'debtorChosen'
             query = makeReadQuery(
-                sql="SELECT IDdeudor, nombre, apellido FROM Deudores WHERE (nombre = ?) AND (apellido = ?);",
+                sql="SELECT IDdeudor FROM Deudores WHERE (nombre = ?) AND (apellido = ?);",
                 params=(values['name'], values['surname'],)
-                )[0]
+                )[0][0]
 
-            # emite señal avisando que SÍ se eligió un deudor, con un tuple(IDdeudor, nombre y apellido)
+            # emite señal avisando que SÍ se eligió un deudor, con el IDdeudor
             self.debtorChosen.emit(query)
             
         except sqlite3Error as err:
@@ -1955,7 +1969,7 @@ class DebtorDataDialog(QDialog):
         return None
 
 
-
+# DEUDORES (SECCIÓN CUENTA CORRIENTE) ==========================================================================
 
 
 # item de lista de Deudas

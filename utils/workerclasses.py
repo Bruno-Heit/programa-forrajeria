@@ -124,7 +124,7 @@ class DbDeleteWorker(QObject):
         
         except sqlite3Error as err: #! errores de base de datos, consultas, etc.
             conn.rollback()
-            logging.critical(LoggingMessage.ERROR_DB_DELETE, f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+            logging.critical(LoggingMessage.ERROR_DB_DELETE, f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
             self.finished.emit(err.sqlite_errorcode)
             
         finally:
@@ -172,7 +172,7 @@ class DbInsertWorker(QObject):
             
         except sqlite3Error as err:
             conn.rollback()
-            logging.critical(LoggingMessage.ERROR_DB_INSERT, f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+            logging.critical(LoggingMessage.ERROR_DB_INSERT, f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
             self.finished.emit(err.sqlite_errorcode) #! error al realizar el insert
             
         finally:
@@ -223,7 +223,7 @@ class DbUpdateWorker(QObject):
             
         except sqlite3Error as err:
             conn.rollback()
-            logging.critical(LoggingMessage.ERROR_DB_UPDATE, f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+            logging.critical(LoggingMessage.ERROR_DB_UPDATE, f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
             self.finished.emit(err.sqlite_errorcode) #! error al realizar el update
                 
         finally:

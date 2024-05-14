@@ -67,7 +67,7 @@ class MainWindow(QMainWindow):
         
         self.IDs_saleDetails:list = [] # var. de 'table_sales_data' que tiene los IDs de las ventas en Detalle_Ventas
         self.SALES_ITEM_NUM:int = 0 # contador para crear nombres de items en 'input_sales_data'
-        self.DICT_ITEMS_VALUES:dict[str:ListItemValues] = {} # tiene los valores de cada ListItemWidget
+        self.DICT_ITEMS_VALUES:dict[str,ListItemValues] = {} # tiene los valores de cada ListItemWidget
         self.VALID_PAID_FIELD:bool = None # True si lineEdit_paid es válido, sino False
         self.TOTAL_COST:float = None # guarda el costo total de 'label_total' como float, para no tener que buscarlo con regex
 
@@ -132,7 +132,6 @@ class MainWindow(QMainWindow):
         
         self.ui.tabWidget.currentChanged.connect(lambda index: self.ui.tab2_toolBox.setCurrentIndex(0) if index == 1 else None)
         
-        # TODO principal: en classes.py, seguir colocando validators, luego seguir refactorizando el código a partir de acá
         #* (CREATE) añadir una venta a 'table_sales_data'
         self.ui.btn_add_product_sales.clicked.connect(lambda: self.handleTableCreateRow(self.ui.table_sales_data))
         
@@ -143,7 +142,6 @@ class MainWindow(QMainWindow):
         self.ui.table_sales_data.doubleClicked.connect(lambda: self.handleTableUpdateItem(self.ui.table_sales_data, self.ui.table_sales_data.currentIndex()) )
         self.ui.table_sales_data.itemSelectionChanged.connect(lambda: self.handleSelectionChange(self.ui.table_sales_data))
         
-        # TODO secundario: refactorizar estas funciones y luego probarlas
         #* formulario de ventas
         self.ui.btn_add_product.clicked.connect(self.addSalesInputListItem)
         
@@ -155,6 +153,10 @@ class MainWindow(QMainWindow):
         self.ui.btn_end_sale.clicked.connect(self.handleFinishedSale)
 
         #¡--- DEUDAS ------------------------------------------------------
+        # TODO secundario: cambiar el funcionamiento de las search_bars, que busquen sobre los datos de las tablas.
+        
+        # TODO PRINCIPAL: SEGUIR CON PARTE DE DEUDAS
+        
         self.ui.tabWidget.currentChanged.connect(lambda curr_index: self.handleTableToFill(self.ui.table_debts, SHOW_ALL=True) if curr_index == 2 else None)
 
 
@@ -198,25 +200,21 @@ class MainWindow(QMainWindow):
     
     #¡ tablas (READ)
     @Slot(QTableWidget,QLineEdit,bool)
-    def handleTableToFill(self, table_widget:QTableWidget, search_bar:QLineEdit=None, ACCESSED_BY_LIST:bool=False, SHOW_ALL:bool=False) -> None:
+    def handleTableToFill(self, table_widget:QTableWidget, ACCESSED_BY_LIST:bool=False, SHOW_ALL:bool=False) -> None:
         '''
         Este método hace lo siguiente:
         - Limpia el 'table_widget'.
         - Limpia las variables de IDs asociadas con 'table_widget'.
-        - Dependiendo del 'table_widget' que se tenga que llenar, se encarga de declarar las consultas sql y los 
-        parámetros necesarios para luego hacer las consultas en la clase 'workerclasses.DbReadWorker'.
-        - Crea una instancia de WORKER y QThread y conecta sus señales/slots.
-        
-        NO LLAMA A NINGÚN OTRO MÉTODO.
+        - Dependiendo del 'table_widget' que se tenga que llenar, declara y realiza las consultas SELECT en 
+        la clase 'workerclasses.DbReadWorker'.
+        - Crea una instancia de 'workerclasses.DbReadWorker' y QThread y conecta sus señales/slots.
 
         PARAMS:
         - table_widget: el QTableWidget que se referencia.
-        - search_bar: determina si se usó una barra de búsqueda, y cuál fue.
-        - ACCESSED_BY_LIST: flag que será True si se seleccionó un item desde 'tables_ListWidget', sino False. 
-        Por defecto es False.
-        - SHOW_ALL: flag que determina si mostrar todos los elementos de un 'table_widget'. Por defecto es False.
+        - ACCESSED_BY_LIST: flag que será True si se seleccionó un item desde 'tables_ListWidget', sino False.
+        - SHOW_ALL: flag que determina si se muestran todos los elementos de un 'table_widget'.
 
-        Retorna 'None'.
+        Retorna None.
         '''
         
         count_sql:str = "" # consulta de tipo COUNT()
@@ -240,25 +238,36 @@ class MainWindow(QMainWindow):
                 if ACCESSED_BY_LIST:
                     self.ui.tabWidget.setCurrentWidget(self.ui.tabWidget.findChild(QWidget, "tab1_inventory"))
 
-                # si NO se usa una barra de búsqueda...
-                if not search_bar:
-                    if SHOW_ALL or self.ui.tables_ListWidget.currentItem().text() == "MOSTRAR TODOS":
-                        count_sql:str = "SELECT COUNT(*) FROM Productos WHERE eliminado = 0;"
-                        sql = "SELECT IDproducto,nombre_categoria,nombre,p.descripcion,stock,unidad_medida,precio_unit,precio_comerc FROM Productos AS p INNER JOIN Categorias AS c WHERE p.IDcategoria=c.IDcategoria AND p.eliminado = 0;"
-                    elif not SHOW_ALL and ACCESSED_BY_LIST:
-                        # cols.: detalle venta, cantidad, producto, costo total, abonado, fecha y hora
-                        count_sql = "SELECT COUNT(*) FROM Productos WHERE IDcategoria = (SELECT IDcategoria FROM Categorias WHERE nombre_categoria = ? ) AND eliminado = 0;"
-                        count_params = (self.ui.tables_ListWidget.currentItem().text(),)
-                        sql = "SELECT IDproducto,nombre_categoria,nombre,p.descripcion,stock,unidad_medida,precio_unit,precio_comerc FROM Productos AS p INNER JOIN Categorias AS c WHERE p.IDcategoria=c.IDcategoria AND c.nombre_categoria=? AND eliminado = 0;"
-                        params = (self.ui.tables_ListWidget.currentItem().text(),)
+                # # si NO se usa una barra de búsqueda...
+                # if not search_bar:
+                    # if SHOW_ALL or self.ui.tables_ListWidget.currentItem().text() == "MOSTRAR TODOS":
+                    #     count_sql:str = "SELECT COUNT(*) FROM Productos WHERE eliminado = 0;"
+                    #     sql = "SELECT IDproducto,nombre_categoria,nombre,p.descripcion,stock,unidad_medida,precio_unit,precio_comerc \FROM Productos AS p INNER JOIN Categorias AS c WHERE p.IDcategoria=c.IDcategoria AND p.eliminado = 0;"
                     
+                    # elif not SHOW_ALL and ACCESSED_BY_LIST:
+                    #     # cols.: detalle venta, cantidad, producto, costo total, abonado, fecha y hora
+                    #     count_sql = "SELECT COUNT(*) FROM Productos WHERE IDcategoria = (SELECT IDcategoria FROM Categorias WHERE nombre_categoria = ? ) AND eliminado = 0;"
+                    #     count_params = (self.ui.tables_ListWidget.currentItem().text(),)
+                    #     sql = "SELECT IDproducto,nombre_categoria,nombre,p.descripcion,stock,unidad_medida,precio_unit,precio_comerc FROM Productos AS p INNER JOIN Categorias AS c WHERE p.IDcategoria=c.IDcategoria AND c.nombre_categoria=? AND eliminado = 0;"
+                    #     params = (self.ui.tables_ListWidget.currentItem().text(),)
+                if SHOW_ALL or self.ui.tables_ListWidget.currentItem().text() == "MOSTRAR TODOS":
+                    count_sql:str = "SELECT COUNT(*) FROM Productos WHERE eliminado = 0;"
+                    sql = "SELECT IDproducto,nombre_categoria,nombre,p.descripcion,stock,unidad_medida,precio_unit,precio_comerc \FROM Productos AS p INNER JOIN Categorias AS c WHERE p.IDcategoria=c.IDcategoria AND p.eliminado = 0;"
+                
+                elif not SHOW_ALL and ACCESSED_BY_LIST:
+                    # cols.: detalle venta, cantidad, producto, costo total, abonado, fecha y hora
+                    count_sql = "SELECT COUNT(*) FROM Productos WHERE IDcategoria = (SELECT IDcategoria FROM Categorias WHERE nombre_categoria = ? ) AND eliminado = 0;"
+                    count_params = (self.ui.tables_ListWidget.currentItem().text(),)
+                    sql = "SELECT IDproducto,nombre_categoria,nombre,p.descripcion,stock,unidad_medida,precio_unit,precio_comerc FROM Productos AS p INNER JOIN Categorias AS c WHERE p.IDcategoria=c.IDcategoria AND c.nombre_categoria=? AND eliminado = 0;"
+                    params = (self.ui.tables_ListWidget.currentItem().text(),)
+                        
                 # TODO: al usar search_bar, cambiar %{text}% por ?, para evitar sql injections.
                 
-                # si SÍ se usa una barra de búsqueda...
-                elif search_bar:
-                    text:str = self.ui.inventory_searchBar.text()
-                    count_sql = f"SELECT COUNT(*) FROM Productos AS p LEFT JOIN Categorias AS c WHERE p.eliminado = 0 AND p.IDcategoria=c.IDcategoria AND (nombre_categoria LIKE '%{text}%' OR nombre LIKE '%{text}%' OR p.descripcion LIKE '%{text}%' OR stock LIKE '%{text}%' OR unidad_medida LIKE '%{text}%' OR precio_unit LIKE '%{text}%' OR precio_comerc LIKE '%{text}%');"
-                    sql = f"SELECT IDproducto,nombre_categoria,nombre,p.descripcion,stock,unidad_medida,precio_unit,precio_comerc FROM Productos AS p LEFT JOIN Categorias AS c WHERE p.eliminado = 0 AND p.IDcategoria=c.IDcategoria AND (nombre_categoria LIKE '%{text}%' OR  nombre LIKE '%{text}%' OR  p.descripcion LIKE '%{text}%' OR  stock LIKE '%{text}%' OR unidad_medida LIKE '%{text}%' OR precio_unit LIKE '%{text}%' OR precio_comerc LIKE '%{text}%');"
+                # # si SÍ se usa una barra de búsqueda...
+                # elif search_bar:
+                #     text:str = self.ui.inventory_searchBar.text()
+                #     count_sql = f"SELECT COUNT(*) FROM Productos AS p LEFT JOIN Categorias AS c WHERE p.eliminado = 0 AND p.IDcategoria=c.IDcategoria AND (nombre_categoria LIKE '%{text}%' OR nombre LIKE '%{text}%' OR p.descripcion LIKE '%{text}%' OR stock LIKE '%{text}%' OR unidad_medida LIKE '%{text}%' OR precio_unit LIKE '%{text}%' OR precio_comerc LIKE '%{text}%');"
+                #     sql = f"SELECT IDproducto,nombre_categoria,nombre,p.descripcion,stock,unidad_medida,precio_unit,precio_comerc FROM Productos AS p LEFT JOIN Categorias AS c WHERE p.eliminado = 0 AND p.IDcategoria=c.IDcategoria AND (nombre_categoria LIKE '%{text}%' OR  nombre LIKE '%{text}%' OR  p.descripcion LIKE '%{text}%' OR  stock LIKE '%{text}%' OR unidad_medida LIKE '%{text}%' OR precio_unit LIKE '%{text}%' OR precio_comerc LIKE '%{text}%');"
                 self.ui.label_feedbackInventory.hide()
 
 
@@ -266,40 +275,46 @@ class MainWindow(QMainWindow):
                 self.IDs_saleDetails.clear() # limpia los IDs
                 
                 # si no se usa la 'search bar'...
-                if not search_bar and SHOW_ALL:
-                    count_sql = "SELECT COUNT(*) FROM Detalle_Ventas as dv LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa;"
-                    sql = "SELECT dv.ID_detalle_venta, v.detalles_venta, p.nombre, dv.cantidad, p.unidad_medida, dv.costo_total, dv.abonado, v.fecha_hora FROM Detalle_Ventas as dv LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa;"
+                # if not search_bar and SHOW_ALL:
+                #     count_sql = "SELECT COUNT(*) FROM Detalle_Ventas as dv LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa;"
+                #     sql = "SELECT dv.ID_detalle_venta, v.detalles_venta, p.nombre, dv.cantidad, p.unidad_medida, dv.costo_total, dv.abonado, v.fecha_hora FROM Detalle_Ventas as dv LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa;"
+                count_sql = "SELECT COUNT(*) FROM Detalle_Ventas as dv LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa;"
+                sql = "SELECT dv.ID_detalle_venta, v.detalles_venta, p.nombre, dv.cantidad, p.unidad_medida, dv.costo_total, dv.abonado, v.fecha_hora FROM Detalle_Ventas as dv LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa;"
+                
                 # en cambio, si SÍ se usa...
-                else:
-                    text:str = self.ui.sales_searchBar.text()
-                    count_sql = f'SELECT COUNT(*) FROM Detalle_Ventas AS dv, Productos AS p, Ventas AS v WHERE (dv.IDproducto = p.IDproducto AND dv.IDventa = v.IDventa) AND (v.Detalles_venta LIKE "%{text}%" OR p.nombre LIKE "%{text}%" OR cantidad LIKE "%{text}%" OR p.unidad_medida LIKE "%{text}%" OR costo_total LIKE "%{text}%" OR abonado LIKE "%{text}%" OR fecha_hora LIKE "%{text}%") ;'
-                    sql = f'SELECT dv.ID_detalle_venta, v.detalles_venta, p.nombre, dv.cantidad, p.unidad_medida, dv.costo_total, dv.abonado, v.fecha_hora FROM Detalle_Ventas AS dv, Productos AS p, Ventas AS v WHERE (dv.IDproducto = p.IDproducto AND dv.IDventa = v.IDventa) AND (v.Detalles_venta LIKE "%{text}%" OR p.nombre LIKE "%{text}%" OR cantidad LIKE "%{text}%" OR p.unidad_medida LIKE "%{text}%" OR costo_total LIKE "%{text}%" OR abonado LIKE "%{text}%" OR fecha_hora LIKE "%{text}%") ;'
+                # else:
+                #     text:str = self.ui.sales_searchBar.text()
+                #     count_sql = f'SELECT COUNT(*) FROM Detalle_Ventas AS dv, Productos AS p, Ventas AS v WHERE (dv.IDproducto = p.IDproducto AND dv.IDventa = v.IDventa) AND (v.Detalles_venta LIKE "%{text}%" OR p.nombre LIKE "%{text}%" OR cantidad LIKE "%{text}%" OR p.unidad_medida LIKE "%{text}%" OR costo_total LIKE "%{text}%" OR abonado LIKE "%{text}%" OR fecha_hora LIKE "%{text}%") ;'
+                #     sql = f'SELECT dv.ID_detalle_venta, v.detalles_venta, p.nombre, dv.cantidad, p.unidad_medida, dv.costo_total, dv.abonado, v.fecha_hora FROM Detalle_Ventas AS dv, Productos AS p, Ventas AS v WHERE (dv.IDproducto = p.IDproducto AND dv.IDventa = v.IDventa) AND (v.Detalles_venta LIKE "%{text}%" OR p.nombre LIKE "%{text}%" OR cantidad LIKE "%{text}%" OR p.unidad_medida LIKE "%{text}%" OR costo_total LIKE "%{text}%" OR abonado LIKE "%{text}%" OR fecha_hora LIKE "%{text}%") ;'
                 self.ui.label_feedbackSales.hide()
 
 
             case "table_debts":
                 # TODO: declarar consultas sql para también traer los datos necesarios
-                if not search_bar and SHOW_ALL:
+                # if not search_bar and SHOW_ALL:
+                if SHOW_ALL:
                     count_sql = "SELECT COUNT(DISTINCT IDdeudor) FROM Deudas;"
                     sql = 'SELECT Detalle_Ventas.*, Deudores.* \
                         FROM Detalle_Ventas \
                         JOIN Deudas ON Detalle_Ventas.IDdeuda = Deudas.IDdeuda \
                         JOIN Deudores ON Deudas.IDdeudor = Deudores.IDdeudor;'
 
-                else:
-                    pass
+                # else:
+                #     pass
         
-        #? declaro WORKER, THREAD y sus señales/slots
+        # declaro WORKER, THREAD y sus señales/slots
         self.READ_THREAD = QThread()
         self.read_worker = DbReadWorker()
         
         self.read_worker.moveToThread(self.READ_THREAD)
         
+        # señales del WORKER y THREAD
         self.READ_THREAD.started.connect(lambda: self.read_worker.executeReadQuery(
             data_sql=sql,
             data_params=params if params else None,
             count_sql=count_sql,
             count_params=count_params if count_params else None))
+        
         self.read_worker.countFinished.connect(lambda row_count: self.DbReadWorker_onCountFinished(
             row_count=row_count,
             table_widget=table_widget))
@@ -309,8 +324,10 @@ class MainWindow(QMainWindow):
         self.read_worker.finished.connect(lambda: self.workerOnFinished(
             table_name=table_widget.objectName()))
         self.read_worker.finished.connect(self.READ_THREAD.quit)
+        
         self.READ_THREAD.finished.connect(self.read_worker.deleteLater)
         
+        # inicia el THREAD
         self.READ_THREAD.start()
         return None
     
@@ -1459,7 +1476,8 @@ class MainWindow(QMainWindow):
         Retorna None.
         '''
         total_paid:float
-        item:ListItemValues # var. usada en el 'for' que recorre 'self.DICT_ITEMS_VALUES'
+        product_id:int # aux. necesaria porque, si hay más de 1 item en 'sales_input_list', falla al hacer la subconsulta 
+                       # en el INSERT a Detalle_Ventas... así que hago un SELECT del IDproducto y lo guardo en una var. aux.
         
         # obtengo el total pagado
         total_paid = self.ui.lineEdit_paid.text().replace(",",".")
@@ -1470,8 +1488,8 @@ class MainWindow(QMainWindow):
             dialog = DebtorDataDialog()
             dialog.setAttribute(Qt.WA_DeleteOnClose, True)
             
-            dialog.debtorChosen.connect(lambda debtor_chosen: self.finishedSaleOnDebtorChosen(
-                debtor_chosen=debtor_chosen,
+            dialog.debtorChosen.connect(lambda debtor_id: self.finishedSaleOnDebtorChosen(
+                debtor_id=debtor_id,
                 total_paid=total_paid))
             
             dialog.exec()
@@ -1488,79 +1506,58 @@ class MainWindow(QMainWindow):
                         "INSERT INTO Ventas(fecha_hora, detalles_venta) VALUES(?,?);",
                         (self.ui.dateTimeEdit_sale.text(), item.sale_details,)
                         )
+                    conn.commit()
                     
                     # inserta a Detalle_Ventas
                     cursor.execute(
-                        "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) \
-                        VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?),\
+                        "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda)\
+                        VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), \
                         (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, NULL);",
-                        (item.quantity, item.subtotal, item.product_name, self.ui.dateTimeEdit_sale.text(),
+                        (item.quantity, item.subtotal, item.product_name, self.ui.dateTimeEdit_sale.text(), 
                          item.sale_details, item.subtotal,)
                         )
+                    conn.commit()
                     
                     # actualiza en Productos
                     cursor.execute(
                         "UPDATE Productos SET stock = stock - ? WHERE nombre = ?;",
                         (item.quantity, item.product_name,)
                     )
-                    
                     conn.commit()
                 
                 except sqlite3Error as err:
                     conn.rollback()
-                    logging.critical(f">> {err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
-                    conn.close()
-            
+                    logging.critical(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+        
             conn.close()
-            
+            # hace los reinicios necesarios para otras ventas
             self.__resetFieldsOnFinishedSale()
         
         return None
 
-        # TODO: escribir código de función que reciba datos de deudor de la señal 'debtorChosen' declarada 
-        # todo: en 'handleFinishedSale'
-
-        
-        # if total_paid < self.TOTAL_COST and self.debtor_chosen:
-        #     total_due = total_paid
-        #     # recorre cada item y hace las consultas INSERT y UPDATE (a Productos)
-        #     for item in self.ITEMS_VALUES.items():
-        #         makeInsertQuery("INSERT INTO Ventas(fecha_hora, detalles_venta) VALUES(?,?);", (item[1][5], item[1][3],))
-        #         # Deudas y Detalle_Ventas (con IDdeuda)
-        #         total_due -= item[1][4] # deuda = total abonado - subtotal
-        #         if total_due < 0: # el producto es deuda
-        #             makeInsertQuery("INSERT INTO Deudas(fecha_hora, total_adeudado, IDdeudor) VALUES(?,?,?);", (item[1][5], abs(total_due), self.debtor_chosen[0]))
-                    
-        #             # ? ya probé la consulta de abajo y al parecer funciona bien. Los registros de Detalle_Ventas 
-        #             # ? apuntan a donde deben... pero igualmente prefiero estar atento a esto...
-        #             makeInsertQuery("INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, (SELECT IDdeuda FROM Deudas WHERE fecha_hora = ? AND IDdeudor = ? ORDER BY IDdeuda DESC LIMIT 1));", 
-        #                             (item[1][1], item[1][4], item[1][0], item[1][5], item[1][3], item[1][4] - abs(total_due), item[1][5], self.debtor_chosen[0], ))
-        #             total_due = 0
-        #         else: # el producto NO es deuda
-        #             makeInsertQuery("INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, NULL);", (item[1][1], item[1][4], item[1][0], item[1][5], item[1][3], item[1][4],))
-        #         # actualiza el stock
-        #         makeUpdateQuery("UPDATE Productos SET stock = stock - ? WHERE nombre = ?;", (item[1][1], item[1][0],))
-        #     self.__resetListAndFields()
 
     @Slot(tuple)
-    def finishedSaleOnDebtorChosen(self, debtor_chosen:tuple, total_paid:float) -> None:
+    def finishedSaleOnDebtorChosen(self, debtor_id:int, total_paid:float) -> None:
         '''
         Es llamado desde la señal 'debtorChosen' del objeto de tipo 'DebtorDataDialog' instanciado en 
         el método 'self.handleFinishedSale'.
         
         Este método hace lo siguiente:
-        - Instancia un WORKER para realizar las consultas.
-        - Obtiene los datos de los campos de los items y hace las consultas INSERT a Ventas y Detalle_Ventas 
-        y la consulta UPDATE a Productos con el nuevo stock.
+        - Obtiene los datos de los campos de los items y hace las consultas INSERT a Ventas, Detalle_Ventas 
+        y Deudas y la consulta UPDATE a Productos con el nuevo stock.
+        NOTA: ESTE MÉTODO NO HACE CONSULTA ALGUNA A LA TABLA "Deudores", ESAS CONSULTAS SON HECHAS EN EL DIALOG 
+        'DebtorDataDialog'.
         - Al finalizar, llama al método 'self.__resetFieldsOnFinishedSale' para realizar los reinicios necesarios.
         
         PARAMS:
-        - debtor_chosen: tuple[IDdeudor, nombre, apellido] con datos del deudor emitidos desde 'DebtorDataDialog'.
+        - debtor_id: int con el 'IDdeudor' emitido desde 'DebtorDataDialog'.
+        - total_paid: float con el total abonado al finalizar la venta. Proviene de 'lineEdit_paid'.
         
         Retorna None.
         '''
         total_due:float = total_paid # acumulador, inicia con el valor del total abonado y se va descontando de ahí 
                                      # cada subtotal (el precio de cada producto)
+        item:ListItemValues # var. usada en el 'for' que recorre 'self.DICT_ITEMS_VALUES'
         
         #? Decidí que cuando se hacen ventas (sin importar la cantidad de productos diferentes) y el comprador paga 
         #? menos del total, esa cantidad sea distribuída entre los primeros productos. 
@@ -1571,25 +1568,67 @@ class MainWindow(QMainWindow):
         #?     luego se agrega a Deudas los $1.000 que quedaron del 2do producto y también el 3er producto, pero 
         #?     no el 1ro que quedó pago.
         
+        conn = createConnection("database/inventario.db")
+        cursor = conn.cursor()
+        
         # recorre cada item y hace las consultas INSERT y UPDATE (a Productos)
-        for item in self.ITEMS_VALUES.items():
-            makeInsertQuery("INSERT INTO Ventas(fecha_hora, detalles_venta) VALUES(?,?);", (item[1][5], item[1][3],))
-            # Deudas y Detalle_Ventas (con IDdeuda)
-            total_due -= item[1][4] # deuda = total abonado - subtotal
-            if total_due < 0: # el producto es deuda
-                makeInsertQuery("INSERT INTO Deudas(fecha_hora, total_adeudado, IDdeudor) VALUES(?,?,?);", (item[1][5], abs(total_due), self.debtor_chosen[0]))
+        for item in self.DICT_ITEMS_VALUES.values():
+            try:
+                cursor.execute(
+                    "INSERT INTO Ventas(fecha_hora, detalles_venta) VALUES(?,?);",
+                    (self.ui.dateTimeEdit_sale.text(), item.sale_details,)
+                    )
+                conn.commit()
                 
-                # ? ya probé la consulta de abajo y al parecer funciona bien. Los registros de Detalle_Ventas 
-                # ? apuntan a donde deben... pero igualmente prefiero estar atento a esto...
-                makeInsertQuery("INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, (SELECT IDdeuda FROM Deudas WHERE fecha_hora = ? AND IDdeudor = ? ORDER BY IDdeuda DESC LIMIT 1));", 
-                                (item[1][1], item[1][4], item[1][0], item[1][5], item[1][3], item[1][4] - abs(total_due), item[1][5], self.debtor_chosen[0], ))
-                total_due = 0
-            else: # el producto NO es deuda
-                makeInsertQuery("INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, NULL);", (item[1][1], item[1][4], item[1][0], item[1][5], item[1][3], item[1][4],))
-            # actualiza el stock
-            makeUpdateQuery("UPDATE Productos SET stock = stock - ? WHERE nombre = ?;", (item[1][1], item[1][0],))
+                # actualiza el total debido
+                total_due -= item.subtotal # deuda = total abonado - subtotal
+                total_due = round(total_due, 2)
+                
+                # Deudas y Detalle_Ventas (con IDdeuda)
+                if total_due < 0: # el producto es deuda
+                    cursor.execute(
+                        "INSERT INTO Deudas(fecha_hora, total_adeudado, IDdeudor, eliminado) VALUES(?,?,?, 0);",
+                        (self.ui.dateTimeEdit_sale.text(), abs(total_due), debtor_id))
+                    conn.commit()
+                    
+                    cursor.execute(
+                        "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda)\
+                        VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?),\
+                        (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?,\
+                        (SELECT IDdeuda FROM Deudas WHERE fecha_hora = ? AND IDdeudor = ? ORDER BY IDdeuda DESC LIMIT 1));",
+                        (item.quantity, item.subtotal, item.product_name, self.ui.dateTimeEdit_sale.text(),
+                        item.sale_details, round(item.subtotal - abs(total_due), 2), self.ui.dateTimeEdit_sale.text(),
+                        debtor_id, )
+                        )
+                    conn.commit()
+                    
+                    total_due = 0
+                
+                else: # el producto NO es deuda
+                    cursor.execute(
+                        "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda)\
+                        VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?),\
+                        (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, NULL);",
+                        (item.quantity, item.subtotal, item.product_name, self.ui.dateTimeEdit_sale.text(),
+                        item.sale_details, item.subtotal,)
+                        )
+                    conn.commit()
+                    
+                # como última consulta de cada item, actualiza el stock
+                cursor.execute(
+                    "UPDATE Productos SET stock = stock - ? WHERE nombre = ?;",
+                    (item.quantity, item.product_name,)
+                    )
+                conn.commit()
             
-        self.__resetListAndFields()
+            except sqlite3Error as err:
+                conn.rollback()
+                logging.critical(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+            
+        conn.close()
+        
+        # hace los reinicios necesarios para otras ventas
+        self.__resetFieldsOnFinishedSale()
         
         return None
     
@@ -1601,6 +1640,8 @@ class MainWindow(QMainWindow):
         Luego de realizadas las consultas INSERT y UPDATE a base de datos, éste método se encarga de realizar 
         los reinicios finales para poder concretar otra venta.
         Este método hace lo siguiente:
+        - Reinicia el contador para nombres de items 'self.SALES_ITEM_NUM'.
+        - Limpia los items en 'self.DICT_ITEMS_VALUES'.
         - Limpia los campos y reasigna el por defecto a 'label_total'.
         - Desactiva el botón 'btn_end_sale'.
         
@@ -1610,6 +1651,9 @@ class MainWindow(QMainWindow):
         self.ui.sales_input_list.clear()
         
         self.SALES_ITEM_NUM = 0
+        
+        # limpia los items
+        self.DICT_ITEMS_VALUES.clear()
         
         # coloca los textos inicial en los labels
         self.ui.label_total.setText("TOTAL")
@@ -1627,12 +1671,16 @@ class MainWindow(QMainWindow):
     
     #¡### DEUDAS ######################################################
     def __fillDebtsTable(self) -> None:
-        '''Es llamada desde 'handleTableToFill'. Recorre cada item y, dependiendo de la columna en la que esté, crea instancias \
-        de las siguientes clases:\n
+        '''
+        Es llamada desde 'handleTableToFill'.
+        
+        Recorre cada item y, dependiendo de la columna en la que esté, crea instancias de las siguientes clases:
         - columna 0 (nombre completo): instancia de 'DebtsTablePersonData'.
         - columna 1 (productos): ...
-        \nSi la columna es la 2 (total adeudado) coloca el total que se adeuda.
-        \nRetorna 'None'.'''
+        Si la columna es la 2 (total adeudado) coloca el total que se adeuda.
+        
+        Retorna None.
+        '''
         for row in range(self.ui.table_debts.rowCount()):
             widget = DebtsTablePersonData(tableWidget=self.ui.table_debts, full_name="nombre completo")
             self.ui.table_debts.setCellWidget(row, 0, widget)
