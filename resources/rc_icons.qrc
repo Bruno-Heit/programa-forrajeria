@@ -10,5 +10,7 @@
         <file alias="x-white.svg">../icons/xWhite.svg</file>
         <file alias="arrow-left-white.svg">../icons/arrow-leftWhite.svg</file>
         <file alias="arrow-right-white.svg">../icons/arrow-rightWhite.svg</file>
+        <file alias="chevron-left-white.svg">../icons/chevron-leftWhite.svg</file>
+        <file alias="chevron-right-white.svg">../icons/chevron-rightWhite.svg</file>
     </qresource>
 </RCC>

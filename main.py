@@ -27,6 +27,7 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.setWindowTitle("herramienta de gestión - Forrajería Torres")
+        set_tables_ListWidgetItemsTooltip(self.ui.tables_ListWidget, getCategoriesDescription())
         # ocultar widgets
         self.ui.side_bar_body.hide()
         self.ui.inventory_side_bar_body.hide()
@@ -42,12 +43,14 @@ class MainWindow(QMainWindow):
         setTableWidthPolitics(self.ui.table_sales_data)
         setTableWidthPolitics(self.ui.table_debts)
 
-        set_tables_ListWidgetItemsTooltip(self.ui.tables_ListWidget, getCategoriesDescription())
-
         # validadores
-        setSearchBarValidator(self.ui.inventory_searchBar)
-        setSearchBarValidator(self.ui.sales_searchBar)
-        setSearchBarValidator(self.ui.debts_searchBar)
+        self.inventory_search_bar_validator = SearchBarValidator(self.ui.inventory_searchBar)
+        self.sales_search_bar_validator = SearchBarValidator(self.ui.sales_searchBar)
+        self.debts_search_bar_validator = SearchBarValidator(self.ui.debts_searchBar)
+        self.ui.inventory_searchBar.setValidator(self.inventory_search_bar_validator)
+        self.ui.sales_searchBar.setValidator(self.sales_search_bar_validator)
+        self.ui.debts_searchBar.setValidator(self.debts_search_bar_validator)
+        
         self.total_paid_validator = SalePaidValidator(self.ui.lineEdit_paid, is_optional=True)
         self.ui.lineEdit_paid.setValidator(self.total_paid_validator)
 
@@ -56,12 +59,15 @@ class MainWindow(QMainWindow):
 
         # añade íconos a los widgets
         self.addIconsToWidgets()
-
-        # variables de inventario
-        self.IDs_products:list = [] # var. de 'displayTable' que tiene los IDs de los productos
-        self.cb_categories:list[str] = getProductsCategories()
         
+        # variables de 'search bars'
+        self.MATCHING_ITEMS:list[QTableWidgetItem] = [] # contiene los items coincidentes, es actualizado en el método 
+                                                        # 'self.searchTableWidget'.
+        self.NUM_CURR_ITEM:int = None # contiene la posición de 'self.MATCHING_ITEMS' del elemento actualmente seleccionado.
 
+        # variable de inventario
+        self.IDs_products:list = [] # var. de 'displayTable' que tiene los IDs de los productos
+        
         # variables de ventas
         self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
         
@@ -79,9 +85,39 @@ class MainWindow(QMainWindow):
         # TODO: permitir modificar deuda
         
         
-        
 
         #*## SEÑALES #####################################################
+        
+        #¡--- search bars -------------------------------------------------
+        # productos
+        self.ui.inventory_searchBar.returnPressed.connect(lambda: self.searchTableWidget(
+            table_widget=self.ui.displayTable,
+            text=self.ui.inventory_searchBar.text() ))
+        
+        self.ui.btn_inventory_prev_search_result.clicked.connect(lambda: self.showPrevMatchingItem(
+            table_name=self.ui.displayTable.objectName() ))
+        self.ui.btn_inventory_next_search_result.clicked.connect(lambda: self.showNextMatchingItem(
+            table_name=self.ui.displayTable.objectName() ))
+        
+        # ventas
+        self.ui.sales_searchBar.returnPressed.connect(lambda: self.searchTableWidget(
+            table_widget=self.ui.table_sales_data,
+            text=self.ui.sales_searchBar.text() ))
+        
+        self.ui.btn_sales_prev_search_result.clicked.connect(lambda: self.showPrevMatchingItem(
+            table_name=self.ui.table_sales_data.objectName() ))
+        self.ui.btn_sales_next_search_result.clicked.connect(lambda: self.showNextMatchingItem(
+            table_name=self.ui.table_sales_data.objectName() ))
+        
+        # cuentas corrientes
+        self.ui.debts_searchBar.returnPressed.connect(lambda: self.searchTableWidget(
+            table_widget=self.ui.table_debts,
+            text=self.ui.debts_searchBar.text() ))
+        
+        self.ui.btn_debts_prev_search_result.clicked.connect(lambda: self.showPrevMatchingItem(
+            table_name=self.ui.table_debts.objectName() ))
+        self.ui.btn_debts_next_search_result.clicked.connect(lambda: self.showNextMatchingItem(
+            table_name=self.ui.table_debts.objectName() ))
         
         #¡--- INVENTARIO --------------------------------------------------
         self.ui.btn_side_barToggle.clicked.connect(lambda: toggleSideBar(
@@ -95,9 +131,6 @@ class MainWindow(QMainWindow):
             self.ui.displayTable, ACCESSED_BY_LIST=True))
         self.ui.tables_ListWidget.itemActivated.connect(lambda: self.handleTableToFill(
             self.ui.displayTable, ACCESSED_BY_LIST=True))
-
-        self.ui.inventory_searchBar.returnPressed.connect(lambda: self.handleTableToFill(
-            self.ui.displayTable, self.ui.inventory_searchBar))
 
         #* (CREATE) añadir nuevo producto a tabla 'displayTable'
         self.ui.btn_add_product_inventory.clicked.connect(lambda: self.handleTableCreateRow(self.ui.displayTable))
@@ -127,8 +160,6 @@ class MainWindow(QMainWindow):
         self.ui.tab2_toolBox.currentChanged.connect(lambda curr_index: self.handleTableToFill(
             self.ui.table_sales_data, SHOW_ALL=True) if curr_index == 1 else None)
         
-        self.ui.sales_searchBar.returnPressed.connect(lambda: self.handleTableToFill(
-            self.ui.table_sales_data, self.ui.sales_searchBar))
         
         self.ui.tabWidget.currentChanged.connect(lambda index: self.ui.tab2_toolBox.setCurrentIndex(0) if index == 1 else None)
         
@@ -153,12 +184,10 @@ class MainWindow(QMainWindow):
         self.ui.btn_end_sale.clicked.connect(self.handleFinishedSale)
 
         #¡--- DEUDAS ------------------------------------------------------
-        # TODO secundario: cambiar el funcionamiento de las search_bars, que busquen sobre los datos de las tablas.
-        
         # TODO PRINCIPAL: SEGUIR CON PARTE DE DEUDAS
-        
-        self.ui.tabWidget.currentChanged.connect(lambda curr_index: self.handleTableToFill(self.ui.table_debts, SHOW_ALL=True) if curr_index == 2 else None)
-
+        #* (READ) cargar con deudas 'table_debts'
+        self.ui.tabWidget.currentChanged.connect(lambda curr_index: self.handleTableToFill(
+            self.ui.table_debts, SHOW_ALL=True) if curr_index == 2 else None)
 
 
 
@@ -167,34 +196,233 @@ class MainWindow(QMainWindow):
     def addIconsToWidgets(self) -> None:
         '''Simplemente le coloca los íconos que le corresponde a cada Widget. Retorna 'None'.'''
         icon:QIcon = QIcon()
+        
+        # botones de side bars
         icon.addFile(":/icons/menu-white.svg")
         self.ui.btn_side_barToggle.setIcon(icon)
         self.ui.btn_inventory_sideBarToggle.setIcon(icon)
 
+        # botones para añadir registros
         icon.addFile(":/icons/plus-white.svg")
         self.ui.btn_add_product_inventory.setIcon(icon)
-
-        icon.addFile(":/icons/minus-circle-white.svg")
-        self.ui.btn_delete_product_inventory.setIcon(icon)
-
-        icon.addFile(":/icons/plus-white.svg")
         self.ui.btn_add_product.setIcon(icon)
-
-        icon.addFile(":/icons/check-white.svg")
-        self.ui.btn_end_sale.setIcon(icon)
-
-        icon.addFile(":/icons/plus-white.svg")
         self.ui.btn_add_product_sales.setIcon(icon)
-
-        icon.addFile(":/icons/minus-circle-white.svg")
-        self.ui.btn_delete_product_sales.setIcon(icon)
-
-        icon.addFile(":/icons/plus-white.svg")
         self.ui.btn_add_debt.setIcon(icon)
 
+        # botones para eliminar registros
         icon.addFile(":/icons/minus-circle-white.svg")
+        self.ui.btn_delete_product_inventory.setIcon(icon)
+        self.ui.btn_delete_product_sales.setIcon(icon)
         self.ui.btn_delete_debt.setIcon(icon)
 
+        # botón para terminar venta
+        icon.addFile(":/icons/check-white.svg")
+        self.ui.btn_end_sale.setIcon(icon)
+        
+        # botones de search bars
+        icon.addFile(":/icons/chevron-left-white.svg")
+        self.ui.btn_inventory_prev_search_result.setIcon(icon)
+        self.ui.btn_sales_prev_search_result.setIcon(icon)
+        self.ui.btn_debts_prev_search_result.setIcon(icon)
+        
+        icon.addFile(":/icons/chevron-right-white.svg")
+        self.ui.btn_inventory_next_search_result.setIcon(icon)
+        self.ui.btn_sales_next_search_result.setIcon(icon)
+        self.ui.btn_debts_next_search_result.setIcon(icon)
+        
+        return None
+
+
+    #¡ método de filtrado de 'search bars'
+    def __updatePrevAndNextButtons(self, table_name:str) -> None:
+        '''
+        Es llamado desde 'self.searchTableWidget'.
+        
+        Habilita/inhabilita los botones asociados al QTableWidget con nombre 'table_name' dependiendo de la 
+        disponibilidad de items anteriormente/posteriormente al item actualmente seleccionado.
+        
+        Retorna None.
+        '''
+        # TODO: seguir activando/desactivando botones, probar el programa. Además tengo que ir a las funciones de 
+        # todo: abajo y hacer que se seleccione el item 'self.MATCHING_ITEM[posicion nueva]' en el table_widget.
+        
+        # si el item actual es el primero, desactiva el botón "anterior" y activa el botón "siguiente"
+        if self.NUM_CURR_ITEM == 0:
+            match table_name:
+                case 'displayTable':
+                    self.ui.btn_inventory_prev_search_result.setEnabled(False)
+                    self.ui.btn_inventory_next_search_result.setEnabled(True)
+                
+                case 'table_sales_data':
+                    self.ui.btn_sales_prev_search_result.setEnabled(False)
+                    self.ui.btn_sales_next_search_result.setEnabled(True)
+                
+                case 'table_debts':
+                    self.ui.btn_debts_prev_search_result.setEnabled(False)
+                    self.ui.btn_debts_next_search_result.setEnabled(True)
+        
+        # si el item actual es el último, desactiva el botón "siguiente" y activa el botón "anterior"
+        elif self.NUM_CURR_ITEM == len(self.MATCHING_ITEMS) - 1:
+            match table_name:
+                case 'displayTable':
+                    self.ui.btn_inventory_prev_search_result.setEnabled(True)
+                    self.ui.btn_inventory_next_search_result.setEnabled(False)
+                
+                case 'table_sales_data':
+                    self.ui.btn_sales_prev_search_result.setEnabled(True)
+                    self.ui.btn_sales_next_search_result.setEnabled(False)
+                
+                case 'table_debts':
+                    self.ui.btn_debts_prev_search_result.setEnabled(True)
+                    self.ui.btn_debts_next_search_result.setEnabled(False)
+        
+        # si el item actual no el primero ni el último, activa los botones "siguiente" y "anterior"
+        else:
+            self.ui.btn_inventory_prev_search_result.setEnabled(True)
+            self.ui.btn_sales_prev_search_result.setEnabled(True)
+            self.ui.btn_debts_prev_search_result.setEnabled(True)
+            
+            self.ui.btn_inventory_next_search_result.setEnabled(True)
+            self.ui.btn_sales_next_search_result.setEnabled(True)
+            self.ui.btn_debts_next_search_result.setEnabled(True)
+        
+        return None
+    
+    
+    @Slot(QTableWidget, str)
+    def searchTableWidget(self, table_widget:QTableWidget, text:str) -> None:
+        '''
+        Es llamado desde la señal 'returnPressed' de 'inventory_searchBar' | 'sales_searchBar' | 
+        'debts_searchBar'.
+        
+        Este método hace lo siguiente:
+        - Filtra el 'table_widget' y muestra sólo los registros que contengan el texto de 'text'. 
+        - Guarda los QTableWidgetItem coincidentes en 'self.MATCHING_ITEMS'.
+        - Reinicia el puntero 'self.NUM_CURR_ITEM'.
+        - Reinicia el texto del QLabel asociado a 'table_widget' que se encarga de mostrar las coincidencias 
+        encontradas.
+        - Actualiza el QLabel asociado a 'table_widget' que se encarga de mostrar las coincidencias encontradas.
+        - Activa/desactiva los botones asociados a 'table_widget' que se encargan de avanzar/retroceder entre 
+        los elementos coincidentes. Para eso llama al método 'self.__updatePrevAndNextButtons'.
+        
+        PARAMS:
+        - table_widget: el QTableWidget que se referencia.
+        - text: string con el texto a buscar en 'table_widget'.
+        
+        Retorna None.
+        '''
+        # reinicia 'self.MATCHING_ITEMS'
+        self.MATCHING_ITEMS.clear()
+        
+        # deselecciona cualquier item que esté seleccionado (si no hay seleccionados no pasa nada)
+        table_widget.setCurrentItem(None)
+        
+        if not text:
+            return None
+        
+        # reinicia el contenido de los labels
+        self.ui.label_inventory_found_items.setText("")
+        self.ui.label_sales_found_items.setText("")
+        self.ui.label_debts_found_items.setText("")
+        
+        # busca los registros que contengan 'text'
+        self.MATCHING_ITEMS = table_widget.findItems(text, Qt.MatchFlag.MatchContains)
+        
+        # si se encontró algo, selecciona el primer item coincidente
+        if self.MATCHING_ITEMS:
+            self.NUM_CURR_ITEM = 0
+            table_widget.setCurrentItem(self.MATCHING_ITEMS[self.NUM_CURR_ITEM])
+            
+            # actualiza el label que muestra las coincidencias asociado a 'table_widget'
+            match table_widget.objectName():
+                case 'displayTable':
+                    self.ui.label_inventory_found_items.setText(
+                        f"elemento {self.NUM_CURR_ITEM + 1} de {len(self.MATCHING_ITEMS)}")
+                
+                case 'table_sales_data':
+                    self.ui.label_sales_found_items.setText(
+                        f"elemento {self.NUM_CURR_ITEM + 1} de {len(self.MATCHING_ITEMS)}")
+                
+                case 'table_debts':
+                    self.ui.label_debts_found_items.setText(
+                        f"elemento {self.NUM_CURR_ITEM + 1} de {len(self.MATCHING_ITEMS)}")
+                    
+            # actualiza el estado de los botones
+            self.__updatePrevAndNextButtons(table_widget.objectName())
+        
+        return None
+
+
+    @Slot(str)
+    def showPrevMatchingItem(self, table_name:str) -> None:
+        '''
+        Es llamado desde la señal 'clicked' de 'btn_inventory_prev_search_result' | 'btn_sales_prev_search_result' | 
+        'btn_debts_prev_search_result'.
+        
+        Este método hace lo siguiente:
+        - Actualiza la selección del item actual al anterior encontrado. 
+        - Dependiendo del QTableWidget con nombre 'table_name' actualiza el QLabel asociado que muestra el item 
+        actualmente seleccionado que coincide con la búsqueda. Para eso accede a la variable 'self.NUM_CURR_ITEM' 
+        y la actualiza.
+        - Activa/desactiva los botones asociados a 'table_widget' que se encargan de avanzar/retroceder entre 
+        los elementos coincidentes. Para eso llama al método 'self.__updatePrevAndNextButtons'.
+        
+        Retorna None.
+        '''
+        if self.NUM_CURR_ITEM > 0:
+            self.NUM_CURR_ITEM -= 1
+        
+            match table_name:
+                case 'displayTable':
+                    self.ui.label_inventory_found_items.setText(
+                        f"elemento {self.NUM_CURR_ITEM + 1} de {len(self.MATCHING_ITEMS)}")
+                
+                case 'table_sales_data':
+                    self.ui.label_sales_found_items.setText(
+                        f"elemento {self.NUM_CURR_ITEM + 1} de {len(self.MATCHING_ITEMS)}")
+                
+                case 'table_debts':
+                    self.ui.label_debts_found_items.setText(
+                        f"elemento {self.NUM_CURR_ITEM + 1} de {len(self.MATCHING_ITEMS)}")
+        
+        self.__updatePrevAndNextButtons(table_name)
+        
+        return None
+    
+    
+    @Slot(str)
+    def showNextMatchingItem(self, table_name:str) -> None:
+        '''
+        Es llamado desde la señal 'clicked' de 'btn_inventory_next_search_result' | 'btn_sales_next_search_result' | 
+        'btn_debts_next_search_result'.
+        
+        Este método hace lo siguiente:
+        - Actualiza la selección del item actual al siguiente encontrado.
+        - Dependiendo del QTableWidget con nombre 'table_name' actualiza el QLabel asociado que muestra el item 
+        actualmente seleccionado que coincide con la búsqueda.
+        - - Activa/desactiva los botones asociados a 'table_widget' que se encargan de avanzar/retroceder entre 
+        los elementos coincidentes. Para eso llama al método 'self.__updatePrevAndNextButtons'.
+        
+        Retorna None.
+        '''
+        if self.NUM_CURR_ITEM < len(self.MATCHING_ITEMS) - 1:
+            self.NUM_CURR_ITEM += 1
+        
+            match table_name:
+                case 'displayTable':
+                    self.ui.label_inventory_found_items.setText(
+                        f"elemento {self.NUM_CURR_ITEM + 1} de {len(self.MATCHING_ITEMS)}")
+                
+                case 'table_sales_data':
+                    self.ui.label_sales_found_items.setText(
+                        f"elemento {self.NUM_CURR_ITEM + 1} de {len(self.MATCHING_ITEMS)}")
+                
+                case 'table_debts':
+                    self.ui.label_debts_found_items.setText(
+                        f"elemento {self.NUM_CURR_ITEM + 1} de {len(self.MATCHING_ITEMS)}")
+        
+        self.__updatePrevAndNextButtons(table_name)
+        
         return None
 
     
@@ -242,7 +470,7 @@ class MainWindow(QMainWindow):
                 # if not search_bar:
                     # if SHOW_ALL or self.ui.tables_ListWidget.currentItem().text() == "MOSTRAR TODOS":
                     #     count_sql:str = "SELECT COUNT(*) FROM Productos WHERE eliminado = 0;"
-                    #     sql = "SELECT IDproducto,nombre_categoria,nombre,p.descripcion,stock,unidad_medida,precio_unit,precio_comerc \FROM Productos AS p INNER JOIN Categorias AS c WHERE p.IDcategoria=c.IDcategoria AND p.eliminado = 0;"
+                    #     sql = "SELECT IDproducto,nombre_categoria,nombre,p.descripcion,stock,unidad_medida,precio_unit,precio_comerc FROM Productos AS p INNER JOIN Categorias AS c WHERE p.IDcategoria=c.IDcategoria AND p.eliminado = 0;"
                     
                     # elif not SHOW_ALL and ACCESSED_BY_LIST:
                     #     # cols.: detalle venta, cantidad, producto, costo total, abonado, fecha y hora
@@ -252,7 +480,7 @@ class MainWindow(QMainWindow):
                     #     params = (self.ui.tables_ListWidget.currentItem().text(),)
                 if SHOW_ALL or self.ui.tables_ListWidget.currentItem().text() == "MOSTRAR TODOS":
                     count_sql:str = "SELECT COUNT(*) FROM Productos WHERE eliminado = 0;"
-                    sql = "SELECT IDproducto,nombre_categoria,nombre,p.descripcion,stock,unidad_medida,precio_unit,precio_comerc \FROM Productos AS p INNER JOIN Categorias AS c WHERE p.IDcategoria=c.IDcategoria AND p.eliminado = 0;"
+                    sql = "SELECT IDproducto,nombre_categoria,nombre,p.descripcion,stock,unidad_medida,precio_unit,precio_comerc FROM Productos AS p INNER JOIN Categorias AS c WHERE p.IDcategoria=c.IDcategoria AND p.eliminado = 0;"
                 
                 elif not SHOW_ALL and ACCESSED_BY_LIST:
                     # cols.: detalle venta, cantidad, producto, costo total, abonado, fecha y hora
@@ -294,10 +522,7 @@ class MainWindow(QMainWindow):
                 # if not search_bar and SHOW_ALL:
                 if SHOW_ALL:
                     count_sql = "SELECT COUNT(DISTINCT IDdeudor) FROM Deudas;"
-                    sql = 'SELECT Detalle_Ventas.*, Deudores.* \
-                        FROM Detalle_Ventas \
-                        JOIN Deudas ON Detalle_Ventas.IDdeuda = Deudas.IDdeuda \
-                        JOIN Deudores ON Deudas.IDdeudor = Deudores.IDdeudor;'
+                    sql = 'SELECT Detalle_Ventas.*, Deudores.* FROM Detalle_Ventas JOIN Deudas ON Detalle_Ventas.IDdeuda = Deudas.IDdeuda JOIN Deudores ON Deudas.IDdeudor = Deudores.IDdeudor;'
 
                 # else:
                 #     pass
@@ -531,7 +756,9 @@ class MainWindow(QMainWindow):
         correspondiente que pide los datos necesarios para la nueva fila.
         
         Al final, recarga la tabla correspondiente llamando a 'self.handleTableToFill'.
-        \nRetorna 'None'.'''
+        
+        Retorna None.
+        '''
         match table_widget.objectName():
             case "displayTable":
                 productDialog = ProductDialog() # QDialog para añadir un producto nuevo a 'displayTable'
@@ -1510,9 +1737,7 @@ class MainWindow(QMainWindow):
                     
                     # inserta a Detalle_Ventas
                     cursor.execute(
-                        "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda)\
-                        VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), \
-                        (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, NULL);",
+                        "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, NULL);",
                         (item.quantity, item.subtotal, item.product_name, self.ui.dateTimeEdit_sale.text(), 
                          item.sale_details, item.subtotal,)
                         )
@@ -1592,10 +1817,7 @@ class MainWindow(QMainWindow):
                     conn.commit()
                     
                     cursor.execute(
-                        "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda)\
-                        VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?),\
-                        (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?,\
-                        (SELECT IDdeuda FROM Deudas WHERE fecha_hora = ? AND IDdeudor = ? ORDER BY IDdeuda DESC LIMIT 1));",
+                        "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?),(SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, (SELECT IDdeuda FROM Deudas WHERE fecha_hora = ? AND IDdeudor = ? ORDER BY IDdeuda DESC LIMIT 1));",
                         (item.quantity, item.subtotal, item.product_name, self.ui.dateTimeEdit_sale.text(),
                         item.sale_details, round(item.subtotal - abs(total_due), 2), self.ui.dateTimeEdit_sale.text(),
                         debtor_id, )
@@ -1606,9 +1828,7 @@ class MainWindow(QMainWindow):
                 
                 else: # el producto NO es deuda
                     cursor.execute(
-                        "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda)\
-                        VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?),\
-                        (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, NULL);",
+                        "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, NULL);",
                         (item.quantity, item.subtotal, item.product_name, self.ui.dateTimeEdit_sale.text(),
                         item.sale_details, item.subtotal,)
                         )

@@ -528,9 +528,28 @@ QPushButton {
 	color: #fff;
 	border: 1px solid #12476a;
 	border-radius: 2px;
+/*
 	min-width: 20px;
 	max-width: 170px;
 	min-height: 23px;
+*/
+}
+QPushButton:hover,
+QPushButton:pressed {
+	background-color: #38a3a5;
+	border: 1px inset #289395;
+}
+QPushButton:disabled {
+	background-color: rgb(103, 115, 122);
+	color: #999;
+}
+
+
+
+QPushButton {
+	background-color: #22577a;
+	border: 1px solid #12476a;
+	border-radius: 2px;
 }
 QPushButton:hover,
 QPushButton:pressed {
@@ -773,6 +792,12 @@ QProgressBar::chunk {
                  </property>
                  <item>
                   <widget class="QFrame" name="inventory_header">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
                    <property name="frameShape">
                     <enum>QFrame::NoFrame</enum>
                    </property>
@@ -806,13 +831,13 @@ QProgressBar::chunk {
                       <property name="minimumSize">
                        <size>
                         <width>150</width>
-                        <height>24</height>
+                        <height>25</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>500</width>
-                        <height>24</height>
+                        <width>16777215</width>
+                        <height>25</height>
                        </size>
                       </property>
                       <property name="baseSize">
@@ -831,7 +856,10 @@ QProgressBar::chunk {
                        <string notr="true"/>
                       </property>
                       <property name="maxLength">
-                       <number>255</number>
+                       <number>100</number>
+                      </property>
+                      <property name="frame">
+                       <bool>false</bool>
                       </property>
                       <property name="echoMode">
                        <enum>QLineEdit::Normal</enum>
@@ -844,6 +872,123 @@ QProgressBar::chunk {
                       </property>
                       <property name="clearButtonEnabled">
                        <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+                     <widget class="QFrame" name="btn_group_inventory_header">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="frameShape">
+                       <enum>QFrame::NoFrame</enum>
+                      </property>
+                      <property name="frameShadow">
+                       <enum>QFrame::Raised</enum>
+                      </property>
+                      <layout class="QHBoxLayout" name="horizontalLayout">
+                       <property name="spacing">
+                        <number>4</number>
+                       </property>
+                       <property name="sizeConstraint">
+                        <enum>QLayout::SetDefaultConstraint</enum>
+                       </property>
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                       <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+                        <widget class="QPushButton" name="btn_inventory_prev_search_result">
+                         <property name="enabled">
+                          <bool>false</bool>
+                         </property>
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>25</width>
+                           <height>25</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>25</width>
+                           <height>25</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                         <property name="iconSize">
+                          <size>
+                           <width>24</width>
+                           <height>24</height>
+                          </size>
+                         </property>
+                        </widget>
+                       </item>
+                       <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+                        <widget class="QPushButton" name="btn_inventory_next_search_result">
+                         <property name="enabled">
+                          <bool>false</bool>
+                         </property>
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>25</width>
+                           <height>25</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>25</width>
+                           <height>25</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                         <property name="iconSize">
+                          <size>
+                           <width>24</width>
+                           <height>24</height>
+                          </size>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="label_inventory_found_items">
+                      <property name="text">
+                       <string notr="true"/>
+                      </property>
+                      <property name="textFormat">
+                       <enum>Qt::PlainText</enum>
+                      </property>
+                      <property name="textInteractionFlags">
+                       <set>Qt::NoTextInteraction</set>
                       </property>
                      </widget>
                     </item>
@@ -1021,6 +1166,18 @@ color: #111;</string>
                     </property>
                     <item>
                      <widget class="QPushButton" name="btn_add_product_inventory">
+                      <property name="minimumSize">
+                       <size>
+                        <width>180</width>
+                        <height>25</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>250</width>
+                        <height>25</height>
+                       </size>
+                      </property>
                       <property name="toolTip">
                        <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Añadir un producto nuevo a la lista de productos actual (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;). &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                       </property>
@@ -1040,6 +1197,18 @@ color: #111;</string>
                     </item>
                     <item>
                      <widget class="QPushButton" name="btn_delete_product_inventory">
+                      <property name="minimumSize">
+                       <size>
+                        <width>180</width>
+                        <height>23</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>250</width>
+                        <height>23</height>
+                       </size>
+                      </property>
                       <property name="toolTip">
                        <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Borra el producto actualmente seleccionado (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;supr&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, debe estar seguro de querer eliminar un producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                       </property>
@@ -1165,13 +1334,13 @@ QLineEdit:focus {
                    </property>
                    <property name="minimumSize">
                     <size>
-                     <width>20</width>
-                     <height>23</height>
+                     <width>0</width>
+                     <height>0</height>
                     </size>
                    </property>
                    <property name="maximumSize">
                     <size>
-                     <width>170</width>
+                     <width>16777215</width>
                      <height>16777215</height>
                     </size>
                    </property>
@@ -1563,10 +1732,16 @@ color: #111;</string>
                         </property>
                         <item>
                          <widget class="QPushButton" name="btn_add_product">
+                          <property name="minimumSize">
+                           <size>
+                            <width>180</width>
+                            <height>25</height>
+                           </size>
+                          </property>
                           <property name="maximumSize">
                            <size>
-                            <width>172</width>
-                            <height>16777215</height>
+                            <width>250</width>
+                            <height>25</height>
                            </size>
                           </property>
                           <property name="toolTip">
@@ -1896,8 +2071,8 @@ border-right: 1px solid #111;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>150</width>
-                <height>161</height>
+                <width>756</width>
+                <height>498</height>
                </rect>
               </property>
               <attribute name="label">
@@ -1919,50 +2094,200 @@ border-right: 1px solid #111;</string>
                <property name="bottomMargin">
                 <number>0</number>
                </property>
-               <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
-                <widget class="QLineEdit" name="sales_searchBar">
+               <item>
+                <widget class="QFrame" name="sales_table_header">
                  <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>150</width>
-                   <height>24</height>
-                  </size>
+                 <property name="frameShape">
+                  <enum>QFrame::NoFrame</enum>
                  </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>500</width>
-                   <height>24</height>
-                  </size>
+                 <property name="frameShadow">
+                  <enum>QFrame::Raised</enum>
                  </property>
-                 <property name="acceptDrops">
-                  <bool>false</bool>
-                 </property>
-                 <property name="toolTip">
-                  <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Buscar una venta en la tabla según nombres, características, palabras claves, etc.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                 <property name="text">
-                  <string notr="true"/>
-                 </property>
-                 <property name="maxLength">
-                  <number>255</number>
-                 </property>
-                 <property name="echoMode">
-                  <enum>QLineEdit::Normal</enum>
-                 </property>
-                 <property name="placeholderText">
-                  <string notr="true">Ingresar detalles de ventas a buscar...</string>
-                 </property>
-                 <property name="cursorMoveStyle">
-                  <enum>Qt::LogicalMoveStyle</enum>
-                 </property>
-                 <property name="clearButtonEnabled">
-                  <bool>true</bool>
-                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_2">
+                  <property name="spacing">
+                   <number>4</number>
+                  </property>
+                  <property name="leftMargin">
+                   <number>5</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>5</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
+                  <item>
+                   <widget class="QLineEdit" name="sales_searchBar">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>150</width>
+                      <height>25</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>16777215</width>
+                      <height>25</height>
+                     </size>
+                    </property>
+                    <property name="acceptDrops">
+                     <bool>false</bool>
+                    </property>
+                    <property name="toolTip">
+                     <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Buscar una venta en la tabla según nombres, características, palabras claves, etc.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string notr="true"/>
+                    </property>
+                    <property name="maxLength">
+                     <number>100</number>
+                    </property>
+                    <property name="frame">
+                     <bool>false</bool>
+                    </property>
+                    <property name="echoMode">
+                     <enum>QLineEdit::Normal</enum>
+                    </property>
+                    <property name="placeholderText">
+                     <string notr="true">Ingresar detalles de ventas a buscar...</string>
+                    </property>
+                    <property name="cursorMoveStyle">
+                     <enum>Qt::LogicalMoveStyle</enum>
+                    </property>
+                    <property name="clearButtonEnabled">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QFrame" name="btn_group_sales_header">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="frameShape">
+                     <enum>QFrame::NoFrame</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_3">
+                     <property name="spacing">
+                      <number>4</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+                      <widget class="QPushButton" name="btn_sales_prev_search_result">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>25</width>
+                         <height>25</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>25</width>
+                         <height>25</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="iconSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                      </widget>
+                     </item>
+                     <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+                      <widget class="QPushButton" name="btn_sales_next_search_result">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>25</width>
+                         <height>25</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>25</width>
+                         <height>25</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="iconSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="label_sales_found_items">
+                    <property name="text">
+                     <string notr="true"/>
+                    </property>
+                    <property name="textFormat">
+                     <enum>Qt::PlainText</enum>
+                    </property>
+                    <property name="textInteractionFlags">
+                     <set>Qt::NoTextInteraction</set>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </widget>
                </item>
                <item>
@@ -2122,6 +2447,18 @@ color: #111;</string>
                   </property>
                   <item>
                    <widget class="QPushButton" name="btn_add_product_sales">
+                    <property name="minimumSize">
+                     <size>
+                      <width>180</width>
+                      <height>25</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>250</width>
+                      <height>25</height>
+                     </size>
+                    </property>
                     <property name="toolTip">
                      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Añadir un producto nuevo vendido a la lista de ventas actual (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
@@ -2141,6 +2478,18 @@ color: #111;</string>
                   </item>
                   <item>
                    <widget class="QPushButton" name="btn_delete_product_sales">
+                    <property name="minimumSize">
+                     <size>
+                      <width>180</width>
+                      <height>25</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>250</width>
+                      <height>25</height>
+                     </size>
+                    </property>
                     <property name="toolTip">
                      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Borra el producto vendido actualmente seleccionado (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;supr&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, debe estar seguro de querer eliminar un producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
@@ -2220,60 +2569,204 @@ QPushButton:hover {
               <property name="bottomMargin">
                <number>0</number>
               </property>
-              <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
-               <widget class="QLineEdit" name="debts_searchBar">
+              <item>
+               <widget class="QFrame" name="debts_header">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>150</width>
-                  <height>24</height>
-                 </size>
+                <property name="frameShape">
+                 <enum>QFrame::NoFrame</enum>
                 </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>500</width>
-                  <height>24</height>
-                 </size>
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
                 </property>
-                <property name="font">
-                 <font>
-                  <family>Verdana</family>
-                  <pointsize>-1</pointsize>
-                  <stylestrategy>PreferDefault</stylestrategy>
-                 </font>
-                </property>
-                <property name="acceptDrops">
-                 <bool>false</bool>
-                </property>
-                <property name="toolTip">
-                 <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Buscar una deuda en la tabla según nombres, características, palabras claves, etc.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string notr="true"/>
-                </property>
-                <property name="maxLength">
-                 <number>255</number>
-                </property>
-                <property name="frame">
-                 <bool>false</bool>
-                </property>
-                <property name="echoMode">
-                 <enum>QLineEdit::Normal</enum>
-                </property>
-                <property name="placeholderText">
-                 <string notr="true">Ingresar detalles de cuenta corriente a buscar...</string>
-                </property>
-                <property name="cursorMoveStyle">
-                 <enum>Qt::LogicalMoveStyle</enum>
-                </property>
-                <property name="clearButtonEnabled">
-                 <bool>true</bool>
-                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_4">
+                 <property name="spacing">
+                  <number>4</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>5</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>5</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QLineEdit" name="debts_searchBar">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>25</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>25</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <family>Verdana</family>
+                     <pointsize>-1</pointsize>
+                     <stylestrategy>PreferDefault</stylestrategy>
+                    </font>
+                   </property>
+                   <property name="acceptDrops">
+                    <bool>false</bool>
+                   </property>
+                   <property name="toolTip">
+                    <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Buscar una deuda en la tabla según nombres, características, palabras claves, etc.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="text">
+                    <string notr="true"/>
+                   </property>
+                   <property name="maxLength">
+                    <number>100</number>
+                   </property>
+                   <property name="frame">
+                    <bool>false</bool>
+                   </property>
+                   <property name="echoMode">
+                    <enum>QLineEdit::Normal</enum>
+                   </property>
+                   <property name="placeholderText">
+                    <string notr="true">Ingresar detalles de cuenta corriente a buscar...</string>
+                   </property>
+                   <property name="cursorMoveStyle">
+                    <enum>Qt::LogicalMoveStyle</enum>
+                   </property>
+                   <property name="clearButtonEnabled">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QFrame" name="btn_group_debts_header">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::NoFrame</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <layout class="QHBoxLayout" name="horizontalLayout_5">
+                    <property name="spacing">
+                     <number>4</number>
+                    </property>
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QPushButton" name="btn_debts_prev_search_result">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>25</width>
+                        <height>25</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>25</width>
+                        <height>25</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="iconSize">
+                       <size>
+                        <width>24</width>
+                        <height>24</height>
+                       </size>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="btn_debts_next_search_result">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>25</width>
+                        <height>25</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>25</width>
+                        <height>25</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="iconSize">
+                       <size>
+                        <width>24</width>
+                        <height>24</height>
+                       </size>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="label_debts_found_items">
+                   <property name="text">
+                    <string notr="true"/>
+                   </property>
+                   <property name="textFormat">
+                    <enum>Qt::PlainText</enum>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </widget>
               </item>
               <item>
@@ -2428,6 +2921,18 @@ color: #111;</string>
                  </property>
                  <item>
                   <widget class="QPushButton" name="btn_add_debt">
+                   <property name="minimumSize">
+                    <size>
+                     <width>180</width>
+                     <height>25</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>250</width>
+                     <height>25</height>
+                    </size>
+                   </property>
                    <property name="toolTip">
                     <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Agrega una deuda nueva a la tabla (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
@@ -2447,6 +2952,18 @@ color: #111;</string>
                  </item>
                  <item>
                   <widget class="QPushButton" name="btn_delete_debt">
+                   <property name="minimumSize">
+                    <size>
+                     <width>180</width>
+                     <height>25</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>250</width>
+                     <height>25</height>
+                    </size>
+                   </property>
                    <property name="toolTip">
                     <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Elimina la deuda actualmente seleccionada en la tabla (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;supr&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, debe estar seguro de querer borrar una deuda.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
@@ -2540,11 +3057,9 @@ QPushButton:hover {
   <tabstop>btn_inventory_sideBarToggle</tabstop>
   <tabstop>btn_delete_product_inventory</tabstop>
   <tabstop>inventory_searchBar</tabstop>
-  <tabstop>sales_searchBar</tabstop>
   <tabstop>table_sales_data</tabstop>
   <tabstop>btn_add_product_sales</tabstop>
   <tabstop>btn_delete_product_sales</tabstop>
-  <tabstop>debts_searchBar</tabstop>
   <tabstop>table_debts</tabstop>
   <tabstop>btn_add_debt</tabstop>
   <tabstop>btn_delete_debt</tabstop>

@@ -373,15 +373,6 @@ def createTableColumnDateTimeEdit(table_widget:QTableWidget, curr_index:QModelIn
 
 
 #========================================================================================================================
-def setSearchBarValidator(searchBar:QLineEdit) -> None:
-    '''Coloca un 'Validator' en el 'searchBar' de entrada. Retorna 'None'.'''
-    re = QRegularExpression("[^;,.?¿\'\'\"\"\t\r]*")
-    validator = QRegularExpressionValidator(re, searchBar)
-    searchBar.setValidator(validator)
-    return None
-
-
-#========================================================================================================================
 def createCompleter(sql:str=None, params:tuple=None, type:int=None) -> QCompleter:
     '''
     Crea un QCompleter, establece sus atributos y lo coloca dentro de 'lineedit'.

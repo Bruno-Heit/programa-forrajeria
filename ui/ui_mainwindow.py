@@ -19,10 +19,10 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
 from PySide6.QtWidgets import (QAbstractItemView, QAbstractScrollArea, QAbstractSpinBox, QApplication,
     QButtonGroup, QCheckBox, QDateTimeEdit, QFrame,
     QGridLayout, QHBoxLayout, QHeaderView, QLabel,
-    QLineEdit, QListView, QListWidget, QListWidgetItem,
-    QMainWindow, QProgressBar, QPushButton, QSizePolicy,
-    QSpacerItem, QTabWidget, QTableWidget, QTableWidgetItem,
-    QToolBox, QVBoxLayout, QWidget)
+    QLayout, QLineEdit, QListView, QListWidget,
+    QListWidgetItem, QMainWindow, QProgressBar, QPushButton,
+    QSizePolicy, QSpacerItem, QTabWidget, QTableWidget,
+    QTableWidgetItem, QToolBox, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -336,9 +336,29 @@ class Ui_MainWindow(object):
 "	color: #fff;\n"
 "	border: 1px solid #12476a;\n"
 "	border-radius: 2px;\n"
+"/*\n"
 "	min-width: 20px;\n"
 "	max-width: 170px;\n"
 "	min-height: 23px;\n"
+"*/\n"
+"}\n"
+"QPushButton:hover,\n"
+"QPushButton:pressed {\n"
+"	background-color: #38a3a5;\n"
+"	border: 1px inset #289395;\n"
+"}\n"
+"QPushButton:disabled {\n"
+"	background-color: rgb(103, 115, 122);\n"
+"	color: #999;\n"
+"}\n"
+"\n"
+"\n"
+"\n"
+"QPushButton {\n"
+"	background-color: #22577a;\n"
+"	border: 1px solid #12476a;\n"
+"	bo"
+                        "rder-radius: 2px;\n"
 "}\n"
 "QPushButton:hover,\n"
 "QPushButton:pressed {\n"
@@ -352,8 +372,7 @@ class Ui_MainWindow(object):
 "\n"
 "\n"
 "QTabWidget::pane { /* selecciona la ventana, sin las pesta\u00f1as */\n"
-"	border-top: 2px solid #0b7e7f"
-                        ";\n"
+"	border-top: 2px solid #0b7e7f;\n"
 "	margin-top: -1px;\n"
 "}\n"
 "QTabWidget::tab-bar {\n"
@@ -377,7 +396,8 @@ class Ui_MainWindow(object):
 "QTabBar::tab:selected {\n"
 "	margin-bottom: -1px;\n"
 "	background-color: qlineargradient(spread:pad, x1:0.658, y1:1, x2:0.289, y2:0, stop:0 rgba(11, 126, 127, 255), stop:1 rgba(84, 137, 172, 255));\n"
-"	border-top-color:  rgba(84, 137, 172, 255);\n"
+"	border-top-color:  rgba(84, 137"
+                        ", 172, 255);\n"
 "}\n"
 "QTabBar::tab:!selected {\n"
 "	margin-top: 3px;\n"
@@ -394,8 +414,7 @@ class Ui_MainWindow(object):
 "	background-color: rgb(197, 255, 252);\n"
 "}\n"
 "QTableWidget::item:selected {\n"
-"	bac"
-                        "kground-color: #38a3a5;\n"
+"	background-color: #38a3a5;\n"
 "}\n"
 "QHeaderView:section {\n"
 "	background-color: #fff;\n"
@@ -421,7 +440,8 @@ class Ui_MainWindow(object):
 "	background-color: qlineargradient(spread:pad, x1:0.658, y1:1, x2:0.289, y2:0, stop:0 rgba(11, 126, 127, 255), stop:1 rgba(84, 137, 172, 255));\n"
 "	border-top-color:  rgba(84, 137, 172, 255);\n"
 "}\n"
-"\n"
+""
+                        "\n"
 "\n"
 "QComboBox {\n"
 "	background-color: #fff;\n"
@@ -437,8 +457,7 @@ class Ui_MainWindow(object):
 "	border-color: rgb(11, 126, 127);\n"
 "	padding-top: 2px;\n"
 "	padding-left: 4px;\n"
-"}"
-                        "\n"
+"}\n"
 "QComboBox QAbstractItemView {\n"
 "	background-color: #fff;\n"
 "	selection-background-color: #38a3a5;\n"
@@ -468,7 +487,8 @@ class Ui_MainWindow(object):
 "\n"
 "/* estilos de QProgressBar */\n"
 "QProgressBar {\n"
-"	margin: 0 10px 0 10px;\n"
+"	margin: 0 10px"
+                        " 0 10px;\n"
 "	background-color: rgba(255, 255, 255, 0.6);\n"
 "	border: None;\n"
 "	border-radius: 5px;\n"
@@ -512,6 +532,11 @@ class Ui_MainWindow(object):
         self.inventory_display_Vlayout.setContentsMargins(0, 8, 0, 0)
         self.inventory_header = QFrame(self.inventory_display)
         self.inventory_header.setObjectName(u"inventory_header")
+        sizePolicy3 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.inventory_header.sizePolicy().hasHeightForWidth())
+        self.inventory_header.setSizePolicy(sizePolicy3)
         self.inventory_header.setFrameShape(QFrame.NoFrame)
         self.inventory_header.setFrameShadow(QFrame.Raised)
         self.inventory_header_Hlayout = QHBoxLayout(self.inventory_header)
@@ -520,26 +545,71 @@ class Ui_MainWindow(object):
         self.inventory_header_Hlayout.setContentsMargins(5, 0, 5, 0)
         self.inventory_searchBar = QLineEdit(self.inventory_header)
         self.inventory_searchBar.setObjectName(u"inventory_searchBar")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.inventory_searchBar.sizePolicy().hasHeightForWidth())
-        self.inventory_searchBar.setSizePolicy(sizePolicy3)
-        self.inventory_searchBar.setMinimumSize(QSize(150, 24))
-        self.inventory_searchBar.setMaximumSize(QSize(500, 24))
+        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.inventory_searchBar.sizePolicy().hasHeightForWidth())
+        self.inventory_searchBar.setSizePolicy(sizePolicy4)
+        self.inventory_searchBar.setMinimumSize(QSize(150, 25))
+        self.inventory_searchBar.setMaximumSize(QSize(16777215, 25))
         self.inventory_searchBar.setBaseSize(QSize(0, 0))
         self.inventory_searchBar.setAcceptDrops(False)
 #if QT_CONFIG(tooltip)
         self.inventory_searchBar.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Buscar un producto en la tabla seg\u00fan su nombre, caracter\u00edsticas, palabras claves, etc.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.inventory_searchBar.setText(u"")
-        self.inventory_searchBar.setMaxLength(255)
+        self.inventory_searchBar.setMaxLength(100)
+        self.inventory_searchBar.setFrame(False)
         self.inventory_searchBar.setEchoMode(QLineEdit.Normal)
         self.inventory_searchBar.setPlaceholderText(u"Ingresar detalles de productos a buscar...")
         self.inventory_searchBar.setCursorMoveStyle(Qt.LogicalMoveStyle)
         self.inventory_searchBar.setClearButtonEnabled(True)
 
         self.inventory_header_Hlayout.addWidget(self.inventory_searchBar, 0, Qt.AlignLeft|Qt.AlignVCenter)
+
+        self.btn_group_inventory_header = QFrame(self.inventory_header)
+        self.btn_group_inventory_header.setObjectName(u"btn_group_inventory_header")
+        sizePolicy1.setHeightForWidth(self.btn_group_inventory_header.sizePolicy().hasHeightForWidth())
+        self.btn_group_inventory_header.setSizePolicy(sizePolicy1)
+        self.btn_group_inventory_header.setFrameShape(QFrame.NoFrame)
+        self.btn_group_inventory_header.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout = QHBoxLayout(self.btn_group_inventory_header)
+        self.horizontalLayout.setSpacing(4)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalLayout.setSizeConstraint(QLayout.SetDefaultConstraint)
+        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
+        self.btn_inventory_prev_search_result = QPushButton(self.btn_group_inventory_header)
+        self.btn_inventory_prev_search_result.setObjectName(u"btn_inventory_prev_search_result")
+        self.btn_inventory_prev_search_result.setEnabled(False)
+        sizePolicy1.setHeightForWidth(self.btn_inventory_prev_search_result.sizePolicy().hasHeightForWidth())
+        self.btn_inventory_prev_search_result.setSizePolicy(sizePolicy1)
+        self.btn_inventory_prev_search_result.setMinimumSize(QSize(25, 25))
+        self.btn_inventory_prev_search_result.setMaximumSize(QSize(25, 25))
+        self.btn_inventory_prev_search_result.setIconSize(QSize(24, 24))
+
+        self.horizontalLayout.addWidget(self.btn_inventory_prev_search_result, 0, Qt.AlignLeft|Qt.AlignVCenter)
+
+        self.btn_inventory_next_search_result = QPushButton(self.btn_group_inventory_header)
+        self.btn_inventory_next_search_result.setObjectName(u"btn_inventory_next_search_result")
+        self.btn_inventory_next_search_result.setEnabled(False)
+        sizePolicy1.setHeightForWidth(self.btn_inventory_next_search_result.sizePolicy().hasHeightForWidth())
+        self.btn_inventory_next_search_result.setSizePolicy(sizePolicy1)
+        self.btn_inventory_next_search_result.setMinimumSize(QSize(25, 25))
+        self.btn_inventory_next_search_result.setMaximumSize(QSize(25, 25))
+        self.btn_inventory_next_search_result.setIconSize(QSize(24, 24))
+
+        self.horizontalLayout.addWidget(self.btn_inventory_next_search_result, 0, Qt.AlignLeft|Qt.AlignVCenter)
+
+
+        self.inventory_header_Hlayout.addWidget(self.btn_group_inventory_header, 0, Qt.AlignLeft|Qt.AlignVCenter)
+
+        self.label_inventory_found_items = QLabel(self.inventory_header)
+        self.label_inventory_found_items.setObjectName(u"label_inventory_found_items")
+        self.label_inventory_found_items.setText(u"")
+        self.label_inventory_found_items.setTextFormat(Qt.PlainText)
+        self.label_inventory_found_items.setTextInteractionFlags(Qt.NoTextInteraction)
+
+        self.inventory_header_Hlayout.addWidget(self.label_inventory_found_items)
 
 
         self.inventory_display_Vlayout.addWidget(self.inventory_header)
@@ -624,6 +694,8 @@ class Ui_MainWindow(object):
         self.tab1_buttons_Hlayout.setContentsMargins(0, 0, 0, 0)
         self.btn_add_product_inventory = QPushButton(self.tab1_buttons_2)
         self.btn_add_product_inventory.setObjectName(u"btn_add_product_inventory")
+        self.btn_add_product_inventory.setMinimumSize(QSize(180, 25))
+        self.btn_add_product_inventory.setMaximumSize(QSize(250, 25))
 #if QT_CONFIG(tooltip)
         self.btn_add_product_inventory.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">A\u00f1adir un producto nuevo a la lista de productos actual (</span><span style=\" font-size:12pt; font-style:italic;\">+</span><span style=\" font-size:12pt;\">). </span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
@@ -637,6 +709,8 @@ class Ui_MainWindow(object):
 
         self.btn_delete_product_inventory = QPushButton(self.tab1_buttons_2)
         self.btn_delete_product_inventory.setObjectName(u"btn_delete_product_inventory")
+        self.btn_delete_product_inventory.setMinimumSize(QSize(180, 23))
+        self.btn_delete_product_inventory.setMaximumSize(QSize(250, 23))
 #if QT_CONFIG(tooltip)
         self.btn_delete_product_inventory.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Borra el producto actualmente seleccionado (</span><span style=\" font-size:12pt; font-style:italic;\">supr</span><span style=\" font-size:12pt;\">).</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:12pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer eliminar un producto.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
@@ -714,8 +788,8 @@ class Ui_MainWindow(object):
         self.btn_inventory_sideBarToggle.setObjectName(u"btn_inventory_sideBarToggle")
         sizePolicy1.setHeightForWidth(self.btn_inventory_sideBarToggle.sizePolicy().hasHeightForWidth())
         self.btn_inventory_sideBarToggle.setSizePolicy(sizePolicy1)
-        self.btn_inventory_sideBarToggle.setMinimumSize(QSize(20, 23))
-        self.btn_inventory_sideBarToggle.setMaximumSize(QSize(170, 16777215))
+        self.btn_inventory_sideBarToggle.setMinimumSize(QSize(0, 0))
+        self.btn_inventory_sideBarToggle.setMaximumSize(QSize(16777215, 16777215))
         self.btn_inventory_sideBarToggle.setStyleSheet(u"QPushButton {\n"
 "	border: none;\n"
 "}\n"
@@ -910,7 +984,8 @@ class Ui_MainWindow(object):
         self.box1_add_products_Hlayout.setContentsMargins(0, 0, 0, 0)
         self.btn_add_product = QPushButton(self.add_products)
         self.btn_add_product.setObjectName(u"btn_add_product")
-        self.btn_add_product.setMaximumSize(QSize(172, 16777215))
+        self.btn_add_product.setMinimumSize(QSize(180, 25))
+        self.btn_add_product.setMaximumSize(QSize(250, 25))
 #if QT_CONFIG(tooltip)
         self.btn_add_product.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Agrega un producto m\u00e1s a la venta actual (</span><span style=\" font-size:12pt; font-style:italic;\">+</span><span style=\" font-size:12pt;\">).</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
@@ -931,11 +1006,11 @@ class Ui_MainWindow(object):
 
         self.sales_input_list = QListWidget(self.frame_list)
         self.sales_input_list.setObjectName(u"sales_input_list")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.sales_input_list.sizePolicy().hasHeightForWidth())
-        self.sales_input_list.setSizePolicy(sizePolicy4)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.sales_input_list.sizePolicy().hasHeightForWidth())
+        self.sales_input_list.setSizePolicy(sizePolicy5)
         self.sales_input_list.setStyleSheet(u"QListWidget {\n"
 "	background-color: rgb(194, 255, 237);\n"
 "}\n"
@@ -974,7 +1049,7 @@ class Ui_MainWindow(object):
 "\n"
 "\n"
 "#label_total_change {\n"
-"	color: #f00;\n"
+"	color: #dc2627;\n"
 "}\n"
 "\n"
 "\n"
@@ -1012,8 +1087,8 @@ class Ui_MainWindow(object):
 
         self.label_total = QLabel(self.sale_info)
         self.label_total.setObjectName(u"label_total")
-        sizePolicy3.setHeightForWidth(self.label_total.sizePolicy().hasHeightForWidth())
-        self.label_total.setSizePolicy(sizePolicy3)
+        sizePolicy4.setHeightForWidth(self.label_total.sizePolicy().hasHeightForWidth())
+        self.label_total.setSizePolicy(sizePolicy4)
         self.label_total.setMaximumSize(QSize(400, 16777215))
         self.label_total.setStyleSheet(u"font-weight: 500;\n"
 "background-color: #bbb;\n"
@@ -1094,24 +1169,81 @@ class Ui_MainWindow(object):
         self.box2_sales_Vlayout.setSpacing(4)
         self.box2_sales_Vlayout.setObjectName(u"box2_sales_Vlayout")
         self.box2_sales_Vlayout.setContentsMargins(0, 6, 0, 0)
-        self.sales_searchBar = QLineEdit(self.box2_sales_table)
+        self.sales_table_header = QFrame(self.box2_sales_table)
+        self.sales_table_header.setObjectName(u"sales_table_header")
+        sizePolicy3.setHeightForWidth(self.sales_table_header.sizePolicy().hasHeightForWidth())
+        self.sales_table_header.setSizePolicy(sizePolicy3)
+        self.sales_table_header.setFrameShape(QFrame.NoFrame)
+        self.sales_table_header.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_2 = QHBoxLayout(self.sales_table_header)
+        self.horizontalLayout_2.setSpacing(4)
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.horizontalLayout_2.setContentsMargins(5, 0, 5, 0)
+        self.sales_searchBar = QLineEdit(self.sales_table_header)
         self.sales_searchBar.setObjectName(u"sales_searchBar")
-        sizePolicy3.setHeightForWidth(self.sales_searchBar.sizePolicy().hasHeightForWidth())
-        self.sales_searchBar.setSizePolicy(sizePolicy3)
-        self.sales_searchBar.setMinimumSize(QSize(150, 24))
-        self.sales_searchBar.setMaximumSize(QSize(500, 24))
+        sizePolicy4.setHeightForWidth(self.sales_searchBar.sizePolicy().hasHeightForWidth())
+        self.sales_searchBar.setSizePolicy(sizePolicy4)
+        self.sales_searchBar.setMinimumSize(QSize(150, 25))
+        self.sales_searchBar.setMaximumSize(QSize(16777215, 25))
         self.sales_searchBar.setAcceptDrops(False)
 #if QT_CONFIG(tooltip)
         self.sales_searchBar.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Buscar una venta en la tabla seg\u00fan nombres, caracter\u00edsticas, palabras claves, etc.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.sales_searchBar.setText(u"")
-        self.sales_searchBar.setMaxLength(255)
+        self.sales_searchBar.setMaxLength(100)
+        self.sales_searchBar.setFrame(False)
         self.sales_searchBar.setEchoMode(QLineEdit.Normal)
         self.sales_searchBar.setPlaceholderText(u"Ingresar detalles de ventas a buscar...")
         self.sales_searchBar.setCursorMoveStyle(Qt.LogicalMoveStyle)
         self.sales_searchBar.setClearButtonEnabled(True)
 
-        self.box2_sales_Vlayout.addWidget(self.sales_searchBar, 0, Qt.AlignLeft|Qt.AlignVCenter)
+        self.horizontalLayout_2.addWidget(self.sales_searchBar)
+
+        self.btn_group_sales_header = QFrame(self.sales_table_header)
+        self.btn_group_sales_header.setObjectName(u"btn_group_sales_header")
+        sizePolicy1.setHeightForWidth(self.btn_group_sales_header.sizePolicy().hasHeightForWidth())
+        self.btn_group_sales_header.setSizePolicy(sizePolicy1)
+        self.btn_group_sales_header.setFrameShape(QFrame.NoFrame)
+        self.btn_group_sales_header.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_3 = QHBoxLayout(self.btn_group_sales_header)
+        self.horizontalLayout_3.setSpacing(4)
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
+        self.btn_sales_prev_search_result = QPushButton(self.btn_group_sales_header)
+        self.btn_sales_prev_search_result.setObjectName(u"btn_sales_prev_search_result")
+        self.btn_sales_prev_search_result.setEnabled(False)
+        sizePolicy1.setHeightForWidth(self.btn_sales_prev_search_result.sizePolicy().hasHeightForWidth())
+        self.btn_sales_prev_search_result.setSizePolicy(sizePolicy1)
+        self.btn_sales_prev_search_result.setMinimumSize(QSize(25, 25))
+        self.btn_sales_prev_search_result.setMaximumSize(QSize(25, 25))
+        self.btn_sales_prev_search_result.setIconSize(QSize(24, 24))
+
+        self.horizontalLayout_3.addWidget(self.btn_sales_prev_search_result, 0, Qt.AlignLeft|Qt.AlignVCenter)
+
+        self.btn_sales_next_search_result = QPushButton(self.btn_group_sales_header)
+        self.btn_sales_next_search_result.setObjectName(u"btn_sales_next_search_result")
+        self.btn_sales_next_search_result.setEnabled(False)
+        sizePolicy1.setHeightForWidth(self.btn_sales_next_search_result.sizePolicy().hasHeightForWidth())
+        self.btn_sales_next_search_result.setSizePolicy(sizePolicy1)
+        self.btn_sales_next_search_result.setMinimumSize(QSize(25, 25))
+        self.btn_sales_next_search_result.setMaximumSize(QSize(25, 25))
+        self.btn_sales_next_search_result.setIconSize(QSize(24, 24))
+
+        self.horizontalLayout_3.addWidget(self.btn_sales_next_search_result, 0, Qt.AlignLeft|Qt.AlignVCenter)
+
+
+        self.horizontalLayout_2.addWidget(self.btn_group_sales_header)
+
+        self.label_sales_found_items = QLabel(self.sales_table_header)
+        self.label_sales_found_items.setObjectName(u"label_sales_found_items")
+        self.label_sales_found_items.setText(u"")
+        self.label_sales_found_items.setTextFormat(Qt.PlainText)
+        self.label_sales_found_items.setTextInteractionFlags(Qt.NoTextInteraction)
+
+        self.horizontalLayout_2.addWidget(self.label_sales_found_items)
+
+
+        self.box2_sales_Vlayout.addWidget(self.sales_table_header)
 
         self.sales_progressbar = QProgressBar(self.box2_sales_table)
         self.sales_progressbar.setObjectName(u"sales_progressbar")
@@ -1186,6 +1318,8 @@ class Ui_MainWindow(object):
         self.box2_sales_buttons_Hlayout.setContentsMargins(0, 0, 0, 0)
         self.btn_add_product_sales = QPushButton(self.sales_buttons)
         self.btn_add_product_sales.setObjectName(u"btn_add_product_sales")
+        self.btn_add_product_sales.setMinimumSize(QSize(180, 25))
+        self.btn_add_product_sales.setMaximumSize(QSize(250, 25))
 #if QT_CONFIG(tooltip)
         self.btn_add_product_sales.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">A\u00f1adir un producto nuevo vendido a la lista de ventas actual (</span><span style=\" font-size:12pt; font-style:italic;\">+</span><span style=\" font-size:12pt;\">).</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
@@ -1199,6 +1333,8 @@ class Ui_MainWindow(object):
 
         self.btn_delete_product_sales = QPushButton(self.sales_buttons)
         self.btn_delete_product_sales.setObjectName(u"btn_delete_product_sales")
+        self.btn_delete_product_sales.setMinimumSize(QSize(180, 25))
+        self.btn_delete_product_sales.setMaximumSize(QSize(250, 25))
 #if QT_CONFIG(tooltip)
         self.btn_delete_product_sales.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Borra el producto vendido actualmente seleccionado (</span><span style=\" font-size:12pt; font-style:italic;\">supr</span><span style=\" font-size:12pt;\">).</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:12pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer eliminar un producto.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
@@ -1239,12 +1375,22 @@ class Ui_MainWindow(object):
         self.debts_info_Vlayout.setSpacing(4)
         self.debts_info_Vlayout.setObjectName(u"debts_info_Vlayout")
         self.debts_info_Vlayout.setContentsMargins(0, 8, 0, 0)
-        self.debts_searchBar = QLineEdit(self.debts_info)
+        self.debts_header = QFrame(self.debts_info)
+        self.debts_header.setObjectName(u"debts_header")
+        sizePolicy3.setHeightForWidth(self.debts_header.sizePolicy().hasHeightForWidth())
+        self.debts_header.setSizePolicy(sizePolicy3)
+        self.debts_header.setFrameShape(QFrame.NoFrame)
+        self.debts_header.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_4 = QHBoxLayout(self.debts_header)
+        self.horizontalLayout_4.setSpacing(4)
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.horizontalLayout_4.setContentsMargins(5, 0, 5, 0)
+        self.debts_searchBar = QLineEdit(self.debts_header)
         self.debts_searchBar.setObjectName(u"debts_searchBar")
-        sizePolicy3.setHeightForWidth(self.debts_searchBar.sizePolicy().hasHeightForWidth())
-        self.debts_searchBar.setSizePolicy(sizePolicy3)
-        self.debts_searchBar.setMinimumSize(QSize(150, 24))
-        self.debts_searchBar.setMaximumSize(QSize(500, 24))
+        sizePolicy4.setHeightForWidth(self.debts_searchBar.sizePolicy().hasHeightForWidth())
+        self.debts_searchBar.setSizePolicy(sizePolicy4)
+        self.debts_searchBar.setMinimumSize(QSize(150, 25))
+        self.debts_searchBar.setMaximumSize(QSize(16777215, 25))
         font2 = QFont()
         font2.setFamilies([u"Verdana"])
         font2.setStyleStrategy(QFont.PreferDefault)
@@ -1254,14 +1400,59 @@ class Ui_MainWindow(object):
         self.debts_searchBar.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Buscar una deuda en la tabla seg\u00fan nombres, caracter\u00edsticas, palabras claves, etc.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.debts_searchBar.setText(u"")
-        self.debts_searchBar.setMaxLength(255)
+        self.debts_searchBar.setMaxLength(100)
         self.debts_searchBar.setFrame(False)
         self.debts_searchBar.setEchoMode(QLineEdit.Normal)
         self.debts_searchBar.setPlaceholderText(u"Ingresar detalles de cuenta corriente a buscar...")
         self.debts_searchBar.setCursorMoveStyle(Qt.LogicalMoveStyle)
         self.debts_searchBar.setClearButtonEnabled(True)
 
-        self.debts_info_Vlayout.addWidget(self.debts_searchBar, 0, Qt.AlignLeft|Qt.AlignVCenter)
+        self.horizontalLayout_4.addWidget(self.debts_searchBar)
+
+        self.btn_group_debts_header = QFrame(self.debts_header)
+        self.btn_group_debts_header.setObjectName(u"btn_group_debts_header")
+        sizePolicy1.setHeightForWidth(self.btn_group_debts_header.sizePolicy().hasHeightForWidth())
+        self.btn_group_debts_header.setSizePolicy(sizePolicy1)
+        self.btn_group_debts_header.setFrameShape(QFrame.NoFrame)
+        self.btn_group_debts_header.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_5 = QHBoxLayout(self.btn_group_debts_header)
+        self.horizontalLayout_5.setSpacing(4)
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
+        self.btn_debts_prev_search_result = QPushButton(self.btn_group_debts_header)
+        self.btn_debts_prev_search_result.setObjectName(u"btn_debts_prev_search_result")
+        self.btn_debts_prev_search_result.setEnabled(False)
+        sizePolicy1.setHeightForWidth(self.btn_debts_prev_search_result.sizePolicy().hasHeightForWidth())
+        self.btn_debts_prev_search_result.setSizePolicy(sizePolicy1)
+        self.btn_debts_prev_search_result.setMinimumSize(QSize(25, 25))
+        self.btn_debts_prev_search_result.setMaximumSize(QSize(25, 25))
+        self.btn_debts_prev_search_result.setIconSize(QSize(24, 24))
+
+        self.horizontalLayout_5.addWidget(self.btn_debts_prev_search_result)
+
+        self.btn_debts_next_search_result = QPushButton(self.btn_group_debts_header)
+        self.btn_debts_next_search_result.setObjectName(u"btn_debts_next_search_result")
+        self.btn_debts_next_search_result.setEnabled(False)
+        sizePolicy1.setHeightForWidth(self.btn_debts_next_search_result.sizePolicy().hasHeightForWidth())
+        self.btn_debts_next_search_result.setSizePolicy(sizePolicy1)
+        self.btn_debts_next_search_result.setMinimumSize(QSize(25, 25))
+        self.btn_debts_next_search_result.setMaximumSize(QSize(25, 25))
+        self.btn_debts_next_search_result.setIconSize(QSize(24, 24))
+
+        self.horizontalLayout_5.addWidget(self.btn_debts_next_search_result)
+
+
+        self.horizontalLayout_4.addWidget(self.btn_group_debts_header)
+
+        self.label_debts_found_items = QLabel(self.debts_header)
+        self.label_debts_found_items.setObjectName(u"label_debts_found_items")
+        self.label_debts_found_items.setText(u"")
+        self.label_debts_found_items.setTextFormat(Qt.PlainText)
+
+        self.horizontalLayout_4.addWidget(self.label_debts_found_items)
+
+
+        self.debts_info_Vlayout.addWidget(self.debts_header)
 
         self.debts_progressbar = QProgressBar(self.debts_info)
         self.debts_progressbar.setObjectName(u"debts_progressbar")
@@ -1339,6 +1530,8 @@ class Ui_MainWindow(object):
         self.debts_buttons_Hlayout.setContentsMargins(0, 0, 0, 0)
         self.btn_add_debt = QPushButton(self.debts_buttons)
         self.btn_add_debt.setObjectName(u"btn_add_debt")
+        self.btn_add_debt.setMinimumSize(QSize(180, 25))
+        self.btn_add_debt.setMaximumSize(QSize(250, 25))
 #if QT_CONFIG(tooltip)
         self.btn_add_debt.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Agrega una deuda nueva a la tabla (</span><span style=\" font-size:12pt; font-style:italic;\">+</span><span style=\" font-size:12pt;\">).</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
@@ -1352,6 +1545,8 @@ class Ui_MainWindow(object):
 
         self.btn_delete_debt = QPushButton(self.debts_buttons)
         self.btn_delete_debt.setObjectName(u"btn_delete_debt")
+        self.btn_delete_debt.setMinimumSize(QSize(180, 25))
+        self.btn_delete_debt.setMaximumSize(QSize(250, 25))
 #if QT_CONFIG(tooltip)
         self.btn_delete_debt.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Elimina la deuda actualmente seleccionada en la tabla (</span><span style=\" font-size:12pt; font-style:italic;\">supr</span><span style=\" font-size:12pt;\">).</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:12pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer borrar una deuda.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
@@ -1399,12 +1594,10 @@ class Ui_MainWindow(object):
         QWidget.setTabOrder(self.btn_add_product_inventory, self.btn_inventory_sideBarToggle)
         QWidget.setTabOrder(self.btn_inventory_sideBarToggle, self.btn_delete_product_inventory)
         QWidget.setTabOrder(self.btn_delete_product_inventory, self.inventory_searchBar)
-        QWidget.setTabOrder(self.inventory_searchBar, self.sales_searchBar)
-        QWidget.setTabOrder(self.sales_searchBar, self.table_sales_data)
+        QWidget.setTabOrder(self.inventory_searchBar, self.table_sales_data)
         QWidget.setTabOrder(self.table_sales_data, self.btn_add_product_sales)
         QWidget.setTabOrder(self.btn_add_product_sales, self.btn_delete_product_sales)
-        QWidget.setTabOrder(self.btn_delete_product_sales, self.debts_searchBar)
-        QWidget.setTabOrder(self.debts_searchBar, self.table_debts)
+        QWidget.setTabOrder(self.btn_delete_product_sales, self.table_debts)
         QWidget.setTabOrder(self.table_debts, self.btn_add_debt)
         QWidget.setTabOrder(self.btn_add_debt, self.btn_delete_debt)
 
@@ -1433,6 +1626,8 @@ class Ui_MainWindow(object):
         self.tables_ListWidget.setSortingEnabled(False)
         self.tables_ListWidget.setSortingEnabled(__sortingEnabled)
 
+        self.btn_inventory_prev_search_result.setText("")
+        self.btn_inventory_next_search_result.setText("")
         self.btn_inventory_sideBarToggle.setText("")
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab1_inventory), QCoreApplication.translate("MainWindow", u"INVENTARIO", None))
         self.btn_add_product.setText(QCoreApplication.translate("MainWindow", u"Agregar producto", None))
@@ -1441,6 +1636,8 @@ class Ui_MainWindow(object):
         self.dateTimeEdit_sale.setDisplayFormat(QCoreApplication.translate("MainWindow", u"d/M/yyyy HH:mm:ss", None))
         self.btn_end_sale.setText(QCoreApplication.translate("MainWindow", u"Finalizar venta", None))
         self.tab2_toolBox.setItemText(self.tab2_toolBox.indexOf(self.box1_sales_form), QCoreApplication.translate("MainWindow", u"Formulario de venta", None))
+        self.btn_sales_prev_search_result.setText("")
+        self.btn_sales_next_search_result.setText("")
         ___qtablewidgetitem = self.table_sales_data.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"detalle de venta", None));
         ___qtablewidgetitem1 = self.table_sales_data.horizontalHeaderItem(1)
@@ -1456,6 +1653,8 @@ class Ui_MainWindow(object):
         self.btn_delete_product_sales.setText(QCoreApplication.translate("MainWindow", u"Eliminar venta", None))
         self.tab2_toolBox.setItemText(self.tab2_toolBox.indexOf(self.box2_sales_table), QCoreApplication.translate("MainWindow", u"Tabla de ventas", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab2_sales), QCoreApplication.translate("MainWindow", u"VENTAS", None))
+        self.btn_debts_prev_search_result.setText("")
+        self.btn_debts_next_search_result.setText("")
         ___qtablewidgetitem6 = self.table_debts.horizontalHeaderItem(0)
         ___qtablewidgetitem6.setText(QCoreApplication.translate("MainWindow", u"datos de la persona", None));
         ___qtablewidgetitem7 = self.table_debts.horizontalHeaderItem(1)

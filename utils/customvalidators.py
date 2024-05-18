@@ -11,6 +11,25 @@ from utils.dboperations import *
 from re import (fullmatch, compile, Pattern, IGNORECASE)
 
 
+#¡ search bars ========================================================================================
+class SearchBarValidator(QValidator):
+    '''Validador para las barras de búsquedas. A diferencia de otros validadores, este no emite señales.'''
+    def __init__(self, parent=None):
+        super(SearchBarValidator, self).__init__()
+        self.pattern:Pattern = compile("[^;\"']*", flags=IGNORECASE)
+    
+    
+    def validate(self, text: str, pos: int) -> object:
+        if text.strip() == "": # si el campo está vacío devuelve Acceptable
+            return self.State.Acceptable, text, pos
+        
+        elif fullmatch(self.pattern, text): # si coincide el patrón devuelve Acceptable
+            return self.State.Acceptable, text, pos
+        
+        else: # en cualquier otro caso devuelve Invalid
+            return self.State.Invalid, text, pos
+
+
 
 #¡ tabla INVENTARIO ===================================================================================
 class ProductNameValidator(QValidator):
