@@ -236,55 +236,53 @@ class MainWindow(QMainWindow):
     #¡ método de filtrado de 'search bars'
     def __updatePrevAndNextButtons(self, table_name:str) -> None:
         '''
-        Es llamado desde 'self.searchTableWidget'.
+        Es llamado desde los métodos 'self.searchTableWidget' | 'self.showPrevMatchingItem' | 'self.showNextMatchingItem'.
         
         Habilita/inhabilita los botones asociados al QTableWidget con nombre 'table_name' dependiendo de la 
         disponibilidad de items anteriormente/posteriormente al item actualmente seleccionado.
         
         Retorna None.
         '''
-        # TODO: seguir activando/desactivando botones, probar el programa. Además tengo que ir a las funciones de 
-        # todo: abajo y hacer que se seleccione el item 'self.MATCHING_ITEM[posicion nueva]' en el table_widget.
-        
-        # si el item actual es el primero, desactiva el botón "anterior" y activa el botón "siguiente"
-        if self.NUM_CURR_ITEM == 0:
-            match table_name:
-                case 'displayTable':
-                    self.ui.btn_inventory_prev_search_result.setEnabled(False)
-                    self.ui.btn_inventory_next_search_result.setEnabled(True)
-                
-                case 'table_sales_data':
-                    self.ui.btn_sales_prev_search_result.setEnabled(False)
-                    self.ui.btn_sales_next_search_result.setEnabled(True)
-                
-                case 'table_debts':
-                    self.ui.btn_debts_prev_search_result.setEnabled(False)
-                    self.ui.btn_debts_next_search_result.setEnabled(True)
-        
-        # si el item actual es el último, desactiva el botón "siguiente" y activa el botón "anterior"
-        elif self.NUM_CURR_ITEM == len(self.MATCHING_ITEMS) - 1:
-            match table_name:
-                case 'displayTable':
-                    self.ui.btn_inventory_prev_search_result.setEnabled(True)
-                    self.ui.btn_inventory_next_search_result.setEnabled(False)
-                
-                case 'table_sales_data':
-                    self.ui.btn_sales_prev_search_result.setEnabled(True)
-                    self.ui.btn_sales_next_search_result.setEnabled(False)
-                
-                case 'table_debts':
-                    self.ui.btn_debts_prev_search_result.setEnabled(True)
-                    self.ui.btn_debts_next_search_result.setEnabled(False)
-        
-        # si el item actual no el primero ni el último, activa los botones "siguiente" y "anterior"
-        else:
-            self.ui.btn_inventory_prev_search_result.setEnabled(True)
-            self.ui.btn_sales_prev_search_result.setEnabled(True)
-            self.ui.btn_debts_prev_search_result.setEnabled(True)
+        if len(self.MATCHING_ITEMS) > 1:
+            # si el item actual es el primero, desactiva el botón "anterior" y activa el botón "siguiente"
+            if (self.NUM_CURR_ITEM == 0):
+                match table_name:
+                    case 'displayTable':
+                        self.ui.btn_inventory_prev_search_result.setEnabled(False)
+                        self.ui.btn_inventory_next_search_result.setEnabled(True)
+                    
+                    case 'table_sales_data':
+                        self.ui.btn_sales_prev_search_result.setEnabled(False)
+                        self.ui.btn_sales_next_search_result.setEnabled(True)
+                    
+                    case 'table_debts':
+                        self.ui.btn_debts_prev_search_result.setEnabled(False)
+                        self.ui.btn_debts_next_search_result.setEnabled(True)
             
-            self.ui.btn_inventory_next_search_result.setEnabled(True)
-            self.ui.btn_sales_next_search_result.setEnabled(True)
-            self.ui.btn_debts_next_search_result.setEnabled(True)
+            # si el item actual es el último, desactiva el botón "siguiente" y activa el botón "anterior"
+            elif (self.NUM_CURR_ITEM == len(self.MATCHING_ITEMS) - 1):
+                match table_name:
+                    case 'displayTable':
+                        self.ui.btn_inventory_prev_search_result.setEnabled(True)
+                        self.ui.btn_inventory_next_search_result.setEnabled(False)
+                    
+                    case 'table_sales_data':
+                        self.ui.btn_sales_prev_search_result.setEnabled(True)
+                        self.ui.btn_sales_next_search_result.setEnabled(False)
+                    
+                    case 'table_debts':
+                        self.ui.btn_debts_prev_search_result.setEnabled(True)
+                        self.ui.btn_debts_next_search_result.setEnabled(False)
+            
+            # si el item actual no el primero ni el último, activa los botones "siguiente" y "anterior"
+            else:
+                self.ui.btn_inventory_prev_search_result.setEnabled(True)
+                self.ui.btn_sales_prev_search_result.setEnabled(True)
+                self.ui.btn_debts_prev_search_result.setEnabled(True)
+                
+                self.ui.btn_inventory_next_search_result.setEnabled(True)
+                self.ui.btn_sales_next_search_result.setEnabled(True)
+                self.ui.btn_debts_next_search_result.setEnabled(True)
         
         return None
     
@@ -331,6 +329,10 @@ class MainWindow(QMainWindow):
         # si se encontró algo, selecciona el primer item coincidente
         if self.MATCHING_ITEMS:
             self.NUM_CURR_ITEM = 0
+            #? ordena los items encontrados por fila (por defecto 'findItems' busca por columna, por lo que al navegar 
+            #? por los items encotrados con las flechas hace saltos de arriba a abajo bastante incómodos)
+            self.MATCHING_ITEMS = sorted(self.MATCHING_ITEMS, key=lambda item: item.row())
+            
             table_widget.setCurrentItem(self.MATCHING_ITEMS[self.NUM_CURR_ITEM])
             
             # actualiza el label que muestra las coincidencias asociado a 'table_widget'
@@ -346,7 +348,8 @@ class MainWindow(QMainWindow):
                 case 'table_debts':
                     self.ui.label_debts_found_items.setText(
                         f"elemento {self.NUM_CURR_ITEM + 1} de {len(self.MATCHING_ITEMS)}")
-                    
+
+            
             # actualiza el estado de los botones
             self.__updatePrevAndNextButtons(table_widget.objectName())
         
@@ -360,7 +363,7 @@ class MainWindow(QMainWindow):
         'btn_debts_prev_search_result'.
         
         Este método hace lo siguiente:
-        - Actualiza la selección del item actual al anterior encontrado. 
+        - Actualiza la selección del item actual al anterior encontrado y el contador 'self.NUM_CURR_ITEM'.
         - Dependiendo del QTableWidget con nombre 'table_name' actualiza el QLabel asociado que muestra el item 
         actualmente seleccionado que coincide con la búsqueda. Para eso accede a la variable 'self.NUM_CURR_ITEM' 
         y la actualiza.
@@ -376,14 +379,17 @@ class MainWindow(QMainWindow):
                 case 'displayTable':
                     self.ui.label_inventory_found_items.setText(
                         f"elemento {self.NUM_CURR_ITEM + 1} de {len(self.MATCHING_ITEMS)}")
+                    self.ui.displayTable.setCurrentItem(self.MATCHING_ITEMS[self.NUM_CURR_ITEM])
                 
                 case 'table_sales_data':
                     self.ui.label_sales_found_items.setText(
                         f"elemento {self.NUM_CURR_ITEM + 1} de {len(self.MATCHING_ITEMS)}")
+                    self.ui.table_sales_data.setCurrentItem(self.MATCHING_ITEMS[self.NUM_CURR_ITEM])
                 
                 case 'table_debts':
                     self.ui.label_debts_found_items.setText(
                         f"elemento {self.NUM_CURR_ITEM + 1} de {len(self.MATCHING_ITEMS)}")
+                    self.ui.table_debts.setCurrentItem(self.MATCHING_ITEMS[self.NUM_CURR_ITEM])
         
         self.__updatePrevAndNextButtons(table_name)
         
@@ -397,7 +403,7 @@ class MainWindow(QMainWindow):
         'btn_debts_next_search_result'.
         
         Este método hace lo siguiente:
-        - Actualiza la selección del item actual al siguiente encontrado.
+        - Actualiza la selección del item actual al siguiente encontrado y el contador 'self.NUM_CURR_ITEM'.
         - Dependiendo del QTableWidget con nombre 'table_name' actualiza el QLabel asociado que muestra el item 
         actualmente seleccionado que coincide con la búsqueda.
         - - Activa/desactiva los botones asociados a 'table_widget' que se encargan de avanzar/retroceder entre 
@@ -412,14 +418,17 @@ class MainWindow(QMainWindow):
                 case 'displayTable':
                     self.ui.label_inventory_found_items.setText(
                         f"elemento {self.NUM_CURR_ITEM + 1} de {len(self.MATCHING_ITEMS)}")
+                    self.ui.displayTable.setCurrentItem(self.MATCHING_ITEMS[self.NUM_CURR_ITEM])
                 
                 case 'table_sales_data':
                     self.ui.label_sales_found_items.setText(
                         f"elemento {self.NUM_CURR_ITEM + 1} de {len(self.MATCHING_ITEMS)}")
+                    self.ui.table_sales_data.setCurrentItem(self.MATCHING_ITEMS[self.NUM_CURR_ITEM])
                 
                 case 'table_debts':
                     self.ui.label_debts_found_items.setText(
                         f"elemento {self.NUM_CURR_ITEM + 1} de {len(self.MATCHING_ITEMS)}")
+                    self.ui.table_debts.setCurrentItem(self.MATCHING_ITEMS[self.NUM_CURR_ITEM])
         
         self.__updatePrevAndNextButtons(table_name)
         
