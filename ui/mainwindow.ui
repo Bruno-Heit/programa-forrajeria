@@ -523,38 +523,18 @@ QListWidget::item:selected {
 
 
 QPushButton {
-	font-size: 16px;
-	background-color: #22577a;
 	color: #fff;
-	border: 1px solid #12476a;
-	border-radius: 2px;
-/*
-	min-width: 20px;
-	max-width: 170px;
-	min-height: 23px;
-*/
-}
-QPushButton:hover,
-QPushButton:pressed {
-	background-color: #38a3a5;
-	border: 1px inset #289395;
-}
-QPushButton:disabled {
-	background-color: rgb(103, 115, 122);
-	color: #999;
-}
-
-
-
-QPushButton {
 	background-color: #22577a;
 	border: 1px solid #12476a;
 	border-radius: 2px;
 }
-QPushButton:hover,
-QPushButton:pressed {
+QPushButton:hover {
 	background-color: #38a3a5;
 	border: 1px inset #289395;
+}
+QPushButton:pressed {
+	background-color: #58c3c5;
+	border: 1px inset #48b3b5;
 }
 QPushButton:disabled {
 	background-color: rgb(103, 115, 122);
@@ -2071,8 +2051,8 @@ border-right: 1px solid #111;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>756</width>
-                <height>498</height>
+                <width>364</width>
+                <height>162</height>
                </rect>
               </property>
               <attribute name="label">
