@@ -7,6 +7,18 @@ simplificar la lectura de algunos valores recurrentes.
 from enum import (Enum, StrEnum, IntEnum)
 
 
+class ModelHeaders(Enum):
+    '''Enum con tuples[headers] para las QTableViews que usan los MODELOS DE DATOS.'''
+    INVENTORY_HEADERS = ("Categoría", "Nombre del producto", "Descripción", 
+                         "Stock", "Precio normal", "Precio comercial")
+    SALES_HEADERS = ("Detalle de venta", "Cantidad", "Producto", "Costo total", 
+                     "Abonado", "Fecha y hora")
+    DEBTS_HEADERS = ("Datos de la persona", "productos", "Saldo")
+
+
+
+
+
 class DBQueries(IntEnum):
     '''IntEnum con las operaciones CRUD a base de datos.'''
     SELECT_COUNT = 0
