@@ -1,7 +1,9 @@
 # SQLITE3
 
+from typing import (Any, Sequence)
+
 from PySide6.QtWidgets import (QTableWidget, QComboBox, QHeaderView, QListWidget, QLineEdit, 
-                               QCompleter, QFrame, QWidget, QDateTimeEdit)
+                               QCompleter, QFrame, QWidget, QDateTimeEdit, QTableView)
 from PySide6.QtCore import (QRegularExpression, QModelIndex, Qt, QPropertyAnimation, 
                             QEasingCurve, QDateTime, QDate, QTime)
 from PySide6.QtGui import (QRegularExpressionValidator)
@@ -11,6 +13,63 @@ from utils.dboperations import *
 from utils.customvalidators import *
 
 from re import (Match, match, search, sub, IGNORECASE)
+
+
+# consultas sql
+def getTableViewsSqlQueries(tv_name:str, ACCESSED_BY_LIST:bool=False, SHOW_ALL:bool=False) -> tuple[str, str]:
+    '''
+    Dependiendo de cada caso específico, devuelve la consulta sql en formato str.
+    
+    PARAMS:
+    - tv_name: el nombre del QTableView al que se hace referencia.
+    - ACCESSED_BY_LIST: flag que será True si se seleccionó un item desde 'tables_ListWidget', sino False.
+    - SHOW_ALL: flag que determina si se muestran todos los elementos del QTableView 'tv_name'.
+    
+    Retorna un tuple[count_sql, data_sql], siendo 'count_sql' la consulta tipo COUNT y 'data_sql' la 
+    consulta para traer los registros.
+    '''
+    match tv_name:
+        case "tv_inventory_data":
+            if SHOW_ALL:
+                return (
+                    str("SELECT COUNT(*) FROM Productos WHERE eliminado = 0;"),
+                    str('''SELECT (IDproducto,nombre_categoria,nombre,p.descripcion,
+                        stock,unidad_medida,precio_unit,precio_comerc) 
+                        FROM Productos 
+                            AS p INNER JOIN Categorias AS c WHERE (p.IDcategoria=c.IDcategoria AND p.eliminado = 0);'''))
+            
+            elif not SHOW_ALL and ACCESSED_BY_LIST:
+                # cols.: detalle venta, cantidad, producto, costo total, abonado, fecha y hora
+                return (
+                    str('''SELECT COUNT(*) 
+                        FROM Productos 
+                            WHERE IDcategoria = (SELECT IDcategoria FROM Categorias 
+                                WHERE nombre_categoria = ? ) AND eliminado = 0;"'''),
+                    str('''SELECT IDproducto,nombre_categoria,nombre,p.descripcion,
+                        stock,unidad_medida,precio_unit,precio_comerc 
+                            FROM Productos AS p INNER JOIN Categorias AS c 
+                                WHERE p.IDcategoria=c.IDcategoria AND c.nombre_categoria=? AND 
+                                eliminado = 0;''')
+                    )
+                    
+        case "tv_sales_data":
+            return (
+                str('''SELECT COUNT(*) 
+                    FROM Detalle_Ventas as dv 
+                        LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto 
+                        LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa;'''),
+                str('''SELECT dv.ID_detalle_venta, v.detalles_venta, p.nombre, dv.cantidad, 
+                    p.unidad_medida, dv.costo_total, dv.abonado, v.fecha_hora 
+                    FROM Detalle_Ventas as dv 
+                        LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto 
+                        LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa;''')
+                )
+
+        case "tv_debts_data":
+            # TODO: declarar consultas sql para también traer los datos necesarios
+            if SHOW_ALL:
+                count_sql = "SELECT COUNT(DISTINCT IDdeudor) FROM Deudas;"
+                sql = 'SELECT Detalle_Ventas.*, Deudores.* F'
 
 
 # side bars
@@ -148,27 +207,27 @@ def getCategoriesDescription() -> tuple[str] | None:
     return tuple(query_tuple)
 
 
-def setTableWidthPolitics(tableWidget:QTableWidget) -> None:
+def setTableWidthPolitics(tableView:QTableView) -> None:
     '''
-    Recibe un 'QTableWidget' y especifica las políticas de ancho de las columnas. 
+    Recibe un QTableView y especifica las políticas de ancho de las columnas. 
     
     Retorna None.
     '''
-    match tableWidget.objectName():
-        case "displayTable":
-            header = tableWidget.horizontalHeader()
+    match tableView.objectName():
+        case "tv_inventory_data":
+            header = tableView.horizontalHeader()
             header.setSectionResizeMode(QHeaderView.ResizeToContents)
             header.setSectionResizeMode(0, QHeaderView.Stretch)
             header.setSectionResizeMode(2, QHeaderView.Stretch)
             header.setMaximumSectionSize(200)
-        case "table_sales_data":
-            header = tableWidget.horizontalHeader()
+        case "tv_sales_data":
+            header = tableView.horizontalHeader()
             header.setSectionResizeMode(QHeaderView.ResizeToContents)
             header.setSectionResizeMode(0, QHeaderView.Stretch)
             header.setSectionResizeMode(2, QHeaderView.Stretch)
             header.setMaximumSectionSize(200)
-        case "table_debts":
-            header = tableWidget.horizontalHeader()
+        case "tv_debts_data":
+            header = tableView.horizontalHeader()
             header.setSectionResizeMode(QHeaderView.ResizeToContents)
             header.setSectionResizeMode(0, QHeaderView.Stretch)
             header.setSectionResizeMode(1, QHeaderView.Stretch)
@@ -176,10 +235,10 @@ def setTableWidthPolitics(tableWidget:QTableWidget) -> None:
     return None
 
 
-def getSelectedTableRows(tableWidget:QTableWidget) -> tuple:
+def getSelectedTableRows(tableView:QTableWidget) -> tuple:
     '''Obtiene todas las filas seleccionadas del QTableWidget. Retorna una tupla con las filas.'''
     selected_indexes:list = []
-    for index in tableWidget.selectedIndexes():
+    for index in tableView.selectedIndexes():
         if index.row() not in selected_indexes:
             selected_indexes.append(index.row())
     return tuple(selected_indexes)
@@ -245,11 +304,11 @@ def createTableColumnComboBox(table_widget:QTableWidget, curr_index:QModelIndex,
     combobox.setFrame(False)
 
     match table_widget.objectName():
-        case "displayTable":
+        case "tv_inventory_data":
             combobox.addItems(getProductsCategories())
             combobox.setPlaceholderText("Elegir categoría")
         
-        case "table_sales_data":
+        case "tv_sales_data":
             combobox.addItems(getProductNames())
             combobox.setPlaceholderText("Elegir producto")
         
@@ -272,7 +331,7 @@ def createTableColumnLineEdit(table_widget:QTableWidget, curr_index:QModelIndex)
     
     # a continuación coloca validators y completers dependiendo de la columna...
     match table_widget.objectName():
-        case "displayTable":
+        case "tv_inventory_data":
             match curr_index.column():
                 case 1: # nombre
                     lineedit.setCompleter(createCompleter(type=3))
@@ -288,7 +347,7 @@ def createTableColumnLineEdit(table_widget:QTableWidget, curr_index:QModelIndex)
                     lineedit.setValidator(ProductComercPriceValidator(lineedit))
         
         
-        case "table_sales_data":
+        case "tv_sales_data":
             match curr_index.column():
                 case 0: # detalle de venta
                     lineedit.setValidator(SaleDetailsValidator(lineedit))

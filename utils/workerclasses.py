@@ -5,24 +5,30 @@ from PySide6.QtCore import (QObject, Signal, Slot)
 
 from utils.functionutils import (createConnection)
 from utils.enumclasses import (LoggingMessage)
+from utils.dboperations import (DatabaseRepository)
 
 from sqlite3 import (Connection, Error as sqlite3Error)
 from typing import (Any)
 import logging
+        
 
 
-
-class DbReadWorker(QObject):
+class WorkerSelect(QObject):
     '''Clase WORKER que se encarga de ejecutar las consultas de tipo READ a la base de datos.'''
-    countFinished = Signal(int) # se emite cuando se termina la consulta de COUNT().
+    countFinished = Signal(tuple) # se emite cuando se termina la consulta de COUNT(). emite tuple[int, int], teniendo 
+                                  # la tupla las dimensiones del "batch" ([filas, columnas])
     registerProgress = Signal(tuple) # envía un tuple[int,[Any]] con cada registro coincidente (el 'int' se obtiene de 
                                      # 'enumerate' y sirve solamente para actualizar en MainWindow el QProgressBar de 
                                      # la tabla relacionada, lo más importante es el tuple interno '[Any]').
     finished = Signal(int) # si hubo algún error envía 0, sino 1. Se emite cuando se termina la consulta de registros.
 
+    def __init__(self) -> None:
+        self._db_repo = DatabaseRepository()
+
 
     @Slot(str,str,tuple,tuple)
-    def executeReadQuery(self, data_sql:str, data_params:tuple=None, count_sql:str=None, count_params:tuple=None) -> None:
+    def executeReadQuery(self, data_sql:str, data_params:tuple=None, 
+                         count_sql:str=None, count_params:tuple=None) -> None:
         '''
         Hace la consulta SELECT a la base de datos y devuelve los valores de las filas seleccionadas. 
         
@@ -44,34 +50,34 @@ class DbReadWorker(QObject):
         '''
         count_query:int # guarda el COUNT() de registros
         data_query:list[Any] # guarda los registros obtenidos
-        conn:Connection|None
         signal:tuple[int,Any] = None
         
-        conn = createConnection("database/inventario.db")
-        if not conn:
-            self.finished.emit(0) #! error con la comunicación a la base de datos
-        cursor = conn.cursor()
-
         # si recibió 'count_sql' hace la consulta COUNT() y manda la cantidad de registros encontrados...
         if count_sql:
-            count_query = cursor.execute(count_sql).fetchone()[0] if not count_params else cursor.execute(count_sql, count_params).fetchone()[0]
-            self.countFinished.emit(count_query)
+            # count_query = cursor.execute(count_sql).fetchone()[0] if not count_params else cursor.execute(count_sql, count_params).fetchone()[0]
+            self.countFinished.emit(
+                tuple(
+                    self._db_repo.selectRowCount(count_sql, count_params if count_params else None),
+                    self._db_repo.selectColumnCount(data_sql)
+                    )
+                )
         
-        # luego obtiene los registros los envía de a uno...
-        data_query = cursor.execute(data_sql).fetchall() if not data_params else cursor.execute(data_sql, data_params).fetchall()
+        # luego obtiene los registros y los envía de a uno...
+        # data_query = cursor.execute(data_sql).fetchall() if not data_params else cursor.execute(data_sql, data_params).fetchall()
+        data_query = self._db_repo.selectRegisters(
+            data_sql, data_params if data_params else None)
         for n,reg in enumerate(data_query):
-            signal = tuple((n, reg))
-            self.registerProgress.emit(signal)
+            # signal = tuple((n, reg))
+            self.registerProgress.emit( tuple((n, reg)) )
         
         self.finished.emit(1) #* todo bien
         logging.debug(LoggingMessage.DEBUG_DB_MULT_SELECT_SUCCESS)
-        conn.close()
 
 
 
 
 
-class DbDeleteWorker(QObject):
+class WorkerDelete(QObject):
     '''Clase WORKER que se encarga de ejecutar las consultas de tipo DELETE a la base de datos.
     Este WORKER guarda los registros eliminados de la base de datos en archivos .csv.'''
     progress = Signal(int) # devuelve un int con el progreso que lleva borrado para actualizar el progressbar en MainWindow.
@@ -81,7 +87,7 @@ class DbDeleteWorker(QObject):
         '''
         Hace la consulta DELETE a la base de datos.
         
-        PARAMS:
+        PARAMS
         - sql: la consulta DELETE para eliminar los registros de una tabla. Por defecto es None.
         - params: los parámetros como iterable para la consulta DELETE 'sql'. Cada '[tuple]' tiene un 'int' con el ID y un 
         'str' con un valor único del registro (ej.:nombre de un producto, fecha y hora de una venta, etc.).
@@ -131,13 +137,12 @@ class DbDeleteWorker(QObject):
             conn.close()
             
         self.finished.emit(1) #* todo bien
-        conn.close()
 
 
 
 
 
-class DbInsertWorker(QObject):
+class WorkerInsert(QObject):
     '''Clase WORKER que se encarga de ejecutar las consultas de tipo INSERT a la base de datos.'''
     progress = Signal(int)
     finished = Signal(int)
@@ -184,7 +189,7 @@ class DbInsertWorker(QObject):
 
 
 
-class DbUpdateWorker(QObject):
+class WorkerUpdate(QObject):
     '''Clase WORKER que se encarga de ejecutar las consultas de tipo UPDATE a la base de datos.
     Este WORKER es usado también para marcar registros como eliminados en la columna "eliminado" en la base de datos.'''
     progress = Signal(int)

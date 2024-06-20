@@ -368,7 +368,7 @@ class SaleDialog(QDialog):
         # esconde los campos de datos del deudor
         self.saleDialog_ui.debtor_data.setEnabled(False)
         self.saleDialog_ui.debtor_data.hide()
-
+        
         # QCompleters #! estos completers son "iniciales" y cambian cuando el usuario escribe en uno de ellos.
                       #! Al principio tienen todos los valores de nombres/apellidos de la base de datos, pero 
                       #! al ingresar por ej. un nombre el campo de apellido se actualiza con los apellidos que 

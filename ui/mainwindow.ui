@@ -575,15 +575,15 @@ QTabBar::tab:!selected {
 }
 
 
-QTableWidget {
+QTableView {
 	background-color: #58dfab;
 	alternate-background-color: #98ffcb;
 	border: 1px solid #111;
 }
-QTableWidget::item:hover {
+QTableView::item:hover {
 	background-color: rgb(197, 255, 252);
 }
-QTableWidget::item:selected {
+QTableView::item:selected {
 	background-color: #38a3a5;
 }
 QHeaderView:section {
@@ -1001,7 +1001,7 @@ QProgressBar::chunk {
                   </widget>
                  </item>
                  <item>
-                  <widget class="QTableWidget" name="displayTable">
+                  <widget class="QTableView" name="tv_inventory_data">
                    <property name="toolTip">
                     <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Para &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;modificar&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; las &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;características&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; de un producto, simplemente hacer &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;doble click&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; sobre la celda que se quiere modificar e ingresar el nuevo valor.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
@@ -1035,68 +1035,9 @@ QProgressBar::chunk {
                    <property name="wordWrap">
                     <bool>true</bool>
                    </property>
-                   <property name="rowCount">
-                    <number>0</number>
+                   <property name="cornerButtonEnabled">
+                    <bool>false</bool>
                    </property>
-                   <attribute name="horizontalHeaderCascadingSectionResizes">
-                    <bool>false</bool>
-                   </attribute>
-                   <attribute name="verticalHeaderVisible">
-                    <bool>false</bool>
-                   </attribute>
-                   <column>
-                    <property name="text">
-                     <string notr="true">categoría</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string notr="true">nombre del producto</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string notr="true">descripción</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string notr="true">stock</string>
-                    </property>
-                    <property name="textAlignment">
-                     <set>AlignCenter</set>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string notr="true">precio normal</string>
-                    </property>
-                    <property name="textAlignment">
-                     <set>AlignCenter</set>
-                    </property>
-                    <property name="background">
-                     <color>
-                      <red>88</red>
-                      <green>223</green>
-                      <blue>101</blue>
-                     </color>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string notr="true">precio comercial</string>
-                    </property>
-                    <property name="textAlignment">
-                     <set>AlignCenter</set>
-                    </property>
-                    <property name="background">
-                     <color>
-                      <red>88</red>
-                      <green>153</green>
-                      <blue>171</blue>
-                     </color>
-                    </property>
-                   </column>
                   </widget>
                  </item>
                  <item>
@@ -2051,14 +1992,14 @@ border-right: 1px solid #111;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>364</width>
-                <height>162</height>
+                <width>756</width>
+                <height>498</height>
                </rect>
               </property>
               <attribute name="label">
                <string>Tabla de ventas</string>
               </attribute>
-              <layout class="QVBoxLayout" name="box2_sales_Vlayout" stretch="0,0,10,0,0">
+              <layout class="QVBoxLayout" name="box2_sales_Vlayout" stretch="0,0,0,0,0">
                <property name="spacing">
                 <number>4</number>
                </property>
@@ -2296,7 +2237,7 @@ border-right: 1px solid #111;</string>
                 </widget>
                </item>
                <item>
-                <widget class="QTableWidget" name="table_sales_data">
+                <widget class="QTableView" name="tv_sales_data">
                  <property name="toolTip">
                   <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Para &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;modificar&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; un dato de alguna venta hacer &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;doble click&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; sobre una celda e ingresar el nuevo valor.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; si se cambia el &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;producto vendido&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; o la &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;cantidad vendida&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; de un producto NO se verá afectado el stock de ese producto directamente, para eso es necesario cambiar el stock de ese producto manualmente mediante la pestaña de &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;inventario&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
@@ -2333,45 +2274,9 @@ border-right: 1px solid #111;</string>
                  <property name="sortingEnabled">
                   <bool>false</bool>
                  </property>
-                 <property name="rowCount">
-                  <number>0</number>
+                 <property name="cornerButtonEnabled">
+                  <bool>false</bool>
                  </property>
-                 <attribute name="horizontalHeaderCascadingSectionResizes">
-                  <bool>false</bool>
-                 </attribute>
-                 <attribute name="verticalHeaderVisible">
-                  <bool>false</bool>
-                 </attribute>
-                 <column>
-                  <property name="text">
-                   <string>detalle de venta</string>
-                  </property>
-                 </column>
-                 <column>
-                  <property name="text">
-                   <string>cantidad</string>
-                  </property>
-                 </column>
-                 <column>
-                  <property name="text">
-                   <string>producto</string>
-                  </property>
-                 </column>
-                 <column>
-                  <property name="text">
-                   <string>costo total</string>
-                  </property>
-                 </column>
-                 <column>
-                  <property name="text">
-                   <string>abonado</string>
-                  </property>
-                 </column>
-                 <column>
-                  <property name="text">
-                   <string>fecha y hora</string>
-                  </property>
-                 </column>
                 </widget>
                </item>
                <item>
@@ -2533,7 +2438,7 @@ QPushButton:hover {
              <property name="frameShadow">
               <enum>QFrame::Raised</enum>
              </property>
-             <layout class="QVBoxLayout" name="debts_info_Vlayout" stretch="0,0,10,0,0">
+             <layout class="QVBoxLayout" name="debts_info_Vlayout" stretch="0,0,0,0,0">
               <property name="spacing">
                <number>4</number>
               </property>
@@ -2775,17 +2680,17 @@ QPushButton:hover {
                </widget>
               </item>
               <item>
-               <widget class="QTableWidget" name="table_debts">
+               <widget class="QTableView" name="tv_debts_data">
                 <property name="toolTip">
                  <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Para &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;modificar&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; las &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;características&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; de una deuda simplemente hacer &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;doble click&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; sobre la celda que se quiere modificar e ingresar el nuevo valor.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="styleSheet">
-                 <string notr="true">#table_debts QLabel {
+                 <string notr="true">#tv_debts_data QLabel {
 	font-size: 16px;
 }
 
 
-#table_debts QPushButton {
+#tv_debts_data QPushButton {
 	max-width: 24px;
 	max-height: 24px;
 	border-radius: 1px;
@@ -2822,30 +2727,9 @@ QPushButton:hover {
                 <property name="sortingEnabled">
                  <bool>false</bool>
                 </property>
-                <property name="rowCount">
-                 <number>0</number>
+                <property name="cornerButtonEnabled">
+                 <bool>false</bool>
                 </property>
-                <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-                 <bool>false</bool>
-                </attribute>
-                <attribute name="verticalHeaderVisible">
-                 <bool>false</bool>
-                </attribute>
-                <column>
-                 <property name="text">
-                  <string>datos de la persona</string>
-                 </property>
-                </column>
-                <column>
-                 <property name="text">
-                  <string>productos</string>
-                 </property>
-                </column>
-                <column>
-                 <property name="text">
-                  <string>saldo</string>
-                 </property>
-                </column>
                </widget>
               </item>
               <item>
@@ -3032,15 +2916,15 @@ QPushButton:hover {
   <tabstop>checkbox_unit_prices</tabstop>
   <tabstop>checkbox_comercial_prices</tabstop>
   <tabstop>lineEdit_percentage_change</tabstop>
-  <tabstop>displayTable</tabstop>
+  <tabstop>tv_inventory_data</tabstop>
   <tabstop>btn_add_product_inventory</tabstop>
   <tabstop>btn_inventory_sideBarToggle</tabstop>
   <tabstop>btn_delete_product_inventory</tabstop>
   <tabstop>inventory_searchBar</tabstop>
-  <tabstop>table_sales_data</tabstop>
+  <tabstop>tv_sales_data</tabstop>
   <tabstop>btn_add_product_sales</tabstop>
   <tabstop>btn_delete_product_sales</tabstop>
-  <tabstop>table_debts</tabstop>
+  <tabstop>tv_debts_data</tabstop>
   <tabstop>btn_add_debt</tabstop>
   <tabstop>btn_delete_debt</tabstop>
  </tabstops>

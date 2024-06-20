@@ -6,6 +6,19 @@ simplificar la lectura de algunos valores recurrentes.
 
 from enum import (Enum, StrEnum, IntEnum)
 
+
+class DBQueries(IntEnum):
+    '''IntEnum con las operaciones CRUD a base de datos.'''
+    SELECT_COUNT = 0
+    SELECT_REGISTERS = 1
+    DELETE_REGISTERS = 2
+    UPDATE_REGISTERS = 3
+    INSERT_REGISTERS = 4
+
+
+
+
+
 # estilos generales para widgets
 class WidgetStyle(StrEnum):
     '''Clase de tipo 'strEnum' con estilos generales para aplicar a los widgets.'''

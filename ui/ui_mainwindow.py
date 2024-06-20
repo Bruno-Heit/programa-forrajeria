@@ -21,8 +21,8 @@ from PySide6.QtWidgets import (QAbstractItemView, QAbstractScrollArea, QAbstract
     QGridLayout, QHBoxLayout, QHeaderView, QLabel,
     QLayout, QLineEdit, QListView, QListWidget,
     QListWidgetItem, QMainWindow, QProgressBar, QPushButton,
-    QSizePolicy, QSpacerItem, QTabWidget, QTableWidget,
-    QTableWidgetItem, QToolBox, QVBoxLayout, QWidget)
+    QSizePolicy, QSpacerItem, QTabWidget, QTableView,
+    QToolBox, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -384,18 +384,18 @@ class Ui_MainWindow(object):
 "}\n"
 "\n"
 "\n"
-"QTableWidget {\n"
+"QTableView {\n"
 "	background-color: #58dfab;\n"
 "	alternate-background-color: #98ffcb;\n"
 "	border: 1px solid #111;\n"
 "}\n"
-"QTableWidget::item:hover {\n"
+"QTableView::item:hover {\n"
 "	background-color: rgb(197, 255, 252);\n"
 "}\n"
-"QTableWidget::item:selected {\n"
-"	background-color: #38a"
-                        "3a5;\n"
-"}\n"
+"QTableView::item:selected {\n"
+"	background-color: #38a3a5;\n"
+""
+                        "}\n"
 "QHeaderView:section {\n"
 "	background-color: #fff;\n"
 "	border: none;\n"
@@ -437,8 +437,8 @@ class Ui_MainWindow(object):
 "	padding-top: 2px;\n"
 "	padding-left: 4px;\n"
 "}\n"
-"QComboBox QAbs"
-                        "tractItemView {\n"
+"QComboBox QAbstractItem"
+                        "View {\n"
 "	background-color: #fff;\n"
 "	selection-background-color: #38a3a5;\n"
 "}\n"
@@ -603,51 +603,24 @@ class Ui_MainWindow(object):
 
         self.inventory_display_Vlayout.addWidget(self.inventory_progressbar)
 
-        self.displayTable = QTableWidget(self.inventory_display)
-        if (self.displayTable.columnCount() < 6):
-            self.displayTable.setColumnCount(6)
-        __qtablewidgetitem = QTableWidgetItem()
-        __qtablewidgetitem.setText(u"categor\u00eda");
-        self.displayTable.setHorizontalHeaderItem(0, __qtablewidgetitem)
-        __qtablewidgetitem1 = QTableWidgetItem()
-        __qtablewidgetitem1.setText(u"nombre del producto");
-        self.displayTable.setHorizontalHeaderItem(1, __qtablewidgetitem1)
-        __qtablewidgetitem2 = QTableWidgetItem()
-        __qtablewidgetitem2.setText(u"descripci\u00f3n");
-        self.displayTable.setHorizontalHeaderItem(2, __qtablewidgetitem2)
-        __qtablewidgetitem3 = QTableWidgetItem()
-        __qtablewidgetitem3.setText(u"stock");
-        __qtablewidgetitem3.setTextAlignment(Qt.AlignCenter);
-        self.displayTable.setHorizontalHeaderItem(3, __qtablewidgetitem3)
-        __qtablewidgetitem4 = QTableWidgetItem()
-        __qtablewidgetitem4.setText(u"precio normal");
-        __qtablewidgetitem4.setTextAlignment(Qt.AlignCenter);
-        __qtablewidgetitem4.setBackground(QColor(88, 223, 101));
-        self.displayTable.setHorizontalHeaderItem(4, __qtablewidgetitem4)
-        __qtablewidgetitem5 = QTableWidgetItem()
-        __qtablewidgetitem5.setText(u"precio comercial");
-        __qtablewidgetitem5.setTextAlignment(Qt.AlignCenter);
-        __qtablewidgetitem5.setBackground(QColor(88, 153, 171));
-        self.displayTable.setHorizontalHeaderItem(5, __qtablewidgetitem5)
-        self.displayTable.setObjectName(u"displayTable")
+        self.tv_inventory_data = QTableView(self.inventory_display)
+        self.tv_inventory_data.setObjectName(u"tv_inventory_data")
 #if QT_CONFIG(tooltip)
-        self.displayTable.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Para </span><span style=\" font-size:12pt; text-decoration: underline;\">modificar</span><span style=\" font-size:12pt;\"> las </span><span style=\" font-size:12pt; text-decoration: underline;\">caracter\u00edsticas</span><span style=\" font-size:12pt;\"> de un producto, simplemente hacer </span><span style=\" font-size:12pt; font-style:italic;\">doble click</span><span style=\" font-size:12pt;\"> sobre la celda que se quiere modificar e ingresar el nuevo valor.</span></p></body></html>")
+        self.tv_inventory_data.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Para </span><span style=\" font-size:12pt; text-decoration: underline;\">modificar</span><span style=\" font-size:12pt;\"> las </span><span style=\" font-size:12pt; text-decoration: underline;\">caracter\u00edsticas</span><span style=\" font-size:12pt;\"> de un producto, simplemente hacer </span><span style=\" font-size:12pt; font-style:italic;\">doble click</span><span style=\" font-size:12pt;\"> sobre la celda que se quiere modificar e ingresar el nuevo valor.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        self.displayTable.setFrameShape(QFrame.NoFrame)
-        self.displayTable.setEditTriggers(QAbstractItemView.DoubleClicked)
-        self.displayTable.setProperty("showDropIndicator", False)
-        self.displayTable.setDragDropOverwriteMode(False)
-        self.displayTable.setAlternatingRowColors(True)
-        self.displayTable.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.displayTable.setTextElideMode(Qt.ElideMiddle)
-        self.displayTable.setGridStyle(Qt.SolidLine)
-        self.displayTable.setSortingEnabled(False)
-        self.displayTable.setWordWrap(True)
-        self.displayTable.setRowCount(0)
-        self.displayTable.horizontalHeader().setCascadingSectionResizes(False)
-        self.displayTable.verticalHeader().setVisible(False)
+        self.tv_inventory_data.setFrameShape(QFrame.NoFrame)
+        self.tv_inventory_data.setEditTriggers(QAbstractItemView.DoubleClicked)
+        self.tv_inventory_data.setProperty("showDropIndicator", False)
+        self.tv_inventory_data.setDragDropOverwriteMode(False)
+        self.tv_inventory_data.setAlternatingRowColors(True)
+        self.tv_inventory_data.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.tv_inventory_data.setTextElideMode(Qt.ElideMiddle)
+        self.tv_inventory_data.setGridStyle(Qt.SolidLine)
+        self.tv_inventory_data.setSortingEnabled(False)
+        self.tv_inventory_data.setWordWrap(True)
+        self.tv_inventory_data.setCornerButtonEnabled(False)
 
-        self.inventory_display_Vlayout.addWidget(self.displayTable)
+        self.inventory_display_Vlayout.addWidget(self.tv_inventory_data)
 
         self.label_feedbackInventory = QLabel(self.inventory_display)
         self.label_feedbackInventory.setObjectName(u"label_feedbackInventory")
@@ -1143,7 +1116,7 @@ class Ui_MainWindow(object):
         self.tab2_toolBox.addItem(self.box1_sales_form, u"Formulario de venta")
         self.box2_sales_table = QWidget()
         self.box2_sales_table.setObjectName(u"box2_sales_table")
-        self.box2_sales_table.setGeometry(QRect(0, 0, 364, 162))
+        self.box2_sales_table.setGeometry(QRect(0, 0, 756, 498))
         self.box2_sales_Vlayout = QVBoxLayout(self.box2_sales_table)
         self.box2_sales_Vlayout.setSpacing(4)
         self.box2_sales_Vlayout.setObjectName(u"box2_sales_Vlayout")
@@ -1234,42 +1207,26 @@ class Ui_MainWindow(object):
 
         self.box2_sales_Vlayout.addWidget(self.sales_progressbar)
 
-        self.table_sales_data = QTableWidget(self.box2_sales_table)
-        if (self.table_sales_data.columnCount() < 6):
-            self.table_sales_data.setColumnCount(6)
-        __qtablewidgetitem6 = QTableWidgetItem()
-        self.table_sales_data.setHorizontalHeaderItem(0, __qtablewidgetitem6)
-        __qtablewidgetitem7 = QTableWidgetItem()
-        self.table_sales_data.setHorizontalHeaderItem(1, __qtablewidgetitem7)
-        __qtablewidgetitem8 = QTableWidgetItem()
-        self.table_sales_data.setHorizontalHeaderItem(2, __qtablewidgetitem8)
-        __qtablewidgetitem9 = QTableWidgetItem()
-        self.table_sales_data.setHorizontalHeaderItem(3, __qtablewidgetitem9)
-        __qtablewidgetitem10 = QTableWidgetItem()
-        self.table_sales_data.setHorizontalHeaderItem(4, __qtablewidgetitem10)
-        __qtablewidgetitem11 = QTableWidgetItem()
-        self.table_sales_data.setHorizontalHeaderItem(5, __qtablewidgetitem11)
-        self.table_sales_data.setObjectName(u"table_sales_data")
+        self.tv_sales_data = QTableView(self.box2_sales_table)
+        self.tv_sales_data.setObjectName(u"tv_sales_data")
 #if QT_CONFIG(tooltip)
-        self.table_sales_data.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Para </span><span style=\" font-size:12pt; text-decoration: underline;\">modificar</span><span style=\" font-size:12pt;\"> un dato de alguna venta hacer </span><span style=\" font-size:12pt; font-style:italic;\">doble click</span><span style=\" font-size:12pt;\"> sobre una celda e ingresar el nuevo valor.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:12pt;\"> si se cambia el </span><span style=\" font-size:12pt; font-style:italic;\">producto vendido</span><span style=\" font-size:12pt;\"> o la </span><span style=\" font-size:12pt; font-style:italic;\">cantidad vendida</span><span style=\" font-size:12pt;\"> de un producto NO se ver\u00e1 afectado el stock de ese producto directamente, para eso es necesario cambiar el stock de ese producto manualmente mediante la pesta\u00f1a de </span><span style=\" font-size:12pt; font-style:italic;\">inventario</span><span style=\" font-siz"
+        self.tv_sales_data.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Para </span><span style=\" font-size:12pt; text-decoration: underline;\">modificar</span><span style=\" font-size:12pt;\"> un dato de alguna venta hacer </span><span style=\" font-size:12pt; font-style:italic;\">doble click</span><span style=\" font-size:12pt;\"> sobre una celda e ingresar el nuevo valor.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:12pt;\"> si se cambia el </span><span style=\" font-size:12pt; font-style:italic;\">producto vendido</span><span style=\" font-size:12pt;\"> o la </span><span style=\" font-size:12pt; font-style:italic;\">cantidad vendida</span><span style=\" font-size:12pt;\"> de un producto NO se ver\u00e1 afectado el stock de ese producto directamente, para eso es necesario cambiar el stock de ese producto manualmente mediante la pesta\u00f1a de </span><span style=\" font-size:12pt; font-style:italic;\">inventario</span><span style=\" font-siz"
                         "e:12pt;\">.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        self.table_sales_data.setStyleSheet(u"")
-        self.table_sales_data.setFrameShape(QFrame.NoFrame)
-        self.table_sales_data.setFrameShadow(QFrame.Plain)
-        self.table_sales_data.setEditTriggers(QAbstractItemView.DoubleClicked)
-        self.table_sales_data.setProperty("showDropIndicator", False)
-        self.table_sales_data.setDragDropOverwriteMode(False)
-        self.table_sales_data.setAlternatingRowColors(True)
-        self.table_sales_data.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.table_sales_data.setTextElideMode(Qt.ElideMiddle)
-        self.table_sales_data.setGridStyle(Qt.SolidLine)
-        self.table_sales_data.setSortingEnabled(False)
-        self.table_sales_data.setRowCount(0)
-        self.table_sales_data.horizontalHeader().setCascadingSectionResizes(False)
-        self.table_sales_data.verticalHeader().setVisible(False)
+        self.tv_sales_data.setStyleSheet(u"")
+        self.tv_sales_data.setFrameShape(QFrame.NoFrame)
+        self.tv_sales_data.setFrameShadow(QFrame.Plain)
+        self.tv_sales_data.setEditTriggers(QAbstractItemView.DoubleClicked)
+        self.tv_sales_data.setProperty("showDropIndicator", False)
+        self.tv_sales_data.setDragDropOverwriteMode(False)
+        self.tv_sales_data.setAlternatingRowColors(True)
+        self.tv_sales_data.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.tv_sales_data.setTextElideMode(Qt.ElideMiddle)
+        self.tv_sales_data.setGridStyle(Qt.SolidLine)
+        self.tv_sales_data.setSortingEnabled(False)
+        self.tv_sales_data.setCornerButtonEnabled(False)
 
-        self.box2_sales_Vlayout.addWidget(self.table_sales_data)
+        self.box2_sales_Vlayout.addWidget(self.tv_sales_data)
 
         self.label_feedbackSales = QLabel(self.box2_sales_table)
         self.label_feedbackSales.setObjectName(u"label_feedbackSales")
@@ -1334,7 +1291,6 @@ class Ui_MainWindow(object):
 
         self.box2_sales_Vlayout.addWidget(self.sales_buttons)
 
-        self.box2_sales_Vlayout.setStretch(2, 10)
         self.tab2_toolBox.addItem(self.box2_sales_table, u"Tabla de ventas")
 
         self.tab2_sales_Vlayout.addWidget(self.tab2_toolBox)
@@ -1443,45 +1399,35 @@ class Ui_MainWindow(object):
 
         self.debts_info_Vlayout.addWidget(self.debts_progressbar)
 
-        self.table_debts = QTableWidget(self.debts_info)
-        if (self.table_debts.columnCount() < 3):
-            self.table_debts.setColumnCount(3)
-        __qtablewidgetitem12 = QTableWidgetItem()
-        self.table_debts.setHorizontalHeaderItem(0, __qtablewidgetitem12)
-        __qtablewidgetitem13 = QTableWidgetItem()
-        self.table_debts.setHorizontalHeaderItem(1, __qtablewidgetitem13)
-        __qtablewidgetitem14 = QTableWidgetItem()
-        self.table_debts.setHorizontalHeaderItem(2, __qtablewidgetitem14)
-        self.table_debts.setObjectName(u"table_debts")
+        self.tv_debts_data = QTableView(self.debts_info)
+        self.tv_debts_data.setObjectName(u"tv_debts_data")
 #if QT_CONFIG(tooltip)
-        self.table_debts.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Para </span><span style=\" font-size:12pt; text-decoration: underline;\">modificar</span><span style=\" font-size:12pt;\"> las </span><span style=\" font-size:12pt; text-decoration: underline;\">caracter\u00edsticas</span><span style=\" font-size:12pt;\"> de una deuda simplemente hacer </span><span style=\" font-size:12pt; font-style:italic;\">doble click</span><span style=\" font-size:12pt;\"> sobre la celda que se quiere modificar e ingresar el nuevo valor.</span></p></body></html>")
+        self.tv_debts_data.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Para </span><span style=\" font-size:12pt; text-decoration: underline;\">modificar</span><span style=\" font-size:12pt;\"> las </span><span style=\" font-size:12pt; text-decoration: underline;\">caracter\u00edsticas</span><span style=\" font-size:12pt;\"> de una deuda simplemente hacer </span><span style=\" font-size:12pt; font-style:italic;\">doble click</span><span style=\" font-size:12pt;\"> sobre la celda que se quiere modificar e ingresar el nuevo valor.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        self.table_debts.setStyleSheet(u"#table_debts QLabel {\n"
+        self.tv_debts_data.setStyleSheet(u"#tv_debts_data QLabel {\n"
 "	font-size: 16px;\n"
 "}\n"
 "\n"
 "\n"
-"#table_debts QPushButton {\n"
+"#tv_debts_data QPushButton {\n"
 "	max-width: 24px;\n"
 "	max-height: 24px;\n"
 "	border-radius: 1px;\n"
 "	background-color: rgb(71, 184, 255);\n"
 "}")
-        self.table_debts.setFrameShape(QFrame.NoFrame)
-        self.table_debts.setFrameShadow(QFrame.Sunken)
-        self.table_debts.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
-        self.table_debts.setEditTriggers(QAbstractItemView.DoubleClicked)
-        self.table_debts.setProperty("showDropIndicator", False)
-        self.table_debts.setDragDropOverwriteMode(False)
-        self.table_debts.setDefaultDropAction(Qt.IgnoreAction)
-        self.table_debts.setAlternatingRowColors(True)
-        self.table_debts.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.table_debts.setSortingEnabled(False)
-        self.table_debts.setRowCount(0)
-        self.table_debts.horizontalHeader().setProperty("showSortIndicator", False)
-        self.table_debts.verticalHeader().setVisible(False)
+        self.tv_debts_data.setFrameShape(QFrame.NoFrame)
+        self.tv_debts_data.setFrameShadow(QFrame.Sunken)
+        self.tv_debts_data.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+        self.tv_debts_data.setEditTriggers(QAbstractItemView.DoubleClicked)
+        self.tv_debts_data.setProperty("showDropIndicator", False)
+        self.tv_debts_data.setDragDropOverwriteMode(False)
+        self.tv_debts_data.setDefaultDropAction(Qt.IgnoreAction)
+        self.tv_debts_data.setAlternatingRowColors(True)
+        self.tv_debts_data.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.tv_debts_data.setSortingEnabled(False)
+        self.tv_debts_data.setCornerButtonEnabled(False)
 
-        self.debts_info_Vlayout.addWidget(self.table_debts)
+        self.debts_info_Vlayout.addWidget(self.tv_debts_data)
 
         self.label_feedbackDebts = QLabel(self.debts_info)
         self.label_feedbackDebts.setObjectName(u"label_feedbackDebts")
@@ -1547,7 +1493,6 @@ class Ui_MainWindow(object):
 
         self.debts_info_Vlayout.addWidget(self.debts_buttons)
 
-        self.debts_info_Vlayout.setStretch(2, 10)
 
         self.tab3_debts_Vlayout.addWidget(self.debts_info)
 
@@ -1568,16 +1513,16 @@ class Ui_MainWindow(object):
         QWidget.setTabOrder(self.tabWidget, self.checkbox_unit_prices)
         QWidget.setTabOrder(self.checkbox_unit_prices, self.checkbox_comercial_prices)
         QWidget.setTabOrder(self.checkbox_comercial_prices, self.lineEdit_percentage_change)
-        QWidget.setTabOrder(self.lineEdit_percentage_change, self.displayTable)
-        QWidget.setTabOrder(self.displayTable, self.btn_add_product_inventory)
+        QWidget.setTabOrder(self.lineEdit_percentage_change, self.tv_inventory_data)
+        QWidget.setTabOrder(self.tv_inventory_data, self.btn_add_product_inventory)
         QWidget.setTabOrder(self.btn_add_product_inventory, self.btn_inventory_sideBarToggle)
         QWidget.setTabOrder(self.btn_inventory_sideBarToggle, self.btn_delete_product_inventory)
         QWidget.setTabOrder(self.btn_delete_product_inventory, self.inventory_searchBar)
-        QWidget.setTabOrder(self.inventory_searchBar, self.table_sales_data)
-        QWidget.setTabOrder(self.table_sales_data, self.btn_add_product_sales)
+        QWidget.setTabOrder(self.inventory_searchBar, self.tv_sales_data)
+        QWidget.setTabOrder(self.tv_sales_data, self.btn_add_product_sales)
         QWidget.setTabOrder(self.btn_add_product_sales, self.btn_delete_product_sales)
-        QWidget.setTabOrder(self.btn_delete_product_sales, self.table_debts)
-        QWidget.setTabOrder(self.table_debts, self.btn_add_debt)
+        QWidget.setTabOrder(self.btn_delete_product_sales, self.tv_debts_data)
+        QWidget.setTabOrder(self.tv_debts_data, self.btn_add_debt)
         QWidget.setTabOrder(self.btn_add_debt, self.btn_delete_debt)
 
         self.retranslateUi(MainWindow)
@@ -1617,29 +1562,11 @@ class Ui_MainWindow(object):
         self.tab2_toolBox.setItemText(self.tab2_toolBox.indexOf(self.box1_sales_form), QCoreApplication.translate("MainWindow", u"Formulario de venta", None))
         self.btn_sales_prev_search_result.setText("")
         self.btn_sales_next_search_result.setText("")
-        ___qtablewidgetitem = self.table_sales_data.horizontalHeaderItem(0)
-        ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"detalle de venta", None));
-        ___qtablewidgetitem1 = self.table_sales_data.horizontalHeaderItem(1)
-        ___qtablewidgetitem1.setText(QCoreApplication.translate("MainWindow", u"cantidad", None));
-        ___qtablewidgetitem2 = self.table_sales_data.horizontalHeaderItem(2)
-        ___qtablewidgetitem2.setText(QCoreApplication.translate("MainWindow", u"producto", None));
-        ___qtablewidgetitem3 = self.table_sales_data.horizontalHeaderItem(3)
-        ___qtablewidgetitem3.setText(QCoreApplication.translate("MainWindow", u"costo total", None));
-        ___qtablewidgetitem4 = self.table_sales_data.horizontalHeaderItem(4)
-        ___qtablewidgetitem4.setText(QCoreApplication.translate("MainWindow", u"abonado", None));
-        ___qtablewidgetitem5 = self.table_sales_data.horizontalHeaderItem(5)
-        ___qtablewidgetitem5.setText(QCoreApplication.translate("MainWindow", u"fecha y hora", None));
         self.btn_delete_product_sales.setText(QCoreApplication.translate("MainWindow", u"Eliminar venta", None))
         self.tab2_toolBox.setItemText(self.tab2_toolBox.indexOf(self.box2_sales_table), QCoreApplication.translate("MainWindow", u"Tabla de ventas", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab2_sales), QCoreApplication.translate("MainWindow", u"VENTAS", None))
         self.btn_debts_prev_search_result.setText("")
         self.btn_debts_next_search_result.setText("")
-        ___qtablewidgetitem6 = self.table_debts.horizontalHeaderItem(0)
-        ___qtablewidgetitem6.setText(QCoreApplication.translate("MainWindow", u"datos de la persona", None));
-        ___qtablewidgetitem7 = self.table_debts.horizontalHeaderItem(1)
-        ___qtablewidgetitem7.setText(QCoreApplication.translate("MainWindow", u"productos", None));
-        ___qtablewidgetitem8 = self.table_debts.horizontalHeaderItem(2)
-        ___qtablewidgetitem8.setText(QCoreApplication.translate("MainWindow", u"saldo", None));
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab3_debts), QCoreApplication.translate("MainWindow", u"CUENTAS CORRIENTES", None))
     # retranslateUi
 
