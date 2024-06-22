@@ -19,11 +19,53 @@ from re import (Match, compile, search, IGNORECASE)
 
 
 class DatabaseRepository():
-    '''Clase repositorio para realizar operaciones a la base de datos.'''
+    '''Clase repositorio y "context manager" para realizar operaciones a la base de datos.'''
     
     def __init__(self, db_path:str="database/inventario.db") -> None:
         self._db_path:str = db_path
-        self._connection:Connection = createConnection(self._db_path)
+        self._connection:Connection = None
+    
+    
+    def __enter__(self):
+        self._connection = createConnection(self._db_path)
+        return self
+    
+    
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        if exc_type:
+            self._connection.rollback()
+            logging.critical(f"{exc_type}: {exc_value}")
+            
+        else:
+            if self._connection:
+                self._connection.commit()
+                self._connection.close()
+        return False
+    
+    
+    def __executeQuery(self, sql:str, params:tuple=None) -> Cursor:
+        '''
+        Realiza la consulta entregada independientemente del tipo y devuelve el cursor 
+        con el resultado.
+
+        Parámetros
+        ----------
+        sql : str
+            Consulta de tipo CRUD
+        params : tuple, opcional
+            Parámetros de la consulta, por defecto es None
+
+        Retorna
+        -------
+        Cursor
+            Cursor con los registros resultantes sin filtrar de la consulta
+        '''
+        cursor:Cursor = self._connection.cursor()
+        if params:
+            cursor.execute(sql, params)
+        else:
+            cursor.execute(sql)
+        return cursor
     
     
     def selectRowCount(self, count_sql:str, count_params:tuple=None) -> int:
@@ -43,9 +85,7 @@ class DatabaseRepository():
         int
             Cantidad de registros coincidentes.
         '''
-        with closing(self._connection.cursor()) as cursor:
-            cursor.execute(count_sql) if not count_params else cursor.execute(count_sql, count_params)
-            return cursor.fetchone()[0]
+        return self.__executeQuery(sql=count_sql, params=count_params).fetchone()[0]
     
     
     def selectColumnCount(self, sel_sql:str) -> int:
@@ -64,10 +104,7 @@ class DatabaseRepository():
             Cantidad de columnas seleccionadas
         '''
         sel_sql = self.__addLimitClauseToQuery(sel_sql)
-        
-        with closing(self._connection.cursor()) as cursor:
-            cursor.execute(sel_sql)
-        return len(cursor.description)
+        return len(self.__executeQuery(sel_sql).description)
     
     
     def selectRegisters(self, data_sql:str, data_params:tuple=None) -> list[tuple[Any]]:
@@ -86,9 +123,7 @@ class DatabaseRepository():
         list[tuple[Any]]
             Lista con todos los registros coincidentes en formato tupla[Any].
         '''
-        with closing(self._connection.cursor()) as cursor:
-            cursor.execute(data_sql) if not data_params else cursor.execute(data_sql, data_params)
-            return cursor.fetchall()
+        return self.__executeQuery(data_sql, data_params).fetchall()
     
     
     def updateRegisters(self, upd_sql:str, upd_params:tuple) -> None:
@@ -106,17 +141,7 @@ class DatabaseRepository():
         -------
         None
         '''
-        cursor:Cursor = self._connection.cursor()
-        try:
-            cursor.execute(upd_sql, upd_params)
-            self._connection.commit()
-        
-        except sqlite3Error as err:
-            self._connection.rollback()
-            logging.critical(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
-        
-        finally:
-            self._connection.close()
+        self.__executeQuery(upd_sql, upd_params)
         return None
 
 
@@ -135,17 +160,7 @@ class DatabaseRepository():
         -------
         None
         '''
-        cursor:Cursor = self._connection.cursor()
-        try:
-            cursor.execute(del_sql, del_params)
-            self._connection.commit()
-        
-        except sqlite3Error as err:
-            self._connection.rollback()
-            logging.critical(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
-        
-        finally:
-            self._connection.close()
+        self.__executeQuery(del_sql, del_params)
         return None
         
 
@@ -164,20 +179,7 @@ class DatabaseRepository():
         -------
         None
         '''
-        cursor:Cursor = self._connection.cursor()
-        try:
-            if ins_params:
-                cursor.execute(ins_sql, ins_params)
-            else:
-                cursor.execute(ins_sql)
-            self._connection.commit()
-        
-        except sqlite3Error as err:
-            self._connection.rollback()
-            logging.critical(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
-        
-        finally:
-            self._connection.close()
+        self.__executeQuery(ins_sql, ins_params)
         return None
 
 
