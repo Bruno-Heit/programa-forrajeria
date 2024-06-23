@@ -15,7 +15,7 @@ from utils.model_classes import (InventoryTableModel)
 from utils.workerclasses import (WorkerSelect, WorkerDelete, WorkerUpdate)
 from utils.dboperations import (DatabaseRepository)
 from utils.customvalidators import (SalePaidValidator)
-from utils.enumclasses import (LoggingMessage, DBQueries)
+from utils.enumclasses import (LoggingMessage, DBQueries, ModelHeaders)
 
 from resources import (rc_icons)
 
@@ -31,16 +31,16 @@ class MainWindow(QMainWindow):
         self.__initGeneralValidators() # inicializa validadores existentes
         self.addIconsToWidgets() # añade íconos a los widgets
         # políticas de QTableViews
-        # todo: corregir métodos de políticas de tableview, crashean el programa
-        # setTableWidthPolitics(self.ui.tv_inventory_data)
-        # setTableWidthPolitics(self.ui.tv_sales_data)
-        # setTableWidthPolitics(self.ui.tv_debts_data)
+        setTableViewPolitics(self.ui.tv_inventory_data)
+        setTableViewPolitics(self.ui.tv_sales_data)
+        setTableViewPolitics(self.ui.tv_debts_data)
         
         # repositorio de base de datos
         self._db_repo:DatabaseRepository = DatabaseRepository()
         
         # modelos de datos
-        self.inventory_data_model:InventoryTableModel = None
+        self.inventory_data_model:InventoryTableModel = InventoryTableModel()
+        self.ui.tv_inventory_data.setModel(self.inventory_data_model)
         
         # variables de modelos de datos
         self._model_data_accumulator:ndarray[Any] # acumulador temporal de datos para los modelos
@@ -82,11 +82,11 @@ class MainWindow(QMainWindow):
         
         #* (READ) cargar con productos 'tv_inventory_data'
         self.ui.tables_ListWidget.itemClicked.connect(lambda item: self.fillTableView(
-            self.ui.tv_inventory_data.objectName(),
+            self.ui.tv_inventory_data,
             ACCESSED_BY_LIST=True,
             SHOW_ALL=True if item.text() == "MOSTRAR TODOS" else False))
         self.ui.tables_ListWidget.itemActivated.connect(lambda item: self.fillTableView(
-            self.ui.tv_inventory_data.objectName(),
+            self.ui.tv_inventory_data,
             ACCESSED_BY_LIST=True,
             SHOW_ALL=True if item.text() == "MOSTRAR TODOS" else False))
 
@@ -119,7 +119,7 @@ class MainWindow(QMainWindow):
         #¡========= VENTAS ====================================================
         #* (READ) cargar con ventas 'tv_sales_data'
         self.ui.tab2_toolBox.currentChanged.connect(lambda curr_index: self.fillTableView(
-            self.ui.tv_sales_data.objectName(), SHOW_ALL=True) if curr_index == 1 else None)
+            self.ui.tv_sales_data, SHOW_ALL=True) if curr_index == 1 else None)
         
         
         self.ui.tabWidget.currentChanged.connect(lambda index: self.ui.tab2_toolBox.setCurrentIndex(0) if index == 1 else None)
@@ -279,15 +279,16 @@ class MainWindow(QMainWindow):
                 count_sql, data_sql = getTableViewsSqlQueries(table_view.objectName(), ACCESSED_BY_LIST, SHOW_ALL)
                 
                 if not SHOW_ALL and ACCESSED_BY_LIST:
-                    # cols.: detalle venta, cantidad, producto, costo total, abonado, fecha y hora
                     count_params = (self.ui.tables_ListWidget.currentItem().text(),)
-                    data_params = (self.ui.tables_ListWidget.currentItem().text(),)    
+                    data_params = (self.ui.tables_ListWidget.currentItem().text(),)
                 self.ui.label_feedbackInventory.hide()
+
 
             case "tv_sales_data":
                 self.IDs_saleDetails.clear() # limpia los IDs
                 count_sql, data_sql = getTableViewsSqlQueries(table_view.objectName(), ACCESSED_BY_LIST, SHOW_ALL)
                 self.ui.label_feedbackSales.hide()
+
 
             case "tv_debts_data":
                 # TODO: declarar consultas sql para también traer los datos necesarios
@@ -334,8 +335,6 @@ class MainWindow(QMainWindow):
                         data_sql=data_sql, data_params=data_params,
                         count_sql=count_sql, count_params=count_params)
                     )
-                # TODO: probar si se crea el modelo con la forma establecida, luego seguir escribiendo 
-                # todo: señales de worker y thread
                 self.select_worker.countFinished.connect(
                     lambda model_shape: self.__workerOnCountFinished(
                         tv_name=table_view.objectName(), model_shape=model_shape)
@@ -344,6 +343,14 @@ class MainWindow(QMainWindow):
                     lambda register: self.__workerOnRegisterProgress(
                         register=register,table_view=table_view)
                     )
+                self.select_worker.finished.connect(
+                    lambda: self.__workerOnFinished(
+                        tv_name=table_view.objectName())
+                    )
+                self.select_worker.finished.connect(self.select_thread.quit)
+                self.select_worker.finished.connect(self.select_worker.deleteLater)
+                
+                self.select_thread.start()
             
             case DBQueries.DELETE_REGISTERS.value:
                 pass
@@ -374,7 +381,7 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
-        self._model_data_accumulator = empty(shape=model_shape)
+        self._model_data_accumulator = empty(shape=model_shape, dtype=object)
         
         self.__updateProgressBar(tv_name=tv_name, max_val=model_shape[0])
     
@@ -402,18 +409,11 @@ class MainWindow(QMainWindow):
         self.__updateProgressBar(
             tv_name=table_view.objectName(),max_val=None, value=register[0]
             )
+
+        # guarda en la posición actual (register[0] marca el progreso de 
+        # lectura) el registro completo
+        self._model_data_accumulator[register[0]] = register[1]
         
-        match table_view.objectName():
-            case 'tv_inventory_data':
-                total_rows = self.ui.inventory_progressbar.maximum()
-            
-            case 'tv_sales_data':
-                total_rows = self.ui.sales_progressbar.maximum()
-            
-            case 'tv_debts_data':
-                total_rows = self.ui.debts_progressbar.maximum()
-        
-        # self._model_data_accumulator
         return None
     
     
@@ -482,8 +482,9 @@ class MainWindow(QMainWindow):
     def __workerOnFinished(self, tv_name:str, READ_OPERATION:bool=True) -> None:
         '''
         Esconde la QProgressBar relacionada con el QTableView, reinicia el valor del 
-        QSS de dicha QProgressBar y recarga el QTableView. Si 'READ_OPERATION' es False 
-        es porque se realizaron otras consultas a la base de datos (DELETE / INSERT).
+        QSS de dicha QProgressBar y carga los datos en el QTableView. Si 'READ_OPERATION' 
+        es False es porque se realizaron otras consultas a la base de datos (DELETE / INSERT) 
+        y el QTableView debe ser recargado.
         
         Parámetros
         ----------
@@ -506,7 +507,11 @@ class MainWindow(QMainWindow):
                     except AttributeError: # salta porque se intenta recargar la tabla pero nunca se llenó anteriormente
                         pass
                 else:
-                    self.ui.tv_inventory_data.resizeRowsToContents()
+                    pass
+                self.inventory_data_model.setModelData(
+                    data=self._model_data_accumulator,
+                    headers=ModelHeaders.INVENTORY_HEADERS.value)
+                    # TODO: redimensionar la tabla cuando se carguen datos
                 
             case "tv_sales_data":
                 self.ui.sales_progressbar.setStyleSheet("")
@@ -515,7 +520,8 @@ class MainWindow(QMainWindow):
                     # recarga la tabla
                     self.fillTableView(table_view=self.ui.tv_sales_data, SHOW_ALL=True)
                 else:
-                    self.ui.tv_sales_data.resizeRowsToContents()
+                    pass
+                    # self.ui.tv_sales_data.resizeRowsToContents()
                 
             case "tv_debts_data":
                 self.ui.debts_progressbar.setStyleSheet("")
@@ -524,7 +530,8 @@ class MainWindow(QMainWindow):
                     # recarga la tabla
                     self.fillTableView(table_view=self.ui.tv_debts_data, SHOW_ALL=True)
                 else:
-                    self.ui.tv_debts_data.resizeRowsToContents()
+                    pass
+                    # self.ui.tv_debts_data.resizeRowsToContents()
             
         logging.debug(LoggingMessage.WORKER_SUCCESS)
         return None

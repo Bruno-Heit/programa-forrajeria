@@ -3,7 +3,7 @@
 from typing import (Any, Sequence)
 
 from PySide6.QtWidgets import (QTableWidget, QComboBox, QHeaderView, QListWidget, QLineEdit, 
-                               QCompleter, QFrame, QWidget, QDateTimeEdit, QTableView)
+                               QCompleter, QFrame, QWidget, QDateTimeEdit, QTableView, QSizePolicy)
 from PySide6.QtCore import (QRegularExpression, QModelIndex, Qt, QPropertyAnimation, 
                             QEasingCurve, QDateTime, QDate, QTime)
 from PySide6.QtGui import (QRegularExpressionValidator)
@@ -207,31 +207,22 @@ def getCategoriesDescription() -> tuple[str] | None:
     return tuple(query_tuple)
 
 
-def setTableWidthPolitics(tableView:QTableView) -> None:
+def setTableViewPolitics(tableView:QTableView) -> None:
     '''
-    Recibe un QTableView y especifica las políticas de ancho de las columnas. 
+    Declara las políticas del QTableView.
     
-    Retorna None.
+    Parámetros
+    ----------
+    tableView : QTableView
+        El QTableView que se referencia
+
+    Retorna
+    -------
+    None
     '''
-    match tableView.objectName():
-        case "tv_inventory_data":
-            header = tableView.horizontalHeader()
-            header.setSectionResizeMode(QHeaderView.ResizeToContents)
-            header.setSectionResizeMode(0, QHeaderView.Stretch)
-            header.setSectionResizeMode(2, QHeaderView.Stretch)
-            header.setMaximumSectionSize(200)
-        case "tv_sales_data":
-            header = tableView.horizontalHeader()
-            header.setSectionResizeMode(QHeaderView.ResizeToContents)
-            header.setSectionResizeMode(0, QHeaderView.Stretch)
-            header.setSectionResizeMode(2, QHeaderView.Stretch)
-            header.setMaximumSectionSize(200)
-        case "tv_debts_data":
-            header = tableView.horizontalHeader()
-            header.setSectionResizeMode(QHeaderView.ResizeToContents)
-            header.setSectionResizeMode(0, QHeaderView.Stretch)
-            header.setSectionResizeMode(1, QHeaderView.Stretch)
-            header.setMaximumSectionSize(200)
+    tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+    tableView.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+    tableView.verticalHeader().hide()
     return None
 
 
