@@ -23,7 +23,7 @@ class WorkerSelect(QObject):
     finished = Signal(int) # si hubo algún error envía 0, sino 1. Se emite cuando se termina la consulta de registros.
 
     def __init__(self) -> None:
-        self._db_repo = DatabaseRepository()
+        super(WorkerSelect, self).__init__()
 
 
     @Slot(str,str,tuple,tuple)
@@ -52,23 +52,21 @@ class WorkerSelect(QObject):
         data_query:list[Any] # guarda los registros obtenidos
         signal:tuple[int,Any] = None
         
-        # si recibió 'count_sql' hace la consulta COUNT() y manda la cantidad de registros encontrados...
-        if count_sql:
-            # count_query = cursor.execute(count_sql).fetchone()[0] if not count_params else cursor.execute(count_sql, count_params).fetchone()[0]
-            self.countFinished.emit(
-                tuple(
-                    self._db_repo.selectRowCount(count_sql, count_params if count_params else None),
-                    self._db_repo.selectColumnCount(data_sql)
+        # TODO: limitar la cantidad de registros a 150
+        with DatabaseRepository() as repo:
+            # si recibió 'count_sql' hace la consulta COUNT() y manda la cantidad de registros encontrados...
+            if count_sql:
+                self.countFinished.emit(
+                    (repo.selectRowCount(count_sql,count_params),
+                    repo.selectColumnCount(data_sql, data_params),)
                     )
-                )
-        
-        # luego obtiene los registros y los envía de a uno...
-        # data_query = cursor.execute(data_sql).fetchall() if not data_params else cursor.execute(data_sql, data_params).fetchall()
-        data_query = self._db_repo.selectRegisters(
-            data_sql, data_params if data_params else None)
-        for n,reg in enumerate(data_query):
-            # signal = tuple((n, reg))
-            self.registerProgress.emit( tuple((n, reg)) )
+            
+            # luego obtiene los registros y los envía de a uno...
+            data_query = repo.selectRegisters(
+                data_sql, data_params if data_params else None)
+            for n,reg in enumerate(data_query):
+                # signal = tuple((n, reg))
+                self.registerProgress.emit( tuple((n, reg)) )
         
         self.finished.emit(1) #* todo bien
         logging.debug(LoggingMessage.DEBUG_DB_MULT_SELECT_SUCCESS)

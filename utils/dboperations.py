@@ -11,7 +11,7 @@ Además coloqué acá la función 'pyinstallerCompleteResourcePath' para evitar
 import os # para obtener el 'relative path' de algunos archivos cuando se ejecutan luego de empaquetarse con pyinstaller...
 import sys # sirve para lo mismo que el módulo 'os'.
 
-from sqlite3 import (connect, Connection, Cursor, Error as sqlite3Error)
+from sqlite3 import (connect, Connection, Cursor, Error as sqlite3Error, ProgrammingError)
 from typing import (Any)
 import logging
 from contextlib import closing
@@ -88,7 +88,7 @@ class DatabaseRepository():
         return self.__executeQuery(sql=count_sql, params=count_params).fetchone()[0]
     
     
-    def selectColumnCount(self, sel_sql:str) -> int:
+    def selectColumnCount(self, sel_sql:str, sel_params:tuple[Any]=None) -> int:
         '''
         Realiza una consulta de tipo SELECT y devuelve la cantidad de columnas seleccionadas 
         por la consulta.
@@ -104,7 +104,7 @@ class DatabaseRepository():
             Cantidad de columnas seleccionadas
         '''
         sel_sql = self.__addLimitClauseToQuery(sel_sql)
-        return len(self.__executeQuery(sel_sql).description)
+        return len(self.__executeQuery(sel_sql, sel_params).description)
     
     
     def selectRegisters(self, data_sql:str, data_params:tuple=None) -> list[tuple[Any]]:

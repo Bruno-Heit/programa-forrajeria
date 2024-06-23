@@ -33,10 +33,10 @@ def getTableViewsSqlQueries(tv_name:str, ACCESSED_BY_LIST:bool=False, SHOW_ALL:b
             if SHOW_ALL:
                 return (
                     str("SELECT COUNT(*) FROM Productos WHERE eliminado = 0;"),
-                    str('''SELECT (IDproducto,nombre_categoria,nombre,p.descripcion,
-                        stock,unidad_medida,precio_unit,precio_comerc) 
-                        FROM Productos 
-                            AS p INNER JOIN Categorias AS c WHERE (p.IDcategoria=c.IDcategoria AND p.eliminado = 0);'''))
+                    str('''SELECT IDproducto,nombre_categoria,nombre,p.descripcion,
+                        stock,unidad_medida,precio_unit,precio_comerc 
+                        FROM Productos AS p INNER JOIN Categorias AS c 
+                            WHERE (p.IDcategoria=c.IDcategoria AND p.eliminado = 0);'''))
             
             elif not SHOW_ALL and ACCESSED_BY_LIST:
                 # cols.: detalle venta, cantidad, producto, costo total, abonado, fecha y hora
@@ -44,12 +44,12 @@ def getTableViewsSqlQueries(tv_name:str, ACCESSED_BY_LIST:bool=False, SHOW_ALL:b
                     str('''SELECT COUNT(*) 
                         FROM Productos 
                             WHERE IDcategoria = (SELECT IDcategoria FROM Categorias 
-                                WHERE nombre_categoria = ? ) AND eliminado = 0;"'''),
+                                WHERE nombre_categoria = ?) AND eliminado = 0;'''),
                     str('''SELECT IDproducto,nombre_categoria,nombre,p.descripcion,
                         stock,unidad_medida,precio_unit,precio_comerc 
-                            FROM Productos AS p INNER JOIN Categorias AS c 
-                                WHERE p.IDcategoria=c.IDcategoria AND c.nombre_categoria=? AND 
-                                eliminado = 0;''')
+                        FROM Productos AS p INNER JOIN Categorias AS c 
+                            ON p.IDcategoria=c.IDcategoria 
+                                WHERE c.nombre_categoria=? AND eliminado = 0;''')
                     )
                     
         case "tv_sales_data":
