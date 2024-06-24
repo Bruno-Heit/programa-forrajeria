@@ -3,8 +3,34 @@ En este archivo están las classes que heredan de Enum, y sirve más que nada pa
 simplificar la lectura de algunos valores recurrentes.
 
 '''
+from PySide6.QtGui import (QColor)
 
 from enum import (Enum, StrEnum, IntEnum)
+
+
+class TableFontColor(Enum):
+    '''Enum con QColors para la tipografía de QTableViews.'''
+    DEF_COLOR = QColor(17, 17, 17, 255)
+    CONTRAST_RED = QColor(218, 17, 17, 255)
+    CONTRAST_WHITE = QColor(238, 238, 238, 255)
+
+
+
+
+
+class TableBgColors(Enum):
+    '''Enum con QColors para columnas de QTableViews. Contiene sus versiones normales 
+    y las variantes de color para filas alternantes.'''
+    LOW_STOCK_ROW = QColor(245, 125, 125, 255)
+    
+    UNIT_PRICE_ROW = QColor(253, 214, 118, 255)
+    UNIT_PRICE_ALT_ROW = QColor(253, 246, 134, 255)
+    
+    COMERC_PRICE_ROW = QColor(251, 189, 173, 255)
+    COMERC_PRICE_ALT_ROW = QColor(251, 221, 189, 255)
+
+
+
 
 
 class ModelHeaders(Enum):
