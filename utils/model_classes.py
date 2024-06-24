@@ -5,7 +5,7 @@
 from typing import (Any, Sequence)
 
 from PySide6.QtCore import (QAbstractTableModel, Qt, QModelIndex, QObject)
-from PySide6.QtGui import (QBrush)
+from PySide6.QtGui import (QBrush, QColor)
 
 from utils.enumclasses import (TableBgColors, TableFontColor)
 
@@ -63,6 +63,30 @@ class InventoryTableModel(QAbstractTableModel):
                         else:
                             return ""
         
+            case Qt.ItemDataRole.BackgroundRole:
+                match col:
+                    case 3: # stock
+                        try:
+                            if float(self._data[row][3]) <= 15.0:
+                                return TableBgColors.LOW_STOCK_ROW
+                        except ValueError:
+                            pass
+                    
+                    case 4: # precio normal
+                        return TableBgColors.UNIT_PRICE_ROW.value
+                    
+                    case 5: # precio comerc.
+                        return TableBgColors.COMERC_PRICE_ROW.value
+        
+            case Qt.ItemDataRole.ForegroundRole:
+                if col == 3: # stock
+                    try:
+                        if float(self._data[row][3]) <= 15.0:
+                            return QBrush(TableFontColor.CONTRAST_RED.value)
+                        
+                    except ValueError:
+                        pass
+        
             case Qt.ItemDataRole.TextAlignmentRole:
                 match col:
                     case 3 | 4 | 5: # stock, precio normal, precio comerc.
@@ -106,3 +130,9 @@ class InventoryTableModel(QAbstractTableModel):
     # TODO: implementar la lógica para añadir/quitar filas a medida que se hace scroll en la vista
     # def insertRows(self, row:int, count:int, parent:QModelIndex=QModelIndex()) -> None:
     #     self.beginInsertRows(QModelIndex(), )
+
+
+
+
+
+
