@@ -222,7 +222,6 @@ def setTableViewPolitics(tableView:QTableView) -> None:
     '''
     tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
     tableView.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
-    tableView.verticalHeader().hide()
     return None
 
 
@@ -423,22 +422,29 @@ def createTableColumnDateTimeEdit(table_widget:QTableWidget, curr_index:QModelIn
 
 
 #========================================================================================================================
-def createCompleter(sql:str=None, params:tuple=None, type:int=None) -> QCompleter:
+def createCompleter(sql:str=None, params:tuple[Any]=None, type:int=None) -> QCompleter:
     '''
-    Crea un QCompleter, establece sus atributos y lo coloca dentro de 'lineedit'.
+    Crea un QCompleter y establece sus atributos.
     El parámetro 'type' sirve para realizar una consulta genérica a la base de datos y obtener todas 
     las coincidencias del valor de 'type', en cambio los parámetros 'sql' y 'params' sirven para obtener 
     resultados más precisos al realizar consultas concretas.
     
-    PARAMS:
-    - sql: (opcional) string con la consulta SELECT a la base de datos. Requiere el parámetro 'params'.
-    - params: (opcional) tuple con los parámetros para la consulta 'sql'. Requiere el parámetro 'sql'.
-    - type: (opcional) valor entero que determina los datos con los que llenar el QCompleter.
-        - 1: lo carga con todos los nombres de personas con cuenta corriente.
-        - 2: lo carga con todos los apellidos de personas con cuenta corriente.
-        - 3: lo carga con todos los nombres de productos.
+    Parámetros
+    ----------
+    sql: str, opcional
+        Consulta SELECT a la base de datos, requiere 'params'
+    params: tuple[Any], opcional 
+        Parámetros para la consulta
+    type: int, opcional 
+        Flag que determina los datos con los que llenar el QCompleter
+        - 1: lo carga con todos los nombres de personas con cuenta corriente
+        - 2: lo carga con todos los apellidos de personas con cuenta corriente
+        - 3: lo carga con todos los nombres de productos
     
-    Retorna un QCompleter.
+    Retorna
+    -------
+    QCompleter
+        QCompleter con sus atributos especificados
     '''
     completer:QCompleter
     query:list
@@ -454,7 +460,7 @@ def createCompleter(sql:str=None, params:tuple=None, type:int=None) -> QComplete
             names = [name[0] for name in query]
             completer = QCompleter(names)
         
-        elif type == 2:# apellidos de personas con cta. corriente
+        elif type == 2: # apellidos de personas con cta. corriente
             query = makeReadQuery("SELECT DISTINCT apellido FROM Deudores;")
             surnames = [surname[0] for surname in query]
             completer = QCompleter(surnames)

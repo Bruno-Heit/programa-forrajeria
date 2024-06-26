@@ -609,6 +609,9 @@ class Ui_MainWindow(object):
         self.tv_inventory_data.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Para </span><span style=\" font-size:12pt; text-decoration: underline;\">modificar</span><span style=\" font-size:12pt;\"> las </span><span style=\" font-size:12pt; text-decoration: underline;\">caracter\u00edsticas</span><span style=\" font-size:12pt;\"> de un producto, simplemente hacer </span><span style=\" font-size:12pt; font-style:italic;\">doble click</span><span style=\" font-size:12pt;\"> sobre la celda que se quiere modificar e ingresar el nuevo valor.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.tv_inventory_data.setFrameShape(QFrame.NoFrame)
+        self.tv_inventory_data.setFrameShadow(QFrame.Plain)
+        self.tv_inventory_data.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.tv_inventory_data.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
         self.tv_inventory_data.setEditTriggers(QAbstractItemView.DoubleClicked)
         self.tv_inventory_data.setProperty("showDropIndicator", False)
         self.tv_inventory_data.setDragDropOverwriteMode(False)
@@ -619,6 +622,8 @@ class Ui_MainWindow(object):
         self.tv_inventory_data.setSortingEnabled(False)
         self.tv_inventory_data.setWordWrap(True)
         self.tv_inventory_data.setCornerButtonEnabled(False)
+        self.tv_inventory_data.horizontalHeader().setMinimumSectionSize(50)
+        self.tv_inventory_data.verticalHeader().setVisible(False)
 
         self.inventory_display_Vlayout.addWidget(self.tv_inventory_data)
 
@@ -1216,6 +1221,8 @@ class Ui_MainWindow(object):
         self.tv_sales_data.setStyleSheet(u"")
         self.tv_sales_data.setFrameShape(QFrame.NoFrame)
         self.tv_sales_data.setFrameShadow(QFrame.Plain)
+        self.tv_sales_data.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.tv_sales_data.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
         self.tv_sales_data.setEditTriggers(QAbstractItemView.DoubleClicked)
         self.tv_sales_data.setProperty("showDropIndicator", False)
         self.tv_sales_data.setDragDropOverwriteMode(False)
@@ -1225,6 +1232,8 @@ class Ui_MainWindow(object):
         self.tv_sales_data.setGridStyle(Qt.SolidLine)
         self.tv_sales_data.setSortingEnabled(False)
         self.tv_sales_data.setCornerButtonEnabled(False)
+        self.tv_sales_data.horizontalHeader().setMinimumSectionSize(41)
+        self.tv_sales_data.verticalHeader().setVisible(False)
 
         self.box2_sales_Vlayout.addWidget(self.tv_sales_data)
 
@@ -1416,7 +1425,8 @@ class Ui_MainWindow(object):
 "	background-color: rgb(71, 184, 255);\n"
 "}")
         self.tv_debts_data.setFrameShape(QFrame.NoFrame)
-        self.tv_debts_data.setFrameShadow(QFrame.Sunken)
+        self.tv_debts_data.setFrameShadow(QFrame.Plain)
+        self.tv_debts_data.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.tv_debts_data.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
         self.tv_debts_data.setEditTriggers(QAbstractItemView.DoubleClicked)
         self.tv_debts_data.setProperty("showDropIndicator", False)
@@ -1426,6 +1436,8 @@ class Ui_MainWindow(object):
         self.tv_debts_data.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.tv_debts_data.setSortingEnabled(False)
         self.tv_debts_data.setCornerButtonEnabled(False)
+        self.tv_debts_data.horizontalHeader().setMinimumSectionSize(50)
+        self.tv_debts_data.verticalHeader().setVisible(False)
 
         self.debts_info_Vlayout.addWidget(self.tv_debts_data)
 

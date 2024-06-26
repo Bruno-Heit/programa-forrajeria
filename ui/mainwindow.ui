@@ -1008,6 +1008,15 @@ QProgressBar::chunk {
                    <property name="frameShape">
                     <enum>QFrame::NoFrame</enum>
                    </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Plain</enum>
+                   </property>
+                   <property name="horizontalScrollBarPolicy">
+                    <enum>Qt::ScrollBarAlwaysOff</enum>
+                   </property>
+                   <property name="sizeAdjustPolicy">
+                    <enum>QAbstractScrollArea::AdjustToContents</enum>
+                   </property>
                    <property name="editTriggers">
                     <set>QAbstractItemView::DoubleClicked</set>
                    </property>
@@ -1038,6 +1047,12 @@ QProgressBar::chunk {
                    <property name="cornerButtonEnabled">
                     <bool>false</bool>
                    </property>
+                   <attribute name="horizontalHeaderMinimumSectionSize">
+                    <number>50</number>
+                   </attribute>
+                   <attribute name="verticalHeaderVisible">
+                    <bool>false</bool>
+                   </attribute>
                   </widget>
                  </item>
                  <item>
@@ -2250,6 +2265,12 @@ border-right: 1px solid #111;</string>
                  <property name="frameShadow">
                   <enum>QFrame::Plain</enum>
                  </property>
+                 <property name="horizontalScrollBarPolicy">
+                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                 </property>
+                 <property name="sizeAdjustPolicy">
+                  <enum>QAbstractScrollArea::AdjustToContents</enum>
+                 </property>
                  <property name="editTriggers">
                   <set>QAbstractItemView::DoubleClicked</set>
                  </property>
@@ -2277,6 +2298,12 @@ border-right: 1px solid #111;</string>
                  <property name="cornerButtonEnabled">
                   <bool>false</bool>
                  </property>
+                 <attribute name="horizontalHeaderMinimumSectionSize">
+                  <number>41</number>
+                 </attribute>
+                 <attribute name="verticalHeaderVisible">
+                  <bool>false</bool>
+                 </attribute>
                 </widget>
                </item>
                <item>
@@ -2701,7 +2728,10 @@ QPushButton:hover {
                  <enum>QFrame::NoFrame</enum>
                 </property>
                 <property name="frameShadow">
-                 <enum>QFrame::Sunken</enum>
+                 <enum>QFrame::Plain</enum>
+                </property>
+                <property name="horizontalScrollBarPolicy">
+                 <enum>Qt::ScrollBarAlwaysOff</enum>
                 </property>
                 <property name="sizeAdjustPolicy">
                  <enum>QAbstractScrollArea::AdjustToContents</enum>
@@ -2730,6 +2760,12 @@ QPushButton:hover {
                 <property name="cornerButtonEnabled">
                  <bool>false</bool>
                 </property>
+                <attribute name="horizontalHeaderMinimumSectionSize">
+                 <number>50</number>
+                </attribute>
+                <attribute name="verticalHeaderVisible">
+                 <bool>false</bool>
+                </attribute>
                </widget>
               </item>
               <item>

@@ -6,9 +6,11 @@ demás widgets donde el usuario pueda ingresar datos.
 from PySide6.QtCore import (Signal, QLocale)
 from PySide6.QtGui import (QValidator, QRegularExpressionValidator, QIntValidator, QDoubleValidator)
 
-from utils.dboperations import *
+from utils.dboperations import (makeReadQuery)
+from utils.enumclasses import (RegexExps)
 
 from re import (fullmatch, compile, Pattern, IGNORECASE)
+import logging
 
 
 #¡ search bars ========================================================================================
@@ -16,7 +18,7 @@ class SearchBarValidator(QValidator):
     '''Validador para las barras de búsquedas. A diferencia de otros validadores, este no emite señales.'''
     def __init__(self, parent=None):
         super(SearchBarValidator, self).__init__()
-        self.pattern:Pattern = compile("[^;\"']*", flags=IGNORECASE)
+        self.pattern:Pattern = compile(RegexExps.SEARCH_BAR.value, flags=IGNORECASE)
     
     
     def validate(self, text: str, pos: int) -> object:
@@ -31,6 +33,8 @@ class SearchBarValidator(QValidator):
 
 
 
+
+
 #¡ tabla INVENTARIO ===================================================================================
 class ProductNameValidator(QValidator):
     '''Validador para los campos donde el usuario pueda modificar el nombre de un producto.'''
@@ -39,7 +43,7 @@ class ProductNameValidator(QValidator):
     
     def __init__(self, parent=None):
         super(ProductNameValidator, self).__init__()
-        self.pattern:Pattern = compile("[^;\"']{1,50}", flags=IGNORECASE)
+        self.pattern:Pattern = compile(RegexExps.PROD_NAME.value, flags=IGNORECASE)
     
     
     def validate(self, text: str, pos: int) -> object:
@@ -73,7 +77,7 @@ class ProductStockValidator(QRegularExpressionValidator):
     
     def __init__(self, parent=None):
         super(ProductStockValidator, self).__init__()
-        self.pattern:Pattern = compile("[0-9]{1,8}(\.|,)?[0-9]{0,2} ?[a-zA-Z]{0,20}", IGNORECASE)
+        self.pattern:Pattern = compile(RegexExps.PROD_STOCK.value, IGNORECASE)
     
     
     def fixup(self, text: str) -> str:        
@@ -111,14 +115,7 @@ class ProductUnitPriceValidator(QRegularExpressionValidator):
     
     def __init__(self, parent=None):
         super(ProductUnitPriceValidator, self).__init__()
-        self.pattern:Pattern = compile("[0-9]{1,8}(\.|,)?[0-9]{0,2}")
-    
-    
-    def fixup(self, text: str) -> str:
-        while text.endswith((".", ",")):
-            text = text.rstrip(",")
-            text = text.rstrip(".")
-        return super().fixup(text)
+        self.pattern:Pattern = compile(RegexExps.PROD_UNIT_PRICE.value)
     
     
     def validate(self, text: str, pos: int) -> object:
@@ -149,14 +146,7 @@ class ProductComercPriceValidator(QRegularExpressionValidator):
     
     def __init__(self, parent=None):
         super(ProductComercPriceValidator, self).__init__()
-        self.pattern:Pattern = compile("[0-9]{1,8}(\.|,)?[0-9]{0,2}")
-    
-    
-    def fixup(self, text: str) -> str:
-        while text.endswith((".", ",")):
-            text = text.rstrip(",")
-            text = text.rstrip(".")
-        return super().fixup(text)
+        self.pattern:Pattern = compile(RegexExps.PROD_COMERC_PRICE.value)
     
     
     def validate(self, text: str, pos: int) -> object:

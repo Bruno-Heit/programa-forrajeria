@@ -84,3 +84,21 @@ class LoggingMessage(StrEnum):
     ERROR_DB_DELETE = "Error en consulta DELETE"
     
     WORKER_SUCCESS = "WORKER terminó de ejecutarse correctamente"
+
+
+
+
+
+class RegexExps(StrEnum):
+    '''
+    Clase StrEnum con expresiones regulares predefinidas, creadas principalmente para 
+    usarse en 'utils.customvalidators.py'.
+    '''
+    SEARCH_BAR = "[^;\"']*"
+    
+    PROD_NAME = "[^;\"']{1,50}"
+    PROD_STOCK = "\d{1,8}(\.|,)?\d{0,2} ?[a-zA-Z]{0,20}"
+    PROD_UNIT_PRICE = "\d{1,8}((\.|,)?\d{0,2})?"
+    PROD_COMERC_PRICE = "\d{0,8}((\.|,)\d{0,2})?"
+    
+    # TODO: seguir poniendo acá las expresiones de los validadores

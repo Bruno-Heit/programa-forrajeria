@@ -12,6 +12,7 @@ from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemVa
 from ui.ui_mainwindow import (Ui_MainWindow)
 from utils.functionutils import *
 from utils.model_classes import (InventoryTableModel)
+from utils.delegates import (InventoryDelegate)
 from utils.workerclasses import (WorkerSelect, WorkerDelete, WorkerUpdate)
 from utils.dboperations import (DatabaseRepository)
 from utils.customvalidators import (SalePaidValidator)
@@ -41,6 +42,10 @@ class MainWindow(QMainWindow):
         # modelos de datos
         self.inventory_data_model:InventoryTableModel = InventoryTableModel()
         self.ui.tv_inventory_data.setModel(self.inventory_data_model)
+        
+        # delegados
+        self.inventory_delegate = InventoryDelegate()
+        self.ui.tv_inventory_data.setItemDelegate(self.inventory_delegate)
         
         # variables de modelos de datos
         self._model_data_accumulator:ndarray[Any] # acumulador temporal de datos para los modelos
@@ -99,8 +104,8 @@ class MainWindow(QMainWindow):
         
         # TODO: reimplementar las funciones de UPDATE
         #* (UPDATE) modificar celdas de 'tv_inventory_data'
-        self.ui.tv_inventory_data.doubleClicked.connect(lambda: self.handleTableUpdateItem(
-            self.ui.tv_inventory_data, self.ui.tv_inventory_data.currentIndex()) )
+        # self.ui.tv_inventory_data.doubleClicked.connect(lambda: self.handleTableUpdateItem(
+        #     self.ui.tv_inventory_data, self.ui.tv_inventory_data.currentIndex()) )
         
         #* cambio de selección de 'tv_inventory_data'
         # TODO: reimplementar cambios en las selecciones de los table views
@@ -509,9 +514,9 @@ class MainWindow(QMainWindow):
                 else:
                     pass
                 self.inventory_data_model.setModelData(
-                    data=self._model_data_accumulator,
+                    data=self._model_data_accumulator[:,1:],
                     headers=ModelHeaders.INVENTORY_HEADERS.value)
-                    # TODO: redimensionar la tabla cuando se carguen datos
+
                 
             case "tv_sales_data":
                 self.ui.sales_progressbar.setStyleSheet("")
@@ -1722,10 +1727,12 @@ def main():
         level=logging.DEBUG,
         datefmt='%A %d/%m/%Y %H:%M:%S')
     
+    
     app = QApplication(sys.argv)
     mainWindow = MainWindow()
     mainWindow.show()
     sys.exit(app.exec())
+    
 
 
 # MAIN #########################################################################################################

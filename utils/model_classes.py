@@ -4,7 +4,8 @@
 '''
 from typing import (Any, Sequence)
 
-from PySide6.QtCore import (QAbstractTableModel, Qt, QModelIndex, QObject)
+from PySide6.QtCore import (QAbstractTableModel, Qt, QModelIndex, QPersistentModelIndex, 
+                            QObject)
 from PySide6.QtGui import (QBrush, QColor)
 
 from utils.enumclasses import (TableBgColors, TableFontColor)
@@ -17,24 +18,66 @@ class InventoryTableModel(QAbstractTableModel):
     def __init__(self, data:Sequence[Sequence[Any]]=None, headers:Sequence[str]=None, 
                  parent:QObject=None) -> None:
         super(InventoryTableModel, self).__init__()
+        '''
+        datos en self._data:
+        (pos->dato) 0-> c.nombre_categoria | 1-> p.nombre |2-> p.descripcion |
+                    3-> p.stock | 4-> p.unidad_medida | 5-> p.precio_unit | 
+                    6-> p.precio_comerc
+        '''
         self._data = data
         self._headers = headers
         self._parent = parent
         
     
-    def rowCount(self, parent:QModelIndex=QModelIndex()) -> int:
+    def rowCount(self, parent:QModelIndex | QPersistentModelIndex=QModelIndex()) -> int:
         if self._data is not None:
             return len(self._data)
         return 0
     
     
-    def columnCount(self, parent:QModelIndex=QModelIndex()) -> int:
+    def columnCount(self, parent:QModelIndex | QPersistentModelIndex=QModelIndex()) -> int:
         if self._headers is not None:
             return len(self._headers)
         return 0
     
     
-    def data(self, index:QModelIndex, role:Qt.ItemDataRole=Qt.ItemDataRole.DisplayRole) -> Any:
+    # hace el modelo editable
+    def flags(self, index: QModelIndex | QPersistentModelIndex) -> Qt.ItemFlag:
+        return Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsEditable
+    
+    
+    # TODO: desde setData() emitir una señal a un método en MainWindow que se encargue de 
+    # todo: actualizar los datos en base de datos
+    def setData(self, index: QModelIndex | QPersistentModelIndex, 
+                value: Any, role: int = Qt.ItemDataRole.EditRole) -> bool:
+        if role == Qt.ItemDataRole.EditRole:
+            match index.column():
+                case 0 | 1 | 2: # categoría, nombre, descripción
+                    self._data[index.row()][index.column()] = value
+                    
+                    self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
+                    return True
+                    
+                case 3: # stock (con unidad de medida)
+                    # [0] tiene cantidad de stock y [1] tiene unidad de medida
+                    full_stock = str(value).replace(",",".").split(" ")
+                    full_stock.append("") if len(full_stock) == 1 else None
+                    
+                    self._data[index.row()][3] = full_stock[0] # stock
+                    self._data[index.row()][4] = full_stock[1] # unidad de medida
+                    
+                    self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
+                    return True
+                
+                case 4 | 5: # precio unitario, precio comercial
+                    self._data[index.row()][index.column() + 1] = value
+                    
+                    self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
+                    return True
+        return False
+    
+    
+    def data(self, index:QModelIndex | QPersistentModelIndex, role:Qt.ItemDataRole=Qt.ItemDataRole.DisplayRole) -> Any:
         if not index.isValid():
             return None
         
@@ -54,12 +97,12 @@ class InventoryTableModel(QAbstractTableModel):
                     case 2: # descripción
                         return str(self._data[row][2])
                     case 3: # stock
-                        return str(f"{self._data[row][3]} {self._data[row][4]}")
+                        return str(f"{self._data[row][3]} {self._data[row][4]}").replace(".",",")
                     case 4: # precio normal
-                        return str(self._data[row][5])
+                        return str(self._data[row][5]).replace(".",",")
                     case 5: # precio comercial
                         if self._data[row][6]:
-                            return str(self._data[row][6])
+                            return str(self._data[row][6]).replace(".",",")
                         else:
                             return ""
         
