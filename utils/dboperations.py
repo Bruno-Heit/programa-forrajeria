@@ -31,16 +31,12 @@ class DatabaseRepository():
         return self
     
     
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
+    def __exit__(self, exc_type, exc_value, exc_trc) -> None:
         if exc_type:
-            self._connection.rollback()
-            logging.critical(f"{exc_type}: {exc_value}")
+            logging.critical(f"{exc_type}:{exc_value}")
             
-        else:
-            if self._connection:
-                self._connection.commit()
-                self._connection.close()
-        return False
+        self._connection.close()
+        return None
     
     
     def __executeQuery(self, sql:str, params:tuple=None) -> Cursor:
@@ -60,11 +56,18 @@ class DatabaseRepository():
         Cursor
             Cursor con los registros resultantes sin filtrar de la consulta
         '''
-        cursor:Cursor = self._connection.cursor()
-        if params:
-            cursor.execute(sql, params)
-        else:
-            cursor.execute(sql)
+        cursor = self._connection.cursor()
+        try:
+            if params:
+                cursor.execute(sql, params)
+            else:
+                cursor.execute(sql)
+            self._connection.commit()
+        
+        except sqlite3Error as err:
+            self._connection.rollback()
+            logging.critical(f"{err.sqlite_errorcode}:{err.sqlite_errorname} / {err}")
+        
         return cursor
     
     
