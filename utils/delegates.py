@@ -17,7 +17,7 @@ class InventoryDelegate(QStyledItemDelegate):
     '''Clase DELEGADO que se encarga de personalizar/editar celdas del QTableView de inventario, 
     además, normalmente, el método 'setModelData' se encarga de validar datos, pero en este caso 
     no es necesario ya que cada editor (dependiendo de la columna) tiene un validador.'''
-    fieldIsValid:Signal = Signal(object) # extensión de 'validator.validationSucceded', 
+    fieldIsValid:Signal = Signal(object) # extensión de 'validator.validationSucceeded', 
                                    # emite hacia MainWindow un TableViewId.
     fieldIsInvalid:Signal = Signal(object) # extensión de 'validator.validationFailed',
                                         # emite hacia MainWindow tuple(TableViewId, 
@@ -26,6 +26,7 @@ class InventoryDelegate(QStyledItemDelegate):
     def createEditor(self, parent: QWidget, option: QStyleOptionViewItem, 
                      index: QModelIndex | QPersistentModelIndex) -> QWidget:
         editor:QWidget
+        validator = None
         
         match index.column():
             case 0: # categoría
@@ -51,21 +52,24 @@ class InventoryDelegate(QStyledItemDelegate):
             case 3: # stock
                 editor = QLineEdit(parent)
                 editor.setMaxLength(31)
-                editor.setValidator(ProductStockValidator(editor))
+                validator = ProductStockValidator(editor)
+                editor.setValidator(validator)
                 
             case 4: # precio unitario
                 editor = QLineEdit(parent)
                 editor.setMaxLength(10)
-                editor.setValidator(ProductUnitPriceValidator(editor))
+                validator = ProductUnitPriceValidator(editor)
+                editor.setValidator(validator)
             
             case 5: # precio comercial
                 editor = QLineEdit(parent)
                 editor.setMaxLength(10)
-                editor.setValidator(ProductComercPriceValidator(editor))
+                validator = ProductComercPriceValidator(editor)
+                editor.setValidator(validator)
                 
         # conecto señales de los validadores
-        if editor.validator():
-            validator.validationSucceded.connect(self.__onValidField)
+        if validator:
+            validator.validationSucceeded.connect(self.__onValidField)
             validator.validationFailed.connect(self.__onInvalidField)
         return editor
     
@@ -73,7 +77,7 @@ class InventoryDelegate(QStyledItemDelegate):
     def __onValidField(self):
         '''
         Emite la señal 'fieldIsValid' hacia MainWindow. Funciona principalmente 
-        como una extensión de la señal 'validator.validationSucceded'.
+        como una extensión de la señal 'validator.validationSucceeded'.
 
         Retorna
         -------
@@ -86,7 +90,7 @@ class InventoryDelegate(QStyledItemDelegate):
     def __onInvalidField(self, feedback_text:str):
         '''
         Emite la señal 'fieldIsValid' hacia MainWindow. Funciona principalmente 
-        como una extensión de la señal 'validator.validationSucceded'.
+        como una extensión de la señal 'validator.validationSucceeded'.
 
         Parámetros
         ----------

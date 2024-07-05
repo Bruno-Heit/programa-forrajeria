@@ -4,9 +4,8 @@ para poder lograr una mejor validación de datos en QComboBoxes, QLineEdits, QDa
 demás widgets donde el usuario pueda ingresar datos.
 '''
 from PySide6.QtWidgets import (QWidget)
-from PySide6.QtCore import (Signal, QLocale)
-from PySide6.QtGui import (QValidator, QRegularExpressionValidator, QIntValidator, 
-                           QDoubleValidator)
+from PySide6.QtCore import (Signal, QLocale, QObject)
+from PySide6.QtGui import (QValidator, QRegularExpressionValidator, QIntValidator)
 
 from utils.dboperations import (makeReadQuery)
 from utils.enumclasses import (RegexExps)
@@ -39,7 +38,7 @@ class SearchBarValidator(QValidator):
 
 #¡ tabla INVENTARIO ===================================================================================
 class InventoryValidator(QValidator):
-    validationSucceded = Signal() # se emite cuando el estado es 'Acceptable'. Sirve para esconder el label con feedback
+    validationSucceeded = Signal() # se emite cuando el estado es 'Acceptable'. Sirve para esconder el label con feedback
     validationFailed = Signal(str) # se emite cuando el estado es 'Invalid', envía un str con feedback para mostrar
 
 
@@ -73,7 +72,7 @@ class ProductNameValidator(InventoryValidator):
             
             # # si coincide el patrón devuelve Acceptable
             elif fullmatch(self.pattern, text):
-                self.validationSucceded.emit()
+                self.validationSucceeded.emit()
                 return QValidator.State.Acceptable, text, pos
             
             # en cualquier otro caso devuelve Invalid
@@ -89,7 +88,7 @@ class ProductNameValidator(InventoryValidator):
 class ProductStockValidator(InventoryValidator, QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar el stock y la unidad de medida de un producto.'''
     def __init__(self, parent=None):
-        # TODO: buscar cómo corregir el problema de herencia, no se llama a 'validate'
+        # TODO: corregir SignalManager::registerMetaMethodGetIndex("validationSucceeded()") called with source=nullptr.
         super(ProductStockValidator, self).__init__()
         self.pattern:Pattern = compile(RegexExps.PROD_STOCK.value, IGNORECASE)
     
@@ -107,7 +106,7 @@ class ProductStockValidator(InventoryValidator, QRegularExpressionValidator):
             return QRegularExpressionValidator.State.Intermediate, text, pos
         
         elif fullmatch(self.pattern, text):
-            self.validationSucceded.emit()
+            self.validationSucceeded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
         elif text.split(" ")[0].endswith((".", ",")): # llama automáticamente a fixup()
@@ -136,7 +135,7 @@ class ProductUnitPriceValidator(InventoryValidator, QRegularExpressionValidator)
             return QRegularExpressionValidator.State.Intermediate, text, pos
         
         elif fullmatch(self.pattern, text):
-            self.validationSucceded.emit()
+            self.validationSucceeded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
         elif text.endswith((",",".")): # llama automáticamente a fixup()
@@ -161,11 +160,11 @@ class ProductComercPriceValidator(InventoryValidator, QRegularExpressionValidato
     def validate(self, text: str, pos: int) -> object:
         
         if text.strip() == "":
-            self.validationSucceded.emit()
+            self.validationSucceeded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
         elif fullmatch(self.pattern, text):
-            self.validationSucceded.emit()
+            self.validationSucceeded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
         elif text.endswith((",",".")): # llama automáticamente a fixup()
@@ -182,7 +181,7 @@ class ProductComercPriceValidator(InventoryValidator, QRegularExpressionValidato
 #¡ tabla VENTAS ===================================================================================
 class SaleDetailsValidator(QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar los detalles de una venta.'''
-    validationSucceded = Signal()
+    validationSucceeded = Signal()
     validationFailed = Signal(str)
     
     def __init__(self, parent=None):
@@ -193,7 +192,7 @@ class SaleDetailsValidator(QRegularExpressionValidator):
     def validate(self, text: str, pos: int) -> object:
         
         if text.strip() == "" or fullmatch(self.pattern, text):
-            self.validationSucceded.emit()
+            self.validationSucceeded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
         else:
@@ -206,7 +205,7 @@ class SaleDetailsValidator(QRegularExpressionValidator):
 
 class SaleQuantityValidator(QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar la cantidad de un producto.'''
-    validationSucceded = Signal()
+    validationSucceeded = Signal()
     validationFailed = Signal(str)
     
     def __init__(self, parent=None):
@@ -251,7 +250,7 @@ class SaleQuantityValidator(QRegularExpressionValidator):
             except TypeError as err:
                 logging.error(err)
             
-            self.validationSucceded.emit()
+            self.validationSucceeded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
         elif text.split(" ")[0].endswith((".", ",")): # si pasa, automáticamente llama a 'fixup' y lo corrige, y el programa sigue como si nada...
@@ -267,7 +266,7 @@ class SaleQuantityValidator(QRegularExpressionValidator):
 
 class SaleTotalCostValidator(QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar el costo total de un producto.'''
-    validationSucceded = Signal()
+    validationSucceeded = Signal()
     validationFailed = Signal(str)
     
     
@@ -288,7 +287,7 @@ class SaleTotalCostValidator(QRegularExpressionValidator):
             return QRegularExpressionValidator.State.Intermediate, text, pos
         
         elif fullmatch(self.pattern, text):
-            self.validationSucceded.emit()
+            self.validationSucceeded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
         elif text.endswith((".", ",")): # si pasa, automáticamente llama a 'fixup' y lo corrige, y el programa sigue como si nada...
@@ -304,7 +303,7 @@ class SaleTotalCostValidator(QRegularExpressionValidator):
 
 class SalePaidValidator(QValidator):
     '''Validador para los campos donde el usuario pueda modificar la cantidad paga de un producto.'''
-    validationSucceded = Signal()
+    validationSucceeded = Signal()
     validationFailed = Signal(str)
     
     def __init__(self, parent=None, is_optional:bool=False):
@@ -316,7 +315,7 @@ class SalePaidValidator(QValidator):
     def validate(self, text: str, pos: int) -> object:
         
         if self.is_optional and text == "": # si el campo es opcional y está vacío emite Acceptable
-            self.validationSucceded.emit()
+            self.validationSucceeded.emit()
             return QValidator.State.Acceptable, text, pos
         
         elif not self.is_optional and text == "": # si el campo es obligatorio y está vacío emite Itermediate
@@ -324,7 +323,7 @@ class SalePaidValidator(QValidator):
             return QValidator.State.Intermediate, text, pos
         
         elif fullmatch(self.pattern, text):
-            self.validationSucceded.emit()
+            self.validationSucceeded.emit()
             return QIntValidator.State.Acceptable, text, pos
 
         else:
@@ -338,7 +337,7 @@ class SalePaidValidator(QValidator):
 #¡ tabla VENTAS/CUENTA CORRIENTE ===================================================================================
 class DebtorNameValidator(QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar el nombre de una persona en cuenta corriente.'''
-    validationSucceded = Signal()
+    validationSucceeded = Signal()
     validationFailed = Signal(str)
     
     def __init__(self, parent=None):
@@ -352,7 +351,7 @@ class DebtorNameValidator(QRegularExpressionValidator):
             return QRegularExpressionValidator.State.Intermediate, text, pos
         
         elif fullmatch(self.pattern, text):
-            self.validationSucceded.emit()
+            self.validationSucceeded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
         else:
@@ -365,7 +364,7 @@ class DebtorNameValidator(QRegularExpressionValidator):
 
 class DebtorSurnameValidator(QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar el apellido de una persona en cuenta corriente.'''
-    validationSucceded = Signal()
+    validationSucceeded = Signal()
     validationFailed = Signal(str)
     
     def __init__(self, parent=None):
@@ -379,7 +378,7 @@ class DebtorSurnameValidator(QRegularExpressionValidator):
             return QRegularExpressionValidator.State.Intermediate, text, pos
         
         elif fullmatch(self.pattern, text):
-            self.validationSucceded.emit()
+            self.validationSucceeded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
         else:
@@ -392,7 +391,7 @@ class DebtorSurnameValidator(QRegularExpressionValidator):
 
 class DebtorPhoneNumberValidator(QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar el número de teléfono de una persona en cuenta corriente.'''
-    validationSucceded = Signal()
+    validationSucceeded = Signal()
     validationFailed = Signal(str)
 
     def __init__(self, parent=None):
@@ -402,11 +401,11 @@ class DebtorPhoneNumberValidator(QRegularExpressionValidator):
     def validate(self, text: str, pos: int) -> object:
         
         if text.strip() == "": # si el texto está vacío devuelve Acceptable
-            self.validationSucceded.emit()
+            self.validationSucceeded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
         elif fullmatch(self.pattern, text):
-            self.validationSucceded.emit()
+            self.validationSucceeded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
         
         else:
@@ -418,7 +417,7 @@ class DebtorPhoneNumberValidator(QRegularExpressionValidator):
 
 
 class DebtorPostalCodeValidator(QIntValidator):
-    validationSucceded = Signal()
+    validationSucceeded = Signal()
     validationFailed = Signal(str)
 
     def __init__(self, parent=None):
@@ -430,11 +429,11 @@ class DebtorPostalCodeValidator(QIntValidator):
     def validate(self, text: str, pos: int) -> object:
         
         if text.strip() == "": # si el texto está vacío devuelve Acceptable
-            self.validationSucceded.emit()
+            self.validationSucceeded.emit()
             return QIntValidator.State.Acceptable, text, pos
         
         elif text.isnumeric() and (self.bottom() <= int(text) <= self.top()):
-            self.validationSucceded.emit()
+            self.validationSucceeded.emit()
             return QIntValidator.State.Acceptable, text, pos
         
         elif text.isalnum():

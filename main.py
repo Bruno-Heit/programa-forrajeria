@@ -258,7 +258,7 @@ class MainWindow(QMainWindow):
             QIntValidator(-9_999_999, 99_999_999, self.ui.lineEdit_percentage_change))
         
         # señales/slots
-        self.total_paid_validator.validationSucceded.connect(self.onPaidValidationSucceded)
+        self.total_paid_validator.validationSucceeded.connect(self.onPaidValidationSucceded)
         self.total_paid_validator.validationFailed.connect(self.onPaidValidationFailed)
         
         return None
@@ -1095,7 +1095,7 @@ class MainWindow(QMainWindow):
                             if curr_index.column() != 2: # diferente de descripción (no tiene validador)
                                 # señal del validador
                                 validator = self.lineedit.validator()
-                                validator.validationSucceded.connect(self.ui.label_feedbackInventory.hide)
+                                validator.validationSucceeded.connect(self.ui.label_feedbackInventory.hide)
                                 validator.validationFailed.connect(lambda text: self.__onDelegateValidationFailed(
                                     feedback_text=text,
                                     feedback_label=self.ui.label_feedbackInventory,
@@ -1135,7 +1135,7 @@ class MainWindow(QMainWindow):
                             
                             # señal del validador
                             validator = self.lineedit.validator()
-                            validator.validationSucceded.connect(self.ui.label_feedbackSales.hide)
+                            validator.validationSucceeded.connect(self.ui.label_feedbackSales.hide)
                             validator.validationFailed.connect(lambda text: self.__onDelegateValidationFailed(
                                 feedback_text=text,
                                 feedback_label=self.ui.label_feedbackSales,
@@ -1341,7 +1341,7 @@ class MainWindow(QMainWindow):
     @Slot()
     def onPaidValidationSucceded(self) -> None:
         '''
-        Es llamado desde la señal 'validationSucceded' de 'lineEdit_paid'.
+        Es llamado desde la señal 'validationSucceeded' de 'lineEdit_paid'.
         
         Cambia el estilo de 'lineEdit_paid' para representar la validez del campo y el valor de la variable 
         'self.VALID_PAID_FIELD' a True.
