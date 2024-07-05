@@ -3,8 +3,10 @@ En este archivo se encuentran los QValidators -y sus variantes- que he tenido qu
 para poder lograr una mejor validación de datos en QComboBoxes, QLineEdits, QDateTimeEdits y 
 demás widgets donde el usuario pueda ingresar datos.
 '''
+from PySide6.QtWidgets import (QWidget)
 from PySide6.QtCore import (Signal, QLocale)
-from PySide6.QtGui import (QValidator, QRegularExpressionValidator, QIntValidator, QDoubleValidator)
+from PySide6.QtGui import (QValidator, QRegularExpressionValidator, QIntValidator, 
+                           QDoubleValidator)
 
 from utils.dboperations import (makeReadQuery)
 from utils.enumclasses import (RegexExps)
@@ -36,51 +38,63 @@ class SearchBarValidator(QValidator):
 
 
 #¡ tabla INVENTARIO ===================================================================================
-class ProductNameValidator(QValidator):
-    '''Validador para los campos donde el usuario pueda modificar el nombre de un producto.'''
+class InventoryValidator(QValidator):
     validationSucceded = Signal() # se emite cuando el estado es 'Acceptable'. Sirve para esconder el label con feedback
     validationFailed = Signal(str) # se emite cuando el estado es 'Invalid', envía un str con feedback para mostrar
-    
-    def __init__(self, parent=None):
+
+
+
+
+
+class ProductNameValidator(InventoryValidator):
+    '''Validador para los campos donde el usuario pueda modificar el nombre de un producto.'''
+    def __init__(self, prev_name:str, parent:QWidget=None):
         super(ProductNameValidator, self).__init__()
         self.pattern:Pattern = compile(RegexExps.PROD_NAME.value, flags=IGNORECASE)
+        self.prev_name:str = prev_name
     
     
     def validate(self, text: str, pos: int) -> object:
-        # lista para verificar si el nombre existe en la base de datos
-        names:list = [name[0] for name in makeReadQuery("SELECT nombre FROM Productos WHERE nombre = ?;", (text,))]
-        
-        if text in names: # si el nombre ya existe devuelve Intermediate
-            self.validationFailed.emit("El nombre del producto ya existe")
-            return QValidator.State.Intermediate, text, pos
-        
-        elif text.strip() == "": # si el campo está vacío devuelve Intermediate
-            self.validationFailed.emit("El campo del nombre del producto no puede estar vacío")
-            return QValidator.State.Intermediate, text, pos
-        
-        elif fullmatch(self.pattern, text): # si coincide el patrón devuelve Acceptable
-            self.validationSucceded.emit()
-            return QValidator.State.Acceptable, text, pos
-        
-        else: # en cualquier otro caso devuelve Invalid
-            self.validationFailed.emit("El nombre del producto es inválido")
-            return QValidator.State.Invalid, text, pos
+        #? no quiero validar cuando el nombre sea el mismo que el que estaba antes
+        if text != self.prev_name:
+            # lista para verificar si el nombre existe en la base de datos
+            names:list = [name[0] for name in makeReadQuery(
+                '''SELECT nombre FROM Productos WHERE nombre = ?;''', (text,))]
+            
+            # si el nombre ya existe devuelve Intermediate
+            if text in names:
+                self.validationFailed.emit("El nombre del producto ya existe")
+                return QValidator.State.Intermediate, text, pos
+            
+            # si el campo está vacío devuelve Intermediate
+            elif text.strip() == "":
+                self.validationFailed.emit("El campo del nombre del producto no puede estar vacío")
+                return QValidator.State.Intermediate, text, pos
+            
+            # # si coincide el patrón devuelve Acceptable
+            elif fullmatch(self.pattern, text):
+                self.validationSucceded.emit()
+                return QValidator.State.Acceptable, text, pos
+            
+            # en cualquier otro caso devuelve Invalid
+            else:
+                self.validationFailed.emit("El nombre del producto es inválido")
+                return QValidator.State.Invalid, text, pos
+        return self.State.Acceptable, text, pos
 
 
 
 
 
-class ProductStockValidator(QRegularExpressionValidator):
+class ProductStockValidator(InventoryValidator, QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar el stock y la unidad de medida de un producto.'''
-    validationSucceded = Signal()
-    validationFailed = Signal(str)
-    
     def __init__(self, parent=None):
+        # TODO: buscar cómo corregir el problema de herencia, no se llama a 'validate'
         super(ProductStockValidator, self).__init__()
         self.pattern:Pattern = compile(RegexExps.PROD_STOCK.value, IGNORECASE)
     
     
-    def fixup(self, text: str) -> str:        
+    def fixup(self, text: str) -> str:
         while text.split(" ")[0].endswith((".", ",")):
             text = text.rstrip(",")
             text = text.rstrip(".")
@@ -88,7 +102,6 @@ class ProductStockValidator(QRegularExpressionValidator):
     
     
     def validate(self, text: str, pos: int) -> object:
-        
         if text.strip() == "":
             self.validationFailed.emit("El campo de stock no puede estar vacío")
             return QRegularExpressionValidator.State.Intermediate, text, pos
@@ -108,10 +121,8 @@ class ProductStockValidator(QRegularExpressionValidator):
 
 
 
-class ProductUnitPriceValidator(QRegularExpressionValidator):
+class ProductUnitPriceValidator(InventoryValidator, QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar el precio unitario de un producto.'''
-    validationSucceded = Signal()
-    validationFailed = Signal(str)
     
     def __init__(self, parent=None):
         super(ProductUnitPriceValidator, self).__init__()
@@ -139,10 +150,8 @@ class ProductUnitPriceValidator(QRegularExpressionValidator):
 
 
 
-class ProductComercPriceValidator(QRegularExpressionValidator):
+class ProductComercPriceValidator(InventoryValidator, QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar el precio comercial de un producto.'''
-    validationSucceded = Signal()
-    validationFailed = Signal(str)
     
     def __init__(self, parent=None):
         super(ProductComercPriceValidator, self).__init__()
