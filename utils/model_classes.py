@@ -49,6 +49,8 @@ class InventoryTableModel(QAbstractTableModel):
     
     def setData(self, index: QModelIndex | QPersistentModelIndex, 
                 value: Any, role: int = Qt.ItemDataRole.EditRole) -> bool:
+        #* realizar la actualización de datos en base de datos desde este método
+        
         if role == Qt.ItemDataRole.EditRole:
             match index.column():
                 case 0 | 1 | 2: # categoría, nombre, descripción
@@ -176,9 +178,6 @@ class InventoryTableModel(QAbstractTableModel):
     # TODO: implementar la lógica para añadir/quitar filas a medida que se hace scroll en la vista
     # def insertRows(self, row:int, count:int, parent:QModelIndex=QModelIndex()) -> None:
     #     self.beginInsertRows(QModelIndex(), )
-
-
-
 
 
 

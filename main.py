@@ -16,7 +16,8 @@ from utils.delegates import (InventoryDelegate)
 from utils.workerclasses import (WorkerSelect, WorkerDelete, WorkerUpdate)
 from utils.dboperations import (DatabaseRepository)
 from utils.customvalidators import (SalePaidValidator)
-from utils.enumclasses import (LoggingMessage, DBQueries, ModelHeaders)
+from utils.enumclasses import (LoggingMessage, DBQueries, ModelHeaders, TableViewId, 
+                               LabelFeedbackStyle)
 
 from resources import (rc_icons)
 
@@ -26,15 +27,7 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setWindowTitle("herramienta de gestión - Forrajería Torres")
-        set_tables_ListWidgetItemsTooltip(self.ui.tables_ListWidget, getCategoriesDescription())
-        self.__hideWidgets() # esconde algunos widgets inicialmente
-        self.__initGeneralValidators() # inicializa validadores existentes
-        self.addIconsToWidgets() # añade íconos a los widgets
-        # políticas de QTableViews
-        setTableViewPolitics(self.ui.tv_inventory_data)
-        setTableViewPolitics(self.ui.tv_sales_data)
-        setTableViewPolitics(self.ui.tv_debts_data)
+        self.setup_ui()
         
         # repositorio de base de datos
         self._db_repo:DatabaseRepository = DatabaseRepository()
@@ -48,10 +41,9 @@ class MainWindow(QMainWindow):
         self.ui.tv_inventory_data.setItemDelegate(self.inventory_delegate)
         
         # variables de modelos de datos
-        self._model_data_accumulator:ndarray[Any] # acumulador temporal de datos para los modelos
-        
-        # self.sales_data_model
-        # self.debts_data_model
+        #? Los acumuladores de datos sirven para cargar datos en los modelos de datos 
+        #? en "batches" y mejorar el rendimiento de la aplicación de forma general
+        self._inv_model_data_acc:ndarray[Any] # acumulador temporal de datos para los modelos
 
         #* ======== variables de 'search bars' ================================
         # TODO: reimplementar funcionalidad de search bars
@@ -75,10 +67,36 @@ class MainWindow(QMainWindow):
         # TODO: permitir eliminar deuda
         # TODO: permitir modificar deuda
         
+        self.setup_signals() #! la declaración de señales se hace al final
+        return None
 
-        #*## SEÑALES #####################################################
-        
+
+    def setup_ui(self) -> None:
+        '''
+        Método que sirve para simplificar la lectura del método 'self.__init__'.
+        Contiene inicializaciones y ajustes de algunos Widgets.
+        '''
+        self.setWindowTitle("herramienta de gestión - Forrajería Torres")
+        set_tables_ListWidgetItemsTooltip(self.ui.tables_ListWidget, getCategoriesDescription())
+        self.__hideWidgets() # esconde algunos widgets inicialmente
+        self.__initGeneralValidators() # inicializa validadores existentes
+        self.__addIconsToWidgets() # añade íconos a los widgets
+        # políticas de QTableViews
+        setTableViewPolitics(self.ui.tv_inventory_data)
+        setTableViewPolitics(self.ui.tv_sales_data)
+        setTableViewPolitics(self.ui.tv_debts_data)
+        return None    
+
+
+    def setup_signals(self) -> None:
+        '''
+        Al igual que el método 'self.setup_ui', este método tiene el objeto 
+        de simplificar la lectura del método 'self.__init__'.
+        Contiene las declaraciones de señales/slots de Widgets ya existentes 
+        desde la instanciación de 'MainWindow'.
+        '''
         #¡========= INVENTARIO ================================================
+        #* abrir/cerrar side bars
         self.ui.btn_side_barToggle.clicked.connect(lambda: toggleSideBar(
             self.ui.side_bar, self.ui.centralwidget, self.ui.side_bar_body))
         
@@ -104,8 +122,9 @@ class MainWindow(QMainWindow):
         
         # TODO: reimplementar las funciones de UPDATE
         #* (UPDATE) modificar celdas de 'tv_inventory_data'
-        # self.ui.tv_inventory_data.doubleClicked.connect(lambda: self.handleTableUpdateItem(
-        #     self.ui.tv_inventory_data, self.ui.tv_inventory_data.currentIndex()) )
+        # self.inventory_data_model.dataToUpdate.connect(self.__onInventoryModelDataToUpdate)
+        self.inventory_delegate.fieldIsValid.connect(self.__onDelegateValidationSucceded)
+        self.inventory_delegate.fieldIsInvalid.connect(self.__onDelegateValidationFailed)
         
         #* cambio de selección de 'tv_inventory_data'
         # TODO: reimplementar cambios en las selecciones de los table views
@@ -151,11 +170,11 @@ class MainWindow(QMainWindow):
         #* (READ) cargar con deudas 'tv_debts_data'
         self.ui.tabWidget.currentChanged.connect(lambda curr_index: self.fillTableView(
             self.ui.tv_debts_data, SHOW_ALL=True) if curr_index == 2 else None)
-
-
-
-    #*## MÉTODOS #####################################################
-    def addIconsToWidgets(self) -> None:
+        
+        return None
+    
+    
+    def __addIconsToWidgets(self) -> None:
         '''
         Simplemente le coloca los íconos que le corresponde a cada Widget. 
         
@@ -386,7 +405,7 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
-        self._model_data_accumulator = empty(shape=model_shape, dtype=object)
+        self._inv_model_data_acc = empty(shape=model_shape, dtype=object)
         
         self.__updateProgressBar(tv_name=tv_name, max_val=model_shape[0])
     
@@ -417,7 +436,7 @@ class MainWindow(QMainWindow):
 
         # guarda en la posición actual (register[0] marca el progreso de 
         # lectura) el registro completo
-        self._model_data_accumulator[register[0]] = register[1]
+        self._inv_model_data_acc[register[0]] = register[1]
         
         return None
     
@@ -514,7 +533,7 @@ class MainWindow(QMainWindow):
                 else:
                     pass
                 self.inventory_data_model.setModelData(
-                    data=self._model_data_accumulator[:,1:],
+                    data=self._inv_model_data_acc,
                     headers=ModelHeaders.INVENTORY_HEADERS.value)
 
                 
@@ -712,7 +731,59 @@ class MainWindow(QMainWindow):
 
 
     #¡ tablas (UPDATE)
-    def __tableComboBoxOnCurrentTextChanged(self, table_view:QTableView, curr_index:QModelIndex, combobox:QComboBox) -> None:
+    @Slot(int, int, int, object)
+    def __onInventoryModelDataToUpdate(self, row:int, column:int, IDproduct:int, 
+                                       new_val:object) -> None:
+        '''
+        Actualiza la base de datos con el valor nuevo de Productos.
+        
+        Parámetros
+        ----------
+        row : int
+            Fila del item modificado
+        column : int
+            Columna del item modificado
+        IDproduct : int
+            IDproducto en la base de datos del item modificado
+        new_val : object
+            Valor nuevo del item
+        
+        Retorna
+        -------
+        None
+        '''
+        upd_sql:str
+        upd_params:tuple = None
+        
+        match column:
+            case 0: # categoría
+                upd_sql='''UPDATE Productos 
+                        SET IDcategoria = (
+                            SELECT IDcategoria FROM Categorias 
+                            WHERE nombre_categoria = ?) 
+                        WHERE IDproducto = ?;'''
+                upd_params=(new_val, IDproduct,)
+            case 1: # nombre del producto
+                upd_sql='''UPDATE Productos 
+                        SET nombre = ? 
+                        WHERE IDproducto = ?;'''
+                upd_params=(new_val, IDproduct,)
+            case 2: # descripción
+                pass
+            case 3: # stock
+                pass
+            case 4: # precio normal
+                pass
+            case 5: # precio comercial
+                pass
+        
+        with self._db_repo as db_repo:
+            db_repo.updateRegisters(upd_sql=upd_sql, upd_params=upd_params)
+            
+    
+    
+    def __tableComboBoxOnCurrentTextChanged(self, table_view:QTableView, curr_index:QModelIndex, 
+                                            combobox:QComboBox) -> None:
         '''
         Declara la consulta sql y los parámetros y luego hace la consulta UPDATE a la base de datos con el nuevo 
         dato seleccionado a partir del nuevo texto de 'combobox'. Reemplaza el valor anterior de la celda por el
@@ -998,7 +1069,7 @@ class MainWindow(QMainWindow):
         # table_view.setSortingEnabled(False)
 
         if table_view.editTriggers() != QAbstractItemView.EditTrigger.NoEditTriggers:
-            cell_old_text = table_view.item(curr_index.row(), curr_index.column()).text()
+            # cell_old_text = table_view.item(curr_index.row(), curr_index.column()).text()
             
             match table_view.objectName():
                 case "tv_inventory_data":
@@ -1025,7 +1096,7 @@ class MainWindow(QMainWindow):
                                 # señal del validador
                                 validator = self.lineedit.validator()
                                 validator.validationSucceded.connect(self.ui.label_feedbackInventory.hide)
-                                validator.validationFailed.connect(lambda text: self.__validatorOnValidationFailed(
+                                validator.validationFailed.connect(lambda text: self.__onDelegateValidationFailed(
                                     feedback_text=text,
                                     feedback_label=self.ui.label_feedbackInventory,
                                     curr_text=self.lineedit.text(),
@@ -1065,7 +1136,7 @@ class MainWindow(QMainWindow):
                             # señal del validador
                             validator = self.lineedit.validator()
                             validator.validationSucceded.connect(self.ui.label_feedbackSales.hide)
-                            validator.validationFailed.connect(lambda text: self.__validatorOnValidationFailed(
+                            validator.validationFailed.connect(lambda text: self.__onDelegateValidationFailed(
                                 feedback_text=text,
                                 feedback_label=self.ui.label_feedbackSales,
                                 curr_text=self.lineedit.text(),
@@ -1078,22 +1149,65 @@ class MainWindow(QMainWindow):
         return None
 
 
-    @Slot(str)
-    def __validatorOnValidationFailed(self, feedback_text:str, feedback_label:QLabel, curr_text:str, prev_text:str) -> None:
+    @Slot(object)
+    def __onDelegateValidationSucceded(self, TableViewID:TableViewId) -> None:
         '''
-        Es llamado desde la señal 'validationFailed' perteneciente a los validadores declarados en el método 
-        'self.handleTableUpdateItem'.
-        
-        Muestra el 'feedback_label' con el texto 'feedback_text' en él sólo si 'prev_text' es diferente al 
-        texto actual (sino significa que hubo un falso 'Validator.State.Intermediate' dado que el nombre introducido 
-        es el mismo que el anterior), además cambia la hoja de estilos del QLabel.
-        
-        Retorna None.
+        Esconde los labels de feedback relacionados con la VISTA a la que se 
+        referencia.
+
+        Parámetros
+        ----------
+        TableViewID : TableViewId
+            QTableView al que se refencia
+
+        Retorna
+        -------
+        None
         '''
-        if prev_text != curr_text:
-            feedback_label.show()
-            feedback_label.setStyleSheet("font-family: 'Verdana'; font-size: 16px; letter-spacing: 0px; word-spacing: 0px; color: #f00; border: 1px solid #f00; background-color: rgb(255, 185, 185);")
-            feedback_label.setText(feedback_text)
+        match TableViewID.name:
+            case "INVEN_TABLE_VIEW": # inventario
+                self.ui.label_feedbackInventory.hide()
+            
+            case "SALES_TABLE_VIEW":
+                self.ui.label_feedbackSales.hide()
+                
+            case "DEBTS_TABLE_VIEW":
+                self.ui.label_feedbackDebts.hide()
+        
+        return None
+
+
+    @Slot(tuple)
+    def __onDelegateValidationFailed(self, feedback:tuple[TableViewId, str]) -> None:
+        '''
+        Muestra el label con feedback relacionado con la VISTA a la que se referencia 
+        y cambia la hoja de estilos del label.
+        
+        Parámetros
+        ----------
+        feedback: tuple[TableViewId, str]
+            contiene el QTableView al que se referencia y el texto como feedback a mostrar 
+            en el label
+        
+        Retorna
+        -------
+        None
+        '''
+        match feedback[0].name:
+            case "INVEN_TABLE_VIEW":
+                self.ui.label_feedbackInventory.show()
+                self.ui.label_feedbackInventory.setStyleSheet(LabelFeedbackStyle.INVALID.value)
+                self.ui.label_feedbackInventory.setText(feedback[1])
+                
+            case "SALES_TABLE_VIEW":
+                self.ui.label_feedbackSales.show()
+                self.ui.label_feedbackSales.setStyleSheet(LabelFeedbackStyle.INVALID.value)
+                self.ui.label_feedbackSales.setText(feedback[1])
+                
+            case "DEBTS_TABLE_VIEW":
+                self.ui.label_feedbackDebts.show()
+                self.ui.label_feedbackDebts.setStyleSheet(LabelFeedbackStyle.INVALID.value)
+                self.ui.label_feedbackDebts.setText(feedback[1])
         return None
 
 
