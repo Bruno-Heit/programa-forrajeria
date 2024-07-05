@@ -8,6 +8,27 @@ from PySide6.QtGui import (QColor)
 from enum import (Enum, StrEnum, IntEnum)
 
 
+class LabelFeedbackStyle(StrEnum):
+    '''Clase con StrEnum con estilos predefinidos para darle a los QLabel 
+    dependiendo de si son válidos los datos del QTableView asociado o no.'''
+    VALID = '''font-family: 'Verdana'; 
+            font-size: 16px; 
+            letter-spacing: 0px; 
+            word-spacing: 0px; 
+            background-color: rgb(88, 223, 171); 
+            color: #111;'''
+    INVALID = '''font-family: 'Verdana'; 
+                font-size: 16px; 
+                letter-spacing: 0px; 
+                word-spacing: 0px; 
+                color: #f00; 
+                border: 1px solid #f00; 
+                background-color: rgb(255, 185, 185);'''
+
+
+
+
+
 class TableViewId(IntEnum):
     '''Clase con IntEnum con "IDs" para cada uno de los QTableView.'''
     INVEN_TABLE_VIEW = 0
