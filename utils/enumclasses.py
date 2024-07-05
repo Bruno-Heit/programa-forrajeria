@@ -8,6 +8,16 @@ from PySide6.QtGui import (QColor)
 from enum import (Enum, StrEnum, IntEnum)
 
 
+class TableViewId(IntEnum):
+    '''Clase con IntEnum con "IDs" para cada uno de los QTableView.'''
+    INVEN_TABLE_VIEW = 0
+    SALES_TABLE_VIEW = 1
+    DEBTS_TABLE_VIEW = 2
+
+
+
+
+
 class TableFontColor(Enum):
     '''Enum con QColors para la tipografía de QTableViews.'''
     DEF_COLOR = QColor(17, 17, 17, 255)
