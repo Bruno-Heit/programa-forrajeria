@@ -87,20 +87,20 @@ class InventoryTableModel(QAbstractTableModel):
                     return True
                 
                 case 4: # precio unitario
-                    self._data[index.row()][6] = value
+                    self._data[index.row()][6] = str(value).replace(",",".")
                     
                     self.dataToUpdate.emit(
-                        (index.column(), self._data[index.row()][0], value)
+                        (index.column(), self._data[index.row()][0], self._data[index.row()][6])
                         )
                     
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
                     return True
                     
                 case 5: # precio comercial
-                    self._data[index.row()][7] = value
+                    self._data[index.row()][7] = str(value).replace(",",".")
                     
                     self.dataToUpdate.emit(
-                        (index.column(), self._data[index.row()][0], value)
+                        (index.column(), self._data[index.row()][0], self._data[index.row()][7])
                         )
                     
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
