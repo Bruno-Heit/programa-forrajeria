@@ -43,6 +43,8 @@ class InventoryDelegate(QStyledItemDelegate):
                 validator = ProductNameValidator(
                     prev_name=index.data(Qt.ItemDataRole.DisplayRole),
                     parent=editor)
+                validator.validationSucceeded.connect(self.__onValidField)
+                validator.validationFailed.connect(self.__onInvalidField)
                 editor.setValidator(validator)
             
             case 2: # descripción
@@ -53,24 +55,25 @@ class InventoryDelegate(QStyledItemDelegate):
                 editor = QLineEdit(parent)
                 editor.setMaxLength(31)
                 validator = ProductStockValidator(editor)
+                validator.validationSucceeded.connect(self.__onValidField)
+                validator.validationFailed.connect(self.__onInvalidField)
                 editor.setValidator(validator)
                 
             case 4: # precio unitario
                 editor = QLineEdit(parent)
                 editor.setMaxLength(10)
                 validator = ProductUnitPriceValidator(editor)
+                validator.validationSucceeded.connect(self.__onValidField)
+                validator.validationFailed.connect(self.__onInvalidField)
                 editor.setValidator(validator)
             
             case 5: # precio comercial
                 editor = QLineEdit(parent)
                 editor.setMaxLength(10)
                 validator = ProductComercPriceValidator(editor)
+                validator.validationSucceeded.connect(self.__onValidField)
+                validator.validationFailed.connect(self.__onInvalidField)
                 editor.setValidator(validator)
-                
-        # conecto señales de los validadores
-        if validator:
-            validator.validationSucceeded.connect(self.__onValidField)
-            validator.validationFailed.connect(self.__onInvalidField)
         return editor
     
     
@@ -120,7 +123,6 @@ class InventoryDelegate(QStyledItemDelegate):
                      index: QModelIndex | QPersistentModelIndex) -> None:
         
         col:int = index.column()
-        print("setModelData")
         
         #* formateo de datos
         if isinstance(editor, QComboBox):

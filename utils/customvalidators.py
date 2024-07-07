@@ -37,16 +37,11 @@ class SearchBarValidator(QValidator):
 
 
 #¡ tabla INVENTARIO ===================================================================================
-class InventoryValidator(QValidator):
+class ProductNameValidator(QValidator):
+    '''Validador para los campos donde el usuario pueda modificar el nombre de un producto.'''
     validationSucceeded = Signal() # se emite cuando el estado es 'Acceptable'. Sirve para esconder el label con feedback
     validationFailed = Signal(str) # se emite cuando el estado es 'Invalid', envía un str con feedback para mostrar
-
-
-
-
-
-class ProductNameValidator(InventoryValidator):
-    '''Validador para los campos donde el usuario pueda modificar el nombre de un producto.'''
+    
     def __init__(self, prev_name:str, parent:QWidget=None):
         super(ProductNameValidator, self).__init__()
         self.pattern:Pattern = compile(RegexExps.PROD_NAME.value, flags=IGNORECASE)
@@ -85,19 +80,14 @@ class ProductNameValidator(InventoryValidator):
 
 
 
-class ProductStockValidator(InventoryValidator, QRegularExpressionValidator):
+class ProductStockValidator(QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar el stock y la unidad de medida de un producto.'''
+    validationSucceeded = Signal()
+    validationFailed = Signal(str)
+    
     def __init__(self, parent=None):
-        # TODO: corregir SignalManager::registerMetaMethodGetIndex("validationSucceeded()") called with source=nullptr.
         super(ProductStockValidator, self).__init__()
         self.pattern:Pattern = compile(RegexExps.PROD_STOCK.value, IGNORECASE)
-    
-    
-    def fixup(self, text: str) -> str:
-        while text.split(" ")[0].endswith((".", ",")):
-            text = text.rstrip(",")
-            text = text.rstrip(".")
-        return super().fixup(text)
     
     
     def validate(self, text: str, pos: int) -> object:
@@ -120,8 +110,10 @@ class ProductStockValidator(InventoryValidator, QRegularExpressionValidator):
 
 
 
-class ProductUnitPriceValidator(InventoryValidator, QRegularExpressionValidator):
+class ProductUnitPriceValidator(QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar el precio unitario de un producto.'''
+    validationSucceeded = Signal()
+    validationFailed = Signal(str)
     
     def __init__(self, parent=None):
         super(ProductUnitPriceValidator, self).__init__()
@@ -149,8 +141,10 @@ class ProductUnitPriceValidator(InventoryValidator, QRegularExpressionValidator)
 
 
 
-class ProductComercPriceValidator(InventoryValidator, QRegularExpressionValidator):
+class ProductComercPriceValidator(QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar el precio comercial de un producto.'''
+    validationSucceeded = Signal()
+    validationFailed = Signal(str)
     
     def __init__(self, parent=None):
         super(ProductComercPriceValidator, self).__init__()
