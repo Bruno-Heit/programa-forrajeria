@@ -9,6 +9,7 @@ from PySide6.QtCore import (QAbstractTableModel, Qt, QModelIndex, QPersistentMod
 from PySide6.QtGui import (QBrush, QColor)
 
 from utils.enumclasses import (TableBgColors, TableFontColor)
+from utils.dboperations import (DatabaseRepository)
 
 
 class InventoryTableModel(QAbstractTableModel):
@@ -16,6 +17,11 @@ class InventoryTableModel(QAbstractTableModel):
     Clase MODELO que contiene los datos de los productos para la VISTA 'tv_inventory_data'.
     Esta clase no maneja operaciones a bases de datos.
     '''
+    # señal para actualizar datos en MainWindow
+    dataToUpdate:Signal = Signal(object) #? emite tuple(col:int, id:int, nuevo_valor:str).
+                                         #? NOTA: si la columna es la de stock (3) el nuevo_valor
+                                         #? será una lista[stock:float, unidad_medida:str]
+    
     def __init__(self, data:Sequence[Sequence[Any]]=None, headers:Sequence[str]=None, 
                  parent:QObject=None) -> None:
         super(InventoryTableModel, self).__init__()
@@ -28,6 +34,7 @@ class InventoryTableModel(QAbstractTableModel):
         self._data = data
         self._headers = headers
         self._parent = parent
+        self._db_repo = DatabaseRepository()
         
     
     def rowCount(self, parent:QModelIndex | QPersistentModelIndex=QModelIndex()) -> int:
@@ -56,6 +63,11 @@ class InventoryTableModel(QAbstractTableModel):
                 case 0 | 1 | 2: # categoría, nombre, descripción
                     self._data[index.row()][index.column() + 1] = value
                     
+                    # actualiza los datos en MainWindow
+                    self.dataToUpdate.emit(
+                        (index.column(), self._data[index.row()][0], value)
+                        )
+                    
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
                     return True
                     
@@ -67,16 +79,30 @@ class InventoryTableModel(QAbstractTableModel):
                     self._data[index.row()][4] = full_stock[0] # stock
                     self._data[index.row()][5] = full_stock[1] # unidad de medida
                     
+                    self.dataToUpdate.emit(
+                        (index.column(), self._data[index.row()][0], full_stock)
+                        )
+                    
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
                     return True
                 
                 case 4: # precio unitario
                     self._data[index.row()][6] = value
+                    
+                    self.dataToUpdate.emit(
+                        (index.column(), self._data[index.row()][0], value)
+                        )
+                    
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
                     return True
                     
                 case 5: # precio comercial
                     self._data[index.row()][7] = value
+                    
+                    self.dataToUpdate.emit(
+                        (index.column(), self._data[index.row()][0], value)
+                        )
+                    
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
                     return True
         return False
