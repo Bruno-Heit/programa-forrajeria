@@ -475,5 +475,49 @@ def createCompleter(sql:str=None, params:tuple[Any]=None, type:int=None) -> QCom
     return completer
 
 
+#========================================================================================================================
+def getPercentageMultipFactor(new_value:float, prev_value:float) -> float:
+    '''
+    Obtiene el factor de multiplicación que representa el cambio porcentual entre 
+    un valor nuevo y un valor anterior. Por ejemplo: si el valor anterior es 100 y el 
+    valor nuevo es 200 hubo un incremento del 100%, o lo que es lo mismo, su factor de 
+    multiplicación es 2.
+    Si el valor anterior es 0 y el nuevo valor es diferente de 0, en su lugar retorna 
+    el nuevo valor, porque el cambio porcentual -matemáticamente hablando- en ese caso 
+    es tendiente a infinito.
+
+    Parámetros
+    ----------
+    new_value : float
+        El valor nuevo de la expresión
+    prev_value : float
+        El valor anterior de la expresión
+
+    Retorna
+    -------
+    float
+        El factor de multiplicación por el que multiplicar al valor anterior para obtener 
+        el cambio porcentual.
+    '''
+    percentage_diff:float # cambio porcentual entre el valor anterior al valor nuevo
+    
+    try:
+        # no tiene sentido calcular el cambio porcentual si ambos valores son iguales...
+        if prev_value == new_value:
+            return 1
+        # ni tampoco cuando cambia de 0 a otro valor, porque tiende a infinito...
+        elif prev_value == 0 and new_value != 0:
+            return new_value
+        
+        percentage_diff = (float(new_value) - float(prev_value)) * 100 / float(prev_value)
+        
+    except ValueError:
+        pass
+    
+    return 1 + percentage_diff / 100
+
+
+
+
 
 
