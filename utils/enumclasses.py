@@ -39,6 +39,16 @@ class TableViewId(IntEnum):
 
 
 
+class InventoryPriceType(IntEnum):
+    '''IntEnum con los 2 tipos de precios que se pueden modificar en la tabla Inventario 
+    en la base de datos.'''
+    NORMAL = 1
+    COMERCIAL = 2
+
+
+
+
+
 class TableFontColor(Enum):
     '''Enum con QColors para la tipografía de QTableViews.'''
     DEF_COLOR = QColor(17, 17, 17, 255)
