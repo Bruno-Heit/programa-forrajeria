@@ -72,10 +72,10 @@ class ProductDialog(QDialog):
         self.VALID_COMERCIAL_PRICE:bool = None
 
         #--- SEÑALES --------------------------------------------------
-        name_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('name'))
-        stock_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('stock'))
-        unit_price_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('unit_price'))
-        comerc_price_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('comerc_price'))
+        name_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('name'))
+        stock_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('stock'))
+        unit_price_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('unit_price'))
+        comerc_price_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('comerc_price'))
         
         name_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
             field_validated='name',
@@ -415,7 +415,7 @@ class SaleDialog(QDialog):
         # lineedit cantidad (venta)
         self.saleDialog_ui.lineEdit_productQuantity.editingFinished.connect(lambda: self.formatField('product_quantity'))
         
-        self.quantity_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('product_quantity'))
+        self.quantity_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('product_quantity'))
         self.quantity_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
             field_validated='product_quantity',
             error_message=error_message))
@@ -427,7 +427,7 @@ class SaleDialog(QDialog):
         # lineedit total pago (venta)
         self.saleDialog_ui.lineEdit_totalPaid.editingFinished.connect(self.onTotalPaidEditingFinished)
         
-        self.total_paid_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('product_total_paid'))
+        self.total_paid_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('product_total_paid'))
         self.total_paid_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
             field_validated='product_total_paid',
             error_message=error_message))
@@ -436,7 +436,7 @@ class SaleDialog(QDialog):
         self.saleDialog_ui.lineEdit_debtorName.editingFinished.connect(lambda: self.onDebtorNameAndSurnameEditingFinished(
             field_validated='debtor_name'))
         
-        self.debtor_name_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('debtor_name'))
+        self.debtor_name_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('debtor_name'))
         self.debtor_name_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
             field_validated='debtor_name',
             error_message=error_message))
@@ -445,7 +445,7 @@ class SaleDialog(QDialog):
         self.saleDialog_ui.lineEdit_debtorSurname.editingFinished.connect(lambda: self.onDebtorNameAndSurnameEditingFinished(
             field_validated='debtor_surname'))
         
-        self.debtor_surname_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('debtor_surname'))
+        self.debtor_surname_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('debtor_surname'))
         self.debtor_surname_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
             field_validated='debtor_surname',
             error_message=error_message))
@@ -453,13 +453,13 @@ class SaleDialog(QDialog):
         # lineedit núm. de tel. (cuenta corriente)
         self.saleDialog_ui.lineEdit_phoneNumber.editingFinished.connect(lambda: self.formatField('debtor_phone_num'))
         
-        self.phone_number_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('debtor_phone_num'))
+        self.phone_number_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('debtor_phone_num'))
         self.phone_number_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
             field_validated='debtor_phone_num',
             error_message=error_message))
         
         # lineedit cód. postal (cuenta corriente)
-        self.postal_code_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('debtor_postal_code'))
+        self.postal_code_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('debtor_postal_code'))
         self.postal_code_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
             field_validated='debtor_postal_code',
             error_message=error_message))
@@ -471,7 +471,7 @@ class SaleDialog(QDialog):
     @Slot(str)
     def validatorOnValidationSucceded(self, field_validated:str) -> None:
         '''
-        Es llamado desde la señal 'validationSucceded' de los validadores.
+        Es llamado desde la señal 'validationSucceeded' de los validadores.
         
         Cambia el valor del flag asociado al campo que fue validado 'field_validated' a True, cambia el 
         QSS del campo y esconde el QLabel asociado al campo, excepto si 'debtor_quantity' donde no esconde 
@@ -1251,7 +1251,7 @@ class ListItemWidget(QWidget):
         # cantidad de producto
         self.listItem.lineEdit_productQuantity.editingFinished.connect(self.onQuantityEditingFinished)
         
-        self.quantity_validator.validationSucceded.connect(self.validatorOnValidationSucceded)
+        self.quantity_validator.validationSucceeded.connect(self.validatorOnValidationSucceded)
         self.quantity_validator.validationFailed.connect(self.validatorOnValidationFailed)
         
         # checkbox tipo de precio
@@ -1638,7 +1638,7 @@ class DebtorDataDialog(QDialog):
 
         #--- SEÑALES --------------------------------------------------
         # nombre
-        self.debtor_name_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('DEBTOR_NAME'))
+        self.debtor_name_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('DEBTOR_NAME'))
         self.debtor_name_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
             field_validated='DEBTOR_NAME',
             error_message=error_message))
@@ -1647,7 +1647,7 @@ class DebtorDataDialog(QDialog):
             field_validated='DEBTOR_NAME'))
         
         # apellido
-        self.debtor_surname_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('DEBTOR_SURNAME'))
+        self.debtor_surname_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('DEBTOR_SURNAME'))
         self.debtor_surname_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
             field_validated='DEBTOR_SURNAME',
             error_message=error_message))
@@ -1656,7 +1656,7 @@ class DebtorDataDialog(QDialog):
             field_validated='DEBTOR_SURNAME'))
         
         # número de teléfono
-        self.phone_number_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('DEBTOR_PHONE_NUMBER'))
+        self.phone_number_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('DEBTOR_PHONE_NUMBER'))
         self.phone_number_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
             field_validated='DEBTOR_PHONE_NUMBER',
             error_message=error_message))
@@ -1664,7 +1664,7 @@ class DebtorDataDialog(QDialog):
         self.debtorData.lineEdit_phoneNumber.editingFinished.connect(lambda: self.formatField('DEBTOR_PHONE_NUMBER'))
         
         # código postal
-        self.postal_code_validator.validationSucceded.connect(lambda: self.validatorOnValidationSucceded('DEBTOR_POSTAL_CODE'))
+        self.postal_code_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('DEBTOR_POSTAL_CODE'))
         self.postal_code_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
             field_validated='DEBTOR_POSTAL_CODE',
             error_message=error_message))
@@ -1676,7 +1676,7 @@ class DebtorDataDialog(QDialog):
     @Slot(str)
     def validatorOnValidationSucceded(self, field_validated:str) -> None:
         '''
-        Es llamado desde la señal 'validationSucceded' de los validadores.
+        Es llamado desde la señal 'validationSucceeded' de los validadores.
         
         Cambia el valor del flag asociado al campo que fue validado 'field_validated' a True, cambia el 
         QSS del campo y esconde el QLabel asociado al campo.
