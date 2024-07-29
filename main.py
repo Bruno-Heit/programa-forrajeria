@@ -1,5 +1,6 @@
 import sys
 from numpy import (empty, ndarray)
+from typing import (Any)
 
 from PySide6.QtWidgets import (QApplication, QMainWindow, QLineEdit, QTableView, 
                                QCheckBox, QAbstractItemView, QDateTimeEdit, QListWidgetItem, 
@@ -17,7 +18,7 @@ from utils.workerclasses import (WorkerSelect, WorkerDelete, WorkerUpdate)
 from utils.dboperations import (DatabaseRepository)
 from utils.customvalidators import (SalePaidValidator)
 from utils.enumclasses import (LoggingMessage, DBQueries, ModelHeaders, TableViewId, 
-                               LabelFeedbackStyle)
+                               LabelFeedbackStyle, InventoryPriceType)
 
 from resources import (rc_icons)
 
@@ -122,7 +123,10 @@ class MainWindow(QMainWindow):
         
         # TODO: reimplementar las funciones de UPDATE
         #* (UPDATE) modificar celdas de 'tv_inventory_data'
-        # self.inventory_data_model.dataToUpdate.connect(self.__onInventoryModelDataToUpdate)
+        self.inventory_data_model.dataToUpdate.connect(
+            lambda params: self.__onInventoryModelDataToUpdate(
+                column=params[0], IDproduct=params[1], new_val=params[2]))
+        
         self.inventory_delegate.fieldIsValid.connect(self.__onDelegateValidationSucceded)
         self.inventory_delegate.fieldIsInvalid.connect(self.__onDelegateValidationFailed)
         
@@ -731,22 +735,22 @@ class MainWindow(QMainWindow):
 
 
     #¡ tablas (UPDATE)
-    @Slot(int, int, int, object)
-    def __onInventoryModelDataToUpdate(self, row:int, column:int, IDproduct:int, 
-                                       new_val:object) -> None:
+    @Slot(int, int, object)
+    def __onInventoryModelDataToUpdate(self, column:int, IDproduct:int, 
+                                       new_val:Any | list[str]) -> None:
         '''
         Actualiza la base de datos con el valor nuevo de Productos.
         
         Parámetros
         ----------
-        row : int
-            Fila del item modificado
         column : int
             Columna del item modificado
         IDproduct : int
             IDproducto en la base de datos del item modificado
-        new_val : object
-            Valor nuevo del item
+        new_val : Any | list[str]
+            Valor nuevo del item, sólo será list[str] cuando la columna 
+            modificada en el modelo sea la de stock (3), en ese caso 
+            new_val será una lista[stock, unidad de medida]
         
         Retorna
         -------
@@ -754,6 +758,9 @@ class MainWindow(QMainWindow):
         '''
         upd_sql:str
         upd_params:tuple = None
+        prev_val:float = None # cuando se actualiza precio normal o precio comercial, se debe 
+                              # actualizar el valor también en Deudas, así que antes obtiene el 
+                              # valor anterior para calcular el porcentaje de cambio.
         
         match column:
             case 0: # categoría
@@ -763,23 +770,180 @@ class MainWindow(QMainWindow):
                             WHERE nombre_categoria = ?) 
                         WHERE IDproducto = ?;'''
                 upd_params=(new_val, IDproduct,)
+            
             case 1: # nombre del producto
                 upd_sql='''UPDATE Productos 
                         SET nombre = ? 
                         WHERE IDproducto = ?;'''
                 upd_params=(new_val, IDproduct,)
+            
             case 2: # descripción
-                pass
+                upd_sql='''UPDATE Productos 
+                        SET descripcion = ? 
+                        WHERE IDproducto = ?;'''
+                upd_params=(new_val, IDproduct,)
+            
             case 3: # stock
-                pass
+                upd_sql='''UPDATE Productos 
+                        SET stock = ?, unidad_medida = ? 
+                        WHERE IDproducto = ?;'''
+                upd_params=(new_val[0], new_val[1], IDproduct,)
+            
             case 4: # precio normal
-                pass
+                # TODO: corregir, cuando el usuario pagó algo de un producto y luego se modifica el 
+                # todo: costo del producto a 0, y luego se vuelve a un valor diferente a 0, se debe 
+                # todo: tomar en cuenta lo que el usuario pagó por ese producto anteriormente y DESCONTARLO.
+                # obtiene el valor anterior del producto
+                with self._db_repo as db_repo:
+                    prev_val = db_repo.selectRegisters(
+                        data_sql='''SELECT precio_unit 
+                                    FROM Productos 
+                                    WHERE IDproducto = ?;''',
+                        data_params=(IDproduct,)
+                        )[0][0]
+                                
+                # actualiza en Productos
+                upd_sql='''UPDATE Productos 
+                        SET precio_unit = ? 
+                        WHERE IDproducto = ?;'''
+                upd_params=(float(new_val), IDproduct,)
+                
+                self.__updateDebtsOnPriceChange(
+                    float(new_val), prev_val, IDproduct, InventoryPriceType.NORMAL
+                    )
+            
             case 5: # precio comercial
-                pass
-        
+                # TODO: corregir, cuando el usuario pagó algo de un producto y luego se modifica el 
+                # todo: costo del producto a 0, y luego se vuelve a un valor diferente a 0, se debe 
+                # todo: tomar en cuenta lo que el usuario pagó por ese producto anteriormente y DESCONTARLO.
+                # obtiene el valor anterior del producto
+                with self._db_repo as db_repo:
+                    prev_val = db_repo.selectRegisters(
+                        data_sql='''SELECT precio_comerc 
+                                    FROM Productos 
+                                    WHERE IDproducto = ?;''',
+                        data_params=(IDproduct,)
+                        )[0][0]
+                    
+                # actualiza en Productos
+                upd_sql='''UPDATE Productos 
+                           SET precio_comerc = ? 
+                           WHERE IDproducto = ?;'''
+                upd_params=(float(new_val), IDproduct,)
+                
+                self.__updateDebtsOnPriceChange(
+                    float(new_val), prev_val, IDproduct, InventoryPriceType.COMERCIAL
+                )
+                
         with self._db_repo as db_repo:
             db_repo.updateRegisters(upd_sql=upd_sql, upd_params=upd_params)
-            
+        
+        return None
+
+    
+    def __updateDebtsOnPriceChange(self, new_val:float, prev_val:str, IDproduct:int, 
+                                   price_type:InventoryPriceType) -> None:
+        '''
+        Actualiza el precio normal / precio comercial de un producto en Deudas 
+        cuando se actualiza en la tabla Productos.
+
+        Parámetros
+        ----------
+        new_val: str
+            El nuevo precio del producto
+        prev_val: str
+            El precio anterior del producto en base de datos
+        IDproduct: int
+            ID del producto cuyo precio fue modificado
+        price_type: InventoryPriceType
+            El tipo de precio a cambiar en base de datos
+        
+        Retorna
+        -------
+        None
+        '''
+        mult_factor:float = getPercentageMultipFactor(new_val, prev_val) # factor de multiplicación 
+                        # que representa el cambio porcentual del # valor anterior al valor nuevo
+        upd_sql:str
+        upd_params:tuple
+        
+        print(f"{mult_factor} == {new_val} = {mult_factor == new_val}")
+        
+        # si mult_factor = 1 es porque no cambió el valor, no tiene sentido actualizar 
+        # la base de datos
+        if mult_factor == 1:
+            return None
+        
+        # TODO: seguir corrigiendo esto. Hubo mejoras, ahora no hace consultas al pedo 
+        # todo: cuando no se cambia el precio. Tengo que cambiar el código... reemplazar 
+        # todo: en Deudas por el "new_val", no multiplicar.
+        
+        match price_type.name:
+            case "NORMAL":
+                # si el factor es igual al valor nuevo del producto es porque el 
+                # valor anterior del producto es 0
+                if mult_factor == new_val:
+                    print("igual")
+                    upd_sql = '''UPDATE Deudas 
+                                SET total_adeudado = CASE Detalle_Ventas.abonado 
+                                    WHEN 0 THEN ? -- si no pagó el valor nuevo es "new_val"
+                                    ELSE ROUND(? - Detalle_Ventas.abonado, 2) -- si pagó algo hago: "new_val" - Detalle_Ventas.abonado
+                                END 
+                                FROM Detalle_Ventas, Ventas 
+                                WHERE 
+                                    Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
+                                    Detalle_Ventas.IDproducto = ? AND 
+                                    Detalle_Ventas.IDventa = Ventas.IDventa AND 
+                                    Ventas.detalles_venta LIKE '%(P. NORMAL)%';'''
+                    upd_params = (new_val, new_val, IDproduct,)
+                
+                else:
+                    # TODO: corregir este código, el factor de multiplicación no da 
+                    # todo: resultados correctos
+                    print("diferente")
+                    upd_sql = '''UPDATE Deudas 
+                                SET total_adeudado = ROUND(total_adeudado * ?, 2) 
+                                WHERE IDdeuda IN (
+                                    SELECT Detalle_Ventas.IDdeuda 
+                                    FROM Detalle_Ventas 
+                                    JOIN Ventas ON Detalle_Ventas.IDventa = Ventas.IDventa 
+                                    WHERE Detalle_Ventas.IDproducto = ? 
+                                        AND Ventas.detalles_venta LIKE '%(P. NORMAL)%');'''
+                    upd_params = (mult_factor, IDproduct,)
+        
+            case "COMERCIAL":
+                if mult_factor == new_val:
+                    upd_sql = '''UPDATE Deudas 
+                                SET total_adeudado = CASE Detalle_Ventas.abonado 
+                                    WHEN 0 THEN ? -- si pagó 0 el valor nuevo es "new_val"
+                                    ELSE ROUND(? - Detalle_Ventas.abonado, 2) -- si pagó algo hago: "new_val" - Detalle_Ventas.abonado
+                                END 
+                                FROM Detalle_Ventas, Ventas 
+                                WHERE 
+                                    Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
+                                    Detalle_Ventas.IDproducto = ? AND 
+                                    Detalle_Ventas.IDventa = Ventas.IDventa AND 
+                                    Ventas.detalles_venta LIKE '%(P. COMERCIAL)%';'''
+                    upd_params = (new_val, new_val, IDproduct,)
+                
+                else:
+                    upd_sql = '''UPDATE Deudas 
+                                SET total_adeudado = ROUND(total_adeudado * ?, 2) 
+                                WHERE IDdeuda IN (
+                                    SELECT Detalle_Ventas.IDdeuda 
+                                    FROM Detalle_Ventas 
+                                    JOIN Ventas ON Detalle_Ventas.IDventa = Ventas.IDventa 
+                                    WHERE Detalle_Ventas.IDproducto = ? 
+                                    AND Ventas.detalles_venta LIKE '%(P. COMERCIAL)%');'''
+                    upd_params = (mult_factor, IDproduct,)
+        
+        # actualiza total_adeudado en Deudas
+        with self._db_repo as db_repo:
+            db_repo.updateRegisters(
+                upd_sql=upd_sql,
+                upd_params=upd_params
+                )
+        return None
     
     
     def __tableComboBoxOnCurrentTextChanged(self, table_view:QTableView, curr_index:QModelIndex, 
@@ -800,11 +964,11 @@ class MainWindow(QMainWindow):
         quantity:float | int # cantidad seleccionada.
 
         match table_view.objectName():
-            case "tv_inventory_data":
-                self._db_repo.updateRegisters(
-                    upd_sql="UPDATE Productos SET IDcategoria = (SELECT IDcategoria FROM Categorias WHERE nombre_categoria = ?) WHERE IDproducto = ?;",
-                    upd_params=(combobox.currentText(), str(self.IDs_products[curr_index.row()]),) )
-                table_view.item(curr_index.row(), curr_index.column()).setText(combobox.currentText())
+            # case "tv_inventory_data":
+            #     self._db_repo.updateRegisters(
+            #         upd_sql="UPDATE Productos SET IDcategoria = (SELECT IDcategoria FROM Categorias WHERE nombre_categoria = ?) WHERE IDproducto = ?;",
+            #         upd_params=(combobox.currentText(), str(self.IDs_products[curr_index.row()]),) )
+            #     table_view.item(curr_index.row(), curr_index.column()).setText(combobox.currentText())
 
 
             case "tv_sales_data":
@@ -864,84 +1028,85 @@ class MainWindow(QMainWindow):
 
 
         match table_view.objectName():
-            case "tv_inventory_data":
-                match curr_index.column():
-                    case 1: # nombre
-                        self._db_repo.updateRegisters(
-                            upd_sql="UPDATE Productos SET nombre = ? WHERE IDproducto = ?;",
-                            upd_params=( lineedit.text(), str(self.IDs_products[curr_index.row()]), ))
-                        # reemplaza el valor anterior con el nuevo
-                        table_view.item(curr_index.row(), curr_index.column()).setText(lineedit.text().strip())
+            # case "tv_inventory_data":
+                # match curr_index.column():
+                #     pass
+                    # case 1: # nombre
+                    #     self._db_repo.updateRegisters(
+                    #         upd_sql="UPDATE Productos SET nombre = ? WHERE IDproducto = ?;",
+                    #         upd_params=( lineedit.text(), str(self.IDs_products[curr_index.row()]), ))
+                    #     # reemplaza el valor anterior con el nuevo
+                    #     table_view.item(curr_index.row(), curr_index.column()).setText(lineedit.text().strip())
                     
-                    case 2: # descripción
-                        self._db_repo.updateRegisters(upd_sql="UPDATE Productos SET descripcion = ? WHERE IDproducto = ?;",
-                                        upd_params=( lineedit.text(), str(self.IDs_products[curr_index.row()]), ))
-                        # reemplaza el valor anterior con el nuevo
-                        table_view.item(curr_index.row(), curr_index.column()).setText(lineedit.text().strip())
+                    # case 2: # descripción
+                    #     self._db_repo.updateRegisters(upd_sql="UPDATE Productos SET descripcion = ? WHERE IDproducto = ?;",
+                    #                     upd_params=( lineedit.text(), str(self.IDs_products[curr_index.row()]), ))
+                    #     # reemplaza el valor anterior con el nuevo
+                    #     table_view.item(curr_index.row(), curr_index.column()).setText(lineedit.text().strip())
                     
-                    case 3: # stock
-                        # obtiene la cantidad de stock y la unidad de medida (si tiene)
-                        full_stock = lineedit.text().replace(",",".").split(" ") # pos. 0 tiene cantidad de stock y pos. 1 tiene unidad de medida
-                        full_stock.append("") if len(full_stock) == 1 else None
+                    # case 3: # stock
+                    #     # obtiene la cantidad de stock y la unidad de medida (si tiene)
+                    #     full_stock = lineedit.text().replace(",",".").split(" ") # pos. 0 tiene cantidad de stock y pos. 1 tiene unidad de medida
+                    #     full_stock.append("") if len(full_stock) == 1 else None
                         
-                        self._db_repo.updateRegisters(
-                            upd_sql="UPDATE Productos SET stock = ?, unidad_medida = ? WHERE IDproducto = ?;",
-                            upd_params=(full_stock[0], full_stock[1], str(self.IDs_products[curr_index.row()]), ))
-                        # reemplaza el valor anterior con el nuevo
-                        full_stock[0] = full_stock[0].replace(".",",")
-                        table_view.item(curr_index.row(), curr_index.column()).setText(f"{full_stock[0]} {full_stock[1].strip()}")
+                    #     self._db_repo.updateRegisters(
+                    #         upd_sql="UPDATE Productos SET stock = ?, unidad_medida = ? WHERE IDproducto = ?;",
+                    #         upd_params=(full_stock[0], full_stock[1], str(self.IDs_products[curr_index.row()]), ))
+                    #     # reemplaza el valor anterior con el nuevo
+                    #     full_stock[0] = full_stock[0].replace(".",",")
+                    #     table_view.item(curr_index.row(), curr_index.column()).setText(f"{full_stock[0]} {full_stock[1].strip()}")
                     
-                    case 4: # si es precio unitario, modifica también en Deudas precios normales
-                        # actualiza en Productos
-                        self._db_repo.updateRegisters(
-                            upd_sql="UPDATE Productos SET precio_unit = ? WHERE IDproducto = ?;",
-                            upd_params=(lineedit.text().replace(",","."), str(self.IDs_products[curr_index.row()]), ))
+                    # case 4: # si es precio unitario, modifica también en Deudas precios normales
+                    #     # actualiza en Productos
+                    #     self._db_repo.updateRegisters(
+                    #         upd_sql="UPDATE Productos SET precio_unit = ? WHERE IDproducto = ?;",
+                    #         upd_params=(lineedit.text().replace(",","."), str(self.IDs_products[curr_index.row()]), ))
                         
-                        # obtiene la expresión para calcular en Deudas el nuevo total_adeudado
-                        prev_text = prev_text.replace(",",".")
-                        try:
-                            percentage_diff = (float(lineedit.text().replace(",",".")) - float(prev_text)) * 100 / float(prev_text)
+                    #     # obtiene la expresión para calcular en Deudas el nuevo total_adeudado
+                    #     prev_text = prev_text.replace(",",".")
+                    #     try:
+                    #         percentage_diff = (float(lineedit.text().replace(",",".")) - float(prev_text)) * 100 / float(prev_text)
                             
-                        except ZeroDivisionError: # en caso de fallar porque el valor anterior es 0, hago que sea 0.00001
-                            percentage_diff = (float(lineedit.text().replace(",",".")) - float(prev_text)) * 100 / (float(prev_text) + 0.00001)
+                    #     except ZeroDivisionError: # en caso de fallar porque el valor anterior es 0, hago que sea 0.00001
+                    #         percentage_diff = (float(lineedit.text().replace(",",".")) - float(prev_text)) * 100 / (float(prev_text) + 0.00001)
                             
-                        new_debt_term = 1 + percentage_diff / 100
-                        sql = "UPDATE Deudas SET total_adeudado = ROUND(total_adeudado * ?, 2) WHERE IDdeuda IN (SELECT Detalle_Ventas.IDdeuda FROM Detalle_Ventas JOIN Ventas ON Detalle_Ventas.IDventa = Ventas.IDventa WHERE Detalle_Ventas.IDproducto = (SELECT IDproducto FROM Productos WHERE nombre = ?) AND Ventas.detalles_venta LIKE '%(P. NORMAL)%');"
+                    #     new_debt_term = 1 + percentage_diff / 100
+                    #     sql = "UPDATE Deudas SET total_adeudado = ROUND(total_adeudado * ?, 2) WHERE IDdeuda IN (SELECT Detalle_Ventas.IDdeuda FROM Detalle_Ventas JOIN Ventas ON Detalle_Ventas.IDventa = Ventas.IDventa WHERE Detalle_Ventas.IDproducto = (SELECT IDproducto FROM Productos WHERE nombre = ?) AND Ventas.detalles_venta LIKE '%(P. NORMAL)%');"
                         
-                        # actualiza total_adeudado en Deudas en precios normales
-                        self._db_repo.updateRegisters(
-                            upd_sql=sql,
-                            upd_params=(new_debt_term, table_view.item(curr_index.row(), 1).text(),) )
-                        # reemplaza el valor anterior con el nuevo
-                        lineedit_text = lineedit.text().replace(".",",")
-                        table_view.item(curr_index.row(), curr_index.column()).setText(lineedit_text.strip())
+                    #     # actualiza total_adeudado en Deudas en precios normales
+                    #     self._db_repo.updateRegisters(
+                    #         upd_sql=sql,
+                    #         upd_params=(new_debt_term, table_view.item(curr_index.row(), 1).text(),) )
+                    #     # reemplaza el valor anterior con el nuevo
+                    #     lineedit_text = lineedit.text().replace(".",",")
+                    #     table_view.item(curr_index.row(), curr_index.column()).setText(lineedit_text.strip())
                         
-                    case 5: # si es precio comercial, modifica en Deudas precios comerciales
-                        lineedit_text = lineedit.text().replace(",",".") if lineedit.text() else 0.0
+                    # case 5: # si es precio comercial, modifica en Deudas precios comerciales
+                    #     lineedit_text = lineedit.text().replace(",",".") if lineedit.text() else 0.0
                             
-                        # actualiza en Productos
-                        self._db_repo.updateRegisters(
-                            upd_sql="UPDATE Productos SET precio_comerc = ? WHERE IDproducto = ?;",
-                            upd_params=(str(lineedit_text), str(self.IDs_products[curr_index.row()]), ))
+                    #     # actualiza en Productos
+                    #     self._db_repo.updateRegisters(
+                    #         upd_sql="UPDATE Productos SET precio_comerc = ? WHERE IDproducto = ?;",
+                    #         upd_params=(str(lineedit_text), str(self.IDs_products[curr_index.row()]), ))
                         
-                        prev_text = prev_text.replace(",",".") if prev_text else 0.0
-                        try:
-                            percentage_diff = (float(lineedit_text) - float(prev_text)) * 100 / float(prev_text)
+                    #     prev_text = prev_text.replace(",",".") if prev_text else 0.0
+                    #     try:
+                    #         percentage_diff = (float(lineedit_text) - float(prev_text)) * 100 / float(prev_text)
                         
-                        except ZeroDivisionError: # en caso de fallar porque el valor anterior es 0, hago que sea 0.00001
-                            percentage_diff = (float(lineedit_text) - float(prev_text)) * 100 / (float(prev_text) + 0.00001)
+                    #     except ZeroDivisionError: # en caso de fallar porque el valor anterior es 0, hago que sea 0.00001
+                    #         percentage_diff = (float(lineedit_text) - float(prev_text)) * 100 / (float(prev_text) + 0.00001)
                         
-                        new_debt_term = 1 + percentage_diff / 100
-                        sql = sql = "UPDATE Deudas SET total_adeudado = ROUND(total_adeudado * ?, 2) WHERE IDdeuda IN (SELECT Detalle_Ventas.IDdeuda FROM Detalle_Ventas JOIN Ventas ON Detalle_Ventas.IDventa = Ventas.IDventa WHERE Detalle_Ventas.IDproducto = (SELECT IDproducto FROM Productos WHERE nombre = ?) AND Ventas.detalles_venta LIKE '%(P. COMERCIAL)%');"
+                    #     new_debt_term = 1 + percentage_diff / 100
+                    #     sql = sql = "UPDATE Deudas SET total_adeudado = ROUND(total_adeudado * ?, 2) WHERE IDdeuda IN (SELECT Detalle_Ventas.IDdeuda FROM Detalle_Ventas JOIN Ventas ON Detalle_Ventas.IDventa = Ventas.IDventa WHERE Detalle_Ventas.IDproducto = (SELECT IDproducto FROM Productos WHERE nombre = ?) AND Ventas.detalles_venta LIKE '%(P. COMERCIAL)%');"
                         
-                        # actualiza total_adeudado en Deudas en precios comerciales
-                        self._db_repo.updateRegisters(
-                            upd_sql=sql,
-                            upd_params=(new_debt_term, table_view.item(curr_index.row(), 1).text(),) )
+                    #     # actualiza total_adeudado en Deudas en precios comerciales
+                    #     self._db_repo.updateRegisters(
+                    #         upd_sql=sql,
+                    #         upd_params=(new_debt_term, table_view.item(curr_index.row(), 1).text(),) )
                         
-                        # reemplaza el valor anterior con el nuevo
-                        lineedit_text = lineedit.text().replace(".",",")
-                        table_view.item(curr_index.row(), curr_index.column()).setText(lineedit_text.strip())
+                    #     # reemplaza el valor anterior con el nuevo
+                    #     lineedit_text = lineedit.text().replace(".",",")
+                    #     table_view.item(curr_index.row(), curr_index.column()).setText(lineedit_text.strip())
 
 
             case "tv_sales_data":

@@ -11,7 +11,7 @@ Además coloqué acá la función 'pyinstallerCompleteResourcePath' para evitar
 import os # para obtener el 'relative path' de algunos archivos cuando se ejecutan luego de empaquetarse con pyinstaller...
 import sys # sirve para lo mismo que el módulo 'os'.
 
-from sqlite3 import (connect, Connection, Cursor, Error as sqlite3Error)
+from sqlite3 import (connect, Connection, Cursor, ProgrammingError, Error as sqlite3Error)
 from typing import (Any)
 import logging
 from re import (Match, compile, search, IGNORECASE)

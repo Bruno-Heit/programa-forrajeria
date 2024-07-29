@@ -496,10 +496,12 @@ def getPercentageMultipFactor(new_value:float, prev_value:float) -> float:
     Retorna
     -------
     float
-        El factor de multiplicación por el que multiplicar al valor anterior para obtener 
+        - Retorna 1 cuando el valor anterior es igual al nuevo valor.
+        - Retorna 'new_value' cuando el valor anterior es 0.
+        - Retorna el factor de multiplicación por el que multiplicar al valor anterior para obtener 
         el cambio porcentual.
     '''
-    percentage_diff:float # cambio porcentual entre el valor anterior al valor nuevo
+    percentage_diff:float = 0 # cambio porcentual entre el valor anterior al valor nuevo
     
     try:
         # no tiene sentido calcular el cambio porcentual si ambos valores son iguales...
@@ -513,7 +515,7 @@ def getPercentageMultipFactor(new_value:float, prev_value:float) -> float:
         
     except ValueError:
         pass
-    
+        
     return 1 + percentage_diff / 100
 
 
