@@ -801,7 +801,12 @@ class MainWindow(QMainWindow):
                                     WHERE IDproducto = ?;''',
                         data_params=(IDproduct,)
                         )[0][0]
-                                
+                
+                # no tiene sentido hacer consultas a base de datos si
+                # no se modificaron los precios
+                if float(prev_val) == float(new_val):
+                    return None
+                
                 # actualiza en Productos
                 upd_sql='''UPDATE Productos 
                         SET precio_unit = ? 
@@ -824,7 +829,12 @@ class MainWindow(QMainWindow):
                                     WHERE IDproducto = ?;''',
                         data_params=(IDproduct,)
                         )[0][0]
-                    
+                
+                # no tiene sentido hacer consultas a base de datos si
+                # no se modificaron los precios
+                if float(prev_val) == float(new_val):
+                    return None
+                
                 # actualiza en Productos
                 upd_sql='''UPDATE Productos 
                            SET precio_comerc = ? 
@@ -862,80 +872,37 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
-        mult_factor:float = getPercentageMultipFactor(new_val, prev_val) # factor de multiplicación 
-                        # que representa el cambio porcentual del # valor anterior al valor nuevo
         upd_sql:str
         upd_params:tuple
         
-        print(f"{mult_factor} == {new_val} = {mult_factor == new_val}")
-        
-        # si mult_factor = 1 es porque no cambió el valor, no tiene sentido actualizar 
-        # la base de datos
-        if mult_factor == 1:
-            return None
-        
-        # TODO: seguir corrigiendo esto. Hubo mejoras, ahora no hace consultas al pedo 
-        # todo: cuando no se cambia el precio. Tengo que cambiar el código... reemplazar 
-        # todo: en Deudas por el "new_val", no multiplicar.
-        
         match price_type.name:
             case "NORMAL":
-                # si el factor es igual al valor nuevo del producto es porque el 
-                # valor anterior del producto es 0
-                if mult_factor == new_val:
-                    print("igual")
-                    upd_sql = '''UPDATE Deudas 
-                                SET total_adeudado = CASE Detalle_Ventas.abonado 
-                                    WHEN 0 THEN ? -- si no pagó el valor nuevo es "new_val"
-                                    ELSE ROUND(? - Detalle_Ventas.abonado, 2) -- si pagó algo hago: "new_val" - Detalle_Ventas.abonado
-                                END 
-                                FROM Detalle_Ventas, Ventas 
-                                WHERE 
-                                    Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
-                                    Detalle_Ventas.IDproducto = ? AND 
-                                    Detalle_Ventas.IDventa = Ventas.IDventa AND 
-                                    Ventas.detalles_venta LIKE '%(P. NORMAL)%';'''
-                    upd_params = (new_val, new_val, IDproduct,)
-                
-                else:
-                    # TODO: corregir este código, el factor de multiplicación no da 
-                    # todo: resultados correctos
-                    print("diferente")
-                    upd_sql = '''UPDATE Deudas 
-                                SET total_adeudado = ROUND(total_adeudado * ?, 2) 
-                                WHERE IDdeuda IN (
-                                    SELECT Detalle_Ventas.IDdeuda 
-                                    FROM Detalle_Ventas 
-                                    JOIN Ventas ON Detalle_Ventas.IDventa = Ventas.IDventa 
-                                    WHERE Detalle_Ventas.IDproducto = ? 
-                                        AND Ventas.detalles_venta LIKE '%(P. NORMAL)%');'''
-                    upd_params = (mult_factor, IDproduct,)
+                upd_sql = '''UPDATE Deudas 
+                            SET total_adeudado = CASE Detalle_Ventas.abonado 
+                                WHEN 0 THEN ? -- si no pagó el valor nuevo es "new_val"
+                                ELSE ROUND(? - Detalle_Ventas.abonado, 2) -- si pagó algo hago: "new_val" - Detalle_Ventas.abonado
+                            END 
+                            FROM Detalle_Ventas, Ventas 
+                            WHERE 
+                                Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
+                                Detalle_Ventas.IDproducto = ? AND 
+                                Detalle_Ventas.IDventa = Ventas.IDventa AND 
+                                Ventas.detalles_venta LIKE '%(P. NORMAL)%';'''
+                upd_params = (new_val, new_val, IDproduct,)
         
             case "COMERCIAL":
-                if mult_factor == new_val:
-                    upd_sql = '''UPDATE Deudas 
-                                SET total_adeudado = CASE Detalle_Ventas.abonado 
-                                    WHEN 0 THEN ? -- si pagó 0 el valor nuevo es "new_val"
-                                    ELSE ROUND(? - Detalle_Ventas.abonado, 2) -- si pagó algo hago: "new_val" - Detalle_Ventas.abonado
-                                END 
-                                FROM Detalle_Ventas, Ventas 
-                                WHERE 
-                                    Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
-                                    Detalle_Ventas.IDproducto = ? AND 
-                                    Detalle_Ventas.IDventa = Ventas.IDventa AND 
-                                    Ventas.detalles_venta LIKE '%(P. COMERCIAL)%';'''
-                    upd_params = (new_val, new_val, IDproduct,)
-                
-                else:
-                    upd_sql = '''UPDATE Deudas 
-                                SET total_adeudado = ROUND(total_adeudado * ?, 2) 
-                                WHERE IDdeuda IN (
-                                    SELECT Detalle_Ventas.IDdeuda 
-                                    FROM Detalle_Ventas 
-                                    JOIN Ventas ON Detalle_Ventas.IDventa = Ventas.IDventa 
-                                    WHERE Detalle_Ventas.IDproducto = ? 
-                                    AND Ventas.detalles_venta LIKE '%(P. COMERCIAL)%');'''
-                    upd_params = (mult_factor, IDproduct,)
+                upd_sql = '''UPDATE Deudas 
+                            SET total_adeudado = CASE Detalle_Ventas.abonado 
+                                WHEN 0 THEN ? 
+                                ELSE ROUND(? - Detalle_Ventas.abonado, 2)
+                            END 
+                            FROM Detalle_Ventas, Ventas 
+                            WHERE 
+                                Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
+                                Detalle_Ventas.IDproducto = ? AND 
+                                Detalle_Ventas.IDventa = Ventas.IDventa AND 
+                                Ventas.detalles_venta LIKE '%(P. COMERCIAL)%';'''
+                upd_params = (new_val, new_val, IDproduct,)
         
         # actualiza total_adeudado en Deudas
         with self._db_repo as db_repo:
