@@ -565,6 +565,7 @@ class MainWindow(QMainWindow):
         return None
 
 
+    # todo: reimplementar UPDATE con porcentajes y DELETE
 
     #¡ tablas (CREATE)
     @Slot(str)
@@ -739,7 +740,9 @@ class MainWindow(QMainWindow):
     def __onInventoryModelDataToUpdate(self, column:int, IDproduct:int, 
                                        new_val:Any | list[str]) -> None:
         '''
-        Actualiza la base de datos con el valor nuevo de Productos.
+        Actualiza la base de datos con el valor nuevo de Productos. En caso de 
+        que las columnas sean de precio unitario o precio comercial también 
+        actualiza el total adeudado en la tabla Deudas.
         
         Parámetros
         ----------
@@ -790,9 +793,6 @@ class MainWindow(QMainWindow):
                 upd_params=(new_val[0], new_val[1], IDproduct,)
             
             case 4: # precio normal
-                # TODO: corregir, cuando el usuario pagó algo de un producto y luego se modifica el 
-                # todo: costo del producto a 0, y luego se vuelve a un valor diferente a 0, se debe 
-                # todo: tomar en cuenta lo que el usuario pagó por ese producto anteriormente y DESCONTARLO.
                 # obtiene el valor anterior del producto
                 with self._db_repo as db_repo:
                     prev_val = db_repo.selectRegisters(
@@ -807,20 +807,18 @@ class MainWindow(QMainWindow):
                 if float(prev_val) == float(new_val):
                     return None
                 
-                # actualiza en Productos
+                # consulta para actualizar en Productos
                 upd_sql='''UPDATE Productos 
                         SET precio_unit = ? 
                         WHERE IDproducto = ?;'''
                 upd_params=(float(new_val), IDproduct,)
                 
+                # actualiza en Deudas
                 self.__updateDebtsOnPriceChange(
                     float(new_val), prev_val, IDproduct, InventoryPriceType.NORMAL
                     )
             
             case 5: # precio comercial
-                # TODO: corregir, cuando el usuario pagó algo de un producto y luego se modifica el 
-                # todo: costo del producto a 0, y luego se vuelve a un valor diferente a 0, se debe 
-                # todo: tomar en cuenta lo que el usuario pagó por ese producto anteriormente y DESCONTARLO.
                 # obtiene el valor anterior del producto
                 with self._db_repo as db_repo:
                     prev_val = db_repo.selectRegisters(
@@ -835,12 +833,13 @@ class MainWindow(QMainWindow):
                 if float(prev_val) == float(new_val):
                     return None
                 
-                # actualiza en Productos
+                # consulta para actualizar en Productos
                 upd_sql='''UPDATE Productos 
                            SET precio_comerc = ? 
                            WHERE IDproducto = ?;'''
                 upd_params=(float(new_val), IDproduct,)
                 
+                # actualiza en Deudas
                 self.__updateDebtsOnPriceChange(
                     float(new_val), prev_val, IDproduct, InventoryPriceType.COMERCIAL
                 )

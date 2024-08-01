@@ -745,7 +745,7 @@ QComboBox QAbstractItemView {
             <string notr="true"/>
            </property>
            <property name="maxLength">
-            <number>40</number>
+            <number>20</number>
            </property>
            <property name="placeholderText">
             <string notr="true">(opcional) Ejs.: bolsas; litros; kgs.</string>
