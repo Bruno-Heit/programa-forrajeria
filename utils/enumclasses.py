@@ -138,7 +138,7 @@ class RegexExps(StrEnum):
     SEARCH_BAR = "[^;\"']*"
     
     PROD_NAME = "[^;\"']{1,50}"
-    PROD_STOCK = "\d{1,8}(\.|,)?\d{0,2} ?[a-zA-Z]{0,20}"
+    PROD_STOCK = "(\d{1,8}(\.|,)?\d{0,2} {1}[a-zA-Z]{0,20})|(\d{1,8}(\.|,)?\d{0,2})"
     PROD_UNIT_PRICE = "\d{1,8}((\.|,)?\d{0,2})?"
     PROD_COMERC_PRICE = "\d{0,8}((\.|,)\d{0,2})?"
     

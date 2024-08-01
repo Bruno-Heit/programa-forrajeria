@@ -81,13 +81,24 @@ class ProductNameValidator(QValidator):
 
 
 class ProductStockValidator(QRegularExpressionValidator):
-    '''Validador para los campos donde el usuario pueda modificar el stock y la unidad de medida de un producto.'''
+    '''Validador para los campos donde el usuario pueda modificar el stock y 
+    la unidad de medida de un producto. Si no se especifica el 'pattern' se 
+    asigna automáticamente el valor de 'enumclasses.RegexExps.PROD_STOCK'.
+    
+    Parámetros
+    ----------
+    pattern: re.Pattern | str, opcional
+        Patrón de expresión regular para validar el stock; por defecto es None
+    '''
     validationSucceeded = Signal()
     validationFailed = Signal(str)
     
-    def __init__(self, parent=None):
+    def __init__(self, pattern:Pattern | str=None, parent=None):
         super(ProductStockValidator, self).__init__()
-        self.pattern:Pattern = compile(RegexExps.PROD_STOCK.value, IGNORECASE)
+        if not pattern:
+            self.pattern:Pattern = compile(RegexExps.PROD_STOCK.value, IGNORECASE)
+        else:
+            self.pattern:Pattern = pattern
     
     
     def validate(self, text: str, pos: int) -> object:
@@ -165,7 +176,7 @@ class ProductComercPriceValidator(QRegularExpressionValidator):
             return QRegularExpressionValidator.State.Invalid, text, pos
         
         else:
-            self.validationFailed.emit("El precio unitario es inválido")
+            self.validationFailed.emit("El precio comercial es inválido")
             return QRegularExpressionValidator.State.Invalid, text, pos
 
 
