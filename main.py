@@ -131,8 +131,6 @@ class MainWindow(QMainWindow):
         self.inventory_delegate.fieldIsInvalid.connect(self.__onDelegateValidationFailed)
         
         #* cambio de selección de 'tv_inventory_data'
-        # TODO: reimplementar cambios en las selecciones de los table views
-        # self.ui.tv_inventory_data.itemSelectionChanged.connect(lambda: self.handleSelectionChange(self.ui.tv_inventory_data))
         
         # TODO: reimplementar las funciones de UPDATE con porcentajes
         #* inventory_sideBar
@@ -162,7 +160,6 @@ class MainWindow(QMainWindow):
         #* (UPDATE) modificar celdas de 'tv_sales_data'
         # TODO: reimplementar UPDATES de Ventas
         # self.ui.tv_sales_data.doubleClicked.connect(lambda: self.handleTableUpdateItem(self.ui.tv_sales_data, self.ui.tv_sales_data.currentIndex()) )
-        # self.ui.tv_sales_data.itemSelectionChanged.connect(lambda: self.handleSelectionChange(self.ui.tv_sales_data))
         
         #* formulario de ventas
         self.ui.btn_add_product.clicked.connect(self.addSalesInputListItem)
@@ -1237,15 +1234,38 @@ class MainWindow(QMainWindow):
     # funciones de inventory_checkbuttons_buttonGroup
     @Slot(QCheckBox)
     def handlePressedCheckbutton(self, checkbox:QCheckBox) -> None:
-        '''Permite seleccionar/deseleccionar un checkbox libremente, y se usa en conjunto con 'handleClickedCheckbutton'. 
-        Retorna 'None'.'''
+        '''
+        Permite seleccionar/deseleccionar un checkbox libremente, y se usa en 
+        conjunto con 'handleClickedCheckbutton'.
+        
+        Parámetros
+        ----------
+        checkbox: QCheckBox
+            El checkbox al que se referencia
+        
+        Retorna
+        -------
+        None
+        '''
         checkbox.group().setExclusive(not checkbox.isChecked())
+        return None
 
 
     @Slot(QCheckBox)
     def handleClickedCheckbutton(self, checkbox:QCheckBox) -> None:
-        '''Permite seleccionar/deseleccionar un checkbox libremente, y se usa en conjunto con 'handlePressedCheckbutton'. 
-        Retorna 'None'.'''
+        '''
+        Permite seleccionar/deseleccionar un checkbox libremente, y se usa 
+        en conjunto con 'handlePressedCheckbutton'.
+        
+        Parámetros
+        ----------
+        checkbox: QCheckBox
+            El checkbox al que se referencia
+        
+        Retorna
+        -------
+        None
+        '''
         checkbox.group().setExclusive(True)
 
 
