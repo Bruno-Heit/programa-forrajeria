@@ -121,12 +121,12 @@ class MainWindow(QMainWindow):
         #* (DELETE) eliminar un producto de 'tv_inventory_data'
         self.ui.btn_delete_product_inventory.clicked.connect(lambda: self.handleTableDeleteRows(self.ui.tv_inventory_data))
         
-        # TODO: reimplementar las funciones de UPDATE
-        #* (UPDATE) modificar celdas de 'tv_inventory_data'
+        #* (UPDATE) modificar celdas de 'tv_inventory_data' (sin porcentajes)
         self.inventory_data_model.dataToUpdate.connect(
             lambda params: self.__onInventoryModelDataToUpdate(
                 column=params[0], IDproduct=params[1], new_val=params[2]))
         
+        # delegados
         self.inventory_delegate.fieldIsValid.connect(self.__onDelegateValidationSucceded)
         self.inventory_delegate.fieldIsInvalid.connect(self.__onDelegateValidationFailed)
         
@@ -134,6 +134,7 @@ class MainWindow(QMainWindow):
         # TODO: reimplementar cambios en las selecciones de los table views
         # self.ui.tv_inventory_data.itemSelectionChanged.connect(lambda: self.handleSelectionChange(self.ui.tv_inventory_data))
         
+        # TODO: reimplementar las funciones de UPDATE con porcentajes
         #* inventory_sideBar
         self.ui.inventory_checkbuttons_buttonGroup.buttonPressed.connect(self.handlePressedCheckbutton)
         self.ui.inventory_checkbuttons_buttonGroup.buttonClicked.connect(self.handleClickedCheckbutton)
@@ -159,7 +160,8 @@ class MainWindow(QMainWindow):
         self.ui.btn_delete_product_sales.clicked.connect(lambda: self.handleTableDeleteRows(self.ui.tv_sales_data))
         
         #* (UPDATE) modificar celdas de 'tv_sales_data'
-        self.ui.tv_sales_data.doubleClicked.connect(lambda: self.handleTableUpdateItem(self.ui.tv_sales_data, self.ui.tv_sales_data.currentIndex()) )
+        # TODO: reimplementar UPDATES de Ventas
+        # self.ui.tv_sales_data.doubleClicked.connect(lambda: self.handleTableUpdateItem(self.ui.tv_sales_data, self.ui.tv_sales_data.currentIndex()) )
         # self.ui.tv_sales_data.itemSelectionChanged.connect(lambda: self.handleSelectionChange(self.ui.tv_sales_data))
         
         #* formulario de ventas
@@ -828,6 +830,8 @@ class MainWindow(QMainWindow):
                         data_params=(IDproduct,)
                         )[0][0]
                 
+                new_val = 0.0 if not new_val else new_val
+                
                 # no tiene sentido hacer consultas a base de datos si
                 # no se modificaron los precios
                 if float(prev_val) == float(new_val):
@@ -912,31 +916,13 @@ class MainWindow(QMainWindow):
         return None
     
     
+    #! reimplementar método y luego borrar
     def __tableComboBoxOnCurrentTextChanged(self, table_view:QTableView, curr_index:QModelIndex, 
                                             combobox:QComboBox) -> None:
-        '''
-        Declara la consulta sql y los parámetros y luego hace la consulta UPDATE a la base de datos con el nuevo 
-        dato seleccionado a partir del nuevo texto de 'combobox'. Reemplaza el valor anterior de la celda por el
-        nuevo. Al finalizar, elimina todos los QComboBox de 'table_view'.
-        
-        PARAMS:
-        - table_view: QTableView al que se referencia.
-        - curr_index: representa las coordenadas del item en 'table_view'.
-        - combobox: representa al QComboBox afectado.
-        
-        Retorna None.
-        '''
         new_unit:str | None # y el valor de la unidad ya seleccionado.
         quantity:float | int # cantidad seleccionada.
 
         match table_view.objectName():
-            # case "tv_inventory_data":
-            #     self._db_repo.updateRegisters(
-            #         upd_sql="UPDATE Productos SET IDcategoria = (SELECT IDcategoria FROM Categorias WHERE nombre_categoria = ?) WHERE IDproducto = ?;",
-            #         upd_params=(combobox.currentText(), str(self.IDs_products[curr_index.row()]),) )
-            #     table_view.item(curr_index.row(), curr_index.column()).setText(combobox.currentText())
-
-
             case "tv_sales_data":
                 # actualiza el producto en Detalle_Ventas
                 self._db_repo.updateRegisters(
@@ -960,6 +946,7 @@ class MainWindow(QMainWindow):
         return None
 
 
+    #! reimplementar método y luego borrar
     @Slot(QTableView, QModelIndex, QLineEdit, str)
     def __tableLineEditOnReturnPressed(self, table_view:QTableView, curr_index:QModelIndex, lineedit:QLineEdit, prev_text:str) -> None:
         '''
@@ -994,86 +981,6 @@ class MainWindow(QMainWindow):
 
 
         match table_view.objectName():
-            # case "tv_inventory_data":
-                # match curr_index.column():
-                #     pass
-                    # case 1: # nombre
-                    #     self._db_repo.updateRegisters(
-                    #         upd_sql="UPDATE Productos SET nombre = ? WHERE IDproducto = ?;",
-                    #         upd_params=( lineedit.text(), str(self.IDs_products[curr_index.row()]), ))
-                    #     # reemplaza el valor anterior con el nuevo
-                    #     table_view.item(curr_index.row(), curr_index.column()).setText(lineedit.text().strip())
-                    
-                    # case 2: # descripción
-                    #     self._db_repo.updateRegisters(upd_sql="UPDATE Productos SET descripcion = ? WHERE IDproducto = ?;",
-                    #                     upd_params=( lineedit.text(), str(self.IDs_products[curr_index.row()]), ))
-                    #     # reemplaza el valor anterior con el nuevo
-                    #     table_view.item(curr_index.row(), curr_index.column()).setText(lineedit.text().strip())
-                    
-                    # case 3: # stock
-                    #     # obtiene la cantidad de stock y la unidad de medida (si tiene)
-                    #     full_stock = lineedit.text().replace(",",".").split(" ") # pos. 0 tiene cantidad de stock y pos. 1 tiene unidad de medida
-                    #     full_stock.append("") if len(full_stock) == 1 else None
-                        
-                    #     self._db_repo.updateRegisters(
-                    #         upd_sql="UPDATE Productos SET stock = ?, unidad_medida = ? WHERE IDproducto = ?;",
-                    #         upd_params=(full_stock[0], full_stock[1], str(self.IDs_products[curr_index.row()]), ))
-                    #     # reemplaza el valor anterior con el nuevo
-                    #     full_stock[0] = full_stock[0].replace(".",",")
-                    #     table_view.item(curr_index.row(), curr_index.column()).setText(f"{full_stock[0]} {full_stock[1].strip()}")
-                    
-                    # case 4: # si es precio unitario, modifica también en Deudas precios normales
-                    #     # actualiza en Productos
-                    #     self._db_repo.updateRegisters(
-                    #         upd_sql="UPDATE Productos SET precio_unit = ? WHERE IDproducto = ?;",
-                    #         upd_params=(lineedit.text().replace(",","."), str(self.IDs_products[curr_index.row()]), ))
-                        
-                    #     # obtiene la expresión para calcular en Deudas el nuevo total_adeudado
-                    #     prev_text = prev_text.replace(",",".")
-                    #     try:
-                    #         percentage_diff = (float(lineedit.text().replace(",",".")) - float(prev_text)) * 100 / float(prev_text)
-                            
-                    #     except ZeroDivisionError: # en caso de fallar porque el valor anterior es 0, hago que sea 0.00001
-                    #         percentage_diff = (float(lineedit.text().replace(",",".")) - float(prev_text)) * 100 / (float(prev_text) + 0.00001)
-                            
-                    #     new_debt_term = 1 + percentage_diff / 100
-                    #     sql = "UPDATE Deudas SET total_adeudado = ROUND(total_adeudado * ?, 2) WHERE IDdeuda IN (SELECT Detalle_Ventas.IDdeuda FROM Detalle_Ventas JOIN Ventas ON Detalle_Ventas.IDventa = Ventas.IDventa WHERE Detalle_Ventas.IDproducto = (SELECT IDproducto FROM Productos WHERE nombre = ?) AND Ventas.detalles_venta LIKE '%(P. NORMAL)%');"
-                        
-                    #     # actualiza total_adeudado en Deudas en precios normales
-                    #     self._db_repo.updateRegisters(
-                    #         upd_sql=sql,
-                    #         upd_params=(new_debt_term, table_view.item(curr_index.row(), 1).text(),) )
-                    #     # reemplaza el valor anterior con el nuevo
-                    #     lineedit_text = lineedit.text().replace(".",",")
-                    #     table_view.item(curr_index.row(), curr_index.column()).setText(lineedit_text.strip())
-                        
-                    # case 5: # si es precio comercial, modifica en Deudas precios comerciales
-                    #     lineedit_text = lineedit.text().replace(",",".") if lineedit.text() else 0.0
-                            
-                    #     # actualiza en Productos
-                    #     self._db_repo.updateRegisters(
-                    #         upd_sql="UPDATE Productos SET precio_comerc = ? WHERE IDproducto = ?;",
-                    #         upd_params=(str(lineedit_text), str(self.IDs_products[curr_index.row()]), ))
-                        
-                    #     prev_text = prev_text.replace(",",".") if prev_text else 0.0
-                    #     try:
-                    #         percentage_diff = (float(lineedit_text) - float(prev_text)) * 100 / float(prev_text)
-                        
-                    #     except ZeroDivisionError: # en caso de fallar porque el valor anterior es 0, hago que sea 0.00001
-                    #         percentage_diff = (float(lineedit_text) - float(prev_text)) * 100 / (float(prev_text) + 0.00001)
-                        
-                    #     new_debt_term = 1 + percentage_diff / 100
-                    #     sql = sql = "UPDATE Deudas SET total_adeudado = ROUND(total_adeudado * ?, 2) WHERE IDdeuda IN (SELECT Detalle_Ventas.IDdeuda FROM Detalle_Ventas JOIN Ventas ON Detalle_Ventas.IDventa = Ventas.IDventa WHERE Detalle_Ventas.IDproducto = (SELECT IDproducto FROM Productos WHERE nombre = ?) AND Ventas.detalles_venta LIKE '%(P. COMERCIAL)%');"
-                        
-                    #     # actualiza total_adeudado en Deudas en precios comerciales
-                    #     self._db_repo.updateRegisters(
-                    #         upd_sql=sql,
-                    #         upd_params=(new_debt_term, table_view.item(curr_index.row(), 1).text(),) )
-                        
-                    #     # reemplaza el valor anterior con el nuevo
-                    #     lineedit_text = lineedit.text().replace(".",",")
-                    #     table_view.item(curr_index.row(), curr_index.column()).setText(lineedit_text.strip())
-
 
             case "tv_sales_data":
                 match curr_index.column():
@@ -1133,6 +1040,7 @@ class MainWindow(QMainWindow):
         return None
 
 
+    #! reimplementar método y luego borrar
     @Slot(QTableView, QModelIndex, QDateTimeEdit)
     def __tableDateTimeOnEditingFinished(self, table_view:QTableView, curr_index:QModelIndex, datetimeedit:QDateTimeEdit) -> None:
         '''
@@ -1169,114 +1077,6 @@ class MainWindow(QMainWindow):
         if not datetimeedit.calendarWidget().hasFocus():
             datetimeedit.deleteLater()
             removeTableCellsWidgets(table_view)
-        return None
-
-
-    @Slot(QTableView, QModelIndex)
-    def handleTableUpdateItem(self, table_view:QTableView, curr_index:QModelIndex) -> None:
-        '''
-        Dependiendo del 'table_view' del cual se quiera modificar una celda y dependiendo de la columna seleccionada 
-        en 'curr_index' crea un QLineEdit|QComboBox|QDateTimeEdit para permitir una modificación más adecuada en esa celda.
-        Además conecta las señales/slots de los widgets y sus 'validators'.
-
-        Este método llama a:
-        - functionutils.createTableColumnComboBox: para crear QComboBox.
-        - functionutils.createTableColumnLineEdit: para crear QLineEdit.
-        - functionutils.createTableColumnDateTimeEdit: para crear QDateTimeEdit.
-        
-        PARAMS:
-        - table_view: el QTableView al que se referencia.
-        - curr_index: índice seleccionado en 'table_view'.
-        
-        Retorna None.
-        '''
-        cell_old_text:str # texto actual de la celda.
-        self.combobox:QComboBox
-        self.lineedit:QLineEdit
-        self.datetimeedit:QDateTimeEdit
-        validator:ProductNameValidator
-        
-        # desactivo el ordenamiento de la tabla
-        # table_view.setSortingEnabled(False)
-
-        if table_view.editTriggers() != QAbstractItemView.EditTrigger.NoEditTriggers:
-            # cell_old_text = table_view.item(curr_index.row(), curr_index.column()).text()
-            
-            match table_view.objectName():
-                case "tv_inventory_data":
-                    self.ui.label_feedbackInventory.hide()
-                    
-                    match curr_index.column():
-                        case 0: # categoría (QComboBox)
-                            self.combobox = createTableColumnComboBox(table_view, curr_index, cell_old_text)
-                            self.combobox.textActivated.connect(lambda: self.__tableComboBoxOnCurrentTextChanged(
-                                table_view=table_view,
-                                curr_index=curr_index,
-                                combobox=self.combobox))
-                            
-                        case _: # nombre | descripción | stock | precio unitario | precio comercial (QLineEdit)
-                            self.lineedit = createTableColumnLineEdit(table_view, curr_index)
-                        
-                            self.lineedit.returnPressed.connect(lambda: self.__tableLineEditOnReturnPressed(
-                                table_view=self.ui.tv_inventory_data,
-                                curr_index=curr_index,
-                                lineedit=self.lineedit,
-                                prev_text=cell_old_text))
-                            
-                            if curr_index.column() != 2: # diferente de descripción (no tiene validador)
-                                # señal del validador
-                                validator = self.lineedit.validator()
-                                validator.validationSucceeded.connect(self.ui.label_feedbackInventory.hide)
-                                validator.validationFailed.connect(lambda text: self.__onDelegateValidationFailed(
-                                    feedback_text=text,
-                                    feedback_label=self.ui.label_feedbackInventory,
-                                    curr_text=self.lineedit.text(),
-                                    prev_text=cell_old_text))
-                
-                
-                case "tv_sales_data":
-                    self.ui.label_feedbackSales.hide()
-                    
-                    match curr_index.column():
-                        case 2: # producto (QComboBox)
-                            self.combobox  = createTableColumnComboBox(table_view, curr_index, cell_old_text)
-                            
-                            self.combobox.textActivated.connect(lambda: self.__tableComboBoxOnCurrentTextChanged(
-                                table_view=table_view,
-                                curr_index=curr_index,
-                                combobox=self.combobox))
-                        
-                        case 5: # fecha y hora (QDateTimeEdit)
-                            self.datetimeedit = createTableColumnDateTimeEdit(table_view, curr_index)
-                            
-                            self.datetimeedit.editingFinished.connect(lambda: self.__tableDateTimeOnEditingFinished(
-                                table_view=table_view,
-                                curr_index=curr_index,
-                                datetimeedit=self.datetimeedit))
-                        
-                        case _: # detalle de venta | cantidad | costo total | abonado (QLineEdit)
-                            
-                            self.lineedit = createTableColumnLineEdit(table_view, curr_index)
-                            
-                            self.lineedit.returnPressed.connect(lambda: self.__tableLineEditOnReturnPressed(
-                                table_view=self.ui.tv_sales_data,
-                                curr_index=curr_index,
-                                lineedit=self.lineedit,
-                                prev_text=cell_old_text))
-                            
-                            # señal del validador
-                            validator = self.lineedit.validator()
-                            validator.validationSucceeded.connect(self.ui.label_feedbackSales.hide)
-                            validator.validationFailed.connect(lambda text: self.__onDelegateValidationFailed(
-                                feedback_text=text,
-                                feedback_label=self.ui.label_feedbackSales,
-                                curr_text=self.lineedit.text(),
-                                prev_text=cell_old_text))
-                
-                            
-                case "tv_debts_data":
-                    self.ui.label_feedbackDebts.hide()
-                    
         return None
 
 
@@ -1340,22 +1140,6 @@ class MainWindow(QMainWindow):
                 self.ui.label_feedbackDebts.setStyleSheet(LabelFeedbackStyle.INVALID.value)
                 self.ui.label_feedbackDebts.setText(feedback[1])
         return None
-
-
-    #¡ método de cambios en la selección
-    @Slot(QTableView)
-    def handleSelectionChange(self, table_view:QTableView) -> None:
-        '''
-        Esta función es llamada ni bien se detecta que la selección de los items en 'table_view' cambia. 
-        Verifica si hay celdas seleccionadas. Si no hay, llama a 'functionutils.removeTableCellsWidgets'.
-        
-        Retorna None.'''
-        # obtengo los items seleccionados actualmente de las tablas
-        curr_selection = table_view.selectedItems()
-        if len(curr_selection) <= 1: # por alguna razón 'curr_selection' siempre tiene 1 item, nunca llega a estar vacía...
-            removeTableCellsWidgets(table_view)
-        return None
-
 
 
     #¡### INVENTARIO ##################################################

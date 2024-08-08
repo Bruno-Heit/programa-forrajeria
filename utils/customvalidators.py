@@ -98,7 +98,7 @@ class ProductStockValidator(QRegularExpressionValidator):
         if not pattern:
             self.pattern:Pattern = compile(RegexExps.PROD_STOCK.value, IGNORECASE)
         else:
-            self.pattern:Pattern = pattern
+            self.pattern:Pattern = compile(pattern, IGNORECASE)
     
     
     def validate(self, text: str, pos: int) -> object:

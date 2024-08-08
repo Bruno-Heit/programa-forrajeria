@@ -54,7 +54,7 @@ class InventoryDelegate(QStyledItemDelegate):
             case 3: # stock
                 editor = QLineEdit(parent)
                 editor.setMaxLength(31)
-                validator = ProductStockValidator(editor)
+                validator = ProductStockValidator(parent=editor)
                 validator.validationSucceeded.connect(self.__onValidField)
                 validator.validationFailed.connect(self.__onInvalidField)
                 editor.setValidator(validator)
