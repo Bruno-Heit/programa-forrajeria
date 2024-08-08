@@ -16,6 +16,18 @@ class InventoryTableModel(QAbstractTableModel):
     '''
     Clase MODELO que contiene los datos de los productos para la VISTA 'tv_inventory_data'.
     Esta clase no maneja operaciones a bases de datos.
+    Los datos son guardados en la variable 'self.data'.
+    
+    datos en self._data:
+        (posición ┇ dato de base de datos)
+        0 ┇ IDproducto
+        1 ┇ c.nombre_categoria
+        2 ┇ p.nombre
+        3 ┇ p.descripcion
+        4 ┇ p.stock
+        5 ┇ p.unidad_medida
+        6 ┇ p.precio_unit
+        7 ┇ p.precio_comerc
     '''
     # señal para actualizar datos en MainWindow
     dataToUpdate:Signal = Signal(object) #? emite tuple(col:int, id:int, nuevo_valor:str).
@@ -25,21 +37,6 @@ class InventoryTableModel(QAbstractTableModel):
     def __init__(self, data:Sequence[Sequence[Any]]=None, headers:Sequence[str]=None, 
                  parent:QObject=None) -> None:
         super(InventoryTableModel, self).__init__()
-        '''
-        datos en self._data:
-        ┏╍╍╍╍╍╍╍╍╍┳╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓
-        ┇posición ┇ dato                ┇
-        ┇╍╍╍╍╍╍╍╍╍╋╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┇
-        ┇___0_____┇_ID__________________┇
-        ┇___1_____┇_c.nombre_categoria__┇
-        ┇___2_____┇_p.nombre____________┇
-        ┇___3_____┇_p.descripcion_______┇
-        ┇___4_____┇_p.stock_____________┇
-        ┇___5_____┇_p.unidad_medida_____┇
-        ┇___6_____┇_p.precio_unit_______┇
-        ┇   7     ┇ p.precio_comerc     ┇
-        ┗╍╍╍╍╍╍╍╍╍┻╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┛
-        '''
         self._data = data
         self._headers = headers
         self._parent = parent
