@@ -27,9 +27,18 @@ class InventoryTableModel(QAbstractTableModel):
         super(InventoryTableModel, self).__init__()
         '''
         datos en self._data:
-        (pos->dato) 0-> ID | 1-> c.nombre_categoria | 2-> p.nombre |3-> p.descripcion |
-                    4-> p.stock | 5-> p.unidad_medida | 6-> p.precio_unit | 
-                    7-> p.precio_comerc
+        ┏╍╍╍╍╍╍╍╍╍┳╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓
+        ┇posición ┇ dato                ┇
+        ┇╍╍╍╍╍╍╍╍╍╋╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┇
+        ┇___0_____┇_ID__________________┇
+        ┇___1_____┇_c.nombre_categoria__┇
+        ┇___2_____┇_p.nombre____________┇
+        ┇___3_____┇_p.descripcion_______┇
+        ┇___4_____┇_p.stock_____________┇
+        ┇___5_____┇_p.unidad_medida_____┇
+        ┇___6_____┇_p.precio_unit_______┇
+        ┇   7     ┇ p.precio_comerc     ┇
+        ┗╍╍╍╍╍╍╍╍╍┻╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┛
         '''
         self._data = data
         self._headers = headers
