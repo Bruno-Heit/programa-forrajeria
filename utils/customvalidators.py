@@ -5,7 +5,8 @@ demás widgets donde el usuario pueda ingresar datos.
 '''
 from PySide6.QtWidgets import (QWidget)
 from PySide6.QtCore import (Signal, QLocale, QObject)
-from PySide6.QtGui import (QValidator, QRegularExpressionValidator, QIntValidator)
+from PySide6.QtGui import (QValidator, QRegularExpressionValidator, 
+                           QIntValidator, QDoubleValidator)
 
 from utils.dboperations import (makeReadQuery)
 from utils.enumclasses import (RegexExps)
@@ -178,6 +179,33 @@ class ProductComercPriceValidator(QRegularExpressionValidator):
         else:
             self.validationFailed.emit("El precio comercial es inválido")
             return QRegularExpressionValidator.State.Invalid, text, pos
+
+
+
+
+
+class PercentageValidator(QRegularExpressionValidator):
+    '''Validador para el campo de cambio de precios de productos mediante porcentajes.'''
+    validationSucceeded = Signal()
+    validationFailed = Signal(str)
+    
+    def __init__(self, parent=None) -> None:
+        super(PercentageValidator, self).__init__()
+        self.pattern:Pattern = compile(RegexExps.PERCENTAJE_CHANGE.value)
+    
+    
+    def validate(self, text:str, pos:int) -> object:
+        if text.strip() == "":
+            self.validationFailed.emit("Se debe ingresar un porcentaje")
+            return self.State.Intermediate, text, pos
+
+        elif fullmatch(self.pattern, text):
+            self.validationSucceeded.emit()
+            return self.State.Acceptable, text, pos
+        
+        else:
+            self.validationFailed.emit("El porcentaje es inválido")
+            return self.State.Invalid, text, pos
 
 
 
