@@ -225,8 +225,20 @@ def setTableViewPolitics(tableView:QTableView) -> None:
     return None
 
 
-def getSelectedTableRows(tableView:QTableWidget) -> tuple:
-    '''Obtiene todas las filas seleccionadas del QTableWidget. Retorna una tupla con las filas.'''
+def getSelectedTableRows(tableView:QTableView) -> tuple[int]:
+    '''
+    Obtiene todas las filas seleccionadas del QTableView.
+    
+    Parámetros
+    ----------
+    tableView : QTableView
+        El QTableView al que se referencia
+    
+    Retorna
+    -------
+    tuple[int]
+        Tupla con las filas seleccionadas
+        '''
     selected_indexes:list = []
     for index in tableView.selectedIndexes():
         if index.row() not in selected_indexes:
