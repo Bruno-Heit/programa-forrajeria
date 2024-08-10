@@ -1471,7 +1471,7 @@ QLineEdit:disabled {
                           <string notr="true"/>
                          </property>
                          <property name="maxLength">
-                          <number>8</number>
+                          <number>12</number>
                          </property>
                          <property name="frame">
                           <bool>false</bool>
@@ -2007,8 +2007,8 @@ border-right: 1px solid #111;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>756</width>
-                <height>498</height>
+                <width>364</width>
+                <height>162</height>
                </rect>
               </property>
               <attribute name="label">

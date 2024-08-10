@@ -76,6 +76,10 @@ class MainWindow(QMainWindow):
         '''
         Método que sirve para simplificar la lectura del método 'self.__init__'.
         Contiene inicializaciones y ajustes de algunos Widgets.
+        
+        Retorna
+        -------
+        None
         '''
         self.setWindowTitle("herramienta de gestión - Forrajería Torres")
         set_tables_ListWidgetItemsTooltip(self.ui.tables_ListWidget, getCategoriesDescription())
@@ -95,6 +99,10 @@ class MainWindow(QMainWindow):
         de simplificar la lectura del método 'self.__init__'.
         Contiene las declaraciones de señales/slots de Widgets ya existentes 
         desde la instanciación de 'MainWindow'.
+        
+        Retorna
+        -------
+        None
         '''
         #¡========= INVENTARIO ================================================
         #* abrir/cerrar side bars
@@ -141,7 +149,12 @@ class MainWindow(QMainWindow):
         
         self.ui.checkbox_comercial_prices.stateChanged.connect(self.handleCheckboxStateChange)
         
-        self.ui.lineEdit_percentage_change.editingFinished.connect(self.handleLineeditPercentageEditingFinished)
+        # señales del lineedit de porcentajes
+        self.ui.lineEdit_percentage_change.editingFinished.connect(self.onLePercentageEditingFinished)
+        self.ui.lineEdit_percentage_change.validator().validationSucceeded.connect(
+            self.__onPercentageValidatorSucceded)
+        self.ui.lineEdit_percentage_change.validator().validationFailed.connect(
+            self.__onPercentageValidatorFailed)
 
         #¡========= VENTAS ====================================================
         #* (READ) cargar con ventas 'tv_sales_data'
@@ -181,7 +194,9 @@ class MainWindow(QMainWindow):
         '''
         Simplemente le coloca los íconos que le corresponde a cada Widget. 
         
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
         icon:QIcon = QIcon()
         
@@ -225,7 +240,9 @@ class MainWindow(QMainWindow):
         '''
         Método simple que esconde los widgets necesarios al iniciar el programa.
         
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
         # ocultar widgets
         self.ui.side_bar_body.hide()
@@ -241,10 +258,12 @@ class MainWindow(QMainWindow):
 
     def __initGeneralValidators(self) -> None:
         '''
-        Inicializa los validadores predefinidos (de widgets que conforman la GUI base, no creados 
-        dinámicamente) y conecta sus señales y slots.
+        Inicializa los validadores predefinidos (de widgets que conforman la GUI 
+        base, no creados dinámicamente) y conecta sus señales y slots.
         
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
         # validadores
         self.inventory_search_bar_validator = SearchBarValidator(self.ui.inventory_searchBar)
@@ -258,7 +277,7 @@ class MainWindow(QMainWindow):
         self.ui.lineEdit_paid.setValidator(self.total_paid_validator)
 
         self.ui.lineEdit_percentage_change.setValidator(
-            QIntValidator(-9_999_999, 99_999_999, self.ui.lineEdit_percentage_change))
+            PercentageValidator(self.ui.lineEdit_percentage_change))
         
         # señales/slots
         self.total_paid_validator.validationSucceeded.connect(self.onPaidValidationSucceded)
@@ -481,8 +500,8 @@ class MainWindow(QMainWindow):
     
     def __saveTableViewIDs(self, tv_name:str, register_id:int) -> None:
         '''
-        A medida que el WORKER encuentra registros guarda los IDs de los registros coincidentes en 
-        una variable asociada a cada QTableView.
+        A medida que el WORKER encuentra registros guarda los IDs de los registros 
+        coincidentes en una variable asociada a cada QTableView.
         
         Parámetros
         ----------
@@ -1141,97 +1160,6 @@ class MainWindow(QMainWindow):
 
     #¡### INVENTARIO ##################################################
     # funciones de inventory_sideBar
-    def __calculateNewPrices(self, selected_rows:tuple) -> None:
-        '''Calcula los aumentos/decrementos en los precios unitarios o comerciales dependiendo de cuál es la checkbox 
-        marcada en 'inventory_sideBar'; declara la consulta sql y los parámetros que recibirá, y llama a 
-        '__makeUpdateQuery_prices'; finalmente, actualiza los valores en la tabla. Retorna 'None'.'''
-        sql:str
-        params:list[dict] = []
-        # si está activada la checkbox de precios unitarios calcula cuánto será, declara los parámetros para la consulta 
-        # y reemplaza el valor viejo por el nuevo...
-        if self.ui.checkbox_unit_prices.isChecked():
-            for row in range(len(selected_rows)):
-                if self.IDs_products[selected_rows[row]] not in params:
-                    try:
-                        # calcula cuál es el porcentaje que el valor del lineedit representa
-                        percentage = int(self.ui.lineEdit_percentage_change.text().replace(".","").replace(",",""))
-                        value = float(self.ui.tv_inventory_data.item(selected_rows[row], 4).text())
-                        unit_price = value + (value * percentage / 100)
-                        # asigna el valor nuevo
-                        params.append({'id': self.IDs_products[selected_rows[row]],
-                                        'unit_pr': f"{unit_price:.2f}"})
-                        self.ui.tv_inventory_data.item(selected_rows[row], 4).setText(f"{unit_price:.2f}")
-                        sql:str = "UPDATE Productos SET precio_unit = :unit_pr WHERE IDproducto = :id;"
-                        self._db_repo.updateRegisters(sql, params, inv_prices=True)
-                    except:
-                        pass
-
-        # sino, si está activada la checkbox de precios comerciales...
-        else:
-            for row in range(len(selected_rows)):
-                if self.IDs_products[selected_rows[row]] not in params and self.ui.tv_inventory_data.item(selected_rows[row], 5).text() != "":
-                    try:
-                        # calcula el valor nuevo
-                        percentage = int(self.ui.lineEdit_percentage_change.text().replace(".","").replace(",",""))
-                        value = float(self.ui.tv_inventory_data.item(selected_rows[row], 5).text())
-                        comerc_price = value + (value * percentage / 100)
-                        # asigna el valor nuevo
-                        params.append({'id': self.IDs_products[selected_rows[row]],
-                                       'comerc_pr': f"{comerc_price:.2f}"})
-                        self.ui.tv_inventory_data.item(selected_rows[row], 5).setText(f"{comerc_price:.2f}")
-                        sql:str = "UPDATE Productos SET precio_comerc = :comerc_pr WHERE IDproducto = :id;"
-                        self._db_repo.updateRegisters(sql, params, inv_prices=True)
-                    except:
-                        pass
-        return None
-
-
-    def validateLineeditPercentageChange(self) -> bool:
-        '''Valida el valor de entrada para 'lineEdit_percentage_change' y sino lo es muestra un mensaje en 
-        'label_feedbackChangePercentage' informando el problema. Retorna 'True' si es válido, sino 'False'.'''
-        is_valid:bool = True
-        if self.ui.lineEdit_percentage_change.text().strip() == "":
-            is_valid = False
-            self.ui.label_feedbackChangePercentage.show()
-            self.ui.label_feedbackChangePercentage.setStyleSheet("font-family: 'Verdana'; font-size: 16px; letter-spacing: 0px; word-spacing: 0px; color: #f44;")
-            self.ui.label_feedbackChangePercentage.setText("Se debe asignar un valor de cambio")
-        else:
-            self.ui.label_feedbackChangePercentage.hide()
-        return is_valid
-
-
-    @Slot()
-    def handleLineeditPercentageEditingFinished(self) -> None:
-        '''Maneja los métodos asociados con 'lineEdit_percentage_change'. Llama a 'validateLineeditPercentageChange' para 
-        validar el valor ingresado, y si es válido obtiene las filas seleccionadas con 'getSelectedTableRows', calcula los 
-        precios nuevos y los actualiza en la base de datos con '__calculateNewPrices', además actualiza los valores en la 
-        tabla. Retorna 'None'.'''
-        if self.validateLineeditPercentageChange():
-            selected_rows = getSelectedTableRows(self.ui.tv_inventory_data)
-            self.__calculateNewPrices(selected_rows)
-        return None
-
-
-    @Slot()
-    def handleCheckboxStateChange(self) -> None:
-        '''Dependiendo de cuál se haya checkeado, permite al usuario seleccionar las filas de los productos cuyos 
-        precios (unitarios o comerciales) de la tabla 'tv_inventory_data' desee incrementar/decrementar de forma porcentual. Además 
-        al checkear cualquier checkbox se habilita el 'lineEdit_percentage_change', sino lo deshabilita. Retorna 'None'.'''
-        if self.ui.checkbox_unit_prices.isChecked() or self.ui.checkbox_comercial_prices.isChecked():
-            # cambia el modo de selección de 'tv_inventory_data', habilita el lineedit
-            self.ui.tv_inventory_data.setEditTriggers(QAbstractItemView.NoEditTriggers)
-            self.ui.tv_inventory_data.setSelectionBehavior(QAbstractItemView.SelectRows)
-            self.ui.tv_inventory_data.setSelectionMode(QAbstractItemView.MultiSelection)
-            self.ui.lineEdit_percentage_change.setEnabled(True)
-        else: # vuelve a poner el modo de selección de 'tv_inventory_data' al que tiene por defecto, deshabilita el lineedit
-            self.ui.tv_inventory_data.setEditTriggers(QAbstractItemView.DoubleClicked)
-            self.ui.tv_inventory_data.setSelectionBehavior(QAbstractItemView.SelectItems)
-            self.ui.tv_inventory_data.setSelectionMode(QAbstractItemView.ExtendedSelection)
-            self.ui.lineEdit_percentage_change.setEnabled(False)
-        return None
-    
-
-    # funciones de inventory_checkbuttons_buttonGroup
     @Slot(QCheckBox)
     def handlePressedCheckbutton(self, checkbox:QCheckBox) -> None:
         '''
@@ -1268,6 +1196,161 @@ class MainWindow(QMainWindow):
         '''
         checkbox.group().setExclusive(True)
 
+
+    @Slot()
+    def handleCheckboxStateChange(self) -> None:
+        '''
+        Dependiendo de cuál checkbox se haya checkeado, permite al usuario 
+        seleccionar las filas de los productos cuyos precios (unitarios o 
+        comerciales) de la tabla 'tv_inventory_data' desee incrementar/decrementar 
+        de forma porcentual. Además al checkear cualquier checkbox se habilita 
+        el 'lineEdit_percentage_change', sino lo deshabilita.
+        
+        Retorna
+        -------
+        None
+        '''
+        if self.ui.checkbox_unit_prices.isChecked() or self.ui.checkbox_comercial_prices.isChecked():
+            # cambia el modo de selección de 'tv_inventory_data'
+            self.ui.tv_inventory_data.setEditTriggers(QAbstractItemView.NoEditTriggers)
+            self.ui.tv_inventory_data.setSelectionBehavior(QAbstractItemView.SelectRows)
+            self.ui.tv_inventory_data.setSelectionMode(QAbstractItemView.MultiSelection)
+            # habilita el lineedit
+            self.ui.lineEdit_percentage_change.setEnabled(True)
+            
+        else: # vuelve a poner el modo de selección de 'tv_inventory_data' al que tiene por defecto
+            self.ui.tv_inventory_data.setEditTriggers(QAbstractItemView.DoubleClicked)
+            self.ui.tv_inventory_data.setSelectionBehavior(QAbstractItemView.SelectItems)
+            self.ui.tv_inventory_data.setSelectionMode(QAbstractItemView.ExtendedSelection)
+            # deshabilita el lineedit
+            self.ui.lineEdit_percentage_change.setEnabled(False)
+        return None
+
+
+    @Slot()
+    def __onPercentageValidatorSucceded(self) -> None:
+        '''
+        Esconde el label de feedback de porcentajes.
+
+        Retorna
+        -------
+        None
+        '''
+        self.ui.label_feedbackChangePercentage.hide()
+        return None
+
+
+    @Slot(str)
+    def __onPercentageValidatorFailed(self, error_message:str) -> None:
+        '''
+        Muestra el label con feedback y cambia la hoja de estilos del label.
+        
+        Parámetros
+        ----------
+        feedback : str
+            Texto como feedback a mostrar en el label
+        
+        Retorna
+        -------
+        None
+        '''
+        self.ui.label_feedbackChangePercentage.show()
+        self.ui.label_feedbackChangePercentage.setText(error_message)
+        self.ui.label_feedbackChangePercentage.setStyleSheet(LabelFeedbackStyle.INVALID.value)
+        return None
+
+
+    @Slot()
+    def onLePercentageEditingFinished(self) -> None:
+        ''' 
+        A partir de las filas seleccionadas calcula los precios nuevos y los 
+        actualiza en la base de datos.
+        
+        Retorna
+        -------
+        None
+        '''
+        try:
+            text:float = float(self.ui.lineEdit_percentage_change.text().replace(",","."))
+        except ValueError:
+            return None
+        
+        if text != 0:
+            selected_rows = getSelectedTableRows(self.ui.tv_inventory_data)
+            
+            if not selected_rows:
+                return None
+            
+            self.__calculateNewPrices(text, selected_rows)
+        return None
+
+
+    def __calculateNewPrices(self, percentage:float, selected_rows:tuple[int]) -> None:
+        '''
+        Calcula los aumentos/decrementos en los precios unitarios o comerciales 
+        dependiendo de cuál es la checkbox marcada y actualiza los valores en 
+        la tabla.
+        
+        Parámetros
+        ----------
+        percentage : float
+            Porcentaje de incremento/decremento
+        selected_rows: tuple[int]
+            Filas seleccionadas en la vista
+        
+        Retorna
+        -------
+        None
+        '''
+        sql:str
+        params:list[dict] = []
+        IDproduct:int # id del producto
+        col_value:float # valor de la columna (unitario o comercial)
+        final_price:float # precio final a aplicar en base de datos (unitario o comercial)
+        
+        # TODO: funciona bien, falta realizar las consultas para actualizar 
+        # todo: en base de datos
+        
+        # si está activada la checkbox de precios unitarios...
+        if self.ui.checkbox_unit_prices.isChecked():
+            for row in selected_rows:
+                # accede al IDproducto guardado en '_data' en el MODELO
+                IDproduct = self.ui.tv_inventory_data.model()._data[row][0]
+                
+                # si el id no está duplicado...
+                if IDproduct not in params:
+                    # obtengo el precio unitario de cada celda
+                    col_value = float(self.ui.tv_inventory_data.model()._data[row][6])
+                    final_price = round(col_value + (col_value * percentage / 100), 2)
+                    
+                    # asigna el valor nuevo
+                    params.append({'id': IDproduct,
+                                    'unit_pr': final_price})
+                    sql:str = '''UPDATE Productos 
+                                SET precio_unit = ? 
+                                WHERE IDproducto = ?;'''
+                    # self._db_repo.updateRegisters(sql, params, inv_prices=True)
+
+        # sino, si está activada la checkbox de precios comerciales...
+        else:
+            for row in selected_rows:
+                # obtengo el id del producto desde el MODELO
+                IDproduct = self.ui.tv_inventory_data.model()._data[row][0]
+                
+                # si el campo no está vacío y el id no está duplicado...
+                if self.ui.tv_inventory_data.model()._data[row][7] and IDproduct not in params:
+                    # obtengo el precio comercial de cada celda
+                    col_value = float(self.ui.tv_inventory_data.model()._data[row][7])
+                    final_price = round(col_value + (col_value * percentage / 100), 2)
+                   
+                    # asigna el valor nuevo
+                    params.append({'id': IDproduct,
+                                    'comerc_pr': final_price})
+                    sql:str = '''UPDATE Productos 
+                                SET precio_comerc = ? 
+                                WHERE IDproducto = ?;'''
+                    # self._db_repo.updateRegisters(sql, params, inv_prices=True)
+        return None
 
 
     #¡### VENTAS ######################################################

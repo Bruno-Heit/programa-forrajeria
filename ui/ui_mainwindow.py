@@ -846,7 +846,7 @@ class Ui_MainWindow(object):
 "	color: #555;\n"
 "}")
         self.lineEdit_percentage_change.setText(u"")
-        self.lineEdit_percentage_change.setMaxLength(8)
+        self.lineEdit_percentage_change.setMaxLength(12)
         self.lineEdit_percentage_change.setFrame(False)
         self.lineEdit_percentage_change.setPlaceholderText(u"Ejemplo: 25")
         self.lineEdit_percentage_change.setClearButtonEnabled(True)
@@ -1121,7 +1121,7 @@ class Ui_MainWindow(object):
         self.tab2_toolBox.addItem(self.box1_sales_form, u"Formulario de venta")
         self.box2_sales_table = QWidget()
         self.box2_sales_table.setObjectName(u"box2_sales_table")
-        self.box2_sales_table.setGeometry(QRect(0, 0, 756, 498))
+        self.box2_sales_table.setGeometry(QRect(0, 0, 364, 162))
         self.box2_sales_Vlayout = QVBoxLayout(self.box2_sales_table)
         self.box2_sales_Vlayout.setSpacing(4)
         self.box2_sales_Vlayout.setObjectName(u"box2_sales_Vlayout")
