@@ -200,6 +200,12 @@ class PercentageValidator(QRegularExpressionValidator):
             return self.State.Intermediate, text, pos
 
         elif fullmatch(self.pattern, text):
+            try:
+                if float(text.replace(",",".")) < -100:
+                    self.validationFailed.emit("El valor no puede ser menor a -100%")
+                    return self.State.Invalid, text, pos
+            except ValueError:
+                pass
             self.validationSucceeded.emit()
             return self.State.Acceptable, text, pos
         
