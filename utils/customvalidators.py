@@ -191,7 +191,7 @@ class PercentageValidator(QRegularExpressionValidator):
     
     def __init__(self, parent=None) -> None:
         super(PercentageValidator, self).__init__()
-        self.pattern:Pattern = compile(RegexExps.PERCENTAJE_CHANGE.value)
+        self.pattern:Pattern = compile(RegexExps.PERCENTAGE_CHANGE.value)
     
     
     def validate(self, text:str, pos:int) -> object:
