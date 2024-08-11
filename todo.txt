@@ -20,6 +20,8 @@ CAMBIOS A HACER/IMPLEMENTACIONES NUEVAS:
 	☑ Implementar el sistema de ventas del día.
 	☑ Cada vez que se agregue a la tabla de ventas un objeto vendido (o la cantidad especificada) se 
 	  debe modificar el stock total en la tabla donde se encuentra ese objeto.
+	☐ Al efectuarse una venta, si el cliente paga demás, se debe agregar también a cuentas corrientes (las 
+	  deudas ya se agregan).
 	☐ Implementar el sistema de deudas.
 
 	☐ Implementar copias de seguridad (idealmente 3 copias, 2 en disco, 1 en otro dispositivo (principio 321)).

@@ -38,7 +38,7 @@ class DatabaseRepository():
         return None
     
     
-    def __executeQuery(self, sql:str, params:tuple=None) -> Cursor:
+    def __executeQuery(self, sql:str, params:tuple=None, executemany:bool=False) -> Cursor:
         '''
         Realiza la consulta entregada independientemente del tipo y devuelve el cursor 
         con el resultado.
@@ -49,6 +49,10 @@ class DatabaseRepository():
             Consulta de tipo CRUD
         params : tuple, opcional
             Parámetros de la consulta, por defecto es None
+        executemany: bool, opcional
+            Flag que determina si la misma consulta se debe ejecutar múltiples veces 
+            con diferentes valores de parámetros. NOTA: executemany requiere que 'params' 
+            también tenga un valor asignado
 
         Retorna
         -------
@@ -56,16 +60,31 @@ class DatabaseRepository():
             Cursor con los registros resultantes sin filtrar de la consulta
         '''
         cursor = self._connection.cursor()
-        try:
-            if params:
-                cursor.execute(sql, params)
-            else:
-                cursor.execute(sql)
-            self._connection.commit()
-        
-        except sqlite3Error as err:
-            self._connection.rollback()
-            logging.critical(f"{err.sqlite_errorcode}:{err.sqlite_errorname} / {err}")
+        match executemany:
+            case False:
+                try:
+                    if params:
+                        cursor.execute(sql, params)
+                    else:
+                        cursor.execute(sql)
+                    self._connection.commit()
+                
+                except sqlite3Error as err:
+                    self._connection.rollback()
+                    logging.critical(f"{err.sqlite_errorcode}:{err.sqlite_errorname} / {err}")
+            
+            case True:
+                try:
+                    cursor.executemany(sql, params)
+                    self._connection.commit()
+                
+                except ProgrammingError as err:
+                    self._connection.rollback()
+                    logging.critical(f"{err}")
+                
+                except sqlite3Error as err:
+                    self._connection.rollback()
+                    logging.critical(f"{err.sqlite_errorcode}:{err.sqlite_errorname} / {err}")
         
         return cursor
     
@@ -128,22 +147,25 @@ class DatabaseRepository():
         return self.__executeQuery(data_sql, data_params).fetchall()
     
     
-    def updateRegisters(self, upd_sql:str, upd_params:tuple) -> None:
+    def updateRegisters(self, upd_sql:str, upd_params:tuple, executemany:bool=False) -> None:
         '''
         Realiza una consulta de tipo UPDATE.
 
         Parámetros
         ----------
         upd_sql : str
-            Consulta para actualizar los registros coincidentes.
+            Consulta para actualizar los registros coincidentes
         upd_params : tuple
-            Parámetros para la consulta.
+            Parámetros para la consulta
+        executemany: bool, opcional
+        Flag que determina si la misma consulta se debe ejecutar múltiples veces 
+        con diferentes valores de parámetros
 
         Retorna
         -------
         None
         '''
-        self.__executeQuery(upd_sql, upd_params)
+        self.__executeQuery(upd_sql, upd_params, executemany)
         return None
 
 

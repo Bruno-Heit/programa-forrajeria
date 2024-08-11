@@ -23,6 +23,8 @@ from utils.enumclasses import (LoggingMessage, DBQueries, ModelHeaders, TableVie
 from resources import (rc_icons)
 
 
+# TODO IMPORTANTE: cuando hay UPDATE, hay que actualizar también el MODELO DE DATOS!!
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -1264,12 +1266,17 @@ class MainWindow(QMainWindow):
     def onLePercentageEditingFinished(self) -> None:
         ''' 
         A partir de las filas seleccionadas calcula los precios nuevos y los 
-        actualiza en la base de datos.
+        actualiza en la base de datos, en la tabla de Productos y Deudas.
+        NOTA: Este método realiza las actualizaciones en "batches" o grupos de 
+        datos para que la operación sea más eficiente.
         
         Retorna
         -------
         None
         '''
+        params:tuple[tuple[float, int]] # tuplas con los valores nuevos y los 
+                                        # ids de los productos
+        
         try:
             text:float = float(self.ui.lineEdit_percentage_change.text().replace(",","."))
         except ValueError:
@@ -1281,15 +1288,87 @@ class MainWindow(QMainWindow):
             if not selected_rows:
                 return None
             
-            self.__calculateNewPrices(text, selected_rows)
+            # obtiene los precios nuevos (en tuplas de [precio nuevo, IDproducto])
+            params = self.__calculateNewPrices(text, selected_rows)
+            
+            if params:
+                # dependiendo de qué checkbox esté checkeada...
+                if self.ui.checkbox_unit_prices.isChecked():
+                    # actualiza en Productos
+                    with self._db_repo as db_repo:
+                        db_repo.updateRegisters(
+                            upd_sql='''UPDATE Productos 
+                                        SET precio_unit = ? 
+                                        WHERE IDproducto = ?''',
+                            upd_params=params,
+                            executemany=True
+                            )
+                        
+                        # actualizo los params, sólo conservo el IDproducto
+                        params = tuple((param[1],) for param in params)
+                        
+                        # actualiza en Deudas
+                        db_repo.updateRegisters(
+                            upd_sql='''
+                                UPDATE Deudas 
+                                SET total_adeudado = CASE Detalle_Ventas.abonado
+                                    WHEN 0 THEN Productos.precio_unit
+                                    ELSE ROUND(Productos.precio_unit - Detalle_Ventas.abonado, 2)
+                                END
+                                FROM Detalle_Ventas, Ventas, Productos
+                                WHERE 
+                                    Productos.IDproducto = ? AND
+                                    Detalle_Ventas.IDproducto = Productos.IDproducto AND
+                                    Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
+                                    Detalle_Ventas.IDventa = Ventas.IDventa AND 
+                                    Ventas.detalles_venta LIKE "%(P. NORMAL)%";''',
+                            upd_params=params,
+                            executemany=True
+                        )
+                        
+                elif self.ui.checkbox_comercial_prices.isChecked():
+                    # actualiza en Productos
+                    with self._db_repo as db_repo:
+                        db_repo.updateRegisters(
+                            upd_sql='''UPDATE Productos 
+                                        SET precio_comerc = ? 
+                                        WHERE IDproducto = ?''',
+                            upd_params=params,
+                            executemany=True
+                            )
+                        
+                        # actualizo los params, sólo conservo el IDproducto
+                        params = tuple((param[1],) for param in params)
+                        
+                        # actualiza en Deudas
+                        db_repo.updateRegisters(
+                            upd_sql='''
+                                UPDATE Deudas 
+                                SET total_adeudado = CASE Detalle_Ventas.abonado
+                                    WHEN 0 THEN Productos.precio_comerc
+                                    ELSE ROUND(Productos.precio_comerc - Detalle_Ventas.abonado, 2)
+                                END
+                                FROM Detalle_Ventas, Ventas, Productos
+                                WHERE 
+                                    Productos.IDproducto = ? AND
+                                    Detalle_Ventas.IDproducto = Productos.IDproducto AND
+                                    Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
+                                    Detalle_Ventas.IDventa = Ventas.IDventa AND 
+                                    Ventas.detalles_venta LIKE "%(P. COMERCIAL)%";''',
+                            upd_params=params,
+                            executemany=True
+                        )
+        
+        # TODO: comunicar al modelo de datos sobre los cambios en precios comerciales/unitarios
         return None
 
 
-    def __calculateNewPrices(self, percentage:float, selected_rows:tuple[int]) -> None:
+    def __calculateNewPrices(self, percentage:float, 
+                             selected_rows:tuple[int]) -> tuple[tuple[float, int]]:
         '''
         Calcula los aumentos/decrementos en los precios unitarios o comerciales 
-        dependiendo de cuál es la checkbox marcada y actualiza los valores en 
-        la tabla.
+        dependiendo de cuál es la checkbox marcada y devuelve los precios nuevos 
+        y los IDproductos donde se deben colocar en la base de datos.
         
         Parámetros
         ----------
@@ -1300,16 +1379,13 @@ class MainWindow(QMainWindow):
         
         Retorna
         -------
-        None
+        tuple[tuple[float, int]]
+            Tupla con tuplas internas con cada precio nuevo en formato float y cada 
+            IDproducto en el que actualizar la base de datos
         '''
-        sql:str
-        params:list[dict] = []
+        params:list[tuple[float, int]] = []
         IDproduct:int # id del producto
-        col_value:float # valor de la columna (unitario o comercial)
-        final_price:float # precio final a aplicar en base de datos (unitario o comercial)
-        
-        # TODO: funciona bien, falta realizar las consultas para actualizar 
-        # todo: en base de datos
+        col_value:float # valor de la columna de precio (unitario o comercial)
         
         # si está activada la checkbox de precios unitarios...
         if self.ui.checkbox_unit_prices.isChecked():
@@ -1321,36 +1397,32 @@ class MainWindow(QMainWindow):
                 if IDproduct not in params:
                     # obtengo el precio unitario de cada celda
                     col_value = float(self.ui.tv_inventory_data.model()._data[row][6])
-                    final_price = round(col_value + (col_value * percentage / 100), 2)
                     
                     # asigna el valor nuevo
-                    params.append({'id': IDproduct,
-                                    'unit_pr': final_price})
-                    sql:str = '''UPDATE Productos 
-                                SET precio_unit = ? 
-                                WHERE IDproducto = ?;'''
-                    # self._db_repo.updateRegisters(sql, params, inv_prices=True)
+                    params.append(
+                        (
+                            round(col_value + (col_value * percentage / 100), 2),
+                            IDproduct,
+                        )
+                    )
 
         # sino, si está activada la checkbox de precios comerciales...
         else:
             for row in selected_rows:
-                # obtengo el id del producto desde el MODELO
                 IDproduct = self.ui.tv_inventory_data.model()._data[row][0]
                 
                 # si el campo no está vacío y el id no está duplicado...
                 if self.ui.tv_inventory_data.model()._data[row][7] and IDproduct not in params:
-                    # obtengo el precio comercial de cada celda
                     col_value = float(self.ui.tv_inventory_data.model()._data[row][7])
-                    final_price = round(col_value + (col_value * percentage / 100), 2)
                    
                     # asigna el valor nuevo
-                    params.append({'id': IDproduct,
-                                    'comerc_pr': final_price})
-                    sql:str = '''UPDATE Productos 
-                                SET precio_comerc = ? 
-                                WHERE IDproducto = ?;'''
-                    # self._db_repo.updateRegisters(sql, params, inv_prices=True)
-        return None
+                    params.append(
+                        (
+                            round(col_value + (col_value * percentage / 100), 2),
+                            IDproduct,
+                        )
+                    )
+        return tuple(params)
 
 
     #¡### VENTAS ######################################################
