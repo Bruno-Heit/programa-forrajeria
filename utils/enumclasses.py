@@ -130,6 +130,16 @@ class LoggingMessage(StrEnum):
 
 
 
+# tipos de sidebars
+class TypeSideBar(IntEnum):
+    '''Clase de tipo 'IntEnum' con valores que sirven para identificar las sidebars.'''
+    CATEGORIES_SIDEBAR = 1
+    PERCENTAGES_SIDEBAR = 2
+
+
+
+
+
 class RegexExps(StrEnum):
     '''
     Clase StrEnum con expresiones regulares predefinidas, creadas principalmente para 
