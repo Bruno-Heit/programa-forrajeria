@@ -1,18 +1,16 @@
 # SQLITE3
 
-from typing import (Any, Sequence)
+from typing import (Any)
 
 from PySide6.QtWidgets import (QTableWidget, QComboBox, QHeaderView, QListWidget, QLineEdit, 
-                               QCompleter, QFrame, QWidget, QDateTimeEdit, QTableView, QSizePolicy)
-from PySide6.QtCore import (QRegularExpression, QModelIndex, Qt, QPropertyAnimation, 
-                            QEasingCurve, QDateTime, QDate, QTime)
-from PySide6.QtGui import (QRegularExpressionValidator)
+                               QCompleter, QFrame, QWidget, QDateTimeEdit, QTableView)
+from PySide6.QtCore import (QModelIndex, Qt, QPropertyAnimation, QEasingCurve, QDateTime, 
+                            QDate, QTime)
 
 from resources import (rc_icons)
 from utils.dboperations import *
 from utils.customvalidators import *
-
-from re import (Match, match, search, sub, IGNORECASE)
+from re import (Match, sub, match, findall)
 
 
 # consultas sql
@@ -73,8 +71,29 @@ def getTableViewsSqlQueries(tv_name:str, ACCESSED_BY_LIST:bool=False, SHOW_ALL:b
 
 
 # side bars
-def toggleSideBar(side_bar:QFrame, parent:QWidget|QFrame, body:QFrame, max_width:int=250) -> None:
-    '''Anima la apertura o cierre de los menús laterales. Retorna None.'''
+def toggleSideBar(side_bar:QFrame, parent:QWidget|QFrame, body:QFrame, max_width:int=250) -> bool:
+    '''
+    Anima la apertura o cierre de los menús laterales y esconde o muestra los 
+    widgets internos.
+    
+    Parámetros
+    ----------
+    side_bar: QFrame
+        El sidebar al que se referencia
+    parent: QWidget|QFrame
+        El widget padre al que pertenece el sidebar, es necesario porque la 
+        animación requiere especificar el widget padre
+    body: QFrame
+        El widget con los widgets hijos que deben esconderse o mostrarse
+    max_width: int, opcional
+        El ancho máximo al que animar la apertura del sidebar
+    
+    Retorna
+    -------
+    bool
+        Determina si se abrió o si se cerró el sidebar, si es False se cerró, si es True 
+        se abrió
+    '''
     # OBTENER el width actual
     start_value = side_bar.width()
     if start_value == 40:
@@ -90,9 +109,10 @@ def toggleSideBar(side_bar:QFrame, parent:QWidget|QFrame, body:QFrame, max_width
     anim.setEndValue(end_value)
     anim.setEasingCurve(QEasingCurve.Type.InOutCubic)
     anim.start()
+    
     # una vez terminada la animación, llama a la función de abajo, que muestra o esconde los widgets
     anim.finished.connect(lambda: __toggleSideBarWidgetsVisibility(body, signal))
-    return None
+    return bool(signal)
 
 
 def __toggleSideBarWidgetsVisibility(body:QFrame, signal:int):

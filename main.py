@@ -18,7 +18,7 @@ from utils.workerclasses import (WorkerSelect, WorkerDelete, WorkerUpdate)
 from utils.dboperations import (DatabaseRepository)
 from utils.customvalidators import (SalePaidValidator)
 from utils.enumclasses import (LoggingMessage, DBQueries, ModelHeaders, TableViewId, 
-                               LabelFeedbackStyle, InventoryPriceType)
+                               LabelFeedbackStyle, InventoryPriceType, TypeSideBar)
 
 from resources import (rc_icons)
 
@@ -108,11 +108,11 @@ class MainWindow(QMainWindow):
         '''
         #¡========= INVENTARIO ================================================
         #* abrir/cerrar side bars
-        self.ui.btn_side_barToggle.clicked.connect(lambda: toggleSideBar(
-            self.ui.side_bar, self.ui.centralwidget, self.ui.side_bar_body))
+        self.ui.btn_side_barToggle.clicked.connect(lambda: self.toggleSideBar(
+            TypeSideBar.CATEGORIES_SIDEBAR))
         
-        self.ui.btn_inventory_sideBarToggle.clicked.connect(lambda: toggleSideBar(
-            self.ui.inventory_sideBar, self.ui.main_inventory_frame, self.ui.inventory_side_bar_body, 200))
+        self.ui.btn_inventory_sideBarToggle.clicked.connect(lambda: self.toggleSideBar(
+            TypeSideBar.PERCENTAGES_SIDEBAR))
         
         #* (READ) cargar con productos 'tv_inventory_data'
         self.ui.tables_ListWidget.itemClicked.connect(lambda item: self.fillTableView(
@@ -288,6 +288,89 @@ class MainWindow(QMainWindow):
         return None
 
 
+    @Slot(object)
+    def toggleSideBar(self, sidebar_type:TypeSideBar) -> None:
+        '''
+        Abre o cierra el sidebar, muestra o esconde sus widgets internos 
+        y alterna la selección/edición en la tabla de inventario.
+
+        Parámetros
+        ----------
+        sidebar_type : TypeSideBar
+            El sidebar que se está modificando
+
+        Retorna
+        -------
+        None
+        '''
+        perc_sidebar_opened:bool = False # se usa cuando el sidebar es el de 
+                                         # porcentajes, para permitir o prohibir
+                                         # selección y edición en la VISTA
+        
+        match sidebar_type.value:
+            case 1: # sidebar de categorías
+                toggleSideBar(
+                    side_bar=self.ui.side_bar,
+                    parent=self.ui.centralwidget,
+                    body=self.ui.side_bar_body)
+                # limpia la selección
+                self.ui.tv_inventory_data.selectionModel().clearSelection()
+                return None
+            
+            case 2: # sidebar de porcentajes
+                perc_sidebar_opened = toggleSideBar(
+                    side_bar=self.ui.inventory_sideBar,
+                    parent=self.ui.main_inventory_frame,
+                    body=self.ui.inventory_side_bar_body,
+                    max_width=200
+                )
+                self.ui.tv_inventory_data.selectionModel().clearSelection()
+        
+        # alterna la selección y la edición...
+        if perc_sidebar_opened: # cambia selección y anula edición
+            self.__altViewSelectionAndEditionParameters(perc_sidebar_opened)
+        
+        else: # vuelve a valores por defecto
+            self.__altViewSelectionAndEditionParameters(perc_sidebar_opened)
+        
+        return None
+
+
+    def __altViewSelectionAndEditionParameters(self, sidebar_opened:bool) -> None:
+        '''
+        Alterna la selección y edición en la VISTA 'tv_inventory_data' 
+        dependiendo de si se abrió o cerró el sidebar de porcentajes.
+
+        Parámetros
+        ----------
+        sidebar_opened : bool
+            Flag que determina si el sidebar de porcentajes se abrió 
+            o cerró
+
+        Retorna
+        -------
+        None
+        '''
+        match sidebar_opened:
+            case True: # desactiva la selección y edición
+                self.ui.tv_inventory_data.setEditTriggers(
+                    QAbstractItemView.EditTrigger.NoEditTriggers)
+                self.ui.tv_inventory_data.setSelectionBehavior(
+                    QAbstractItemView.SelectionBehavior.SelectRows)
+                self.ui.tv_inventory_data.setSelectionMode(
+                    QAbstractItemView.SelectionMode.MultiSelection)
+            
+            case False: # activa la selección y edición
+                self.ui.tv_inventory_data.setEditTriggers(
+                    QAbstractItemView.EditTrigger.DoubleClicked)
+                self.ui.tv_inventory_data.setSelectionBehavior(
+                    QAbstractItemView.SelectionBehavior.SelectItems)
+                self.ui.tv_inventory_data.setSelectionMode(
+                    QAbstractItemView.SelectionMode.ExtendedSelection)
+            
+        return None
+    
+
     #¡ tablas (READ)
     @Slot(QTableView, bool, bool)
     def fillTableView(self, table_view:QTableView, ACCESSED_BY_LIST:bool=False, SHOW_ALL:bool=False) -> None:
@@ -343,11 +426,11 @@ class MainWindow(QMainWindow):
                 pass
                 # getTableViewsSqlQueries()
         
-        self.startWorker(table_view, data_sql, data_params, count_sql, count_params)
+        self.__startWorker(table_view, data_sql, data_params, count_sql, count_params)
         return None
     
     
-    def startWorker(self, table_view:QTableView, data_sql:str, data_params:tuple=None, count_sql:str=None, 
+    def __startWorker(self, table_view:QTableView, data_sql:str, data_params:tuple=None, count_sql:str=None, 
                     count_params:tuple=None, db_operation:int=DBQueries.SELECT_REGISTERS.value) -> None:
         '''
         Inicializa un QThread y un worker para realizar un tipo de consultas a la base de 
@@ -536,9 +619,11 @@ class MainWindow(QMainWindow):
         
         Parámetros
         ----------
-            tv_name: nombre del QTableView al que se referencia
-            READ_OPERATION: flag que determina si la operación que se hizo fue de llenado (READ) a un 
-            QTableView, por defecto es True
+            tv_name: QTableView
+                nombre del QTableView al que se referencia
+            READ_OPERATION: bool, opcional
+                Flag que determina si la operación que se hizo fue de llenado (READ) a un 
+                QTableView, por defecto es True
 
         Retorna
         -------
@@ -585,18 +670,23 @@ class MainWindow(QMainWindow):
         return None
 
 
-    # todo: reimplementar UPDATE con porcentajes y DELETE
-
     #¡ tablas (CREATE)
     @Slot(str)
     def handleTableCreateRow(self, table_view:QTableView) -> None:
         '''
-        Dependiendo del QTableView al que se agregue una fila, se encarga de crear una instancia del QDialog 
-        correspondiente que pide los datos necesarios para la nueva fila.
+        Dependiendo del QTableView al que se agregue una fila, se encarga de 
+        crear una instancia del QDialog correspondiente que pide los datos 
+        necesarios para la nueva fila. Al final, recarga la tabla correspondiente 
+        llamando a 'self.fillTableView'.
         
-        Al final, recarga la tabla correspondiente llamando a 'self.fillTableView'.
+        Parámetros
+        ----------
+        table_view: QTableView
+            El QTableView al que se referencia
         
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
         match table_view.objectName():
             case "tv_inventory_data":
@@ -755,6 +845,7 @@ class MainWindow(QMainWindow):
         return None
 
 
+    # TODO: reimplementar UPDATES con porcentajes y directos sobre el modelo de datos
     #¡ tablas (UPDATE)
     @Slot(int, int, object)
     def __onInventoryModelDataToUpdate(self, column:int, IDproduct:int, 
@@ -1213,17 +1304,17 @@ class MainWindow(QMainWindow):
         None
         '''
         if self.ui.checkbox_unit_prices.isChecked() or self.ui.checkbox_comercial_prices.isChecked():
-            # cambia el modo de selección de 'tv_inventory_data'
-            self.ui.tv_inventory_data.setEditTriggers(QAbstractItemView.NoEditTriggers)
-            self.ui.tv_inventory_data.setSelectionBehavior(QAbstractItemView.SelectRows)
-            self.ui.tv_inventory_data.setSelectionMode(QAbstractItemView.MultiSelection)
+            # # cambia el modo de selección de 'tv_inventory_data'
+            # self.ui.tv_inventory_data.setEditTriggers(QAbstractItemView.NoEditTriggers)
+            # self.ui.tv_inventory_data.setSelectionBehavior(QAbstractItemView.SelectRows)
+            # self.ui.tv_inventory_data.setSelectionMode(QAbstractItemView.MultiSelection)
             # habilita el lineedit
             self.ui.lineEdit_percentage_change.setEnabled(True)
             
         else: # vuelve a poner el modo de selección de 'tv_inventory_data' al que tiene por defecto
-            self.ui.tv_inventory_data.setEditTriggers(QAbstractItemView.DoubleClicked)
-            self.ui.tv_inventory_data.setSelectionBehavior(QAbstractItemView.SelectItems)
-            self.ui.tv_inventory_data.setSelectionMode(QAbstractItemView.ExtendedSelection)
+            # self.ui.tv_inventory_data.setEditTriggers(QAbstractItemView.DoubleClicked)
+            # self.ui.tv_inventory_data.setSelectionBehavior(QAbstractItemView.SelectItems)
+            # self.ui.tv_inventory_data.setSelectionMode(QAbstractItemView.ExtendedSelection)
             # deshabilita el lineedit
             self.ui.lineEdit_percentage_change.setEnabled(False)
         return None
@@ -1290,76 +1381,87 @@ class MainWindow(QMainWindow):
             
             # obtiene los precios nuevos (en tuplas de [precio nuevo, IDproducto])
             params = self.__calculateNewPrices(text, selected_rows)
-            
-            if params:
-                # dependiendo de qué checkbox esté checkeada...
-                if self.ui.checkbox_unit_prices.isChecked():
-                    # actualiza en Productos
-                    with self._db_repo as db_repo:
-                        db_repo.updateRegisters(
-                            upd_sql='''UPDATE Productos 
-                                        SET precio_unit = ? 
-                                        WHERE IDproducto = ?''',
-                            upd_params=params,
-                            executemany=True
-                            )
+
+            # TODO: modificar código siguiente, debo llamar a 'model.setData'
+            # todo: y pasarle los precios nuevos, ese método llama automáticamente 
+            # todo: (por una señal) a 'self.__onInventoryModelDataToUpdate' donde 
+            # todo: tengo que actualizar los precios nuevos
+            # if params:
+            #     # dependiendo de qué checkbox esté checkeada...
+            #     if self.ui.checkbox_unit_prices.isChecked():
+            #         # actualiza en Productos
+            #         with self._db_repo as db_repo:
+            #             db_repo.updateRegisters(
+            #                 upd_sql='''UPDATE Productos 
+            #                             SET precio_unit = ? 
+            #                             WHERE IDproducto = ?''',
+            #                 upd_params=params,
+            #                 executemany=True
+            #                 )
                         
-                        # actualizo los params, sólo conservo el IDproducto
-                        params = tuple((param[1],) for param in params)
+            #             # actualizo los params, sólo conservo el IDproducto
+            #             params = tuple((param[1],) for param in params)
                         
-                        # actualiza en Deudas
-                        db_repo.updateRegisters(
-                            upd_sql='''
-                                UPDATE Deudas 
-                                SET total_adeudado = CASE Detalle_Ventas.abonado
-                                    WHEN 0 THEN Productos.precio_unit
-                                    ELSE ROUND(Productos.precio_unit - Detalle_Ventas.abonado, 2)
-                                END
-                                FROM Detalle_Ventas, Ventas, Productos
-                                WHERE 
-                                    Productos.IDproducto = ? AND
-                                    Detalle_Ventas.IDproducto = Productos.IDproducto AND
-                                    Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
-                                    Detalle_Ventas.IDventa = Ventas.IDventa AND 
-                                    Ventas.detalles_venta LIKE "%(P. NORMAL)%";''',
-                            upd_params=params,
-                            executemany=True
-                        )
+            #             # actualiza en Deudas
+            #             db_repo.updateRegisters(
+            #                 upd_sql='''
+            #                     UPDATE Deudas 
+            #                     SET total_adeudado = CASE Detalle_Ventas.abonado
+            #                         WHEN 0 THEN Productos.precio_unit
+            #                         ELSE ROUND(Productos.precio_unit - Detalle_Ventas.abonado, 2)
+            #                     END
+            #                     FROM Detalle_Ventas, Ventas, Productos
+            #                     WHERE 
+            #                         Productos.IDproducto = ? AND
+            #                         Detalle_Ventas.IDproducto = Productos.IDproducto AND
+            #                         Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
+            #                         Detalle_Ventas.IDventa = Ventas.IDventa AND 
+            #                         Ventas.detalles_venta LIKE "%(P. NORMAL)%";''',
+            #                 upd_params=params,
+            #                 executemany=True
+            #             )
                         
-                elif self.ui.checkbox_comercial_prices.isChecked():
-                    # actualiza en Productos
-                    with self._db_repo as db_repo:
-                        db_repo.updateRegisters(
-                            upd_sql='''UPDATE Productos 
-                                        SET precio_comerc = ? 
-                                        WHERE IDproducto = ?''',
-                            upd_params=params,
-                            executemany=True
-                            )
+            #     elif self.ui.checkbox_comercial_prices.isChecked():
+            #         # actualiza en Productos
+            #         with self._db_repo as db_repo:
+            #             db_repo.updateRegisters(
+            #                 upd_sql='''UPDATE Productos 
+            #                             SET precio_comerc = ? 
+            #                             WHERE IDproducto = ?''',
+            #                 upd_params=params,
+            #                 executemany=True
+            #                 )
                         
-                        # actualizo los params, sólo conservo el IDproducto
-                        params = tuple((param[1],) for param in params)
+            #             # actualizo los params, sólo conservo el IDproducto
+            #             params = tuple((param[1],) for param in params)
                         
-                        # actualiza en Deudas
-                        db_repo.updateRegisters(
-                            upd_sql='''
-                                UPDATE Deudas 
-                                SET total_adeudado = CASE Detalle_Ventas.abonado
-                                    WHEN 0 THEN Productos.precio_comerc
-                                    ELSE ROUND(Productos.precio_comerc - Detalle_Ventas.abonado, 2)
-                                END
-                                FROM Detalle_Ventas, Ventas, Productos
-                                WHERE 
-                                    Productos.IDproducto = ? AND
-                                    Detalle_Ventas.IDproducto = Productos.IDproducto AND
-                                    Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
-                                    Detalle_Ventas.IDventa = Ventas.IDventa AND 
-                                    Ventas.detalles_venta LIKE "%(P. COMERCIAL)%";''',
-                            upd_params=params,
-                            executemany=True
-                        )
+            #             # actualiza en Deudas
+            #             db_repo.updateRegisters(
+            #                 upd_sql='''
+            #                     UPDATE Deudas 
+            #                     SET total_adeudado = CASE Detalle_Ventas.abonado
+            #                         WHEN 0 THEN Productos.precio_comerc
+            #                         ELSE ROUND(Productos.precio_comerc - Detalle_Ventas.abonado, 2)
+            #                     END
+            #                     FROM Detalle_Ventas, Ventas, Productos
+            #                     WHERE 
+            #                         Productos.IDproducto = ? AND
+            #                         Detalle_Ventas.IDproducto = Productos.IDproducto AND
+            #                         Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
+            #                         Detalle_Ventas.IDventa = Ventas.IDventa AND 
+            #                         Ventas.detalles_venta LIKE "%(P. COMERCIAL)%";''',
+            #                 upd_params=params,
+            #                 executemany=True
+            #             )
         
-        # TODO: comunicar al modelo de datos sobre los cambios en precios comerciales/unitarios
+        # TODO3: comunicar al modelo de datos sobre los cambios en precios comerciales/unitarios
+        
+        # TODO2: obtener los index de los valores modificados, luego iterar sobre cada 
+        # todo2: uno y pasarlo al método 'setData' de abajo.
+        
+        for index in self.ui.tv_inventory_data.selectedIndexes():
+            # self.ui.tv_inventory_data.model().setData(index, params)
+            print(index)
         return None
 
 
@@ -1918,8 +2020,6 @@ class MainWindow(QMainWindow):
         for row in range(self.ui.tv_debts_data.rowCount()):
             widget = DebtsTablePersonData(tableWidget=self.ui.tv_debts_data, full_name="nombre completo")
             self.ui.tv_debts_data.setCellWidget(row, 0, widget)
-        
-            
 
 
 
