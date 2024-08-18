@@ -62,7 +62,11 @@ class InventoryTableModel(QAbstractTableModel):
     
     def setData(self, index: QModelIndex | QPersistentModelIndex, 
                 value: Any, role: int = Qt.ItemDataRole.EditRole) -> bool:
-        #* realizar la actualización de datos en base de datos desde este método
+        '''
+        Realiza la actualización de datos dentro del modelo y además emite la 
+        señal 'dataToUpdate' con el índice, el IDproducto y el valor nuevo, para 
+        poder actualizar la base de datos a partir de esos datos.
+        '''
         
         if role == Qt.ItemDataRole.EditRole:
             match index.column():

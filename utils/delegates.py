@@ -5,7 +5,7 @@
 from PySide6.QtWidgets import (QWidget, QStyledItemDelegate, QStyleOptionViewItem, 
                                QComboBox, QLineEdit)
 from PySide6.QtCore import (Qt, QModelIndex, QSize, QPersistentModelIndex, 
-                            QAbstractItemModel, Signal)
+                            QAbstractItemModel, Signal, Slot)
 
 from utils.enumclasses import (TableViewId)
 from utils.functionutils import (getProductsCategories, createCompleter)
@@ -77,6 +77,7 @@ class InventoryDelegate(QStyledItemDelegate):
         return editor
     
     
+    @Slot()
     def __onValidField(self):
         '''
         Emite la señal 'fieldIsValid' hacia MainWindow. Funciona principalmente 
@@ -90,6 +91,7 @@ class InventoryDelegate(QStyledItemDelegate):
         return None
     
     
+    @Slot(str)
     def __onInvalidField(self, feedback_text:str):
         '''
         Emite la señal 'fieldIsValid' hacia MainWindow. Funciona principalmente 
