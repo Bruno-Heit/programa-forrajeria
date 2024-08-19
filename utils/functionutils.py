@@ -245,25 +245,50 @@ def setTableViewPolitics(tableView:QTableView) -> None:
     return None
 
 
-def getSelectedTableRows(tableView:QTableView) -> tuple[int]:
+def getSelectedTableRows(tableView:QTableView, 
+                         indexes_in_col:int=-1) -> tuple[int] | dict[int, QModelIndex]:
     '''
-    Obtiene todas las filas seleccionadas del QTableView.
+    Obtiene todas las filas seleccionadas del QTableView. Puede retornar una 
+    tupla o un diccionario, dependiendo del parámetro 'indexes_in_col'. 
+    NOTA: no devuelve valores de filas repetidas.
     
     Parámetros
     ----------
     tableView : QTableView
         El QTableView al que se referencia
+    indexes_in_col: int, opcional
+        Especifica una columna en particular de la cual obtener los índices, de forma 
+        que se ignorarán los índices seleccionados en esa fila a excepción de los 
+        índices seleccionados en la columna especificada.
+        NOTA: al pasar este parámetro, se devuelve un diccionario con la fila como 
+        clave y el índice como valor.
     
     Retorna
     -------
-    tuple[int]
-        Tupla con las filas seleccionadas
+    tuple[int] | dict[int, QModelIndex]
+        Tupla con las filas seleccionadas ó diccionario con las filas seleccionadas 
+        como 'keys' y el índice como 'value'
         '''
-    selected_indexes:list = []
-    for index in tableView.selectedIndexes():
-        if index.row() not in selected_indexes:
-            selected_indexes.append(index.row())
-    return tuple(selected_indexes)
+    selected_indexes:list[int] | dict[int, QModelIndex]
+    
+    match indexes_in_col:
+        case -1:
+            selected_indexes:list[int] = []
+            
+            for index in tableView.selectedIndexes():
+                if index.row() not in selected_indexes:
+                    selected_indexes.append(index.row())
+        
+            return tuple(selected_indexes)
+        
+        case _:
+            selected_indexes:dict[int, QModelIndex] = {}
+            
+            for index in tableView.selectedIndexes():
+                if index.column() == indexes_in_col:
+                    selected_indexes[index.row()] = index
+            
+            return selected_indexes
 
 
 def getCurrentProductStock(product_name:str) -> tuple[float,str]:
