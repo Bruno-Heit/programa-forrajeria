@@ -904,20 +904,6 @@ class MainWindow(QMainWindow):
                 upd_params=(new_val[0], new_val[1], IDproduct,)
             
             case 4: # precio normal
-                # obtiene el valor anterior del producto
-                with self._db_repo as db_repo:
-                    prev_val = db_repo.selectRegisters(
-                        data_sql='''SELECT precio_unit 
-                                    FROM Productos 
-                                    WHERE IDproducto = ?;''',
-                        data_params=(IDproduct,)
-                        )[0][0]
-                
-                # no tiene sentido hacer consultas a base de datos si
-                # no se modificaron los precios
-                if float(prev_val) == float(new_val):
-                    return None
-                
                 # consulta para actualizar en Productos
                 upd_sql='''UPDATE Productos 
                         SET precio_unit = ? 
@@ -926,25 +912,11 @@ class MainWindow(QMainWindow):
                 
                 # actualiza en Deudas
                 self.__updateDebtsOnPriceChange(
-                    float(new_val), prev_val, IDproduct, InventoryPriceType.NORMAL
+                    float(new_val), IDproduct, InventoryPriceType.NORMAL
                     )
             
             case 5: # precio comercial
-                # obtiene el valor anterior del producto
-                with self._db_repo as db_repo:
-                    prev_val = db_repo.selectRegisters(
-                        data_sql='''SELECT precio_comerc 
-                                    FROM Productos 
-                                    WHERE IDproducto = ?;''',
-                        data_params=(IDproduct,)
-                        )[0][0]
-                
                 new_val = 0.0 if not new_val else new_val
-                
-                # no tiene sentido hacer consultas a base de datos si
-                # no se modificaron los precios
-                if float(prev_val) == float(new_val):
-                    return None
                 
                 # consulta para actualizar en Productos
                 upd_sql='''UPDATE Productos 
@@ -954,7 +926,7 @@ class MainWindow(QMainWindow):
                 
                 # actualiza en Deudas
                 self.__updateDebtsOnPriceChange(
-                    float(new_val), prev_val, IDproduct, InventoryPriceType.COMERCIAL
+                    float(new_val), IDproduct, InventoryPriceType.COMERCIAL
                 )
                 
         with self._db_repo as db_repo:
@@ -963,7 +935,7 @@ class MainWindow(QMainWindow):
         return None
 
     
-    def __updateDebtsOnPriceChange(self, new_val:float, prev_val:str, IDproduct:int, 
+    def __updateDebtsOnPriceChange(self, new_val:float, IDproduct:int, 
                                    price_type:InventoryPriceType) -> None:
         '''
         Actualiza el precio normal / precio comercial de un producto en Deudas 
@@ -973,8 +945,6 @@ class MainWindow(QMainWindow):
         ----------
         new_val: str
             El nuevo precio del producto
-        prev_val: str
-            El precio anterior del producto en base de datos
         IDproduct: int
             ID del producto cuyo precio fue modificado
         price_type: InventoryPriceType
@@ -1356,10 +1326,10 @@ class MainWindow(QMainWindow):
     @Slot()
     def onLePercentageEditingFinished(self) -> None:
         ''' 
-        A partir de las filas seleccionadas calcula los precios nuevos y los 
-        actualiza en la base de datos, en la tabla de Productos y Deudas.
-        NOTA: Este método realiza las actualizaciones en "batches" o grupos de 
-        datos para que la operación sea más eficiente.
+        A partir de las filas seleccionadas calcula los precios nuevos y 
+        actualiza el modelo de datos.
+        NOTA: la actualización de la base de datos se hace luego de la 
+        actualización del modelo de datos, y no se hace en éste método.
         
         Retorna
         -------
@@ -1367,6 +1337,7 @@ class MainWindow(QMainWindow):
         '''
         params:tuple[tuple[float, int]] # tuplas con los valores nuevos y los 
                                         # ids de los productos
+        selected_rows:dict[int, QModelIndex]
         
         try:
             text:float = float(self.ui.lineEdit_percentage_change.text().replace(",","."))
@@ -1374,13 +1345,19 @@ class MainWindow(QMainWindow):
             return None
         
         if text != 0:
-            selected_rows = getSelectedTableRows(self.ui.tv_inventory_data)
+            selected_rows = getSelectedTableRows(
+                tableView=self.ui.tv_inventory_data,
+                indexes_in_col=4 if self.ui.checkbox_unit_prices.isChecked() else 5
+                )
             
             if not selected_rows:
                 return None
             
             # obtiene los precios nuevos (en tuplas de [precio nuevo, IDproducto])
-            params = self.__calculateNewPrices(text, selected_rows)
+            params = self.__calculateNewPrices(
+                percentage=text,
+                selected_rows=tuple(selected_rows.keys())
+                )
 
             # TODO: modificar código siguiente, debo llamar a 'model.setData'
             # todo: y pasarle los precios nuevos, ese método llama automáticamente 
@@ -1454,14 +1431,11 @@ class MainWindow(QMainWindow):
             #                 executemany=True
             #             )
         
-        # TODO3: comunicar al modelo de datos sobre los cambios en precios comerciales/unitarios
-        
-        # TODO2: obtener los index de los valores modificados, luego iterar sobre cada 
-        # todo2: uno y pasarlo al método 'setData' de abajo.
-        
-        for index in self.ui.tv_inventory_data.selectedIndexes():
-            # self.ui.tv_inventory_data.model().setData(index, params)
-            print(index)
+            # paso al modelo los nuevos valores
+            for index, param in zip(selected_rows.values(), params):
+                self.ui.tv_inventory_data.model().setData(
+                    index=index,
+                    value=param)
         return None
 
 

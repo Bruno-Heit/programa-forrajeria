@@ -71,6 +71,10 @@ class InventoryTableModel(QAbstractTableModel):
         if role == Qt.ItemDataRole.EditRole:
             match index.column():
                 case 0 | 1 | 2: # categoría, nombre, descripción
+                    #? no modifica el modelo si el nuevo dato es igual al anterior
+                    if value == self._data[index.row()][index.column() + 1]:
+                        return False
+                    
                     self._data[index.row()][index.column() + 1] = value
                     
                     # actualiza los datos en MainWindow
@@ -86,6 +90,11 @@ class InventoryTableModel(QAbstractTableModel):
                     full_stock = str(value).replace(",",".").split(" ")
                     full_stock.append("") if len(full_stock) == 1 else None
                     
+                    #? no modifica el modelo si el nuevo stock es igual al anterior
+                    if (self._data[index.row()][4] == full_stock[0] and 
+                        self._data[index.row()][5] == full_stock[1]):
+                        return False
+                    
                     self._data[index.row()][4] = full_stock[0] # stock
                     self._data[index.row()][5] = full_stock[1] # unidad de medida
                     
@@ -97,7 +106,16 @@ class InventoryTableModel(QAbstractTableModel):
                     return True
                 
                 case 4: # precio unitario
-                    self._data[index.row()][6] = str(value).replace(",",".")
+                    # TODO: desde acá, comprobar si 'value' viene de 
+                    # todo: 'MainWindow.onLePercentageEditingFinished' para 
+                    # todo: poder actualizar en batches (por ej., usando Worker)
+                    value = str(value).replace(",",".")
+                    
+                    #? no modifica el precio unitario si el valor nuevo es igual al anterior
+                    if self._data[index.row()][6] == value:
+                        return False
+                    
+                    self._data[index.row()][6] = value
                     
                     self.dataToUpdate.emit(
                         (index.column(), self._data[index.row()][0], self._data[index.row()][6])
@@ -107,6 +125,12 @@ class InventoryTableModel(QAbstractTableModel):
                     return True
                     
                 case 5: # precio comercial
+                    value = str(value).replace(",",".")
+                    
+                    #? no modifica el precio comercial si el valor nuevo es igual al anterior
+                    if self._data[index.row()][7] == value:
+                        return False
+                    
                     self._data[index.row()][7] = str(value).replace(",",".")
                     
                     self.dataToUpdate.emit(
