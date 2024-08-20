@@ -6,8 +6,8 @@ test.py
 
 # archivos innecesarios
 py_to_exe_config.json
-.drawio
-.drawio.bkp
+*.drawio
+*.drawio.bkp
 
 # archivos de compilación
 *.o
