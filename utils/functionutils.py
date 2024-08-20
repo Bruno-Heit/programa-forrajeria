@@ -3,7 +3,8 @@
 from typing import (Any)
 
 from PySide6.QtWidgets import (QTableWidget, QComboBox, QHeaderView, QListWidget, QLineEdit, 
-                               QCompleter, QFrame, QWidget, QDateTimeEdit, QTableView)
+                               QCompleter, QFrame, QWidget, QDateTimeEdit, QTableView, 
+                               QCheckBox, QButtonGroup)
 from PySide6.QtCore import (QModelIndex, Qt, QPropertyAnimation, QEasingCurve, QDateTime, 
                             QDate, QTime)
 
@@ -116,8 +117,21 @@ def toggleSideBar(side_bar:QFrame, parent:QWidget|QFrame, body:QFrame, max_width
 
 
 def __toggleSideBarWidgetsVisibility(body:QFrame, signal:int):
-    '''Muestra o esconde los widgets dentro del menú lateral al terminar la animación de apertura o cierre del 
-    menú lateral. Retorna None.'''
+    '''
+    Muestra o esconde los widgets dentro del menú lateral al terminar la animación 
+    de apertura o cierre del menú lateral
+    
+    Parámetros
+    ----------
+    body: QFrame
+        El cuerpo del sidebar que hay que esconder/mostrar
+    signal: int
+        Flag que determina si esconder/mostrar el cuerpo del sidebar
+    
+    Retorna
+    -------
+    None
+    '''
     match signal:
         case 0:
             body.hide()
