@@ -845,7 +845,6 @@ class MainWindow(QMainWindow):
         return None
 
 
-    # TODO: reimplementar UPDATES con porcentajes y directos sobre el modelo de datos
     #¡ tablas (UPDATE)
     @Slot(int, int, object)
     def __onInventoryModelDataToUpdate(self, column:int, IDproduct:int, 
@@ -870,68 +869,79 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
-        upd_sql:str
-        upd_params:tuple = None
-        prev_val:float = None # cuando se actualiza precio normal o precio comercial, se debe 
-                              # actualizar el valor también en Deudas, así que antes obtiene el 
-                              # valor anterior para calcular el porcentaje de cambio.
-        
         match column:
             case 0: # categoría
-                upd_sql='''UPDATE Productos 
-                        SET IDcategoria = (
-                            SELECT IDcategoria FROM Categorias 
-                            WHERE nombre_categoria = ?) 
-                        WHERE IDproducto = ?;'''
-                upd_params=(new_val, IDproduct,)
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Productos 
+                                SET IDcategoria = (
+                                    SELECT IDcategoria FROM Categorias 
+                                    WHERE nombre_categoria = ?) 
+                                WHERE IDproducto = ?;''',
+                        upd_params=(new_val, IDproduct,)
+                        )
             
             case 1: # nombre del producto
-                upd_sql='''UPDATE Productos 
-                        SET nombre = ? 
-                        WHERE IDproducto = ?;'''
-                upd_params=(new_val, IDproduct,)
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Productos 
+                                SET nombre = ? 
+                                WHERE IDproducto = ?;''',
+                        upd_params=(new_val, IDproduct,)
+                        )
             
             case 2: # descripción
-                upd_sql='''UPDATE Productos 
-                        SET descripcion = ? 
-                        WHERE IDproducto = ?;'''
-                upd_params=(new_val, IDproduct,)
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Productos 
+                                SET descripcion = ? 
+                                WHERE IDproducto = ?;''',
+                        upd_params=(new_val, IDproduct,)
+                        )
             
             case 3: # stock
-                upd_sql='''UPDATE Productos 
-                        SET stock = ?, unidad_medida = ? 
-                        WHERE IDproducto = ?;'''
-                upd_params=(new_val[0], new_val[1], IDproduct,)
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Productos 
+                                SET stock = ?, unidad_medida = ? 
+                                WHERE IDproducto = ?;''',
+                        upd_params=(new_val[0], new_val[1], IDproduct,)
+                        )
             
             case 4: # precio normal
-                # consulta para actualizar en Productos
-                upd_sql='''UPDATE Productos 
-                        SET precio_unit = ? 
-                        WHERE IDproducto = ?;'''
-                upd_params=(float(new_val), IDproduct,)
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Productos 
+                                SET precio_unit = ? 
+                                WHERE IDproducto = ?;''',
+                        upd_params=(float(new_val), IDproduct,)
+                        )
                 
                 # actualiza en Deudas
                 self.__updateDebtsOnPriceChange(
-                    float(new_val), IDproduct, InventoryPriceType.NORMAL
+                    new_val=float(new_val),
+                    IDproduct=IDproduct,
+                    price_type=InventoryPriceType.NORMAL
                     )
             
             case 5: # precio comercial
                 new_val = 0.0 if not new_val else new_val
                 
-                # consulta para actualizar en Productos
-                upd_sql='''UPDATE Productos 
-                           SET precio_comerc = ? 
-                           WHERE IDproducto = ?;'''
-                upd_params=(float(new_val), IDproduct,)
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Productos 
+                                SET precio_comerc = ? 
+                                WHERE IDproducto = ?;''',
+                        upd_params=(float(new_val), IDproduct,)
+                        )
                 
                 # actualiza en Deudas
                 self.__updateDebtsOnPriceChange(
-                    float(new_val), IDproduct, InventoryPriceType.COMERCIAL
+                    new_val=float(new_val),
+                    IDproduct=IDproduct,
+                    price_type=InventoryPriceType.COMERCIAL
                 )
                 
-        with self._db_repo as db_repo:
-            db_repo.updateRegisters(upd_sql=upd_sql, upd_params=upd_params)
-        
         return None
 
     
