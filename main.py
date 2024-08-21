@@ -30,7 +30,12 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        
+        # inicializa ajustes personalizados de widgets
         self.setup_ui()
+        
+        # declara/instancia variables
+        self.setup_variables()
         
         # repositorio de base de datos
         self._db_repo:DatabaseRepository = DatabaseRepository()
@@ -43,34 +48,11 @@ class MainWindow(QMainWindow):
         self.inventory_delegate = InventoryDelegate()
         self.ui.tv_inventory_data.setItemDelegate(self.inventory_delegate)
         
-        # variables de modelos de datos
-        #? Los acumuladores de datos sirven para cargar datos en los modelos de datos 
-        #? en "batches" y mejorar el rendimiento de la aplicación de forma general
-        self._inv_model_data_acc:ndarray[Any] # acumulador temporal de datos para los modelos
-
-        #* ======== variables de 'search bars' ================================
-        # TODO: reimplementar funcionalidad de search bars
-
-        #* ======== variable de inventario ====================================
-        self.IDs_products:list = [] # var. de 'tv_inventory_data' que tiene los IDs de los productos
+        # declara e instancia variables
+        self.setup_variables()
         
-        #* ======== variables de ventas =======================================
-        self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
-        
-        self.IDs_saleDetails:list = [] # var. de 'tv_sales_data' que tiene los IDs de las ventas en Detalle_Ventas
-        self.SALES_ITEM_NUM:int = 0 # contador para crear nombres de items en 'input_sales_data'
-        self.DICT_ITEMS_VALUES:dict[str,ListItemValues] = {} # tiene los valores de cada ListItemWidget
-        self.VALID_PAID_FIELD:bool = None # True si lineEdit_paid es válido, sino False
-        self.TOTAL_COST:float = None # guarda el costo total de 'label_total' como float, para no tener que buscarlo con regex
-
-        #* ======== variables de deudas =======================================
-        
-        # TODO: mostrar deudas
-        # TODO: permitir agregar deuda
-        # TODO: permitir eliminar deuda
-        # TODO: permitir modificar deuda
-        
-        self.setup_signals() #! la declaración de señales se hace al final
+        #! la declaración de señales se hace al final
+        self.setup_signals()
         return None
 
 
@@ -92,13 +74,59 @@ class MainWindow(QMainWindow):
         setTableViewPolitics(self.ui.tv_inventory_data)
         setTableViewPolitics(self.ui.tv_sales_data)
         setTableViewPolitics(self.ui.tv_debts_data)
+        # las checkboxes de porcentajes son exclusivas
+        self.ui.inventory_checkbuttons_buttonGroup.setExclusive(True)
         return None    
+
+
+    def setup_variables(self) -> None:
+        '''
+        Al igual que el método 'self.setup_ui' y 'self.setup_signals', este 
+        método tiene el objeto de simplificar la lectura del método 'self.__init__'.
+        Contiene las declaraciones de variables locales que se usan a lo largo de la 
+        ejecución del programa.
+        
+        Retorna
+        -------
+        None
+        '''
+        #¡ ======== variables de modelos de datos =============================
+        #? Los acumuladores de datos sirven para cargar datos en los modelos de datos 
+        #? en "batches" y mejorar el rendimiento de la aplicación de forma general
+        self._inv_model_data_acc:ndarray[Any] # acumulador temporal de datos para los modelos
+
+        #¡ ======== variables de 'search bars' ================================
+        # TODO: reimplementar funcionalidad de search bars
+
+        #¡ ======== variable de inventario ====================================
+        # TODO: eliminar el uso de 'self.IDs_products', acceder desde el modelo a los IDs
+        self.IDs_products:list = [] # var. de 'tv_inventory_data' que tiene los IDs de los productos
+        
+        self._UPD_BATCH_SIZE:int = None # cuando se modifican precios en porcentajes, 
+                                        # sirve para hacerlo en batches
+        
+        #¡ ======== variables de ventas =======================================
+        self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
+        
+        self.IDs_saleDetails:list = [] # var. de 'tv_sales_data' que tiene los IDs de las ventas en Detalle_Ventas
+        self.SALES_ITEM_NUM:int = 0 # contador para crear nombres de items en 'input_sales_data'
+        self.DICT_ITEMS_VALUES:dict[str,ListItemValues] = {} # tiene los valores de cada ListItemWidget
+        self.VALID_PAID_FIELD:bool = None # True si lineEdit_paid es válido, sino False
+        self.TOTAL_COST:float = None # guarda el costo total de 'label_total' como float, para no tener que buscarlo con regex
+
+        #¡ ======== variables de deudas =======================================
+        
+        # TODO: mostrar deudas
+        # TODO: permitir agregar deuda
+        # TODO: permitir eliminar deuda
+        # TODO: permitir modificar deuda
+        return None
 
 
     def setup_signals(self) -> None:
         '''
-        Al igual que el método 'self.setup_ui', este método tiene el objeto 
-        de simplificar la lectura del método 'self.__init__'.
+        Al igual que los métodos 'self.setup_ui' y 'self.setup_variables', este 
+        método tiene el objeto de simplificar la lectura del método 'self.__init__'.
         Contiene las declaraciones de señales/slots de Widgets ya existentes 
         desde la instanciación de 'MainWindow'.
         
@@ -144,8 +172,8 @@ class MainWindow(QMainWindow):
         
         # TODO: reimplementar las funciones de UPDATE con porcentajes
         #* inventory_sideBar
-        self.ui.inventory_checkbuttons_buttonGroup.buttonPressed.connect(self.handlePressedCheckbutton)
-        self.ui.inventory_checkbuttons_buttonGroup.buttonClicked.connect(self.handleClickedCheckbutton)
+        self.ui.inventory_checkbuttons_buttonGroup.buttonPressed.connect(self.handlePressedCheckbox)
+        self.ui.inventory_checkbuttons_buttonGroup.buttonClicked.connect(self.handleClickedCheckbox)
         
         self.ui.checkbox_unit_prices.stateChanged.connect(self.handleCheckboxStateChange)
         
@@ -288,6 +316,7 @@ class MainWindow(QMainWindow):
         return None
 
 
+    # método de sidebars
     @Slot(object)
     def toggleSideBar(self, sidebar_type:TypeSideBar) -> None:
         '''
@@ -327,19 +356,16 @@ class MainWindow(QMainWindow):
                 self.ui.tv_inventory_data.selectionModel().clearSelection()
         
         # alterna la selección y la edición...
-        if perc_sidebar_opened: # cambia selección y anula edición
-            self.__altViewSelectionAndEditionParameters(perc_sidebar_opened)
-        
-        else: # vuelve a valores por defecto
-            self.__altViewSelectionAndEditionParameters(perc_sidebar_opened)
+        self.__alterViewSelEditAndParameters(perc_sidebar_opened)
         
         return None
 
 
-    def __altViewSelectionAndEditionParameters(self, sidebar_opened:bool) -> None:
+    def __alterViewSelEditAndParameters(self, sidebar_opened:bool) -> None:
         '''
         Alterna la selección y edición en la VISTA 'tv_inventory_data' 
-        dependiendo de si se abrió o cerró el sidebar de porcentajes.
+        dependiendo de si se abrió o cerró el sidebar de porcentajes, y
+        cambia el estado de las checkboxes.
 
         Parámetros
         ----------
@@ -359,6 +385,10 @@ class MainWindow(QMainWindow):
                     QAbstractItemView.SelectionBehavior.SelectRows)
                 self.ui.tv_inventory_data.setSelectionMode(
                     QAbstractItemView.SelectionMode.MultiSelection)
+                # cambia el estado de las checkboxes
+                self.ui.inventory_checkbuttons_buttonGroup.setExclusive(False)
+                self.ui.checkbox_unit_prices.setChecked(False)
+                self.ui.checkbox_comercial_prices.setChecked(False)
             
             case False: # activa la selección y edición
                 self.ui.tv_inventory_data.setEditTriggers(
@@ -367,6 +397,8 @@ class MainWindow(QMainWindow):
                     QAbstractItemView.SelectionBehavior.SelectItems)
                 self.ui.tv_inventory_data.setSelectionMode(
                     QAbstractItemView.SelectionMode.ExtendedSelection)
+                # cambia la selección/deselección de las checkboxes
+                self.ui.inventory_checkbuttons_buttonGroup.setExclusive(True)
             
         return None
     
@@ -909,38 +941,46 @@ class MainWindow(QMainWindow):
                         )
             
             case 4: # precio normal
-                with self._db_repo as db_repo:
-                    db_repo.updateRegisters(
-                        upd_sql='''UPDATE Productos 
-                                SET precio_unit = ? 
-                                WHERE IDproducto = ?;''',
-                        upd_params=(float(new_val), IDproduct,)
-                        )
+                pass
+                print(f"col: {column}")
+                print(f"ID: {IDproduct}")
+                print(f"new_val: {new_val}")
+                # with self._db_repo as db_repo:
+                #     db_repo.updateRegisters(
+                #         upd_sql='''UPDATE Productos 
+                #                 SET precio_unit = ? 
+                #                 WHERE IDproducto = ?;''',
+                #         upd_params=(float(new_val), IDproduct,)
+                #         )
                 
-                # actualiza en Deudas
-                self.__updateDebtsOnPriceChange(
-                    new_val=float(new_val),
-                    IDproduct=IDproduct,
-                    price_type=InventoryPriceType.NORMAL
-                    )
+                # # actualiza en Deudas
+                # self.__updateDebtsOnPriceChange(
+                #     new_val=float(new_val),
+                #     IDproduct=IDproduct,
+                #     price_type=InventoryPriceType.NORMAL
+                #     )
             
             case 5: # precio comercial
-                new_val = 0.0 if not new_val else new_val
+                pass
+                print(f"col: {column}")
+                print(f"ID: {IDproduct}")
+                print(f"new_val: {new_val}")
+            #     new_val = 0.0 if not new_val else new_val
                 
-                with self._db_repo as db_repo:
-                    db_repo.updateRegisters(
-                        upd_sql='''UPDATE Productos 
-                                SET precio_comerc = ? 
-                                WHERE IDproducto = ?;''',
-                        upd_params=(float(new_val), IDproduct,)
-                        )
+            #     with self._db_repo as db_repo:
+            #         db_repo.updateRegisters(
+            #             upd_sql='''UPDATE Productos 
+            #                     SET precio_comerc = ? 
+            #                     WHERE IDproducto = ?;''',
+            #             upd_params=(float(new_val), IDproduct,)
+            #             )
                 
-                # actualiza en Deudas
-                self.__updateDebtsOnPriceChange(
-                    new_val=float(new_val),
-                    IDproduct=IDproduct,
-                    price_type=InventoryPriceType.COMERCIAL
-                )
+            #     # actualiza en Deudas
+            #     self.__updateDebtsOnPriceChange(
+            #         new_val=float(new_val),
+            #         IDproduct=IDproduct,
+            #         price_type=InventoryPriceType.COMERCIAL
+            #     )
                 
         return None
 
@@ -1234,10 +1274,11 @@ class MainWindow(QMainWindow):
     #¡### INVENTARIO ##################################################
     # funciones de inventory_sideBar
     @Slot(QCheckBox)
-    def handlePressedCheckbutton(self, checkbox:QCheckBox) -> None:
+    def handlePressedCheckbox(self, checkbox:QCheckBox) -> None:
         '''
-        Permite seleccionar/deseleccionar un checkbox libremente, y se usa en 
-        conjunto con 'handleClickedCheckbutton'.
+        Alterna el estado de exclusividad del grupo de checkboxes, lo que 
+        permite seleccionar/deseleccionar las checkboxes libremente, y se usa 
+        en conjunto con 'handleClickedCheckbox'.
         
         Parámetros
         ----------
@@ -1253,10 +1294,11 @@ class MainWindow(QMainWindow):
 
 
     @Slot(QCheckBox)
-    def handleClickedCheckbutton(self, checkbox:QCheckBox) -> None:
+    def handleClickedCheckbox(self, checkbox:QCheckBox) -> None:
         '''
-        Permite seleccionar/deseleccionar un checkbox libremente, y se usa 
-        en conjunto con 'handlePressedCheckbutton'.
+        Alterna el estado de exclusividad del grupo de checkboxes, lo que 
+        permite seleccionar/deseleccionar las checkboxes libremente, y se usa 
+        en conjunto con 'handlePressedCheckbox'.
         
         Parámetros
         ----------
@@ -1273,29 +1315,18 @@ class MainWindow(QMainWindow):
     @Slot()
     def handleCheckboxStateChange(self) -> None:
         '''
-        Dependiendo de cuál checkbox se haya checkeado, permite al usuario 
-        seleccionar las filas de los productos cuyos precios (unitarios o 
-        comerciales) de la tabla 'tv_inventory_data' desee incrementar/decrementar 
-        de forma porcentual. Además al checkear cualquier checkbox se habilita 
-        el 'lineEdit_percentage_change', sino lo deshabilita.
+        Al checkear cualquier checkbox habilita el 'lineEdit_percentage_change', 
+        sino lo deshabilita.
         
         Retorna
         -------
         None
         '''
-        if self.ui.checkbox_unit_prices.isChecked() or self.ui.checkbox_comercial_prices.isChecked():
-            # # cambia el modo de selección de 'tv_inventory_data'
-            # self.ui.tv_inventory_data.setEditTriggers(QAbstractItemView.NoEditTriggers)
-            # self.ui.tv_inventory_data.setSelectionBehavior(QAbstractItemView.SelectRows)
-            # self.ui.tv_inventory_data.setSelectionMode(QAbstractItemView.MultiSelection)
-            # habilita el lineedit
+        if (self.ui.checkbox_unit_prices.isChecked() or 
+            self.ui.checkbox_comercial_prices.isChecked()):
             self.ui.lineEdit_percentage_change.setEnabled(True)
             
-        else: # vuelve a poner el modo de selección de 'tv_inventory_data' al que tiene por defecto
-            # self.ui.tv_inventory_data.setEditTriggers(QAbstractItemView.DoubleClicked)
-            # self.ui.tv_inventory_data.setSelectionBehavior(QAbstractItemView.SelectItems)
-            # self.ui.tv_inventory_data.setSelectionMode(QAbstractItemView.ExtendedSelection)
-            # deshabilita el lineedit
+        else:
             self.ui.lineEdit_percentage_change.setEnabled(False)
         return None
 
@@ -1345,9 +1376,8 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
-        params:tuple[tuple[float, int]] # tuplas con los valores nuevos y los 
-                                        # ids de los productos
-        selected_rows:dict[int, QModelIndex]
+        new_values:tuple[float] # tuplas con los valores nuevos
+        selected_rows:dict[int, list[QModelIndex, float]] # key=fila, value=lista[índice, nuevo valor]
         
         try:
             text:float = float(self.ui.lineEdit_percentage_change.text().replace(",","."))
@@ -1363,17 +1393,27 @@ class MainWindow(QMainWindow):
             if not selected_rows:
                 return None
             
-            # obtiene los precios nuevos (en tuplas de [precio nuevo, IDproducto])
-            params = self.__calculateNewPrices(
-                percentage=text,
-                selected_rows=tuple(selected_rows.keys())
-                )
-
+            # convierto a 'selected_rows' de -> 'dict[int, QModelIndex]'
+            #                             a  -> 'dict[int, list[QModelIndex, float]]'
+            selected_rows = {key:[idx,] for key, idx in selected_rows.items()}
+            
+            # obtiene los precios nuevos (tupla[precio nuevo])
+            new_values = self.__calculateNewPrices(text, tuple(selected_rows.keys()))
+            
+            # agrega los precios nuevos a la lista del diccionario
+            for i, (key, value) in enumerate(selected_rows.items()):
+                value.append(new_values[i])
+                
+            print(selected_rows)
+            
+            # actualiza self._UPD_BATCH_SIZE con el total de registros a actualizar
+            self._UPD_BATCH_SIZE = len(new_values)
+            
             # TODO: modificar código siguiente, debo llamar a 'model.setData'
             # todo: y pasarle los precios nuevos, ese método llama automáticamente 
             # todo: (por una señal) a 'self.__onInventoryModelDataToUpdate' donde 
             # todo: tengo que actualizar los precios nuevos
-            # if params:
+            # if new_values:
             #     # dependiendo de qué checkbox esté checkeada...
             #     if self.ui.checkbox_unit_prices.isChecked():
             #         # actualiza en Productos
@@ -1382,12 +1422,12 @@ class MainWindow(QMainWindow):
             #                 upd_sql='''UPDATE Productos 
             #                             SET precio_unit = ? 
             #                             WHERE IDproducto = ?''',
-            #                 upd_params=params,
+            #                 upd_params=new_values,
             #                 executemany=True
             #                 )
                         
-            #             # actualizo los params, sólo conservo el IDproducto
-            #             params = tuple((param[1],) for param in params)
+            #             # actualizo los new_values, sólo conservo el IDproducto
+            #             new_values = tuple((param[1],) for param in new_values)
                         
             #             # actualiza en Deudas
             #             db_repo.updateRegisters(
@@ -1404,7 +1444,7 @@ class MainWindow(QMainWindow):
             #                         Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
             #                         Detalle_Ventas.IDventa = Ventas.IDventa AND 
             #                         Ventas.detalles_venta LIKE "%(P. NORMAL)%";''',
-            #                 upd_params=params,
+            #                 upd_params=new_values,
             #                 executemany=True
             #             )
                         
@@ -1415,12 +1455,12 @@ class MainWindow(QMainWindow):
             #                 upd_sql='''UPDATE Productos 
             #                             SET precio_comerc = ? 
             #                             WHERE IDproducto = ?''',
-            #                 upd_params=params,
+            #                 upd_params=new_values,
             #                 executemany=True
             #                 )
                         
-            #             # actualizo los params, sólo conservo el IDproducto
-            #             params = tuple((param[1],) for param in params)
+            #             # actualizo los new_values, sólo conservo el IDproducto
+            #             new_values = tuple((param[1],) for param in new_values)
                         
             #             # actualiza en Deudas
             #             db_repo.updateRegisters(
@@ -1437,24 +1477,29 @@ class MainWindow(QMainWindow):
             #                         Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
             #                         Detalle_Ventas.IDventa = Ventas.IDventa AND 
             #                         Ventas.detalles_venta LIKE "%(P. COMERCIAL)%";''',
-            #                 upd_params=params,
+            #                 upd_params=new_values,
             #                 executemany=True
             #             )
         
+            # todo 2: declarar var. global donde guardar la cantidad de 
+            # todo 2: modificaciones que se hacen, para desde '__onInventoryModelDataToUpdate'
+            # todo 2: modificar en batches la base de datos (recibir los datos desde 
+            # todo 2: 'model.setData' y llenar un array hasta llegar al tamaño ese de la
+            # todo 2: variable, ahí recién hacer el UPDATE).  <JUGADA MAESTRA :D>
+            
             # paso al modelo los nuevos valores
-            for index, param in zip(selected_rows.values(), params):
+            for (key, value) in selected_rows.items():
                 self.ui.tv_inventory_data.model().setData(
-                    index=index,
-                    value=param)
+                    index=value[0],
+                    value=value[1])
         return None
 
 
     def __calculateNewPrices(self, percentage:float, 
-                             selected_rows:tuple[int]) -> tuple[tuple[float, int]]:
+                             selected_rows:tuple[int]) -> tuple[float]:
         '''
         Calcula los aumentos/decrementos en los precios unitarios o comerciales 
-        dependiendo de cuál es la checkbox marcada y devuelve los precios nuevos 
-        y los IDproductos donde se deben colocar en la base de datos.
+        dependiendo de cuál es la checkbox marcada y devuelve los precios nuevos.
         
         Parámetros
         ----------
@@ -1465,50 +1510,34 @@ class MainWindow(QMainWindow):
         
         Retorna
         -------
-        tuple[tuple[float, int]]
-            Tupla con tuplas internas con cada precio nuevo en formato float y cada 
-            IDproducto en el que actualizar la base de datos
+        tuple[float]
+            Tupla con tuplas internas con cada precio nuevo en formato float
         '''
-        params:list[tuple[float, int]] = []
-        IDproduct:int # id del producto
+        new_values:dict[int,float] = {}
         col_value:float # valor de la columna de precio (unitario o comercial)
         
         # si está activada la checkbox de precios unitarios...
         if self.ui.checkbox_unit_prices.isChecked():
             for row in selected_rows:
-                # accede al IDproducto guardado en '_data' en el MODELO
-                IDproduct = self.ui.tv_inventory_data.model()._data[row][0]
-                
-                # si el id no está duplicado...
-                if IDproduct not in params:
-                    # obtengo el precio unitario de cada celda
-                    col_value = float(self.ui.tv_inventory_data.model()._data[row][6])
+                # obtengo el precio unitario de cada celda
+                col_value = float(self.ui.tv_inventory_data.model()._data[row][6])
                     
-                    # asigna el valor nuevo
-                    params.append(
-                        (
-                            round(col_value + (col_value * percentage / 100), 2),
-                            IDproduct,
-                        )
-                    )
+                # asigna el valor nuevo
+                new_values[row] = round(col_value + (col_value * percentage / 100), 2)
 
         # sino, si está activada la checkbox de precios comerciales...
         else:
             for row in selected_rows:
-                IDproduct = self.ui.tv_inventory_data.model()._data[row][0]
-                
-                # si el campo no está vacío y el id no está duplicado...
-                if self.ui.tv_inventory_data.model()._data[row][7] and IDproduct not in params:
+                if self.ui.tv_inventory_data.model()._data[row][7]:
                     col_value = float(self.ui.tv_inventory_data.model()._data[row][7])
                    
                     # asigna el valor nuevo
-                    params.append(
-                        (
-                            round(col_value + (col_value * percentage / 100), 2),
-                            IDproduct,
-                        )
-                    )
-        return tuple(params)
+                    new_values[row] = round(col_value + (col_value * percentage / 100), 2)
+                
+                else:
+                    new_values[row] = 0.0
+            
+        return tuple(new_values.values())
 
 
     #¡### VENTAS ######################################################

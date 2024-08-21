@@ -106,9 +106,6 @@ class InventoryTableModel(QAbstractTableModel):
                     return True
                 
                 case 4: # precio unitario
-                    # TODO: desde acá, comprobar si 'value' viene de 
-                    # todo: 'MainWindow.onLePercentageEditingFinished' para 
-                    # todo: poder actualizar en batches (por ej., usando Worker)
                     value = str(value).replace(",",".")
                     
                     #? no modifica el precio unitario si el valor nuevo es igual al anterior
