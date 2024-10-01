@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.3
+## Created by: Qt User Interface Compiler version 6.7.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -37,6 +37,11 @@ class Ui_MainWindow(object):
 "	color: #111;\n"
 "	font-family: \"Verdana\", \"Sans-Serif\";\n"
 "	font-size: 16px;\n"
+"}\n"
+"\n"
+"\n"
+"QToolTip {\n"
+"	background-color: #fff;\n"
 "}\n"
 "\n"
 "\n"
@@ -124,7 +129,7 @@ class Ui_MainWindow(object):
         self.centralwidget_HLayout.setContentsMargins(0, 0, 0, 0)
         self.side_bar = QFrame(self.centralwidget)
         self.side_bar.setObjectName(u"side_bar")
-        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.side_bar.sizePolicy().hasHeightForWidth())
@@ -157,15 +162,15 @@ class Ui_MainWindow(object):
 "	margin-top: 5px;\n"
 "	border-bottom: 1px solid #c7f9cc;\n"
 "}")
-        self.side_bar.setFrameShape(QFrame.NoFrame)
-        self.side_bar.setFrameShadow(QFrame.Plain)
+        self.side_bar.setFrameShape(QFrame.Shape.NoFrame)
+        self.side_bar.setFrameShadow(QFrame.Shadow.Plain)
         self.side_bar_VLayout = QVBoxLayout(self.side_bar)
         self.side_bar_VLayout.setSpacing(8)
         self.side_bar_VLayout.setObjectName(u"side_bar_VLayout")
         self.side_bar_VLayout.setContentsMargins(0, 0, 0, 18)
         self.btn_side_barToggle = QPushButton(self.side_bar)
         self.btn_side_barToggle.setObjectName(u"btn_side_barToggle")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.btn_side_barToggle.sizePolicy().hasHeightForWidth())
@@ -183,21 +188,21 @@ class Ui_MainWindow(object):
 "}")
         self.btn_side_barToggle.setIconSize(QSize(32, 32))
 
-        self.side_bar_VLayout.addWidget(self.btn_side_barToggle, 0, Qt.AlignLeft|Qt.AlignTop)
+        self.side_bar_VLayout.addWidget(self.btn_side_barToggle, 0, Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignTop)
 
         self.side_bar_body = QFrame(self.side_bar)
         self.side_bar_body.setObjectName(u"side_bar_body")
         sizePolicy.setHeightForWidth(self.side_bar_body.sizePolicy().hasHeightForWidth())
         self.side_bar_body.setSizePolicy(sizePolicy)
-        self.side_bar_body.setFrameShape(QFrame.NoFrame)
-        self.side_bar_body.setFrameShadow(QFrame.Raised)
+        self.side_bar_body.setFrameShape(QFrame.Shape.NoFrame)
+        self.side_bar_body.setFrameShadow(QFrame.Shadow.Raised)
         self.side_bar_body_Vlayout = QVBoxLayout(self.side_bar_body)
         self.side_bar_body_Vlayout.setSpacing(4)
         self.side_bar_body_Vlayout.setObjectName(u"side_bar_body_Vlayout")
         self.side_bar_body_Vlayout.setContentsMargins(0, 0, 0, 0)
         self.label_categories = QLabel(self.side_bar_body)
         self.label_categories.setObjectName(u"label_categories")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.label_categories.sizePolicy().hasHeightForWidth())
@@ -213,9 +218,9 @@ class Ui_MainWindow(object):
 #endif // QT_CONFIG(whatsthis)
         self.label_categories.setAutoFillBackground(False)
         self.label_categories.setText(u"CATEGOR\u00cdAS")
-        self.label_categories.setTextFormat(Qt.PlainText)
-        self.label_categories.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
-        self.label_categories.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_categories.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_categories.setAlignment(Qt.AlignmentFlag.AlignBottom|Qt.AlignmentFlag.AlignHCenter)
+        self.label_categories.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.side_bar_body_Vlayout.addWidget(self.label_categories)
 
@@ -273,16 +278,16 @@ class Ui_MainWindow(object):
 "	background-color: rgb(71, 184, 255);\n"
 "	border-radius: 3px;\n"
 "}")
-        self.tables_ListWidget.setFrameShape(QFrame.NoFrame)
-        self.tables_ListWidget.setFrameShadow(QFrame.Plain)
+        self.tables_ListWidget.setFrameShape(QFrame.Shape.NoFrame)
+        self.tables_ListWidget.setFrameShadow(QFrame.Shadow.Plain)
         self.tables_ListWidget.setLineWidth(1)
-        self.tables_ListWidget.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.tables_ListWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.tables_ListWidget.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
-        self.tables_ListWidget.setEditTriggers(QAbstractItemView.DoubleClicked)
+        self.tables_ListWidget.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.tables_ListWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.tables_ListWidget.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
+        self.tables_ListWidget.setEditTriggers(QAbstractItemView.EditTrigger.DoubleClicked)
         self.tables_ListWidget.setTabKeyNavigation(True)
         self.tables_ListWidget.setDragEnabled(False)
-        self.tables_ListWidget.setTextElideMode(Qt.ElideLeft)
+        self.tables_ListWidget.setTextElideMode(Qt.TextElideMode.ElideLeft)
         self.tables_ListWidget.setSpacing(5)
         self.tables_ListWidget.setSortingEnabled(False)
 
@@ -297,8 +302,8 @@ class Ui_MainWindow(object):
         self.main_body = QFrame(self.centralwidget)
         self.main_body.setObjectName(u"main_body")
         self.main_body.setFont(font)
-        self.main_body.setFrameShape(QFrame.StyledPanel)
-        self.main_body.setFrameShadow(QFrame.Raised)
+        self.main_body.setFrameShape(QFrame.Shape.StyledPanel)
+        self.main_body.setFrameShadow(QFrame.Shadow.Raised)
         self.main_body_VLayout = QVBoxLayout(self.main_body)
         self.main_body_VLayout.setSpacing(4)
         self.main_body_VLayout.setObjectName(u"main_body_VLayout")
@@ -476,9 +481,9 @@ class Ui_MainWindow(object):
 "	background-color: qlineargradient(spread:reflect, x1:0.119, y1:0.426, x2:0.712045, y2:0.926, stop:0.0451977 rgba(84, 137, 172, 255), stop:0.59887 rgba(71, 184, 255, 255));\n"
 "	border-radius: 5px;\n"
 "}")
-        self.tabWidget.setTabPosition(QTabWidget.North)
-        self.tabWidget.setTabShape(QTabWidget.Rounded)
-        self.tabWidget.setElideMode(Qt.ElideMiddle)
+        self.tabWidget.setTabPosition(QTabWidget.TabPosition.North)
+        self.tabWidget.setTabShape(QTabWidget.TabShape.Rounded)
+        self.tabWidget.setElideMode(Qt.TextElideMode.ElideMiddle)
         self.tabWidget.setTabsClosable(False)
         self.tabWidget.setMovable(True)
         self.tabWidget.setTabBarAutoHide(False)
@@ -495,36 +500,36 @@ class Ui_MainWindow(object):
         self.verticalLayout.setContentsMargins(0, 0, 0, 5)
         self.main_inventory_frame = QFrame(self.tab1_inventory)
         self.main_inventory_frame.setObjectName(u"main_inventory_frame")
-        self.main_inventory_frame.setFrameShape(QFrame.NoFrame)
-        self.main_inventory_frame.setFrameShadow(QFrame.Raised)
+        self.main_inventory_frame.setFrameShape(QFrame.Shape.NoFrame)
+        self.main_inventory_frame.setFrameShadow(QFrame.Shadow.Raised)
         self.main_inventory_frame_Hlayout = QHBoxLayout(self.main_inventory_frame)
         self.main_inventory_frame_Hlayout.setSpacing(0)
         self.main_inventory_frame_Hlayout.setObjectName(u"main_inventory_frame_Hlayout")
         self.main_inventory_frame_Hlayout.setContentsMargins(0, 0, 0, 0)
         self.inventory_display = QFrame(self.main_inventory_frame)
         self.inventory_display.setObjectName(u"inventory_display")
-        self.inventory_display.setFrameShape(QFrame.StyledPanel)
-        self.inventory_display.setFrameShadow(QFrame.Raised)
+        self.inventory_display.setFrameShape(QFrame.Shape.StyledPanel)
+        self.inventory_display.setFrameShadow(QFrame.Shadow.Raised)
         self.inventory_display_Vlayout = QVBoxLayout(self.inventory_display)
         self.inventory_display_Vlayout.setSpacing(4)
         self.inventory_display_Vlayout.setObjectName(u"inventory_display_Vlayout")
         self.inventory_display_Vlayout.setContentsMargins(0, 8, 0, 0)
         self.inventory_header = QFrame(self.inventory_display)
         self.inventory_header.setObjectName(u"inventory_header")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
         sizePolicy3.setHorizontalStretch(0)
         sizePolicy3.setVerticalStretch(0)
         sizePolicy3.setHeightForWidth(self.inventory_header.sizePolicy().hasHeightForWidth())
         self.inventory_header.setSizePolicy(sizePolicy3)
-        self.inventory_header.setFrameShape(QFrame.NoFrame)
-        self.inventory_header.setFrameShadow(QFrame.Raised)
+        self.inventory_header.setFrameShape(QFrame.Shape.NoFrame)
+        self.inventory_header.setFrameShadow(QFrame.Shadow.Raised)
         self.inventory_header_Hlayout = QHBoxLayout(self.inventory_header)
         self.inventory_header_Hlayout.setSpacing(4)
         self.inventory_header_Hlayout.setObjectName(u"inventory_header_Hlayout")
         self.inventory_header_Hlayout.setContentsMargins(5, 0, 5, 0)
         self.inventory_searchBar = QLineEdit(self.inventory_header)
         self.inventory_searchBar.setObjectName(u"inventory_searchBar")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         sizePolicy4.setHorizontalStretch(0)
         sizePolicy4.setVerticalStretch(0)
         sizePolicy4.setHeightForWidth(self.inventory_searchBar.sizePolicy().hasHeightForWidth())
@@ -539,23 +544,23 @@ class Ui_MainWindow(object):
         self.inventory_searchBar.setText(u"")
         self.inventory_searchBar.setMaxLength(100)
         self.inventory_searchBar.setFrame(False)
-        self.inventory_searchBar.setEchoMode(QLineEdit.Normal)
+        self.inventory_searchBar.setEchoMode(QLineEdit.EchoMode.Normal)
         self.inventory_searchBar.setPlaceholderText(u"Ingresar detalles de productos a buscar...")
-        self.inventory_searchBar.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inventory_searchBar.setCursorMoveStyle(Qt.CursorMoveStyle.LogicalMoveStyle)
         self.inventory_searchBar.setClearButtonEnabled(True)
 
-        self.inventory_header_Hlayout.addWidget(self.inventory_searchBar, 0, Qt.AlignLeft|Qt.AlignVCenter)
+        self.inventory_header_Hlayout.addWidget(self.inventory_searchBar, 0, Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
 
         self.btn_group_inventory_header = QFrame(self.inventory_header)
         self.btn_group_inventory_header.setObjectName(u"btn_group_inventory_header")
         sizePolicy1.setHeightForWidth(self.btn_group_inventory_header.sizePolicy().hasHeightForWidth())
         self.btn_group_inventory_header.setSizePolicy(sizePolicy1)
-        self.btn_group_inventory_header.setFrameShape(QFrame.NoFrame)
-        self.btn_group_inventory_header.setFrameShadow(QFrame.Raised)
+        self.btn_group_inventory_header.setFrameShape(QFrame.Shape.NoFrame)
+        self.btn_group_inventory_header.setFrameShadow(QFrame.Shadow.Raised)
         self.horizontalLayout = QHBoxLayout(self.btn_group_inventory_header)
         self.horizontalLayout.setSpacing(4)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalLayout.setSizeConstraint(QLayout.SetDefaultConstraint)
+        self.horizontalLayout.setSizeConstraint(QLayout.SizeConstraint.SetDefaultConstraint)
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.btn_inventory_prev_search_result = QPushButton(self.btn_group_inventory_header)
         self.btn_inventory_prev_search_result.setObjectName(u"btn_inventory_prev_search_result")
@@ -566,7 +571,7 @@ class Ui_MainWindow(object):
         self.btn_inventory_prev_search_result.setMaximumSize(QSize(25, 25))
         self.btn_inventory_prev_search_result.setIconSize(QSize(24, 24))
 
-        self.horizontalLayout.addWidget(self.btn_inventory_prev_search_result, 0, Qt.AlignLeft|Qt.AlignVCenter)
+        self.horizontalLayout.addWidget(self.btn_inventory_prev_search_result, 0, Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
 
         self.btn_inventory_next_search_result = QPushButton(self.btn_group_inventory_header)
         self.btn_inventory_next_search_result.setObjectName(u"btn_inventory_next_search_result")
@@ -577,16 +582,16 @@ class Ui_MainWindow(object):
         self.btn_inventory_next_search_result.setMaximumSize(QSize(25, 25))
         self.btn_inventory_next_search_result.setIconSize(QSize(24, 24))
 
-        self.horizontalLayout.addWidget(self.btn_inventory_next_search_result, 0, Qt.AlignLeft|Qt.AlignVCenter)
+        self.horizontalLayout.addWidget(self.btn_inventory_next_search_result, 0, Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
 
 
-        self.inventory_header_Hlayout.addWidget(self.btn_group_inventory_header, 0, Qt.AlignLeft|Qt.AlignVCenter)
+        self.inventory_header_Hlayout.addWidget(self.btn_group_inventory_header, 0, Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
 
         self.label_inventory_found_items = QLabel(self.inventory_header)
         self.label_inventory_found_items.setObjectName(u"label_inventory_found_items")
         self.label_inventory_found_items.setText(u"")
-        self.label_inventory_found_items.setTextFormat(Qt.PlainText)
-        self.label_inventory_found_items.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_inventory_found_items.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_inventory_found_items.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.inventory_header_Hlayout.addWidget(self.label_inventory_found_items)
 
@@ -608,17 +613,17 @@ class Ui_MainWindow(object):
 #if QT_CONFIG(tooltip)
         self.tv_inventory_data.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Para </span><span style=\" font-size:12pt; text-decoration: underline;\">modificar</span><span style=\" font-size:12pt;\"> las </span><span style=\" font-size:12pt; text-decoration: underline;\">caracter\u00edsticas</span><span style=\" font-size:12pt;\"> de un producto, simplemente hacer </span><span style=\" font-size:12pt; font-style:italic;\">doble click</span><span style=\" font-size:12pt;\"> sobre la celda que se quiere modificar e ingresar el nuevo valor.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        self.tv_inventory_data.setFrameShape(QFrame.NoFrame)
-        self.tv_inventory_data.setFrameShadow(QFrame.Plain)
-        self.tv_inventory_data.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.tv_inventory_data.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
-        self.tv_inventory_data.setEditTriggers(QAbstractItemView.DoubleClicked)
+        self.tv_inventory_data.setFrameShape(QFrame.Shape.NoFrame)
+        self.tv_inventory_data.setFrameShadow(QFrame.Shadow.Plain)
+        self.tv_inventory_data.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.tv_inventory_data.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
+        self.tv_inventory_data.setEditTriggers(QAbstractItemView.EditTrigger.DoubleClicked)
         self.tv_inventory_data.setProperty("showDropIndicator", False)
         self.tv_inventory_data.setDragDropOverwriteMode(False)
         self.tv_inventory_data.setAlternatingRowColors(True)
-        self.tv_inventory_data.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.tv_inventory_data.setTextElideMode(Qt.ElideMiddle)
-        self.tv_inventory_data.setGridStyle(Qt.SolidLine)
+        self.tv_inventory_data.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self.tv_inventory_data.setTextElideMode(Qt.TextElideMode.ElideMiddle)
+        self.tv_inventory_data.setGridStyle(Qt.PenStyle.SolidLine)
         self.tv_inventory_data.setSortingEnabled(False)
         self.tv_inventory_data.setWordWrap(True)
         self.tv_inventory_data.setCornerButtonEnabled(False)
@@ -636,16 +641,16 @@ class Ui_MainWindow(object):
 "background-color: rgb(88, 223, 171);\n"
 "color: #111;")
         self.label_feedbackInventory.setText(u"")
-        self.label_feedbackInventory.setAlignment(Qt.AlignCenter)
+        self.label_feedbackInventory.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_feedbackInventory.setWordWrap(True)
-        self.label_feedbackInventory.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_feedbackInventory.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.inventory_display_Vlayout.addWidget(self.label_feedbackInventory)
 
         self.tab1_buttons_2 = QFrame(self.inventory_display)
         self.tab1_buttons_2.setObjectName(u"tab1_buttons_2")
-        self.tab1_buttons_2.setFrameShape(QFrame.StyledPanel)
-        self.tab1_buttons_2.setFrameShadow(QFrame.Raised)
+        self.tab1_buttons_2.setFrameShape(QFrame.Shape.StyledPanel)
+        self.tab1_buttons_2.setFrameShadow(QFrame.Shadow.Raised)
         self.tab1_buttons_Hlayout = QHBoxLayout(self.tab1_buttons_2)
         self.tab1_buttons_Hlayout.setObjectName(u"tab1_buttons_Hlayout")
         self.tab1_buttons_Hlayout.setContentsMargins(0, 0, 0, 0)
@@ -735,8 +740,8 @@ class Ui_MainWindow(object):
 "	border-color: #0b7e7f;\n"
 "	font-size: 18px;\n"
 "}")
-        self.inventory_sideBar.setFrameShape(QFrame.NoFrame)
-        self.inventory_sideBar.setFrameShadow(QFrame.Raised)
+        self.inventory_sideBar.setFrameShape(QFrame.Shape.NoFrame)
+        self.inventory_sideBar.setFrameShadow(QFrame.Shadow.Raised)
         self.inventory_sideBar_Vlayout = QVBoxLayout(self.inventory_sideBar)
         self.inventory_sideBar_Vlayout.setSpacing(10)
         self.inventory_sideBar_Vlayout.setObjectName(u"inventory_sideBar_Vlayout")
@@ -759,13 +764,13 @@ class Ui_MainWindow(object):
 "}")
         self.btn_inventory_sideBarToggle.setIconSize(QSize(32, 32))
 
-        self.inventory_sideBar_Vlayout.addWidget(self.btn_inventory_sideBarToggle, 0, Qt.AlignRight|Qt.AlignTop)
+        self.inventory_sideBar_Vlayout.addWidget(self.btn_inventory_sideBarToggle, 0, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTop)
 
         self.inventory_side_bar_body = QFrame(self.inventory_sideBar)
         self.inventory_side_bar_body.setObjectName(u"inventory_side_bar_body")
         self.inventory_side_bar_body.setMinimumSize(QSize(0, 0))
-        self.inventory_side_bar_body.setFrameShape(QFrame.NoFrame)
-        self.inventory_side_bar_body.setFrameShadow(QFrame.Plain)
+        self.inventory_side_bar_body.setFrameShape(QFrame.Shape.NoFrame)
+        self.inventory_side_bar_body.setFrameShadow(QFrame.Shadow.Plain)
         self.inventory_side_bar_body_Vlayout = QVBoxLayout(self.inventory_side_bar_body)
         self.inventory_side_bar_body_Vlayout.setSpacing(14)
         self.inventory_side_bar_body_Vlayout.setObjectName(u"inventory_side_bar_body_Vlayout")
@@ -775,18 +780,18 @@ class Ui_MainWindow(object):
         self.inventory_sideBar_label_changePrices.setStyleSheet(u"border-bottom: 1px solid #fff;\n"
 "margin-bottom: 5px;")
         self.inventory_sideBar_label_changePrices.setText(u"CAMBIAR PRECIOS USANDO PORCENTAJES")
-        self.inventory_sideBar_label_changePrices.setTextFormat(Qt.PlainText)
+        self.inventory_sideBar_label_changePrices.setTextFormat(Qt.TextFormat.PlainText)
         self.inventory_sideBar_label_changePrices.setScaledContents(False)
-        self.inventory_sideBar_label_changePrices.setAlignment(Qt.AlignCenter)
+        self.inventory_sideBar_label_changePrices.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.inventory_sideBar_label_changePrices.setWordWrap(True)
-        self.inventory_sideBar_label_changePrices.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.inventory_sideBar_label_changePrices.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.inventory_side_bar_body_Vlayout.addWidget(self.inventory_sideBar_label_changePrices)
 
         self.change_percentage_frame = QFrame(self.inventory_side_bar_body)
         self.change_percentage_frame.setObjectName(u"change_percentage_frame")
-        self.change_percentage_frame.setFrameShape(QFrame.NoFrame)
-        self.change_percentage_frame.setFrameShadow(QFrame.Raised)
+        self.change_percentage_frame.setFrameShape(QFrame.Shape.NoFrame)
+        self.change_percentage_frame.setFrameShadow(QFrame.Shadow.Raised)
         self.change_percentage_frame_Vlayout = QVBoxLayout(self.change_percentage_frame)
         self.change_percentage_frame_Vlayout.setSpacing(8)
         self.change_percentage_frame_Vlayout.setObjectName(u"change_percentage_frame_Vlayout")
@@ -824,10 +829,10 @@ class Ui_MainWindow(object):
         self.percentage_label.setStyleSheet(u"margin-top: 20px;\n"
 "margin-bottom: 0;")
         self.percentage_label.setText(u"Porcentaje de cambio")
-        self.percentage_label.setTextFormat(Qt.PlainText)
-        self.percentage_label.setAlignment(Qt.AlignBottom|Qt.AlignLeading|Qt.AlignLeft)
+        self.percentage_label.setTextFormat(Qt.TextFormat.PlainText)
+        self.percentage_label.setAlignment(Qt.AlignmentFlag.AlignBottom|Qt.AlignmentFlag.AlignLeading|Qt.AlignmentFlag.AlignLeft)
         self.percentage_label.setWordWrap(True)
-        self.percentage_label.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.percentage_label.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.change_percentage_frame_Vlayout.addWidget(self.percentage_label)
 
@@ -866,14 +871,14 @@ class Ui_MainWindow(object):
 "word-spacing: 0px;\n"
 "color: #111;")
         self.label_feedbackChangePercentage.setText(u"")
-        self.label_feedbackChangePercentage.setTextFormat(Qt.PlainText)
-        self.label_feedbackChangePercentage.setAlignment(Qt.AlignCenter)
+        self.label_feedbackChangePercentage.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_feedbackChangePercentage.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_feedbackChangePercentage.setWordWrap(True)
 
         self.inventory_side_bar_body_Vlayout.addWidget(self.label_feedbackChangePercentage)
 
 
-        self.inventory_sideBar_Vlayout.addWidget(self.inventory_side_bar_body, 0, Qt.AlignRight|Qt.AlignTop)
+        self.inventory_sideBar_Vlayout.addWidget(self.inventory_side_bar_body, 0, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTop)
 
         self.inventory_sideBar_Vlayout.setStretch(1, 10)
 
@@ -910,31 +915,31 @@ class Ui_MainWindow(object):
 "}")
         self.box1_sales_form = QWidget()
         self.box1_sales_form.setObjectName(u"box1_sales_form")
-        self.box1_sales_form.setGeometry(QRect(0, 0, 756, 498))
+        self.box1_sales_form.setGeometry(QRect(0, 0, 756, 496))
         self.box1_sales_form_Vlayout = QVBoxLayout(self.box1_sales_form)
         self.box1_sales_form_Vlayout.setSpacing(4)
         self.box1_sales_form_Vlayout.setObjectName(u"box1_sales_form_Vlayout")
         self.box1_sales_form_Vlayout.setContentsMargins(0, 6, 0, 0)
         self.main_form = QFrame(self.box1_sales_form)
         self.main_form.setObjectName(u"main_form")
-        self.main_form.setFrameShape(QFrame.StyledPanel)
-        self.main_form.setFrameShadow(QFrame.Raised)
+        self.main_form.setFrameShape(QFrame.Shape.StyledPanel)
+        self.main_form.setFrameShadow(QFrame.Shadow.Raised)
         self.box1_main_form_Vlayout = QVBoxLayout(self.main_form)
         self.box1_main_form_Vlayout.setSpacing(4)
         self.box1_main_form_Vlayout.setObjectName(u"box1_main_form_Vlayout")
         self.box1_main_form_Vlayout.setContentsMargins(0, 0, 0, 0)
         self.frame_list = QFrame(self.main_form)
         self.frame_list.setObjectName(u"frame_list")
-        self.frame_list.setFrameShape(QFrame.StyledPanel)
-        self.frame_list.setFrameShadow(QFrame.Raised)
+        self.frame_list.setFrameShape(QFrame.Shape.StyledPanel)
+        self.frame_list.setFrameShadow(QFrame.Shadow.Raised)
         self.box1_frame_list_Vlayout = QVBoxLayout(self.frame_list)
         self.box1_frame_list_Vlayout.setSpacing(4)
         self.box1_frame_list_Vlayout.setObjectName(u"box1_frame_list_Vlayout")
         self.box1_frame_list_Vlayout.setContentsMargins(0, 0, 0, 0)
         self.add_products = QFrame(self.frame_list)
         self.add_products.setObjectName(u"add_products")
-        self.add_products.setFrameShape(QFrame.StyledPanel)
-        self.add_products.setFrameShadow(QFrame.Raised)
+        self.add_products.setFrameShape(QFrame.Shape.StyledPanel)
+        self.add_products.setFrameShadow(QFrame.Shadow.Raised)
         self.box1_add_products_Hlayout = QHBoxLayout(self.add_products)
         self.box1_add_products_Hlayout.setSpacing(4)
         self.box1_add_products_Hlayout.setObjectName(u"box1_add_products_Hlayout")
@@ -953,7 +958,7 @@ class Ui_MainWindow(object):
 
         self.box1_add_products_Hlayout.addWidget(self.btn_add_product)
 
-        self.btn_add_product_Hspacer = QSpacerItem(379, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.btn_add_product_Hspacer = QSpacerItem(379, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.box1_add_products_Hlayout.addItem(self.btn_add_product_Hspacer)
 
@@ -963,7 +968,7 @@ class Ui_MainWindow(object):
 
         self.sales_input_list = QListWidget(self.frame_list)
         self.sales_input_list.setObjectName(u"sales_input_list")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy5.setHorizontalStretch(0)
         sizePolicy5.setVerticalStretch(0)
         sizePolicy5.setHeightForWidth(self.sales_input_list.sizePolicy().hasHeightForWidth())
@@ -982,11 +987,11 @@ class Ui_MainWindow(object):
 "QListWidget::item:selected {\n"
 "	border-left: 7px solid rgb(34, 87, 122);\n"
 "}")
-        self.sales_input_list.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
-        self.sales_input_list.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.sales_input_list.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
+        self.sales_input_list.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.sales_input_list.setTabKeyNavigation(True)
         self.sales_input_list.setAlternatingRowColors(False)
-        self.sales_input_list.setResizeMode(QListView.Adjust)
+        self.sales_input_list.setResizeMode(QListView.ResizeMode.Adjust)
         self.sales_input_list.setSpacing(5)
         self.sales_input_list.setUniformItemSizes(True)
         self.sales_input_list.setWordWrap(True)
@@ -1013,8 +1018,8 @@ class Ui_MainWindow(object):
 "#dateTimeEdit_sale {\n"
 "	font-size: 18px;\n"
 "}")
-        self.sale_info.setFrameShape(QFrame.NoFrame)
-        self.sale_info.setFrameShadow(QFrame.Raised)
+        self.sale_info.setFrameShape(QFrame.Shape.NoFrame)
+        self.sale_info.setFrameShadow(QFrame.Shadow.Raised)
         self.gridLayout = QGridLayout(self.sale_info)
         self.gridLayout.setObjectName(u"gridLayout")
         self.gridLayout.setHorizontalSpacing(5)
@@ -1024,7 +1029,7 @@ class Ui_MainWindow(object):
         self.label_total_change.setObjectName(u"label_total_change")
         self.label_total_change.setMaximumSize(QSize(400, 16777215))
         self.label_total_change.setText(u"")
-        self.label_total_change.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.label_total_change.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
         self.label_total_change.setWordWrap(False)
 
         self.gridLayout.addWidget(self.label_total_change, 2, 2, 2, 1)
@@ -1037,7 +1042,7 @@ class Ui_MainWindow(object):
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_paid.setInputMask(u"")
         self.lineEdit_paid.setText(u"")
-        self.lineEdit_paid.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.lineEdit_paid.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
         self.lineEdit_paid.setPlaceholderText(u"Total abonado ($)")
 
         self.gridLayout.addWidget(self.lineEdit_paid, 1, 2, 1, 1)
@@ -1052,30 +1057,30 @@ class Ui_MainWindow(object):
 "border-top: 1px solid #111;\n"
 "border-right: 1px solid #111;")
         self.label_total.setText(u"TOTAL")
-        self.label_total.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
-        self.label_total.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.label_total.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.label_total.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
 
         self.gridLayout.addWidget(self.label_total, 0, 2, 1, 1)
 
         self.label_paid = QLabel(self.sale_info)
         self.label_paid.setObjectName(u"label_paid")
-        self.label_paid.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_paid.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
-        self.gridLayout.addWidget(self.label_paid, 1, 1, 1, 1, Qt.AlignRight)
+        self.gridLayout.addWidget(self.label_paid, 1, 1, 1, 1, Qt.AlignmentFlag.AlignRight)
 
         self.label_change = QLabel(self.sale_info)
         self.label_change.setObjectName(u"label_change")
 
-        self.gridLayout.addWidget(self.label_change, 2, 1, 1, 1, Qt.AlignRight)
+        self.gridLayout.addWidget(self.label_change, 2, 1, 1, 1, Qt.AlignmentFlag.AlignRight)
 
         self.dateTimeEdit_sale = QDateTimeEdit(self.sale_info)
         self.dateTimeEdit_sale.setObjectName(u"dateTimeEdit_sale")
         self.dateTimeEdit_sale.setWrapping(True)
         self.dateTimeEdit_sale.setFrame(False)
         self.dateTimeEdit_sale.setReadOnly(True)
-        self.dateTimeEdit_sale.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.dateTimeEdit_sale.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
         self.dateTimeEdit_sale.setAccelerated(False)
-        self.dateTimeEdit_sale.setCorrectionMode(QAbstractSpinBox.CorrectToPreviousValue)
+        self.dateTimeEdit_sale.setCorrectionMode(QAbstractSpinBox.CorrectionMode.CorrectToPreviousValue)
         self.dateTimeEdit_sale.setKeyboardTracking(False)
         self.dateTimeEdit_sale.setProperty("showGroupSeparator", True)
 
@@ -1086,13 +1091,13 @@ class Ui_MainWindow(object):
 
         self.end_sale = QFrame(self.main_form)
         self.end_sale.setObjectName(u"end_sale")
-        self.end_sale.setFrameShape(QFrame.StyledPanel)
-        self.end_sale.setFrameShadow(QFrame.Raised)
+        self.end_sale.setFrameShape(QFrame.Shape.StyledPanel)
+        self.end_sale.setFrameShadow(QFrame.Shadow.Raised)
         self.end_sale_Hlayout = QHBoxLayout(self.end_sale)
         self.end_sale_Hlayout.setSpacing(0)
         self.end_sale_Hlayout.setObjectName(u"end_sale_Hlayout")
         self.end_sale_Hlayout.setContentsMargins(0, 3, 15, 10)
-        self.horizontalSpacer_2 = QSpacerItem(412, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.horizontalSpacer_2 = QSpacerItem(412, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.end_sale_Hlayout.addItem(self.horizontalSpacer_2)
 
@@ -1121,7 +1126,7 @@ class Ui_MainWindow(object):
         self.tab2_toolBox.addItem(self.box1_sales_form, u"Formulario de venta")
         self.box2_sales_table = QWidget()
         self.box2_sales_table.setObjectName(u"box2_sales_table")
-        self.box2_sales_table.setGeometry(QRect(0, 0, 364, 162))
+        self.box2_sales_table.setGeometry(QRect(0, 0, 364, 163))
         self.box2_sales_Vlayout = QVBoxLayout(self.box2_sales_table)
         self.box2_sales_Vlayout.setSpacing(4)
         self.box2_sales_Vlayout.setObjectName(u"box2_sales_Vlayout")
@@ -1130,8 +1135,8 @@ class Ui_MainWindow(object):
         self.sales_table_header.setObjectName(u"sales_table_header")
         sizePolicy3.setHeightForWidth(self.sales_table_header.sizePolicy().hasHeightForWidth())
         self.sales_table_header.setSizePolicy(sizePolicy3)
-        self.sales_table_header.setFrameShape(QFrame.NoFrame)
-        self.sales_table_header.setFrameShadow(QFrame.Raised)
+        self.sales_table_header.setFrameShape(QFrame.Shape.NoFrame)
+        self.sales_table_header.setFrameShadow(QFrame.Shadow.Raised)
         self.horizontalLayout_2 = QHBoxLayout(self.sales_table_header)
         self.horizontalLayout_2.setSpacing(4)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
@@ -1149,9 +1154,9 @@ class Ui_MainWindow(object):
         self.sales_searchBar.setText(u"")
         self.sales_searchBar.setMaxLength(100)
         self.sales_searchBar.setFrame(False)
-        self.sales_searchBar.setEchoMode(QLineEdit.Normal)
+        self.sales_searchBar.setEchoMode(QLineEdit.EchoMode.Normal)
         self.sales_searchBar.setPlaceholderText(u"Ingresar detalles de ventas a buscar...")
-        self.sales_searchBar.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.sales_searchBar.setCursorMoveStyle(Qt.CursorMoveStyle.LogicalMoveStyle)
         self.sales_searchBar.setClearButtonEnabled(True)
 
         self.horizontalLayout_2.addWidget(self.sales_searchBar)
@@ -1160,8 +1165,8 @@ class Ui_MainWindow(object):
         self.btn_group_sales_header.setObjectName(u"btn_group_sales_header")
         sizePolicy1.setHeightForWidth(self.btn_group_sales_header.sizePolicy().hasHeightForWidth())
         self.btn_group_sales_header.setSizePolicy(sizePolicy1)
-        self.btn_group_sales_header.setFrameShape(QFrame.NoFrame)
-        self.btn_group_sales_header.setFrameShadow(QFrame.Raised)
+        self.btn_group_sales_header.setFrameShape(QFrame.Shape.NoFrame)
+        self.btn_group_sales_header.setFrameShadow(QFrame.Shadow.Raised)
         self.horizontalLayout_3 = QHBoxLayout(self.btn_group_sales_header)
         self.horizontalLayout_3.setSpacing(4)
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
@@ -1175,7 +1180,7 @@ class Ui_MainWindow(object):
         self.btn_sales_prev_search_result.setMaximumSize(QSize(25, 25))
         self.btn_sales_prev_search_result.setIconSize(QSize(24, 24))
 
-        self.horizontalLayout_3.addWidget(self.btn_sales_prev_search_result, 0, Qt.AlignLeft|Qt.AlignVCenter)
+        self.horizontalLayout_3.addWidget(self.btn_sales_prev_search_result, 0, Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
 
         self.btn_sales_next_search_result = QPushButton(self.btn_group_sales_header)
         self.btn_sales_next_search_result.setObjectName(u"btn_sales_next_search_result")
@@ -1186,7 +1191,7 @@ class Ui_MainWindow(object):
         self.btn_sales_next_search_result.setMaximumSize(QSize(25, 25))
         self.btn_sales_next_search_result.setIconSize(QSize(24, 24))
 
-        self.horizontalLayout_3.addWidget(self.btn_sales_next_search_result, 0, Qt.AlignLeft|Qt.AlignVCenter)
+        self.horizontalLayout_3.addWidget(self.btn_sales_next_search_result, 0, Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
 
 
         self.horizontalLayout_2.addWidget(self.btn_group_sales_header)
@@ -1194,8 +1199,8 @@ class Ui_MainWindow(object):
         self.label_sales_found_items = QLabel(self.sales_table_header)
         self.label_sales_found_items.setObjectName(u"label_sales_found_items")
         self.label_sales_found_items.setText(u"")
-        self.label_sales_found_items.setTextFormat(Qt.PlainText)
-        self.label_sales_found_items.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_sales_found_items.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_sales_found_items.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.horizontalLayout_2.addWidget(self.label_sales_found_items)
 
@@ -1219,17 +1224,17 @@ class Ui_MainWindow(object):
                         "e:12pt;\">.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.tv_sales_data.setStyleSheet(u"")
-        self.tv_sales_data.setFrameShape(QFrame.NoFrame)
-        self.tv_sales_data.setFrameShadow(QFrame.Plain)
-        self.tv_sales_data.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.tv_sales_data.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
-        self.tv_sales_data.setEditTriggers(QAbstractItemView.DoubleClicked)
+        self.tv_sales_data.setFrameShape(QFrame.Shape.NoFrame)
+        self.tv_sales_data.setFrameShadow(QFrame.Shadow.Plain)
+        self.tv_sales_data.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.tv_sales_data.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
+        self.tv_sales_data.setEditTriggers(QAbstractItemView.EditTrigger.DoubleClicked)
         self.tv_sales_data.setProperty("showDropIndicator", False)
         self.tv_sales_data.setDragDropOverwriteMode(False)
         self.tv_sales_data.setAlternatingRowColors(True)
-        self.tv_sales_data.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.tv_sales_data.setTextElideMode(Qt.ElideMiddle)
-        self.tv_sales_data.setGridStyle(Qt.SolidLine)
+        self.tv_sales_data.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self.tv_sales_data.setTextElideMode(Qt.TextElideMode.ElideMiddle)
+        self.tv_sales_data.setGridStyle(Qt.PenStyle.SolidLine)
         self.tv_sales_data.setSortingEnabled(False)
         self.tv_sales_data.setCornerButtonEnabled(False)
         self.tv_sales_data.horizontalHeader().setMinimumSectionSize(41)
@@ -1246,17 +1251,17 @@ class Ui_MainWindow(object):
 "background-color: rgb(88, 223, 171);\n"
 "color: #111;")
         self.label_feedbackSales.setText(u"")
-        self.label_feedbackSales.setTextFormat(Qt.PlainText)
-        self.label_feedbackSales.setAlignment(Qt.AlignCenter)
+        self.label_feedbackSales.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_feedbackSales.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_feedbackSales.setWordWrap(True)
-        self.label_feedbackSales.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_feedbackSales.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.box2_sales_Vlayout.addWidget(self.label_feedbackSales)
 
         self.sales_buttons = QFrame(self.box2_sales_table)
         self.sales_buttons.setObjectName(u"sales_buttons")
-        self.sales_buttons.setFrameShape(QFrame.StyledPanel)
-        self.sales_buttons.setFrameShadow(QFrame.Raised)
+        self.sales_buttons.setFrameShape(QFrame.Shape.StyledPanel)
+        self.sales_buttons.setFrameShadow(QFrame.Shadow.Raised)
         self.box2_sales_buttons_Hlayout = QHBoxLayout(self.sales_buttons)
         self.box2_sales_buttons_Hlayout.setSpacing(4)
         self.box2_sales_buttons_Hlayout.setObjectName(u"box2_sales_buttons_Hlayout")
@@ -1305,6 +1310,9 @@ class Ui_MainWindow(object):
         self.tab2_sales_Vlayout.addWidget(self.tab2_toolBox)
 
         self.tabWidget.addTab(self.tab2_sales, "")
+#if QT_CONFIG(tooltip)
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab2_sales), u"<html><head/><body><p>Muestra informaci\u00f3n sobre las ventas realizadas y permite ingresar nuevas ventas.</p></body></html>")
+#endif // QT_CONFIG(tooltip)
         self.tab3_debts = QWidget()
         self.tab3_debts.setObjectName(u"tab3_debts")
         self.tab3_debts_Vlayout = QVBoxLayout(self.tab3_debts)
@@ -1313,8 +1321,8 @@ class Ui_MainWindow(object):
         self.tab3_debts_Vlayout.setContentsMargins(0, 0, 0, 5)
         self.debts_info = QFrame(self.tab3_debts)
         self.debts_info.setObjectName(u"debts_info")
-        self.debts_info.setFrameShape(QFrame.StyledPanel)
-        self.debts_info.setFrameShadow(QFrame.Raised)
+        self.debts_info.setFrameShape(QFrame.Shape.StyledPanel)
+        self.debts_info.setFrameShadow(QFrame.Shadow.Raised)
         self.debts_info_Vlayout = QVBoxLayout(self.debts_info)
         self.debts_info_Vlayout.setSpacing(4)
         self.debts_info_Vlayout.setObjectName(u"debts_info_Vlayout")
@@ -1323,8 +1331,8 @@ class Ui_MainWindow(object):
         self.debts_header.setObjectName(u"debts_header")
         sizePolicy3.setHeightForWidth(self.debts_header.sizePolicy().hasHeightForWidth())
         self.debts_header.setSizePolicy(sizePolicy3)
-        self.debts_header.setFrameShape(QFrame.NoFrame)
-        self.debts_header.setFrameShadow(QFrame.Raised)
+        self.debts_header.setFrameShape(QFrame.Shape.NoFrame)
+        self.debts_header.setFrameShadow(QFrame.Shadow.Raised)
         self.horizontalLayout_4 = QHBoxLayout(self.debts_header)
         self.horizontalLayout_4.setSpacing(4)
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
@@ -1346,9 +1354,9 @@ class Ui_MainWindow(object):
         self.debts_searchBar.setText(u"")
         self.debts_searchBar.setMaxLength(100)
         self.debts_searchBar.setFrame(False)
-        self.debts_searchBar.setEchoMode(QLineEdit.Normal)
+        self.debts_searchBar.setEchoMode(QLineEdit.EchoMode.Normal)
         self.debts_searchBar.setPlaceholderText(u"Ingresar detalles de cuenta corriente a buscar...")
-        self.debts_searchBar.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.debts_searchBar.setCursorMoveStyle(Qt.CursorMoveStyle.LogicalMoveStyle)
         self.debts_searchBar.setClearButtonEnabled(True)
 
         self.horizontalLayout_4.addWidget(self.debts_searchBar)
@@ -1357,8 +1365,8 @@ class Ui_MainWindow(object):
         self.btn_group_debts_header.setObjectName(u"btn_group_debts_header")
         sizePolicy1.setHeightForWidth(self.btn_group_debts_header.sizePolicy().hasHeightForWidth())
         self.btn_group_debts_header.setSizePolicy(sizePolicy1)
-        self.btn_group_debts_header.setFrameShape(QFrame.NoFrame)
-        self.btn_group_debts_header.setFrameShadow(QFrame.Raised)
+        self.btn_group_debts_header.setFrameShape(QFrame.Shape.NoFrame)
+        self.btn_group_debts_header.setFrameShadow(QFrame.Shadow.Raised)
         self.horizontalLayout_5 = QHBoxLayout(self.btn_group_debts_header)
         self.horizontalLayout_5.setSpacing(4)
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
@@ -1391,7 +1399,7 @@ class Ui_MainWindow(object):
         self.label_debts_found_items = QLabel(self.debts_header)
         self.label_debts_found_items.setObjectName(u"label_debts_found_items")
         self.label_debts_found_items.setText(u"")
-        self.label_debts_found_items.setTextFormat(Qt.PlainText)
+        self.label_debts_found_items.setTextFormat(Qt.TextFormat.PlainText)
 
         self.horizontalLayout_4.addWidget(self.label_debts_found_items)
 
@@ -1424,16 +1432,16 @@ class Ui_MainWindow(object):
 "	border-radius: 1px;\n"
 "	background-color: rgb(71, 184, 255);\n"
 "}")
-        self.tv_debts_data.setFrameShape(QFrame.NoFrame)
-        self.tv_debts_data.setFrameShadow(QFrame.Plain)
-        self.tv_debts_data.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.tv_debts_data.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
-        self.tv_debts_data.setEditTriggers(QAbstractItemView.DoubleClicked)
+        self.tv_debts_data.setFrameShape(QFrame.Shape.NoFrame)
+        self.tv_debts_data.setFrameShadow(QFrame.Shadow.Plain)
+        self.tv_debts_data.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.tv_debts_data.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
+        self.tv_debts_data.setEditTriggers(QAbstractItemView.EditTrigger.DoubleClicked)
         self.tv_debts_data.setProperty("showDropIndicator", False)
         self.tv_debts_data.setDragDropOverwriteMode(False)
-        self.tv_debts_data.setDefaultDropAction(Qt.IgnoreAction)
+        self.tv_debts_data.setDefaultDropAction(Qt.DropAction.IgnoreAction)
         self.tv_debts_data.setAlternatingRowColors(True)
-        self.tv_debts_data.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.tv_debts_data.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.tv_debts_data.setSortingEnabled(False)
         self.tv_debts_data.setCornerButtonEnabled(False)
         self.tv_debts_data.horizontalHeader().setMinimumSectionSize(50)
@@ -1450,17 +1458,17 @@ class Ui_MainWindow(object):
 "background-color: rgb(88, 223, 171);\n"
 "color: #111;")
         self.label_feedbackDebts.setText(u"")
-        self.label_feedbackDebts.setTextFormat(Qt.PlainText)
-        self.label_feedbackDebts.setAlignment(Qt.AlignCenter)
+        self.label_feedbackDebts.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_feedbackDebts.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_feedbackDebts.setWordWrap(True)
-        self.label_feedbackDebts.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_feedbackDebts.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.debts_info_Vlayout.addWidget(self.label_feedbackDebts)
 
         self.debts_buttons = QFrame(self.debts_info)
         self.debts_buttons.setObjectName(u"debts_buttons")
-        self.debts_buttons.setFrameShape(QFrame.NoFrame)
-        self.debts_buttons.setFrameShadow(QFrame.Raised)
+        self.debts_buttons.setFrameShape(QFrame.Shape.NoFrame)
+        self.debts_buttons.setFrameShadow(QFrame.Shadow.Raised)
         self.debts_buttons_Hlayout = QHBoxLayout(self.debts_buttons)
         self.debts_buttons_Hlayout.setSpacing(4)
         self.debts_buttons_Hlayout.setObjectName(u"debts_buttons_Hlayout")
@@ -1509,6 +1517,9 @@ class Ui_MainWindow(object):
         self.tab3_debts_Vlayout.addWidget(self.debts_info)
 
         self.tabWidget.addTab(self.tab3_debts, "")
+#if QT_CONFIG(tooltip)
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab3_debts), u"<html><head/><body><p>Muestra las cuentas corrientes y datos personales de quienes posean una.</p></body></html>")
+#endif // QT_CONFIG(tooltip)
 
         self.main_body_VLayout.addWidget(self.tabWidget)
 
@@ -1539,7 +1550,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(2)
         self.tab2_toolBox.setCurrentIndex(0)
         self.tab2_toolBox.layout().setSpacing(4)
 

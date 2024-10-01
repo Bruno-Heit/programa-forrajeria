@@ -30,6 +30,11 @@
 }
 
 
+QToolTip {
+	background-color: #fff;
+}
+
+
 #centralwidget,
 #main_body,
 #debts_info {
@@ -169,10 +174,10 @@ QLabel {
 }</string>
       </property>
       <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
+       <enum>QFrame::Shape::NoFrame</enum>
       </property>
       <property name="frameShadow">
-       <enum>QFrame::Plain</enum>
+       <enum>QFrame::Shadow::Plain</enum>
       </property>
       <layout class="QVBoxLayout" name="side_bar_VLayout" stretch="0,0">
        <property name="spacing">
@@ -190,7 +195,7 @@ QLabel {
        <property name="bottomMargin">
         <number>18</number>
        </property>
-       <item alignment="Qt::AlignLeft|Qt::AlignTop">
+       <item alignment="Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop">
         <widget class="QPushButton" name="btn_side_barToggle">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -236,10 +241,10 @@ QPushButton:hover {
           </sizepolicy>
          </property>
          <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
+          <enum>QFrame::Shape::NoFrame</enum>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
+          <enum>QFrame::Shadow::Raised</enum>
          </property>
          <layout class="QVBoxLayout" name="side_bar_body_Vlayout">
           <property name="spacing">
@@ -281,13 +286,13 @@ QPushButton:hover {
              <string notr="true">CATEGORÍAS</string>
             </property>
             <property name="textFormat">
-             <enum>Qt::PlainText</enum>
+             <enum>Qt::TextFormat::PlainText</enum>
             </property>
             <property name="alignment">
-             <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+             <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
             </property>
             <property name="textInteractionFlags">
-             <set>Qt::NoTextInteraction</set>
+             <set>Qt::TextInteractionFlag::NoTextInteraction</set>
             </property>
            </widget>
           </item>
@@ -307,25 +312,25 @@ QListWidget::item:selected {
 }</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
+             <enum>QFrame::Shape::NoFrame</enum>
             </property>
             <property name="frameShadow">
-             <enum>QFrame::Plain</enum>
+             <enum>QFrame::Shadow::Plain</enum>
             </property>
             <property name="lineWidth">
              <number>1</number>
             </property>
             <property name="verticalScrollBarPolicy">
-             <enum>Qt::ScrollBarAsNeeded</enum>
+             <enum>Qt::ScrollBarPolicy::ScrollBarAsNeeded</enum>
             </property>
             <property name="horizontalScrollBarPolicy">
-             <enum>Qt::ScrollBarAlwaysOff</enum>
+             <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
             </property>
             <property name="sizeAdjustPolicy">
-             <enum>QAbstractScrollArea::AdjustToContents</enum>
+             <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
             </property>
             <property name="editTriggers">
-             <set>QAbstractItemView::DoubleClicked</set>
+             <set>QAbstractItemView::EditTrigger::DoubleClicked</set>
             </property>
             <property name="tabKeyNavigation">
              <bool>true</bool>
@@ -334,7 +339,7 @@ QListWidget::item:selected {
              <bool>false</bool>
             </property>
             <property name="textElideMode">
-             <enum>Qt::ElideLeft</enum>
+             <enum>Qt::TextElideMode::ElideLeft</enum>
             </property>
             <property name="spacing">
              <number>5</number>
@@ -445,7 +450,6 @@ QListWidget::item:selected {
              </property>
              <property name="font">
               <font>
-               <weight>75</weight>
                <bold>true</bold>
                <underline>false</underline>
               </font>
@@ -468,10 +472,10 @@ QListWidget::item:selected {
        </font>
       </property>
       <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
+       <enum>QFrame::Shape::StyledPanel</enum>
       </property>
       <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
+       <enum>QFrame::Shadow::Raised</enum>
       </property>
       <layout class="QVBoxLayout" name="main_body_VLayout">
        <property name="spacing">
@@ -667,16 +671,16 @@ QProgressBar::chunk {
 }</string>
          </property>
          <property name="tabPosition">
-          <enum>QTabWidget::North</enum>
+          <enum>QTabWidget::TabPosition::North</enum>
          </property>
          <property name="tabShape">
-          <enum>QTabWidget::Rounded</enum>
+          <enum>QTabWidget::TabShape::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>2</number>
          </property>
          <property name="elideMode">
-          <enum>Qt::ElideMiddle</enum>
+          <enum>Qt::TextElideMode::ElideMiddle</enum>
          </property>
          <property name="tabsClosable">
           <bool>false</bool>
@@ -725,10 +729,10 @@ QProgressBar::chunk {
            <item>
             <widget class="QFrame" name="main_inventory_frame">
              <property name="frameShape">
-              <enum>QFrame::NoFrame</enum>
+              <enum>QFrame::Shape::NoFrame</enum>
              </property>
              <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
+              <enum>QFrame::Shadow::Raised</enum>
              </property>
              <layout class="QHBoxLayout" name="main_inventory_frame_Hlayout" stretch="10,0">
               <property name="spacing">
@@ -749,10 +753,10 @@ QProgressBar::chunk {
               <item>
                <widget class="QFrame" name="inventory_display">
                 <property name="frameShape">
-                 <enum>QFrame::StyledPanel</enum>
+                 <enum>QFrame::Shape::StyledPanel</enum>
                 </property>
                 <property name="frameShadow">
-                 <enum>QFrame::Raised</enum>
+                 <enum>QFrame::Shadow::Raised</enum>
                 </property>
                 <layout class="QVBoxLayout" name="inventory_display_Vlayout">
                  <property name="spacing">
@@ -779,10 +783,10 @@ QProgressBar::chunk {
                     </sizepolicy>
                    </property>
                    <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
+                    <enum>QFrame::Shape::NoFrame</enum>
                    </property>
                    <property name="frameShadow">
-                    <enum>QFrame::Raised</enum>
+                    <enum>QFrame::Shadow::Raised</enum>
                    </property>
                    <layout class="QHBoxLayout" name="inventory_header_Hlayout">
                     <property name="spacing">
@@ -800,7 +804,7 @@ QProgressBar::chunk {
                     <property name="bottomMargin">
                      <number>0</number>
                     </property>
-                    <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+                    <item alignment="Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter">
                      <widget class="QLineEdit" name="inventory_searchBar">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -842,20 +846,20 @@ QProgressBar::chunk {
                        <bool>false</bool>
                       </property>
                       <property name="echoMode">
-                       <enum>QLineEdit::Normal</enum>
+                       <enum>QLineEdit::EchoMode::Normal</enum>
                       </property>
                       <property name="placeholderText">
                        <string notr="true">Ingresar detalles de productos a buscar...</string>
                       </property>
                       <property name="cursorMoveStyle">
-                       <enum>Qt::LogicalMoveStyle</enum>
+                       <enum>Qt::CursorMoveStyle::LogicalMoveStyle</enum>
                       </property>
                       <property name="clearButtonEnabled">
                        <bool>true</bool>
                       </property>
                      </widget>
                     </item>
-                    <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+                    <item alignment="Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter">
                      <widget class="QFrame" name="btn_group_inventory_header">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -864,17 +868,17 @@ QProgressBar::chunk {
                        </sizepolicy>
                       </property>
                       <property name="frameShape">
-                       <enum>QFrame::NoFrame</enum>
+                       <enum>QFrame::Shape::NoFrame</enum>
                       </property>
                       <property name="frameShadow">
-                       <enum>QFrame::Raised</enum>
+                       <enum>QFrame::Shadow::Raised</enum>
                       </property>
                       <layout class="QHBoxLayout" name="horizontalLayout">
                        <property name="spacing">
                         <number>4</number>
                        </property>
                        <property name="sizeConstraint">
-                        <enum>QLayout::SetDefaultConstraint</enum>
+                        <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
                        </property>
                        <property name="leftMargin">
                         <number>0</number>
@@ -888,7 +892,7 @@ QProgressBar::chunk {
                        <property name="bottomMargin">
                         <number>0</number>
                        </property>
-                       <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+                       <item alignment="Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter">
                         <widget class="QPushButton" name="btn_inventory_prev_search_result">
                          <property name="enabled">
                           <bool>false</bool>
@@ -922,7 +926,7 @@ QProgressBar::chunk {
                          </property>
                         </widget>
                        </item>
-                       <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+                       <item alignment="Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter">
                         <widget class="QPushButton" name="btn_inventory_next_search_result">
                          <property name="enabled">
                           <bool>false</bool>
@@ -965,10 +969,10 @@ QProgressBar::chunk {
                        <string notr="true"/>
                       </property>
                       <property name="textFormat">
-                       <enum>Qt::PlainText</enum>
+                       <enum>Qt::TextFormat::PlainText</enum>
                       </property>
                       <property name="textInteractionFlags">
-                       <set>Qt::NoTextInteraction</set>
+                       <set>Qt::TextInteractionFlag::NoTextInteraction</set>
                       </property>
                      </widget>
                     </item>
@@ -1006,19 +1010,19 @@ QProgressBar::chunk {
                     <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Para &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;modificar&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; las &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;características&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; de un producto, simplemente hacer &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;doble click&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; sobre la celda que se quiere modificar e ingresar el nuevo valor.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
                    <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
+                    <enum>QFrame::Shape::NoFrame</enum>
                    </property>
                    <property name="frameShadow">
-                    <enum>QFrame::Plain</enum>
+                    <enum>QFrame::Shadow::Plain</enum>
                    </property>
                    <property name="horizontalScrollBarPolicy">
-                    <enum>Qt::ScrollBarAlwaysOff</enum>
+                    <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                    </property>
                    <property name="sizeAdjustPolicy">
-                    <enum>QAbstractScrollArea::AdjustToContents</enum>
+                    <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
                    </property>
                    <property name="editTriggers">
-                    <set>QAbstractItemView::DoubleClicked</set>
+                    <set>QAbstractItemView::EditTrigger::DoubleClicked</set>
                    </property>
                    <property name="showDropIndicator" stdset="0">
                     <bool>false</bool>
@@ -1030,13 +1034,13 @@ QProgressBar::chunk {
                     <bool>true</bool>
                    </property>
                    <property name="selectionMode">
-                    <enum>QAbstractItemView::ExtendedSelection</enum>
+                    <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
                    </property>
                    <property name="textElideMode">
-                    <enum>Qt::ElideMiddle</enum>
+                    <enum>Qt::TextElideMode::ElideMiddle</enum>
                    </property>
                    <property name="gridStyle">
-                    <enum>Qt::SolidLine</enum>
+                    <enum>Qt::PenStyle::SolidLine</enum>
                    </property>
                    <property name="sortingEnabled">
                     <bool>false</bool>
@@ -1069,23 +1073,23 @@ color: #111;</string>
                     <string notr="true"/>
                    </property>
                    <property name="alignment">
-                    <set>Qt::AlignCenter</set>
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
                    </property>
                    <property name="wordWrap">
                     <bool>true</bool>
                    </property>
                    <property name="textInteractionFlags">
-                    <set>Qt::NoTextInteraction</set>
+                    <set>Qt::TextInteractionFlag::NoTextInteraction</set>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QFrame" name="tab1_buttons_2">
                    <property name="frameShape">
-                    <enum>QFrame::StyledPanel</enum>
+                    <enum>QFrame::Shape::StyledPanel</enum>
                    </property>
                    <property name="frameShadow">
-                    <enum>QFrame::Raised</enum>
+                    <enum>QFrame::Shadow::Raised</enum>
                    </property>
                    <layout class="QHBoxLayout" name="tab1_buttons_Hlayout">
                     <property name="leftMargin">
@@ -1239,10 +1243,10 @@ QLineEdit:focus {
 }</string>
                 </property>
                 <property name="frameShape">
-                 <enum>QFrame::NoFrame</enum>
+                 <enum>QFrame::Shape::NoFrame</enum>
                 </property>
                 <property name="frameShadow">
-                 <enum>QFrame::Raised</enum>
+                 <enum>QFrame::Shadow::Raised</enum>
                 </property>
                 <layout class="QVBoxLayout" name="inventory_sideBar_Vlayout" stretch="0,10">
                  <property name="spacing">
@@ -1260,7 +1264,7 @@ QLineEdit:focus {
                  <property name="bottomMargin">
                   <number>10</number>
                  </property>
-                 <item alignment="Qt::AlignRight|Qt::AlignTop">
+                 <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
                   <widget class="QPushButton" name="btn_inventory_sideBarToggle">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -1303,7 +1307,7 @@ QPushButton:hover {
                    </property>
                   </widget>
                  </item>
-                 <item alignment="Qt::AlignRight|Qt::AlignTop">
+                 <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
                   <widget class="QFrame" name="inventory_side_bar_body">
                    <property name="minimumSize">
                     <size>
@@ -1312,10 +1316,10 @@ QPushButton:hover {
                     </size>
                    </property>
                    <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
+                    <enum>QFrame::Shape::NoFrame</enum>
                    </property>
                    <property name="frameShadow">
-                    <enum>QFrame::Plain</enum>
+                    <enum>QFrame::Shadow::Plain</enum>
                    </property>
                    <layout class="QVBoxLayout" name="inventory_side_bar_body_Vlayout">
                     <property name="spacing">
@@ -1343,29 +1347,29 @@ margin-bottom: 5px;</string>
                        <string notr="true">CAMBIAR PRECIOS USANDO PORCENTAJES</string>
                       </property>
                       <property name="textFormat">
-                       <enum>Qt::PlainText</enum>
+                       <enum>Qt::TextFormat::PlainText</enum>
                       </property>
                       <property name="scaledContents">
                        <bool>false</bool>
                       </property>
                       <property name="alignment">
-                       <set>Qt::AlignCenter</set>
+                       <set>Qt::AlignmentFlag::AlignCenter</set>
                       </property>
                       <property name="wordWrap">
                        <bool>true</bool>
                       </property>
                       <property name="textInteractionFlags">
-                       <set>Qt::NoTextInteraction</set>
+                       <set>Qt::TextInteractionFlag::NoTextInteraction</set>
                       </property>
                      </widget>
                     </item>
                     <item>
                      <widget class="QFrame" name="change_percentage_frame">
                       <property name="frameShape">
-                       <enum>QFrame::NoFrame</enum>
+                       <enum>QFrame::Shape::NoFrame</enum>
                       </property>
                       <property name="frameShadow">
-                       <enum>QFrame::Raised</enum>
+                       <enum>QFrame::Shadow::Raised</enum>
                       </property>
                       <layout class="QVBoxLayout" name="change_percentage_frame_Vlayout" stretch="0,0,1,1">
                        <property name="spacing">
@@ -1434,16 +1438,16 @@ margin-bottom: 0;</string>
                           <string notr="true">Porcentaje de cambio</string>
                          </property>
                          <property name="textFormat">
-                          <enum>Qt::PlainText</enum>
+                          <enum>Qt::TextFormat::PlainText</enum>
                          </property>
                          <property name="alignment">
-                          <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+                          <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft</set>
                          </property>
                          <property name="wordWrap">
                           <bool>true</bool>
                          </property>
                          <property name="textInteractionFlags">
-                          <set>Qt::NoTextInteraction</set>
+                          <set>Qt::TextInteractionFlag::NoTextInteraction</set>
                          </property>
                         </widget>
                        </item>
@@ -1500,10 +1504,10 @@ color: #111;</string>
                        <string notr="true"/>
                       </property>
                       <property name="textFormat">
-                       <enum>Qt::PlainText</enum>
+                       <enum>Qt::TextFormat::PlainText</enum>
                       </property>
                       <property name="alignment">
-                       <set>Qt::AlignCenter</set>
+                       <set>Qt::AlignmentFlag::AlignCenter</set>
                       </property>
                       <property name="wordWrap">
                        <bool>true</bool>
@@ -1533,6 +1537,9 @@ color: #111;</string>
           </property>
           <attribute name="title">
            <string>VENTAS</string>
+          </attribute>
+          <attribute name="toolTip">
+           <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Muestra información sobre las ventas realizadas y permite ingresar nuevas ventas.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </attribute>
           <layout class="QVBoxLayout" name="tab2_sales_Vlayout">
            <property name="spacing">
@@ -1572,7 +1579,7 @@ color: #111;</string>
                 <x>0</x>
                 <y>0</y>
                 <width>756</width>
-                <height>498</height>
+                <height>496</height>
                </rect>
               </property>
               <attribute name="label">
@@ -1597,10 +1604,10 @@ color: #111;</string>
                <item>
                 <widget class="QFrame" name="main_form">
                  <property name="frameShape">
-                  <enum>QFrame::StyledPanel</enum>
+                  <enum>QFrame::Shape::StyledPanel</enum>
                  </property>
                  <property name="frameShadow">
-                  <enum>QFrame::Raised</enum>
+                  <enum>QFrame::Shadow::Raised</enum>
                  </property>
                  <layout class="QVBoxLayout" name="box1_main_form_Vlayout" stretch="10,0,0">
                   <property name="spacing">
@@ -1621,10 +1628,10 @@ color: #111;</string>
                   <item>
                    <widget class="QFrame" name="frame_list">
                     <property name="frameShape">
-                     <enum>QFrame::StyledPanel</enum>
+                     <enum>QFrame::Shape::StyledPanel</enum>
                     </property>
                     <property name="frameShadow">
-                     <enum>QFrame::Raised</enum>
+                     <enum>QFrame::Shadow::Raised</enum>
                     </property>
                     <layout class="QVBoxLayout" name="box1_frame_list_Vlayout" stretch="0,10">
                      <property name="spacing">
@@ -1645,10 +1652,10 @@ color: #111;</string>
                      <item>
                       <widget class="QFrame" name="add_products">
                        <property name="frameShape">
-                        <enum>QFrame::StyledPanel</enum>
+                        <enum>QFrame::Shape::StyledPanel</enum>
                        </property>
                        <property name="frameShadow">
-                        <enum>QFrame::Raised</enum>
+                        <enum>QFrame::Shadow::Raised</enum>
                        </property>
                        <layout class="QHBoxLayout" name="box1_add_products_Hlayout" stretch="0,10">
                         <property name="spacing">
@@ -1700,7 +1707,7 @@ color: #111;</string>
                         <item>
                          <spacer name="btn_add_product_Hspacer">
                           <property name="orientation">
-                           <enum>Qt::Horizontal</enum>
+                           <enum>Qt::Orientation::Horizontal</enum>
                           </property>
                           <property name="sizeHint" stdset="0">
                            <size>
@@ -1738,10 +1745,10 @@ QListWidget::item:selected {
 }</string>
                        </property>
                        <property name="sizeAdjustPolicy">
-                        <enum>QAbstractScrollArea::AdjustToContents</enum>
+                        <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
                        </property>
                        <property name="editTriggers">
-                        <set>QAbstractItemView::NoEditTriggers</set>
+                        <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
                        </property>
                        <property name="tabKeyNavigation">
                         <bool>true</bool>
@@ -1750,7 +1757,7 @@ QListWidget::item:selected {
                         <bool>false</bool>
                        </property>
                        <property name="resizeMode">
-                        <enum>QListView::Adjust</enum>
+                        <enum>QListView::ResizeMode::Adjust</enum>
                        </property>
                        <property name="spacing">
                         <number>5</number>
@@ -1785,10 +1792,10 @@ QListWidget::item:selected {
 }</string>
                     </property>
                     <property name="frameShape">
-                     <enum>QFrame::NoFrame</enum>
+                     <enum>QFrame::Shape::NoFrame</enum>
                     </property>
                     <property name="frameShadow">
-                     <enum>QFrame::Raised</enum>
+                     <enum>QFrame::Shadow::Raised</enum>
                     </property>
                     <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0">
                      <property name="leftMargin">
@@ -1821,7 +1828,7 @@ QListWidget::item:selected {
                         <string notr="true"/>
                        </property>
                        <property name="alignment">
-                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                        </property>
                        <property name="wordWrap">
                         <bool>false</bool>
@@ -1846,7 +1853,7 @@ QListWidget::item:selected {
                         <string notr="true"/>
                        </property>
                        <property name="alignment">
-                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                        </property>
                        <property name="placeholderText">
                         <string notr="true">Total abonado ($)</string>
@@ -1877,24 +1884,24 @@ border-right: 1px solid #111;</string>
                         <string notr="true">TOTAL</string>
                        </property>
                        <property name="alignment">
-                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                        </property>
                        <property name="textInteractionFlags">
-                        <set>Qt::TextSelectableByMouse</set>
+                        <set>Qt::TextInteractionFlag::TextSelectableByMouse</set>
                        </property>
                       </widget>
                      </item>
-                     <item row="1" column="1" alignment="Qt::AlignRight">
+                     <item row="1" column="1" alignment="Qt::AlignmentFlag::AlignRight">
                       <widget class="QLabel" name="label_paid">
                        <property name="text">
                         <string>ABONA</string>
                        </property>
                        <property name="textInteractionFlags">
-                        <set>Qt::NoTextInteraction</set>
+                        <set>Qt::TextInteractionFlag::NoTextInteraction</set>
                        </property>
                       </widget>
                      </item>
-                     <item row="2" column="1" alignment="Qt::AlignRight">
+                     <item row="2" column="1" alignment="Qt::AlignmentFlag::AlignRight">
                       <widget class="QLabel" name="label_change">
                        <property name="text">
                         <string>CAMBIO</string>
@@ -1913,13 +1920,13 @@ border-right: 1px solid #111;</string>
                         <bool>true</bool>
                        </property>
                        <property name="buttonSymbols">
-                        <enum>QAbstractSpinBox::NoButtons</enum>
+                        <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
                        </property>
                        <property name="accelerated">
                         <bool>false</bool>
                        </property>
                        <property name="correctionMode">
-                        <enum>QAbstractSpinBox::CorrectToPreviousValue</enum>
+                        <enum>QAbstractSpinBox::CorrectionMode::CorrectToPreviousValue</enum>
                        </property>
                        <property name="keyboardTracking">
                         <bool>false</bool>
@@ -1938,10 +1945,10 @@ border-right: 1px solid #111;</string>
                   <item>
                    <widget class="QFrame" name="end_sale">
                     <property name="frameShape">
-                     <enum>QFrame::StyledPanel</enum>
+                     <enum>QFrame::Shape::StyledPanel</enum>
                     </property>
                     <property name="frameShadow">
-                     <enum>QFrame::Raised</enum>
+                     <enum>QFrame::Shadow::Raised</enum>
                     </property>
                     <layout class="QHBoxLayout" name="end_sale_Hlayout" stretch="3,1">
                      <property name="spacing">
@@ -1962,7 +1969,7 @@ border-right: 1px solid #111;</string>
                      <item>
                       <spacer name="horizontalSpacer_2">
                        <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
+                        <enum>Qt::Orientation::Horizontal</enum>
                        </property>
                        <property name="sizeHint" stdset="0">
                         <size>
@@ -2008,7 +2015,7 @@ border-right: 1px solid #111;</string>
                 <x>0</x>
                 <y>0</y>
                 <width>364</width>
-                <height>162</height>
+                <height>163</height>
                </rect>
               </property>
               <attribute name="label">
@@ -2039,10 +2046,10 @@ border-right: 1px solid #111;</string>
                   </sizepolicy>
                  </property>
                  <property name="frameShape">
-                  <enum>QFrame::NoFrame</enum>
+                  <enum>QFrame::Shape::NoFrame</enum>
                  </property>
                  <property name="frameShadow">
-                  <enum>QFrame::Raised</enum>
+                  <enum>QFrame::Shadow::Raised</enum>
                  </property>
                  <layout class="QHBoxLayout" name="horizontalLayout_2">
                   <property name="spacing">
@@ -2096,13 +2103,13 @@ border-right: 1px solid #111;</string>
                      <bool>false</bool>
                     </property>
                     <property name="echoMode">
-                     <enum>QLineEdit::Normal</enum>
+                     <enum>QLineEdit::EchoMode::Normal</enum>
                     </property>
                     <property name="placeholderText">
                      <string notr="true">Ingresar detalles de ventas a buscar...</string>
                     </property>
                     <property name="cursorMoveStyle">
-                     <enum>Qt::LogicalMoveStyle</enum>
+                     <enum>Qt::CursorMoveStyle::LogicalMoveStyle</enum>
                     </property>
                     <property name="clearButtonEnabled">
                      <bool>true</bool>
@@ -2118,10 +2125,10 @@ border-right: 1px solid #111;</string>
                      </sizepolicy>
                     </property>
                     <property name="frameShape">
-                     <enum>QFrame::NoFrame</enum>
+                     <enum>QFrame::Shape::NoFrame</enum>
                     </property>
                     <property name="frameShadow">
-                     <enum>QFrame::Raised</enum>
+                     <enum>QFrame::Shadow::Raised</enum>
                     </property>
                     <layout class="QHBoxLayout" name="horizontalLayout_3">
                      <property name="spacing">
@@ -2139,7 +2146,7 @@ border-right: 1px solid #111;</string>
                      <property name="bottomMargin">
                       <number>0</number>
                      </property>
-                     <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+                     <item alignment="Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter">
                       <widget class="QPushButton" name="btn_sales_prev_search_result">
                        <property name="enabled">
                         <bool>false</bool>
@@ -2173,7 +2180,7 @@ border-right: 1px solid #111;</string>
                        </property>
                       </widget>
                      </item>
-                     <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+                     <item alignment="Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter">
                       <widget class="QPushButton" name="btn_sales_next_search_result">
                        <property name="enabled">
                         <bool>false</bool>
@@ -2216,10 +2223,10 @@ border-right: 1px solid #111;</string>
                      <string notr="true"/>
                     </property>
                     <property name="textFormat">
-                     <enum>Qt::PlainText</enum>
+                     <enum>Qt::TextFormat::PlainText</enum>
                     </property>
                     <property name="textInteractionFlags">
-                     <set>Qt::NoTextInteraction</set>
+                     <set>Qt::TextInteractionFlag::NoTextInteraction</set>
                     </property>
                    </widget>
                   </item>
@@ -2260,19 +2267,19 @@ border-right: 1px solid #111;</string>
                   <string notr="true"/>
                  </property>
                  <property name="frameShape">
-                  <enum>QFrame::NoFrame</enum>
+                  <enum>QFrame::Shape::NoFrame</enum>
                  </property>
                  <property name="frameShadow">
-                  <enum>QFrame::Plain</enum>
+                  <enum>QFrame::Shadow::Plain</enum>
                  </property>
                  <property name="horizontalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="sizeAdjustPolicy">
-                  <enum>QAbstractScrollArea::AdjustToContents</enum>
+                  <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
                  </property>
                  <property name="editTriggers">
-                  <set>QAbstractItemView::DoubleClicked</set>
+                  <set>QAbstractItemView::EditTrigger::DoubleClicked</set>
                  </property>
                  <property name="showDropIndicator" stdset="0">
                   <bool>false</bool>
@@ -2284,13 +2291,13 @@ border-right: 1px solid #111;</string>
                   <bool>true</bool>
                  </property>
                  <property name="selectionMode">
-                  <enum>QAbstractItemView::ExtendedSelection</enum>
+                  <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
                  </property>
                  <property name="textElideMode">
-                  <enum>Qt::ElideMiddle</enum>
+                  <enum>Qt::TextElideMode::ElideMiddle</enum>
                  </property>
                  <property name="gridStyle">
-                  <enum>Qt::SolidLine</enum>
+                  <enum>Qt::PenStyle::SolidLine</enum>
                  </property>
                  <property name="sortingEnabled">
                   <bool>false</bool>
@@ -2320,26 +2327,26 @@ color: #111;</string>
                   <string notr="true"/>
                  </property>
                  <property name="textFormat">
-                  <enum>Qt::PlainText</enum>
+                  <enum>Qt::TextFormat::PlainText</enum>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignCenter</set>
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
                  </property>
                  <property name="wordWrap">
                   <bool>true</bool>
                  </property>
                  <property name="textInteractionFlags">
-                  <set>Qt::NoTextInteraction</set>
+                  <set>Qt::TextInteractionFlag::NoTextInteraction</set>
                  </property>
                 </widget>
                </item>
                <item>
                 <widget class="QFrame" name="sales_buttons">
                  <property name="frameShape">
-                  <enum>QFrame::StyledPanel</enum>
+                  <enum>QFrame::Shape::StyledPanel</enum>
                  </property>
                  <property name="frameShadow">
-                  <enum>QFrame::Raised</enum>
+                  <enum>QFrame::Shadow::Raised</enum>
                  </property>
                  <layout class="QHBoxLayout" name="box2_sales_buttons_Hlayout">
                   <property name="spacing">
@@ -2441,6 +2448,9 @@ QPushButton:hover {
           <attribute name="title">
            <string>CUENTAS CORRIENTES</string>
           </attribute>
+          <attribute name="toolTip">
+           <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Muestra las cuentas corrientes y datos personales de quienes posean una.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </attribute>
           <layout class="QVBoxLayout" name="tab3_debts_Vlayout">
            <property name="spacing">
             <number>4</number>
@@ -2460,10 +2470,10 @@ QPushButton:hover {
            <item>
             <widget class="QFrame" name="debts_info">
              <property name="frameShape">
-              <enum>QFrame::StyledPanel</enum>
+              <enum>QFrame::Shape::StyledPanel</enum>
              </property>
              <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
+              <enum>QFrame::Shadow::Raised</enum>
              </property>
              <layout class="QVBoxLayout" name="debts_info_Vlayout" stretch="0,0,0,0,0">
               <property name="spacing">
@@ -2490,10 +2500,10 @@ QPushButton:hover {
                  </sizepolicy>
                 </property>
                 <property name="frameShape">
-                 <enum>QFrame::NoFrame</enum>
+                 <enum>QFrame::Shape::NoFrame</enum>
                 </property>
                 <property name="frameShadow">
-                 <enum>QFrame::Raised</enum>
+                 <enum>QFrame::Shadow::Raised</enum>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_4">
                  <property name="spacing">
@@ -2554,13 +2564,13 @@ QPushButton:hover {
                     <bool>false</bool>
                    </property>
                    <property name="echoMode">
-                    <enum>QLineEdit::Normal</enum>
+                    <enum>QLineEdit::EchoMode::Normal</enum>
                    </property>
                    <property name="placeholderText">
                     <string notr="true">Ingresar detalles de cuenta corriente a buscar...</string>
                    </property>
                    <property name="cursorMoveStyle">
-                    <enum>Qt::LogicalMoveStyle</enum>
+                    <enum>Qt::CursorMoveStyle::LogicalMoveStyle</enum>
                    </property>
                    <property name="clearButtonEnabled">
                     <bool>true</bool>
@@ -2576,10 +2586,10 @@ QPushButton:hover {
                     </sizepolicy>
                    </property>
                    <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
+                    <enum>QFrame::Shape::NoFrame</enum>
                    </property>
                    <property name="frameShadow">
-                    <enum>QFrame::Raised</enum>
+                    <enum>QFrame::Shadow::Raised</enum>
                    </property>
                    <layout class="QHBoxLayout" name="horizontalLayout_5">
                     <property name="spacing">
@@ -2674,7 +2684,7 @@ QPushButton:hover {
                     <string notr="true"/>
                    </property>
                    <property name="textFormat">
-                    <enum>Qt::PlainText</enum>
+                    <enum>Qt::TextFormat::PlainText</enum>
                    </property>
                   </widget>
                  </item>
@@ -2725,19 +2735,19 @@ QPushButton:hover {
 }</string>
                 </property>
                 <property name="frameShape">
-                 <enum>QFrame::NoFrame</enum>
+                 <enum>QFrame::Shape::NoFrame</enum>
                 </property>
                 <property name="frameShadow">
-                 <enum>QFrame::Plain</enum>
+                 <enum>QFrame::Shadow::Plain</enum>
                 </property>
                 <property name="horizontalScrollBarPolicy">
-                 <enum>Qt::ScrollBarAlwaysOff</enum>
+                 <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                 </property>
                 <property name="sizeAdjustPolicy">
-                 <enum>QAbstractScrollArea::AdjustToContents</enum>
+                 <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
                 </property>
                 <property name="editTriggers">
-                 <set>QAbstractItemView::DoubleClicked</set>
+                 <set>QAbstractItemView::EditTrigger::DoubleClicked</set>
                 </property>
                 <property name="showDropIndicator" stdset="0">
                  <bool>false</bool>
@@ -2746,13 +2756,13 @@ QPushButton:hover {
                  <bool>false</bool>
                 </property>
                 <property name="defaultDropAction">
-                 <enum>Qt::IgnoreAction</enum>
+                 <enum>Qt::DropAction::IgnoreAction</enum>
                 </property>
                 <property name="alternatingRowColors">
                  <bool>true</bool>
                 </property>
                 <property name="selectionMode">
-                 <enum>QAbstractItemView::ExtendedSelection</enum>
+                 <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
                 </property>
                 <property name="sortingEnabled">
                  <bool>false</bool>
@@ -2782,26 +2792,26 @@ color: #111;</string>
                  <string notr="true"/>
                 </property>
                 <property name="textFormat">
-                 <enum>Qt::PlainText</enum>
+                 <enum>Qt::TextFormat::PlainText</enum>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                 <property name="wordWrap">
                  <bool>true</bool>
                 </property>
                 <property name="textInteractionFlags">
-                 <set>Qt::NoTextInteraction</set>
+                 <set>Qt::TextInteractionFlag::NoTextInteraction</set>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QFrame" name="debts_buttons">
                 <property name="frameShape">
-                 <enum>QFrame::NoFrame</enum>
+                 <enum>QFrame::Shape::NoFrame</enum>
                 </property>
                 <property name="frameShadow">
-                 <enum>QFrame::Raised</enum>
+                 <enum>QFrame::Shadow::Raised</enum>
                 </property>
                 <layout class="QHBoxLayout" name="debts_buttons_Hlayout">
                  <property name="spacing">

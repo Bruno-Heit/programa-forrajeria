@@ -72,7 +72,7 @@ class InventoryTableModel(QAbstractTableModel):
             match index.column():
                 case 0 | 1 | 2: # categoría, nombre, descripción
                     #? no modifica el modelo si el nuevo dato es igual al anterior
-                    if value == self._data[index.row()][index.column() + 1]:
+                    if str(value) == str(self._data[index.row()][index.column() + 1]):
                         return False
                     
                     self._data[index.row()][index.column() + 1] = value
