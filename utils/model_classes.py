@@ -108,10 +108,6 @@ class InventoryTableModel(QAbstractTableModel):
                 case 4: # precio unitario
                     value = str(value).replace(",",".")
                     
-                    #? no modifica el precio unitario si el valor nuevo es igual al anterior
-                    if self._data[index.row()][6] == value:
-                        return False
-                    
                     self._data[index.row()][6] = value
                     
                     self.dataToUpdate.emit(
@@ -123,10 +119,6 @@ class InventoryTableModel(QAbstractTableModel):
                     
                 case 5: # precio comercial
                     value = str(value).replace(",",".")
-                    
-                    #? no modifica el precio comercial si el valor nuevo es igual al anterior
-                    if self._data[index.row()][7] == value:
-                        return False
                     
                     self._data[index.row()][7] = str(value).replace(",",".")
                     

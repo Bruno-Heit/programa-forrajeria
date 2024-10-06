@@ -978,7 +978,7 @@ class MainWindow(QMainWindow):
                         )
             
             case 4: # precio normal
-                # ve si el sidebar de porcentajes está abierto, si está se modifican porcentajes
+                # si el sidebar de porcentajes está abierto se modifican porcentajes
                 if not self.ui.inventory_side_bar_body.isHidden():
                     # actualiza contador de registros y acumulador
                     var_loaded = self.__updateInventoryPricesBatchVar(
@@ -988,27 +988,42 @@ class MainWindow(QMainWindow):
                     
                     if var_loaded:
                         self.__resetInventoryUpdateVariables()
-                    
-                    # TODO: corregir, salta error al actualizar individualmente luego de hacerlo en porcentajes
-                    # with self._db_repo as db_repo:
-                        # db_repo.updateRegisters(
-                        #     upd_sql='''UPDATE Productos 
-                        #             SET precio_unit = ? 
-                        #             WHERE IDproducto = ?;''',
-                        #     upd_params=self._inv_model_data_acc,
-                        #     executemany=True
-                        #     )
-                    
-                    # # actualiza en Deudas
-                    # self.__updateDebtsOnPriceChange(
-                    #     price_type=InventoryPriceType.NORMAL
-                    #     )
+                        
+                        # actualiza en Productos
+                        with self._db_repo as db_repo:
+                            db_repo.updateRegisters(
+                                upd_sql='''UPDATE Productos 
+                                        SET precio_unit = ? 
+                                        WHERE IDproducto = ?;''',
+                                upd_params=self._inv_model_data_acc,
+                                executemany=True
+                                )
+                        
+                        # actualiza en Deudas
+                        self.__updateDebtsOnPriceChange(
+                            price_type=InventoryPriceType.NORMAL,
+                            executemany=True
+                            )
                 
-                # sino, se modifica un solo precio
+                # se modifica un solo precio
                 else:
-                    self.__resetInventoryUpdateVariables()
+                    # actualiza en Productos
+                    with self._db_repo as db_repo:
+                        db_repo.updateRegisters(
+                            upd_sql='''UPDATE Productos
+                                    SET precio_unit = ?
+                                    WHERE IDproducto = ?;''',
+                            upd_params=(new_val, IDproduct,),
+                        )
+                    
+                    # actualiza en Deudas
+                    self.__updateDebtsOnPriceChange(
+                        price_type=InventoryPriceType.NORMAL,
+                        params=(IDproduct,)
+                    )
             
             case 5: # precio comercial
+                # si el sidebar de porcentajes está abierto se modifican porcentajes
                 if not self.ui.inventory_side_bar_body.isHidden():
                     var_loaded = self.__updateInventoryPricesBatchVar(
                         price_type=InventoryPriceType.COMERCIAL,
@@ -1018,28 +1033,41 @@ class MainWindow(QMainWindow):
                     if var_loaded:
                         self.__resetInventoryUpdateVariables()
                     
-                # TODO: corregir, no actualiza en base de datos
-                    # with self._db_repo as db_repo:
-                        
-                        # db_repo.updateRegisters(
-                        #     upd_sql='''UPDATE Productos 
-                        #             SET precio_comerc = ? 
-                        #             WHERE IDproducto = ?;''',
-                        #     upd_params=self._inv_model_data_acc,
-                        #     executemany=True
-                        #     )
+                        with self._db_repo as db_repo:
+                            # actualiza en Productos
+                            db_repo.updateRegisters(
+                                upd_sql='''UPDATE Productos 
+                                        SET precio_comerc = ? 
+                                        WHERE IDproducto = ?;''',
+                                upd_params=self._inv_model_data_acc,
+                                executemany=True
+                                )
                     
-                    # # actualiza en Deudas
-                    # self.__updateDebtsOnPriceChange(
-                    #     price_type=InventoryPriceType.COMERCIAL
-                    #     )
+                        # actualiza en Deudas
+                        self.__updateDebtsOnPriceChange(
+                            price_type=InventoryPriceType.COMERCIAL,
+                            executemany=True
+                            )
                 
                 # modifica un solo precio
                 else:
-                    self.__resetInventoryUpdateVariables()
+                    # actualiza en Productos
+                    with self._db_repo as db_repo:
+                        db_repo.updateRegisters(
+                            upd_sql='''UPDATE Productos
+                                    SET precio_comerc = ?
+                                    WHERE IDproducto = ?;''',
+                            upd_params=(new_val, IDproduct,),
+                        )
                     
+                    # actualiza en Deudas
+                    self.__updateDebtsOnPriceChange(
+                        price_type=InventoryPriceType.COMERCIAL,
+                        params=(IDproduct,)
+                    )
         
         return None
+
 
     def __updateInventoryPricesBatchVar(self, price_type:InventoryPriceType, IDproduct:int, new_value:float=None) -> bool:
         '''
@@ -1088,15 +1116,21 @@ class MainWindow(QMainWindow):
         return has_finished
 
  
-    def __updateDebtsOnPriceChange(self, price_type:InventoryPriceType) -> None:
+    def __updateDebtsOnPriceChange(self, price_type:InventoryPriceType, params:tuple[int]=None, executemany:bool=False) -> None:
         '''
-        Actualiza el precio normal / precio comercial de un producto en Deudas 
-        cuando se actualiza en la tabla Productos.
+        Actualiza el precio normal / comercial de un producto en Deudas cuando 
+        se actualiza en la tabla Productos.
 
         Parámetros
         ----------
         price_type: InventoryPriceType
             El tipo de precio a cambiar en base de datos
+        params: tuple[int], opcional
+            Se usa cuando no se modifican los precios en porcentajes, recibe 
+            una tupla con el IDproduct del producto
+        executemany: bool, opcional
+            Flag que determina si ejecutar una (False) o más veces (True) la 
+            consulta update a la base de datos
         
         Retorna
         -------
@@ -1120,12 +1154,11 @@ class MainWindow(QMainWindow):
                                 Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
                                 Detalle_Ventas.IDventa = Ventas.IDventa AND 
                                 Ventas.detalles_venta LIKE "%(P. NORMAL)%";''',
-                            upd_params=self._inv_model_data_acc[:, 1:],
-                            executemany=True
+                            upd_params=self._inv_model_data_acc[:, 1:] if not params else params,
+                            executemany=executemany
                             )
         
             case "COMERCIAL":
-                # TODO: probar este código
                 # actualiza en Deudas
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
@@ -1142,8 +1175,8 @@ class MainWindow(QMainWindow):
                                 Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
                                 Detalle_Ventas.IDventa = Ventas.IDventa AND 
                                 Ventas.detalles_venta LIKE "%(P. COMERCIAL)%";''',
-                        upd_params=self._inv_model_data_acc[:, 1:],
-                        executemany=True
+                        upd_params=self._inv_model_data_acc[:, 1:] if not params else params,
+                        executemany=executemany
                     )
         
         return None
@@ -1537,77 +1570,6 @@ class MainWindow(QMainWindow):
                 self.ui.tv_inventory_data.model().setData(
                     index=value[0],
                     value=value[1])
-            
-            # TODO: pasar este código a 'self.__onInventoryModelDataToUpdate' donde 
-            # todo: tengo que actualizar los precios nuevos
-            # if new_values:
-            #     # dependiendo de qué checkbox esté checkeada...
-            #     if self.ui.checkbox_unit_prices.isChecked():
-            #         # actualiza en Productos
-            #         with self._db_repo as db_repo:
-            #             db_repo.updateRegisters(
-            #                 upd_sql='''UPDATE Productos 
-            #                             SET precio_unit = ? 
-            #                             WHERE IDproducto = ?''',
-            #                 upd_params=new_values,
-            #                 executemany=True
-            #                 )
-                        
-            #             # actualizo los new_values, sólo conservo el IDproducto
-            #             new_values = tuple((param[1],) for param in new_values)
-                        
-            #             # actualiza en Deudas
-            #             db_repo.updateRegisters(
-            #                 upd_sql='''
-            #                     UPDATE Deudas 
-            #                     SET total_adeudado = CASE Detalle_Ventas.abonado
-            #                         WHEN 0 THEN Productos.precio_unit
-            #                         ELSE ROUND(Productos.precio_unit - Detalle_Ventas.abonado, 2)
-            #                     END
-            #                     FROM Detalle_Ventas, Ventas, Productos
-            #                     WHERE 
-            #                         Productos.IDproducto = ? AND
-            #                         Detalle_Ventas.IDproducto = Productos.IDproducto AND
-            #                         Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
-            #                         Detalle_Ventas.IDventa = Ventas.IDventa AND 
-            #                         Ventas.detalles_venta LIKE "%(P. NORMAL)%";''',
-            #                 upd_params=new_values,
-            #                 executemany=True
-            #             )
-                        
-            #     elif self.ui.checkbox_comercial_prices.isChecked():
-            #         # actualiza en Productos
-            #         with self._db_repo as db_repo:
-            #             db_repo.updateRegisters(
-            #                 upd_sql='''UPDATE Productos 
-            #                             SET precio_comerc = ? 
-            #                             WHERE IDproducto = ?''',
-            #                 upd_params=new_values,
-            #                 executemany=True
-            #                 )
-                        
-            #             # actualizo los new_values, sólo conservo el IDproducto
-            #             new_values = tuple((param[1],) for param in new_values)
-                        
-            #             # actualiza en Deudas
-            #             db_repo.updateRegisters(
-            #                 upd_sql='''
-            #                     UPDATE Deudas 
-            #                     SET total_adeudado = CASE Detalle_Ventas.abonado
-            #                         WHEN 0 THEN Productos.precio_comerc
-            #                         ELSE ROUND(Productos.precio_comerc - Detalle_Ventas.abonado, 2)
-            #                     END
-            #                     FROM Detalle_Ventas, Ventas, Productos
-            #                     WHERE 
-            #                         Productos.IDproducto = ? AND
-            #                         Detalle_Ventas.IDproducto = Productos.IDproducto AND
-            #                         Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
-            #                         Detalle_Ventas.IDventa = Ventas.IDventa AND 
-            #                         Ventas.detalles_venta LIKE "%(P. COMERCIAL)%";''',
-            #                 upd_params=new_values,
-            #                 executemany=True
-            #             )
-        
             
         return None
 
