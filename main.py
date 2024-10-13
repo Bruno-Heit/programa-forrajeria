@@ -1,12 +1,12 @@
 import sys
 from numpy import (empty, ndarray)
-from typing import (Any)
+from typing import (Any, Iterable)
 
 from PySide6.QtWidgets import (QApplication, QMainWindow, QLineEdit, QTableView, 
                                QCheckBox, QAbstractItemView, QDateTimeEdit, QListWidgetItem, 
                                QLabel)
 from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot)
-from PySide6.QtGui import (QIntValidator, QIcon)
+from PySide6.QtGui import (QIcon)
 
 from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemValues, 
                            DebtorDataDialog, DebtsTablePersonData, WidgetStyle)
@@ -159,7 +159,7 @@ class MainWindow(QMainWindow):
         
         # TODO: reimplementar las funciones de DELETE
         #* (DELETE) eliminar un producto de 'tv_inventory_data'
-        self.ui.btn_delete_product_inventory.clicked.connect(lambda: self.handleTableDeleteRows(self.ui.tv_inventory_data))
+        self.ui.btn_delete_product_inventory.clicked.connect(lambda: self.handleTableDeleteRows(TableViewId.INVEN_TABLE_VIEW))
         
         #* (UPDATE) modificar celdas de 'tv_inventory_data' (sin porcentajes)
         self.inventory_data_model.dataToUpdate.connect(
@@ -170,7 +170,6 @@ class MainWindow(QMainWindow):
         self.inventory_delegate.fieldIsValid.connect(self.__onDelegateValidationSucceded)
         self.inventory_delegate.fieldIsInvalid.connect(self.__onDelegateValidationFailed)
         
-        # TODO: reimplementar las funciones de UPDATE con porcentajes
         #* inventory_sideBar
         self.ui.inventory_checkbuttons_buttonGroup.buttonPressed.connect(self.handlePressedCheckbox)
         self.ui.inventory_checkbuttons_buttonGroup.buttonClicked.connect(self.handleClickedCheckbox)
@@ -197,7 +196,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_add_product_sales.clicked.connect(lambda: self.handleTableCreateRow(self.ui.tv_sales_data))
         
         #* (DELETE) eliminar ventas de 'tv_sales_data'
-        self.ui.btn_delete_product_sales.clicked.connect(lambda: self.handleTableDeleteRows(self.ui.tv_sales_data))
+        self.ui.btn_delete_product_sales.clicked.connect(lambda: self.handleTableDeleteRows(TableViewId.SALES_TABLE_VIEW))
         
         #* (UPDATE) modificar celdas de 'tv_sales_data'
         # TODO: reimplementar UPDATES de Ventas
@@ -695,17 +694,18 @@ class MainWindow(QMainWindow):
             case "tv_inventory_data":
                 self.ui.inventory_progressbar.setStyleSheet("")
                 self.ui.inventory_progressbar.hide()
-                if not READ_OPERATION:
-                    # recarga la tabla
-                    try:
-                        self.fillTableView(table_view=self.ui.tv_inventory_data, SHOW_ALL=True)
-                    except AttributeError: # salta porque se intenta recargar la tabla pero nunca se llenó anteriormente
-                        pass
-                else:
-                    pass
-                self.inventory_data_model.setModelData(
-                    data=self._inv_model_data_acc,
-                    headers=ModelHeaders.INVENTORY_HEADERS.value)
+                # if not READ_OPERATION:
+                #     # recarga la tabla
+                #     try:
+                #         self.fillTableView(table_view=self.ui.tv_inventory_data, SHOW_ALL=True)
+                #     except AttributeError: # salta porque se intenta recargar la tabla pero nunca se llenó anteriormente
+                #         pass
+                # else:
+                #     pass
+                if READ_OPERATION:
+                    self.inventory_data_model.setModelData(
+                        data=self._inv_model_data_acc,
+                        headers=ModelHeaders.INVENTORY_HEADERS.value)
             
                 # borra el acumulador temporal de datos
                 self._inv_model_data_acc = None
@@ -770,141 +770,186 @@ class MainWindow(QMainWindow):
 
 
     #¡ tablas (DELETE)
-    def __getTableElementsToDelete(self, table_view:QTableView, selected_rows:list) -> tuple | None:
-        '''
-        Dependiendo de cuál sea 'table_view', obtiene los nombres de los productos de 'tv_inventory_data' ó la fecha 
-        y hora de 'tv_sales_data'. 
-        
-        - table_view: QTableView al que se referencia.
-        - selected_rows: lista con las filas seleccionadas del 'table_view'.
-        
-        Retorna una tupla con los registros a eliminar, o None si no hay elementos seleccionados.
-        '''
-        if not selected_rows:
-            return None
-        
-        registers_to_delete:list = [None]*len(selected_rows)
-        
-        match table_view.objectName():
-            # obtiene los nombres de los productos a borrar
-            case "tv_inventory_data":
-                for pos,row in enumerate(selected_rows):
-                    registers_to_delete[pos] = table_view.item(row, 1).text()
-            
-            # obtiene la fecha y hora de las ventas a borrar
-            case "tv_sales_data":
-                for pos,row in enumerate(selected_rows):
-                    registers_to_delete[pos] = table_view.item(row, 5).text()
-            
-        return tuple(registers_to_delete)
-
-
     @Slot(QTableView)
-    def handleTableDeleteRows(self, table_view:QTableView) -> None:
+    def handleTableDeleteRows(self, table_viewID:TableViewId) -> None:
         '''
-        NOTA: Este método NO ELIMINA LOS REGISTROS DE "Productos" NI "Deudas", LOS MARCA COMO "ELIMINADOS" EN LA 
-        BASE DE DATOS. EN CAMBIO SÍ ELIMINA LOS REGISTROS DE "Ventas" Y "Detalle_Ventas".
+        Elimina los registros seleccionados en la VISTA correspondiente y modifica la base 
+        de datos, además actualiza el estado de la progress-bar relacionada con la VISTA.
+        NOTA: Este método NO ELIMINA LOS REGISTROS DE "Productos" NI "Deudas", LOS MARCA 
+        COMO "ELIMINADOS" EN LA BASE DE DATOS. EN CAMBIO SÍ ELIMINA LOS REGISTROS DE "Ventas" 
+        Y "Detalle_Ventas".
         
-        Este método hace lo siguiente:
-        - Dependiendo del 'table_view' del que se tengan que borrar registros, se encarga de declarar las 
-        consultas sql y los parámetros necesarios para luego hacer las consultas UPDATE que marcan como "eliminado" 
-        los registros en la clase 'workerclasses.WorkerDelete'.
-        - Cambia el QSS del QProgressBar asociado a 'table_view'.
-        - Especifica el valor máximo del QProgressBar asociado a 'table_view'.
-        - Crea una instancia de WORKER y QThread y conecta sus señales/slots.
+        Parámetros
+        ----------
+        table_viewID : TableViewId
+            QTableView al que se refencia
         
-        Este método llama a:
-        - functionutils.getSelectedTableRows: para obtener las filas seleccionas del 'table_view'.
-        - self.__getTableElementsToDelete: para obtener datos sobre los registros a marcar como eliminados.
-        - self.__updateProgressBar: para especificar el valor máximo de la QProgressBar asociada a 'table_view'.
-        
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
-        selected_rows:tuple # las posiciones de self.IDs_products/self.IDs_saleDetails donde están los registros seleccionados
-        ids_to_delete:list # los IDs de los registros a eliminar (necesario para consulta)
-        productnames_to_delete:list|None # los nombres de los registros a eliminar de "Productos"
-        dateTime_to_delete:list|None # las fechas y horas de los registros a eliminar de "Ventas" y "Detalle_Ventas"
+        match table_viewID.name:
+            case "INVEN_TABLE_VIEW":
+                self.__deleteInventoryRows()
+            
+            case "SALES_TABLE_VIEW":
+                # TODO: una vez creado el modelo de ventas, obtener los datetime desde dicho modelo
+                pass
+                # dateTime_to_delete = self.__getTableElementsToDelete(table_view, selected_rows)
+                
+                # # obtiene ids de las filas seleccionadas
+                # ids_to_delete = [self.IDs_saleDetails[n_id] for n_id in selected_rows]
+                
+                # mult_sql:tuple[str] = (
+                #     "DELETE FROM Ventas WHERE IDventa = (SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?) AND fecha_hora = ?;",
+                #     "DELETE FROM Detalle_Ventas WHERE ID_detalle_venta = ?;",
+                #     )
+                
+                # # une 'ids_to_delete' y 'dateTime_to_delete' en una lista[(id, fecha_y_hora)]
+                # params = [(id, datetime) for id,datetime in zip(ids_to_delete, dateTime_to_delete)]
+                
+                # self.ui.sales_progressbar.setMaximum(len(params))
+                # self.ui.sales_progressbar.setStyleSheet("QProgressBar::chunk {background-color: qlineargradient(spread:reflect, x1:0.119, y1:0.426, x2:0.712045, y2:0.926, stop:0.0451977 rgba(255, 84, 87, 255), stop:0.59887 rgba(255, 161, 71, 255));}")
 
-        mark_sql:str = None # consulta UPDATE para marcar "eliminado" los registros (Productos y Deudas)
-        mult_sql:tuple[str] = None # se usa para borrar de Detalle_Ventas y Ventas.
-        params:list[tuple] = None # lista[(id, nombre)] si es Productos; ó lista[(id,fecha_hora)] si es Detalle_Ventas
-        
-        selected_rows = getSelectedTableRows(table_view)
+            case "DEBTS_TABLE_VIEW":
+                pass
+        return None
+    
+    
+    def __deleteInventoryRows(self, table_viewID:TableViewId=TableViewId.INVEN_TABLE_VIEW) -> None:
+        '''
+        Elimina los productos seleccionados en el MODELO de inventario, actualiza 
+        la VISTA y marca el producto en la base de datos como eliminado.
+
+        Parámetros
+        ----------
+        table_viewID : TableViewId, opcional
+            QTableView al que se refencia
+
+        Retorna
+        -------
+        None
+        '''
+        # obtiene las filas seleccionadas
+        selected_rows = getSelectedTableRows(self.ui.tv_inventory_data)
         
         if not selected_rows:
             return None
         
+        # cambia la progress-bar para representar las eliminaciones
+        self.ui.inventory_progressbar.setMaximum(len(selected_rows))
+        self.ui.inventory_progressbar.setStyleSheet(
+            '''QProgressBar::chunk {
+                background-color: qlineargradient(spread:reflect, x1:0.119, y1:0.426, 
+                                                  x2:0.712045, y2:0.926, stop:0.0451977 
+                                                  rgba(255, 84, 87, 255), 
+                                                  stop:0.59887 rgba(255, 161, 71, 255));
+                }''')
         
-        match table_view.objectName():
-            case "tv_inventory_data":
-                productnames_to_delete = self.__getTableElementsToDelete(table_view, selected_rows)
-                
-                # a partir de las filas seleccionadas, obtiene de self.IDs_products los ids para la consulta
-                ids_to_delete = [self.IDs_products[n_id] for n_id in selected_rows]
-                
-                mark_sql = "UPDATE Productos SET eliminado = 1 WHERE IDproducto = ? AND nombre = ?;"
-                
-                # une 'ids_to_delete' y 'productnames_to_delete' en una lista[(id, nombre)]
-                params = [(id, name) for id,name in zip(ids_to_delete, productnames_to_delete)]
-                
-                self.ui.inventory_progressbar.setMaximum(len(params))
-                self.ui.inventory_progressbar.setStyleSheet("QProgressBar::chunk {background-color: qlineargradient(spread:reflect, x1:0.119, y1:0.426, x2:0.712045, y2:0.926, stop:0.0451977 rgba(255, 84, 87, 255), stop:0.59887 rgba(255, 161, 71, 255));}")
-            
-            
-            case "tv_sales_data":
-                dateTime_to_delete = self.__getTableElementsToDelete(table_view, selected_rows)
-                
-                # obtiene ids de las filas seleccionadas
-                ids_to_delete = [self.IDs_saleDetails[n_id] for n_id in selected_rows]
-                
-                mult_sql:tuple[str] = (
-                    "DELETE FROM Ventas WHERE IDventa = (SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?) AND fecha_hora = ?;",
-                    "DELETE FROM Detalle_Ventas WHERE ID_detalle_venta = ?;",
-                    )
-                
-                # une 'ids_to_delete' y 'dateTime_to_delete' en una lista[(id, fecha_y_hora)]
-                params = [(id, datetime) for id,datetime in zip(ids_to_delete, dateTime_to_delete)]
-                
-                self.ui.sales_progressbar.setMaximum(len(params))
-                self.ui.sales_progressbar.setStyleSheet("QProgressBar::chunk {background-color: qlineargradient(spread:reflect, x1:0.119, y1:0.426, x2:0.712045, y2:0.926, stop:0.0451977 rgba(255, 84, 87, 255), stop:0.59887 rgba(255, 161, 71, 255));}")
+        # obtiene los ids para las consultas
+        params_ids = self.__getDeleteData(table_viewID, selected_rows)
+        
+        # actualiza el MODELO de datos
+        self.inventory_data_model.removeSelectedModelRows(selected_rows)
+        
+        # instancia y ejecuta WORKER y THREAD
+        # self.__instanciateDeleteWorkerAndThread(table_viewID, params_ids)
+        
+        return None
 
 
-            case "tv_debts_data":
+    def __getDeleteData(self, table_viewID:TableViewId, selected_rows:Iterable) -> Iterable:
+        '''
+        Obtiene los datos necesarios desde el MODELO de datos de la VISTA especifica 
+        para poder realizar las consultas.
+        Si la VISTA es:
+            1. Inventario: obtiene los IDs de los productos
+            ...
+
+        Parámetros
+        ----------
+        table_viewID : TableViewId
+            QTableView al que se refencia
+
+        Retorna
+        -------
+        Iterable
+            iterable con los datos necesarios para las consultas
+        '''
+        data:list[Any] = []
+        
+        match table_viewID.name:
+            case "INVEN_TABLE_VIEW":
+                # obtiene los IDs de los productos
+                for row in selected_rows:
+                    data.append(self.inventory_data_model._data[row][0])
+            
+            case "SALES_TABLE_VIEW":
+                pass
+            
+            case "DEBTS_TABLE_VIEW":
                 pass
         
-        #? inicializa WORKER y THREAD, y conecta señales/slots
+        return tuple(data)
+
+
+    def __instanciateDeleteWorkerAndThread(self, table_viewID:TableViewId, del_params:Iterable) -> None:
+        '''
+        Dependiendo de la VISTA, instancia y ejecuta un WORKER y un QTHREAD para realizar 
+        las consultas de eliminación a la base de datos y conecta sus señales.
+
+        Parámetros
+        ----------
+        table_viewID : TableViewId
+            QTableView al que se refencia
+        del_params: Iterable
+            parámetros necesarios para realizar las consultas UPDATE/DELETE
+
+        Retorna
+        -------
+        None
+        '''
         self.DELETE_THREAD = QThread()
-        # si mark_sql != None es porque se deben MARCAR "eliminados" los registros, sino se deben ELIMINAR        
-        if mark_sql:
-            self.update_worker = WorkerUpdate()
-            self.update_worker.moveToThread(self.DELETE_THREAD)
-            self.DELETE_THREAD.started.connect(lambda: self.update_worker.executeUpdateQuery(
-                sql=mark_sql,
-                params=params))
-            self.update_worker.progress.connect(lambda value: self.__updateProgressBar(
-                tv_name=table_view.objectName(),
-                value=value))
-            self.update_worker.finished.connect(lambda: self.__workerOnFinished(
-                tv_name=table_view.objectName(),
-                READ_OPERATION=False) )
-            self.update_worker.finished.connect(self.DELETE_THREAD.quit)
-            self.DELETE_THREAD.finished.connect(self.update_worker.deleteLater)
+        
+        match table_viewID.name:
+            case "INVEN_TABLE_VIEW":
+                self.update_worker = WorkerUpdate()
+                self.update_worker.moveToThread(self.DELETE_THREAD)
+                
+                self.DELETE_THREAD.started.connect(lambda: self.update_worker.executeUpdateQuery(
+                    sql="UPDATE Productos SET eliminado = 1 WHERE IDproducto = ?",
+                    params=del_params)
+                    )
+                self.update_worker.progress.connect(lambda value: self.__updateProgressBar(
+                    tv_name=self.ui.tv_inventory_data.objectName(),
+                    value=value)
+                    )
+                
+                self.update_worker.finished.connect(lambda: self.__workerOnFinished(
+                    tv_name=self.ui.tv_inventory_data.objectName(),
+                    READ_OPERATION=False)
+                    )
+                self.update_worker.finished.connect(self.DELETE_THREAD.quit)
+                self.DELETE_THREAD.finished.connect(self.update_worker.deleteLater)
             
-        # sino, se deben borrar completamente (no marcar como "eliminados")
-        else:
-            self.delete_worker = WorkerDelete()
-            self.delete_worker.moveToThread(self.DELETE_THREAD)
-            self.DELETE_THREAD.started.connect(lambda: self.delete_worker.executeDeleteQuery(
-                params=params,
-                mult_sql=mult_sql))
-            self.delete_worker.progress.connect(lambda value: self.__updateProgressBar(
-                tv_name=table_view.objectName(),
-                value=value))
-            self.delete_worker.finished.connect(lambda: self.__workerOnFinished(
-                tv_name=table_view.objectName(),
-                READ_OPERATION=False) )
-            self.delete_worker.finished.connect(self.DELETE_THREAD.quit)
-            self.DELETE_THREAD.finished.connect(self.delete_worker.deleteLater)
+            case "SALES_TABLE_VIEW":
+                pass
+                # self.delete_worker = WorkerDelete()
+                # self.delete_worker.moveToThread(self.DELETE_THREAD)
+                # self.DELETE_THREAD.started.connect(lambda: self.delete_worker.executeDeleteQuery(
+                #     params=params,
+                #     mult_sql=mult_sql))
+                # self.delete_worker.progress.connect(lambda value: self.__updateProgressBar(
+                #     tv_name=table_view.objectName(),
+                #     value=value))
+                # self.delete_worker.finished.connect(lambda: self.__workerOnFinished(
+                #     tv_name=table_view.objectName(),
+                #     READ_OPERATION=False) )
+                # self.delete_worker.finished.connect(self.DELETE_THREAD.quit)
+                # self.DELETE_THREAD.finished.connect(self.delete_worker.deleteLater)
+            
+            case "DEBTS_TABLE_VIEW":
+                pass
             
         self.DELETE_THREAD.start()
         return None
@@ -1361,21 +1406,21 @@ class MainWindow(QMainWindow):
 
 
     @Slot(object)
-    def __onDelegateValidationSucceded(self, TableViewID:TableViewId) -> None:
+    def __onDelegateValidationSucceded(self, table_viewID:TableViewId) -> None:
         '''
         Esconde los labels de feedback relacionados con la VISTA a la que se 
         referencia.
 
         Parámetros
         ----------
-        TableViewID : TableViewId
+        table_viewID : TableViewId
             QTableView al que se refencia
 
         Retorna
         -------
         None
         '''
-        match TableViewID.name:
+        match table_viewID.name:
             case "INVEN_TABLE_VIEW": # inventario
                 self.ui.label_feedbackInventory.hide()
             

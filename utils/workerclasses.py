@@ -8,7 +8,7 @@ from utils.enumclasses import (LoggingMessage)
 from utils.dboperations import (DatabaseRepository)
 
 from sqlite3 import (Connection, Error as sqlite3Error)
-from typing import (Any)
+from typing import (Any, Iterable)
 import logging
         
 
@@ -195,7 +195,7 @@ class WorkerUpdate(QObject):
     
     
     @Slot(str,tuple,bool)
-    def executeUpdateQuery(self, sql:str, params:tuple[int,str]) -> None:
+    def executeUpdateQuery(self, sql:str, params:Iterable) -> None:
         '''
         Hace la consulta UPDATE a la base de datos.
         
