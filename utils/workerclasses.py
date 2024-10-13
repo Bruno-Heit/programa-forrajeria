@@ -195,22 +195,25 @@ class WorkerUpdate(QObject):
     
     
     @Slot(str,tuple,bool)
-    def executeUpdateQuery(self, sql:str, params:Iterable) -> None:
+    def executeUpdateQuery(self, sql:str, params:Iterable[tuple]) -> None:
         '''
         Hace la consulta UPDATE a la base de datos.
-        
-        PARAMS:
-        - sql: consulta UPDATE a ejecutar.
-        - params: parámetros para consulta 'sql'. Guarda como 'int' el ID del registro y como 'str' un dato 
-        de un registro único.
-        
-        SEÑALES:
         La señal 'finished' emite:
-        - 0: si no se pudo establecer una conexión con la base de datos.
-        - 1: si no hubo errores.
-        - sqlite3.Error.sqlite_errorcode: si hubo un error concreto, emite el código de error de sqlite3.
-        
+        - 0: si no se pudo establecer una conexión con la base de datos
+        - 1: si no hubo errores
+        - sqlite3.Error: si hubo un error concreto, emite el código de error de sqlite3
         La señal 'progress' emite un 'int' que indica el progreso de actualización.
+        
+        Parámetros
+        ----------
+        sql: str
+            consulta UPDATE a ejecutar
+        params: Iterable[tuple]
+            parámetros para consulta
+        
+        Retorna
+        -------
+        None
         '''
         conn = createConnection("database/inventario.db")
         if not conn:
@@ -226,8 +229,8 @@ class WorkerUpdate(QObject):
             
         except sqlite3Error as err:
             conn.rollback()
-            logging.critical(LoggingMessage.ERROR_DB_UPDATE, f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
-            self.finished.emit(err.sqlite_errorcode) #! error al realizar el update
+            logging.critical(LoggingMessage.ERROR_DB_UPDATE, f"{err}")
+            self.finished.emit(err) #! error al realizar el update
                 
         finally:
             conn.close()

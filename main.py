@@ -676,7 +676,7 @@ class MainWindow(QMainWindow):
         QSS de dicha QProgressBar y carga los datos en el QTableView, luego reinicia 
         los acumuladores temporales.
         Si 'READ_OPERATION' es False es porque se realizaron otras consultas a la base 
-        de datos (DELETE / INSERT) y el QTableView debe ser recargado.
+        de datos (DELETE) y el QTableView debe ser recargado.
         
         Parámetros
         ----------
@@ -853,12 +853,12 @@ class MainWindow(QMainWindow):
         self.inventory_data_model.removeSelectedModelRows(selected_rows)
         
         # instancia y ejecuta WORKER y THREAD
-        # self.__instanciateDeleteWorkerAndThread(table_viewID, params_ids)
+        self.__instanciateDeleteWorkerAndThread(table_viewID, params_ids)
         
         return None
 
 
-    def __getDeleteData(self, table_viewID:TableViewId, selected_rows:Iterable) -> Iterable:
+    def __getDeleteData(self, table_viewID:TableViewId, selected_rows:Iterable) -> Iterable[tuple]:
         '''
         Obtiene los datos necesarios desde el MODELO de datos de la VISTA especifica 
         para poder realizar las consultas.
@@ -873,16 +873,16 @@ class MainWindow(QMainWindow):
 
         Retorna
         -------
-        Iterable
+        Iterable[tuple]
             iterable con los datos necesarios para las consultas
         '''
         data:list[Any] = []
         
         match table_viewID.name:
             case "INVEN_TABLE_VIEW":
-                # obtiene los IDs de los productos
+                # obtiene los IDs de los productos y los convierte en tuple[ID]
                 for row in selected_rows:
-                    data.append(self.inventory_data_model._data[row][0])
+                    data.append( (self.inventory_data_model._data[row][0],) )
             
             case "SALES_TABLE_VIEW":
                 pass
@@ -893,7 +893,7 @@ class MainWindow(QMainWindow):
         return tuple(data)
 
 
-    def __instanciateDeleteWorkerAndThread(self, table_viewID:TableViewId, del_params:Iterable) -> None:
+    def __instanciateDeleteWorkerAndThread(self, table_viewID:TableViewId, del_params:Iterable[tuple]) -> None:
         '''
         Dependiendo de la VISTA, instancia y ejecuta un WORKER y un QTHREAD para realizar 
         las consultas de eliminación a la base de datos y conecta sus señales.
@@ -902,7 +902,7 @@ class MainWindow(QMainWindow):
         ----------
         table_viewID : TableViewId
             QTableView al que se refencia
-        del_params: Iterable
+        del_params: Iterable[tuple]
             parámetros necesarios para realizar las consultas UPDATE/DELETE
 
         Retorna
