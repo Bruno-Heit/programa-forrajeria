@@ -26,6 +26,8 @@ from phonenumbers import (parse, format_number, is_valid_number, PhoneNumber, Ph
 class ProductDialog(QDialog):
     '''QDialog creado al presionar el botón 'MainWindow.btn_add_product_inventory'. 
     Sirve para crear un nuevo registro de producto en la tabla "Productos" en la base de datos.'''
+    dataFilled:Signal = Signal(object) # emite un dict con todos los datos introducidos a MainWindow
+    
     def __init__(self):
         super(ProductDialog, self).__init__()
         self.productDialog_ui = Ui_Dialog()
@@ -379,23 +381,53 @@ class ProductDialog(QDialog):
         '''
         Es llamada cuando se presiona el botón "Aceptar".
         Obtiene los datos de los campos y hace una consulta INSERT INTO a la 
-        base de datos.
+        base de datos, y emite la señal 'dataFilled' con los datos 
+        introducidos a MainWindow para poder actualizar el MODELO DE DATOS.
         
         Retorna
         -------
         None
         '''
+        data:tuple[str]
+        data_as_dict:dict[str]
+        
         try:
             conn = createConnection("database/inventario.db")
             cursor = conn.cursor()
             
             if self.productDialog_ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled() == False:
                 return None
-            data:tuple[str] = self.__getFieldsData()
-            sql = "INSERT INTO Productos(nombre,descripcion,stock,unidad_medida,precio_unit,precio_comerc,IDcategoria,eliminado) VALUES(?,?,?,?,?,?,(SELECT IDcategoria FROM Categorias WHERE nombre_categoria=?),0);"
+            data = self.__getFieldsData()
 
-            cursor.execute(sql, data)
+            cursor.execute(
+                '''INSERT INTO Productos
+                        (nombre,descripcion,stock,unidad_medida,precio_unit,
+                        precio_comerc,IDcategoria,eliminado) 
+                   VALUES(?,?,?,?,?,?,(
+                        SELECT IDcategoria 
+                        FROM Categorias 
+                        WHERE nombre_categoria=?)
+                        ,0
+                   );''', 
+                data)
             conn.commit()
+            
+            # emite los datos a MainWindow para actualizar el MODELO DE DATOS
+            data_as_dict = {
+                'product_ID': makeReadQuery( # obtengo el último ID, es el del nuevo producto
+                    '''SELECT IDproducto 
+                    FROM Productos 
+                    ORDER BY IDproducto DESC 
+                    LIMIT 1;''')[0][0],
+                'product_name': data[0],
+                'product_description': data[1],
+                'product_stock': data[2],
+                'product_measurement_unit': data[3],
+                'product_unit_price': data[4],
+                'product_comercial_price': data[5],
+                'product_category': data[6]
+            }
+            self.dataFilled.emit(data_as_dict)
             
         except sqlite3Error as err:
             conn.rollback()
@@ -1186,18 +1218,15 @@ class SaleDialog(QDialog):
     @Slot()
     def handleOkClicked(self) -> None:
         '''
-        Es llamado una vez que se presiona el botón "Aceptar".
+        Obtiene los datos formateados de los campos, hace las consultas INSERT a la base 
+        de datos y actualiza el stock en la tabla "Productos".
+        NOTA: las consultas se hacen sin llamar a otra función, y tampoco usando 
+        MULTITHREADING, esto es es así para garantizar la atomicidad e integridad de los 
+        datos.
         
-        Este método obtiene los datos formateados de los campos, declara las consultas INSERT y sus parámetros, 
-        realiza las consultas INSERT a la base de datos y al final actualiza el stock en la tabla "Productos".
-        En éste método las consultas se hacen sin llamar a otra función, y tampoco usando MULTITHREADING, esto es 
-        es así para garantizar la atomicidad e integridad de los datos.
-        
-        Este método llama a:
-        - self.__getFieldsData: para obtener los valores formateados de los campos.
-        - self.__updateProductStock: para actualizar (luego de los INSERT) el stock en tabla "Productos".
-        
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
         #? siempre se insertan datos en Ventas y Detalle_Ventas, pero si el "total abonado" no es igual 
         #? al "costo total" entonces se insertan datos también en Deudas y Deudores.

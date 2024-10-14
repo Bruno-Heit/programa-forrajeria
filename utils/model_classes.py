@@ -3,7 +3,7 @@
     en las vistas.
 '''
 from typing import (Any, Sequence)
-from numpy import (ndarray, delete, s_)
+from numpy import (ndarray, delete, s_, vstack, array)
 
 from PySide6.QtCore import (QAbstractTableModel, Qt, QModelIndex, QPersistentModelIndex, 
                             QObject, Signal)
@@ -223,11 +223,6 @@ class InventoryTableModel(QAbstractTableModel):
         self._headers = headers
         self.endResetModel()
         return None
-    
-    
-    # TODO: implementar la lógica para añadir/quitar filas a medida que se hace scroll en la vista
-    # def insertRows(self, row:int, count:int, parent:QModelIndex=QModelIndex()) -> None:
-    #     self.beginInsertRows(QModelIndex(), )
 
 
     def removeSelectedModelRows(self, selected_rows:Sequence) -> None:
@@ -286,3 +281,48 @@ class InventoryTableModel(QAbstractTableModel):
         self.endRemoveRows()
         
         return True
+
+
+    # TODO: implementar la lógica para añadir filas
+    def insertRows(self, row:int, count:int, data_to_insert:dict[Any], 
+                   parent:QModelIndex = QModelIndex()) -> bool:
+        '''
+        Actualiza el MODELO de datos agregando los datos introducidos en el QDialog 
+        de MainWindow a una fila nueva al final de la tabla.
+
+        Parámetros
+        ----------
+        data_to_insert: dict[Any]
+            datos con los que actualizar el MODELO
+        
+        Retorna
+        -------
+        None
+        '''
+        if row < 0 or row > self.rowCount():
+            return False
+        
+        self.beginInsertRows(parent, row, row + count - 1)
+        # actualiza el atributo '_data'
+        dict_to_ndarray:ndarray = array( # convierte el dict a un array de Numpy
+            object=[data_to_insert["product_ID"], 
+                    data_to_insert["product_category"],
+                    data_to_insert["product_name"],
+                    data_to_insert["product_description"],
+                    data_to_insert["product_stock"],
+                    data_to_insert["product_measurement_unit"],
+                    data_to_insert["product_unit_price"],
+                    data_to_insert["product_comercial_price"]]
+            )
+        # 'numpy.vstack' concatena ambos arrays de forma vertical, es decir, por filas
+        self._data = vstack((self._data, dict_to_ndarray))
+        self.endInsertRows()
+                
+        return True
+
+
+
+
+
+
+

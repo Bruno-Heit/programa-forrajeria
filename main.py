@@ -757,6 +757,14 @@ class MainWindow(QMainWindow):
             case "tv_inventory_data":
                 productDialog = ProductDialog() # QDialog para añadir un producto nuevo a 'tv_inventory_data'
                 productDialog.setAttribute(Qt.WA_DeleteOnClose, True) # destruye el dialog cuando se cierra
+                
+                productDialog.dataFilled.connect(
+                    lambda data_to_insert: self.insertDataIntoModel(
+                        table_viewID=TableViewId.INVEN_TABLE_VIEW,
+                        data_to_insert=data_to_insert
+                    )
+                )
+                
                 productDialog.exec()
 
             case "tv_sales_data":
@@ -767,6 +775,37 @@ class MainWindow(QMainWindow):
         
         return None
 
+
+    def insertDataIntoModel(self, table_viewID:TableViewId, data_to_insert:dict[Any]) -> None:
+        '''
+        Cuando se terminen de llenar los datos en el QDialog correspondiente, 
+        éste método recibe los datos y actualiza el MODELO DE DATOS respectivo.
+
+        Parámetros
+        ----------
+        table_viewID : TableViewId
+            QTableView al que se refencia
+        data_to_insert : dict[Any]
+            datos con los que actualizar el MODELO DE DATOS correspondiente
+
+        Retorna
+        -------
+        None
+        '''
+        match table_viewID.name:
+            case 'INVEN_TABLE_VIEW':
+                self.inventory_data_model.insertRows(
+                    row=self.inventory_data_model.rowCount(),
+                    count=1,
+                    data_to_insert=data_to_insert)
+            
+            case 'SALES_TABLE_VIEW':
+                ...
+            
+            case 'DEBTS_TABLE_VIEW':
+                ...
+        
+        return None
 
 
     #¡ tablas (DELETE)
