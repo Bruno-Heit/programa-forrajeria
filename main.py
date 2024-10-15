@@ -758,6 +758,7 @@ class MainWindow(QMainWindow):
                 productDialog = ProductDialog() # QDialog para añadir un producto nuevo a 'tv_inventory_data'
                 productDialog.setAttribute(Qt.WA_DeleteOnClose, True) # destruye el dialog cuando se cierra
                 
+                # conecta señal para actualizar el MODELO
                 productDialog.dataFilled.connect(
                     lambda data_to_insert: self.insertDataIntoModel(
                         table_viewID=TableViewId.INVEN_TABLE_VIEW,
@@ -776,6 +777,7 @@ class MainWindow(QMainWindow):
         return None
 
 
+    @Slot(object, dict)
     def insertDataIntoModel(self, table_viewID:TableViewId, data_to_insert:dict[Any]) -> None:
         '''
         Cuando se terminen de llenar los datos en el QDialog correspondiente, 
@@ -1704,8 +1706,31 @@ class MainWindow(QMainWindow):
 
 
     #¡### VENTAS ######################################################
-    
-    #* MÉTODOS DE VALIDADOR DE 'lineEdit_paid'
+    # TODO: continuar refactorizando parte de VENTAS
+    #* MÉTODOS DE 'lineEdit_paid'
+    @Slot()
+    def onSalePaidEditingFinished(self) -> None:
+        '''
+        Una vez emitida la señal 'editingFinished' de 'lineEdit_paid', formatea 
+        el campo del QLineEdit y muestra el cambio a devolver.
+        
+        Retorna
+        -------
+        None
+        '''
+        field_text:str = self.ui.lineEdit_paid.text()
+        
+        field_text = field_text.replace(".",",")
+        field_text = field_text.strip()
+        field_text = field_text.rstrip(",.") if field_text.endswith((",",".")) else field_text
+        field_text = field_text.lstrip("0") if field_text.startswith("0") else field_text
+        
+        self.ui.lineEdit_paid.setText(field_text)
+        
+        self.setSaleChange()
+        return None
+
+
     @Slot()
     def onPaidValidationSucceded(self) -> None:
         '''
@@ -1714,7 +1739,9 @@ class MainWindow(QMainWindow):
         Cambia el estilo de 'lineEdit_paid' para representar la validez del campo y el valor de la variable 
         'self.VALID_PAID_FIELD' a True.
         
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
         # si el campo es válido y no está vacío lo pone de color verde, si está vacío le quita el estilo
         self.ui.lineEdit_paid.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value if self.ui.lineEdit_paid.text().strip() else "")
@@ -1731,35 +1758,13 @@ class MainWindow(QMainWindow):
         Cambia el estilo de 'lineEdit_paid' para representar la invalidez del campo y el valor de la variable 
         'self.VALID_PAID_FIELD' a False.
         
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
         self.ui.lineEdit_paid.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
         self.VALID_PAID_FIELD = False
         
-        return None
-    
-
-    #* MÉTODOS DEL FORMULARIO DE VENTAS            
-    @Slot()
-    def onSalePaidEditingFinished(self) -> None:
-        '''
-        Es llamado desde la señal 'editingFinished' de 'lineEdit_paid'.
-        
-        Formatea el campo del QLineEdit y llama al método 'self.setSaleChange' para calcular y mostrar 
-        el cambio.
-        
-        Retorna None.
-        '''
-        field_text:str = self.ui.lineEdit_paid.text()
-        
-        field_text = field_text.replace(".",",")
-        field_text = field_text.strip()
-        field_text = field_text.rstrip(",.") if field_text.endswith((",",".")) else field_text
-        field_text = field_text.lstrip("0") if field_text.startswith("0") else field_text
-        
-        self.ui.lineEdit_paid.setText(field_text)
-        
-        self.setSaleChange()
         return None
     
     
@@ -1768,26 +1773,34 @@ class MainWindow(QMainWindow):
         Es llamado desde los métodos 'self.onSalesItemFieldValidation' | 'self.onSalesItemDeletion' | 
         'self.addSalesInputListItem'.
         
-        Actualiza el diccionario 'self.DICT_ITEMS_VALUES' a partir del valor de 'list_item' ó elimina 
-        el item con nombre 'item_to_delete' del diccionario, y además si es necesario reinicia el 
-        contador 'self.SALES_ITEM_NUM' y desactiva el botón 'btn_end_sale'.
+        Actualiza el diccionario 'self.DICT_ITEMS_VALUES' a partir del valor de 
+        'list_item' ó elimina el item con nombre 'item_to_delete' del diccionario, 
+        y además si es necesario reinicia el contador 'self.SALES_ITEM_NUM' y 
+        desactiva el botón 'btn_end_sale'.
         
-        PARAMS:
-        - list_item: objeto de tipo 'classes.ListItemValues' con todos los valores actualizados del item. 
-        Es enviado el parámetro cuando el método es llamado desde los métodos 'self.onSalesItemFieldValidation' | 
-        'self.addSalesInputListItem'.
-        - item_to_delete: str que determina cuál item debe ser borrado. Es enviado el parámetro cuando el 
-        método es llamado desde el método 'self.onSalesItemDeletion'.
+        Parámetros
+        ----------
+        list_item: ListItemValues
+            objeto con todos los valores actualizados del item, es enviado el 
+            parámetro cuando el método es llamado desde los métodos 
+            'self.onSalesItemFieldValidation' | 'self.addSalesInputListItem'
+        item_to_delete: str
+            determina cuál item debe ser borrado, es enviado el parámetro cuando 
+            el método es llamado desde el método 'self.onSalesItemDeletion'
         
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
         if not item_to_delete:
             self.DICT_ITEMS_VALUES[list_item.object_name] = list_item
         
+        # llamada desde 'onSalesItemDeletion', borra el item
         else:
             self.DICT_ITEMS_VALUES.pop(item_to_delete)
             
-            # reinicia el contador de nombres cuando no hay items en 'sales_input_list', y desactiva 'btn_end_sale'
+            # reinicia el contador de nombres cuando no hay items en 'sales_input_list', 
+            # y desactiva 'btn_end_sale'
             if self.ui.sales_input_list.count() == 0:
                 self.SALES_ITEM_NUM = 0
                 self.ui.btn_end_sale.setEnabled(False)
@@ -1805,10 +1818,14 @@ class MainWindow(QMainWindow):
         - Verifica la validez de todos los items. Para eso llama al método 'self.validateSalesItemsFields'.
         - Cambia el contenido de 'dateTimeEdit_sale' para mostrar la hora precisa de la venta.
         
-        PARAMS:
-        - list_item: objeto de tipo 'classes.ListItemValues' con todos los valores actualizados del item.
+        Parámetros
+        ----------
+        list_item: ListItemValues
+            objeto con todos los valores actualizados del item
         
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
         # actualiza self.DICT_ITEMS_VALUES
         self.__updateItemsValues(list_item)
