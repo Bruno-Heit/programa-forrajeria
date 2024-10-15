@@ -11,24 +11,35 @@ from PySide6.QtCore import (QModelIndex, Qt, QPropertyAnimation, QEasingCurve, Q
 from resources import (rc_icons)
 from utils.dboperations import *
 from utils.customvalidators import *
+from utils.enumclasses import (TableViewId)
 from re import (Match, sub, match, findall)
 
 
 # consultas sql
-def getTableViewsSqlQueries(tv_name:str, ACCESSED_BY_LIST:bool=False, SHOW_ALL:bool=False) -> tuple[str, str]:
+def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=False, SHOW_ALL:bool=False) -> tuple[str, str]:
     '''
-    Dependiendo de cada caso específico, devuelve la consulta sql en formato str.
+    Dependiendo de la tabla, devuelve las consultas sql en formato 'str' para 
+    obtener dimensiones y registros.
     
-    PARAMS:
-    - tv_name: el nombre del QTableView al que se hace referencia.
-    - ACCESSED_BY_LIST: flag que será True si se seleccionó un item desde 'tables_ListWidget', sino False.
-    - SHOW_ALL: flag que determina si se muestran todos los elementos del QTableView 'tv_name'.
+    Parámetros
+    ----------
+    table_viewID: TableViewID
+        QTableView al que se referencia
+    ACCESSED_BY_LIST: bool, opcional
+        flag que será True si se seleccionó un item desde 'tables_ListWidget', 
+        sino False
+    SHOW_ALL: bool, opcional
+        flag que determina si se muestran todos los elementos del QTableView 
+        'table_viewID'
     
-    Retorna un tuple[count_sql, data_sql], siendo 'count_sql' la consulta tipo COUNT y 'data_sql' la 
-    consulta para traer los registros.
+    Retorna
+    -------
+    tuple[str, str]
+        tupla[count_sql, data_sql], siendo 'count_sql' la consulta tipo COUNT y 
+        'data_sql' la consulta para traer los registros
     '''
-    match tv_name:
-        case "tv_inventory_data":
+    match table_viewID.name:
+        case "INVEN_TABLE_VIEW":
             if SHOW_ALL:
                 return (
                     str("SELECT COUNT(*) FROM Productos WHERE eliminado = 0;"),
@@ -51,7 +62,7 @@ def getTableViewsSqlQueries(tv_name:str, ACCESSED_BY_LIST:bool=False, SHOW_ALL:b
                                 WHERE c.nombre_categoria=? AND eliminado = 0;''')
                     )
                     
-        case "tv_sales_data":
+        case "SALES_TABLE_VIEW":
             return (
                 str('''SELECT COUNT(*) 
                     FROM Detalle_Ventas as dv 
@@ -64,7 +75,7 @@ def getTableViewsSqlQueries(tv_name:str, ACCESSED_BY_LIST:bool=False, SHOW_ALL:b
                         LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa;''')
                 )
 
-        case "tv_debts_data":
+        case "DEBTS_TABLE_VIEW":
             # TODO: declarar consultas sql para también traer los datos necesarios
             if SHOW_ALL:
                 count_sql = "SELECT COUNT(DISTINCT IDdeudor) FROM Deudas;"
