@@ -26,7 +26,8 @@ CAMBIOS A HACER/IMPLEMENTACIONES NUEVAS:
 
 	☐ Implementar copias de seguridad (idealmente 3 copias, 2 en disco, 1 en otro dispositivo (principio 321)).
 
-
+	☐ Crear constante con dirección de la base de datos, para acceder desde las funciones y clases 
+	  que lo necesiten.
 
 ################################################################################################################
 
