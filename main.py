@@ -12,9 +12,9 @@ from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemVa
                            DebtorDataDialog, DebtsTablePersonData, WidgetStyle)
 from ui.ui_mainwindow import (Ui_MainWindow)
 from utils.functionutils import *
-from utils.model_classes import (InventoryTableModel)
+from utils.model_classes import (InventoryTableModel, SalesTableModel)
 from utils.delegates import (InventoryDelegate)
-from utils.workerclasses import (WorkerSelect, WorkerDelete, WorkerUpdate)
+from utils.workerclasses import (WorkerSelect, WorkerUpdate)
 from utils.dboperations import (DatabaseRepository)
 from utils.customvalidators import (SalePaidValidator)
 from utils.enumclasses import (LoggingMessage, DBQueries, ModelHeaders, TableViewId, 
@@ -38,9 +38,13 @@ class MainWindow(QMainWindow):
         # repositorio de base de datos
         self._db_repo:DatabaseRepository = DatabaseRepository()
         
-        # modelos de datos
+        # modelo de datos de Inventario
         self.inventory_data_model:InventoryTableModel = InventoryTableModel()
         self.ui.tv_inventory_data.setModel(self.inventory_data_model)
+        
+        # modelo de datos de Ventas
+        self.sales_data_model:SalesTableModel = SalesTableModel()
+        self.ui.tv_sales_data.setModel(self.sales_data_model)
         
         # delegados
         self.inventory_delegate = InventoryDelegate()
@@ -74,6 +78,9 @@ class MainWindow(QMainWindow):
         setTableViewPolitics(self.ui.tv_debts_data)
         # las checkboxes de porcentajes son exclusivas
         self.ui.inventory_checkbuttons_buttonGroup.setExclusive(True)
+        
+        # en el formulario de Ventas coloca el tiempo en que se inició el programa
+        self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
         return None    
 
 
@@ -92,22 +99,16 @@ class MainWindow(QMainWindow):
         # TODO: reimplementar funcionalidad de search bars
 
         #¡ ======== variable de inventario ====================================
-        # TODO: eliminar el uso de 'self.IDs_products', acceder desde el modelo a los IDs
-        self.IDs_products:list = [] # var. de 'tv_inventory_data' que tiene los 
-                                    # IDs de los productos.
         #? Los acumuladores de datos sirven para hacer operaciones sobre los modelos de datos 
         #? y la base de datos en "batches" y mejorar el rendimiento de la aplicación en general
-        self._inv_model_data_acc:ndarray[Any] = None # acumulador temporal de datos para los modelos
-        self._UPD_BATCH_SIZE:int = None # cuando se modifican precios en porcentajes, sirve para 
-                                        # hacerlo en batches.
+        self._inv_model_data_acc:ndarray[Any] = None #? acumulador temporal de datos para modelo de Inventario.
+        self._UPD_BATCH_SIZE:int = None # al modificar precios en porcentajes, sirve para hacerlo en batches.
         self.__upd_reg_count:int = 0 # se usa con 'self._UPD_BATCH_SIZE' y 'self._inv_model_data_acc', 
                                         # cuenta por qué registro va pasando desde el modelo a MainWindow.
         
         #¡ ======== variables de ventas =======================================
-        self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
+        self._sales_model_data_acc:ndarray[Any] = None #? acumulador temp. de datos para modelo de Ventas.
         
-        self.IDs_saleDetails:list = [] # var. de 'tv_sales_data' que tiene los 
-                                       # IDs de las ventas en Detalle_Ventas.
         self.SALES_ITEM_NUM:int = 0 # contador para crear nombres de items en 
                                     # 'input_sales_data'.
         self.DICT_ITEMS_VALUES:dict[str,ListItemValues] = {} # tiene los valores 
@@ -146,16 +147,20 @@ class MainWindow(QMainWindow):
         
         #* (READ) cargar con productos 'tv_inventory_data'
         self.ui.tables_ListWidget.itemClicked.connect(lambda item: self.fillTableView(
-            self.ui.tv_inventory_data,
+            table_viewID=TableViewId.INVEN_TABLE_VIEW,
             ACCESSED_BY_LIST=True,
-            SHOW_ALL=True if item.text() == "MOSTRAR TODOS" else False))
+            SHOW_ALL=True if item.text() == "MOSTRAR TODOS" else False
+            )
+        )
         self.ui.tables_ListWidget.itemActivated.connect(lambda item: self.fillTableView(
-            self.ui.tv_inventory_data,
+            table_viewID=TableViewId.INVEN_TABLE_VIEW,
             ACCESSED_BY_LIST=True,
-            SHOW_ALL=True if item.text() == "MOSTRAR TODOS" else False))
+            SHOW_ALL=True if item.text() == "MOSTRAR TODOS" else False
+            )
+        )
 
         #* (CREATE) añadir nuevo producto a tabla 'tv_inventory_data'
-        self.ui.btn_add_product_inventory.clicked.connect(lambda: self.handleTableCreateRow(self.ui.tv_inventory_data))
+        self.ui.btn_add_product_inventory.clicked.connect(lambda: self.handleTableCreateRow(TableViewId.INVEN_TABLE_VIEW))
         
         # TODO: reimplementar las funciones de DELETE
         #* (DELETE) eliminar un producto de 'tv_inventory_data'
@@ -188,12 +193,12 @@ class MainWindow(QMainWindow):
         #¡========= VENTAS ====================================================
         #* (READ) cargar con ventas 'tv_sales_data'
         self.ui.tab2_toolBox.currentChanged.connect(lambda curr_index: self.fillTableView(
-            self.ui.tv_sales_data, SHOW_ALL=True) if curr_index == 1 else None)
+            table_viewID=TableViewId.SALES_TABLE_VIEW, SHOW_ALL=True) if curr_index == 1 else None)
         
         self.ui.tabWidget.currentChanged.connect(lambda index: self.ui.tab2_toolBox.setCurrentIndex(0) if index == 1 else None)
         
         #* (CREATE) añadir una venta a 'tv_sales_data'
-        self.ui.btn_add_product_sales.clicked.connect(lambda: self.handleTableCreateRow(self.ui.tv_sales_data))
+        self.ui.btn_add_product_sales.clicked.connect(lambda: self.handleTableCreateRow(TableViewId.SALES_TABLE_VIEW))
         
         #* (DELETE) eliminar ventas de 'tv_sales_data'
         self.ui.btn_delete_product_sales.clicked.connect(lambda: self.handleTableDeleteRows(TableViewId.SALES_TABLE_VIEW))
@@ -213,7 +218,7 @@ class MainWindow(QMainWindow):
         # TODO PRINCIPAL: SEGUIR CON PARTE DE DEUDAS
         #* (READ) cargar con deudas 'tv_debts_data'
         self.ui.tabWidget.currentChanged.connect(lambda curr_index: self.fillTableView(
-            self.ui.tv_debts_data, SHOW_ALL=True) if curr_index == 2 else None)
+            table_viewID=TableViewId.DEBTS_TABLE_VIEW, SHOW_ALL=True) if curr_index == 2 else None)
         
         return None
     
@@ -402,7 +407,7 @@ class MainWindow(QMainWindow):
     
     
     #¡ métodos de acumulador de datos
-    def setNpDataAccumulator(self, tv_name:str,
+    def setNpDataAccumulator(self, table_viewID:TableViewId,
                             model_shape:tuple[int, int]) -> None:
         '''
         Dependiendo de la VISTA usada, crea un 'numpy.ndarray' vacío con 
@@ -410,8 +415,8 @@ class MainWindow(QMainWindow):
 
         Parámetros
         ----------
-        tv_name : str
-            La VISTA que se referencia
+        table_viewID : TableViewId
+            el QTableView al que se referencia
         model_shape: tuple[int, int]
             Tupla con las dimensiones del arreglo
 
@@ -419,21 +424,25 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
-        match tv_name:
-            case "tv_inventory_data": # Productos
-                self._inv_model_data_acc = empty(shape=model_shape, dtype=object)
+        match table_viewID.name:
+            case "INVEN_TABLE_VIEW": # Productos
+                self._inv_model_data_acc = empty(
+                    shape=model_shape,
+                    dtype=object)
             
-            case "tv_sales_data": # Ventas
-                pass
+            case "SALES_TABLE_VIEW": # Ventas
+                self._sales_model_data_acc = empty(
+                    shape=model_shape,
+                    dtype=object)
             
-            case "tv_debts_data": # Ctas. Ctes.
-                pass
+            case "DEBTS_TABLE_VIEW": # Ctas. Ctes.
+                ...
         return None
 
 
     #¡ tablas (READ)
     @Slot(QTableView, bool, bool)
-    def fillTableView(self, table_view:QTableView, ACCESSED_BY_LIST:bool=False, SHOW_ALL:bool=False) -> None:
+    def fillTableView(self, table_viewID:TableViewId, ACCESSED_BY_LIST:bool=False, SHOW_ALL:bool=False) -> None:
         '''
         Este método hace lo siguiente:
         - Limpia las variables de IDs asociadas con el QTableView.
@@ -443,8 +452,8 @@ class MainWindow(QMainWindow):
 
         Parámetros
         ----------
-        table_view : QTableView
-            El QTableView que se referencia
+        table_viewID : TableViewId
+            QTableView que se referencia
         ACCESSED_BY_LIST : bool, opcional
             Flag que será True si se seleccionó un item desde 'tables_ListWidget', sino False, por defecto es False
         SHOW_ALL : bool, opcional
@@ -460,14 +469,19 @@ class MainWindow(QMainWindow):
         data_sql:str = "" # consulta que pide los registros
         data_params:tuple[Any] = None # params de la consulta de registros
         
-        # crea las consultas para obtener el COUNT() de filas y los registros para llenar la tabla
-        match table_view.objectName():
-            case "tv_inventory_data":
-                self.IDs_products.clear() # limpia los IDs
-                # si se seleccionó una categoría desde 'tables_ListWidget', cambia hacia la pestaña de inventario...
+        # crea las consultas para obtener el COUNT() de filas y los registros 
+        # para llenar la tabla
+        match table_viewID.name:
+            case "INVEN_TABLE_VIEW":
+                # si se seleccionó una categoría desde 'tables_ListWidget', cambia 
+                # hacia la pestaña de inventario...
                 if ACCESSED_BY_LIST:
-                    self.ui.tabWidget.setCurrentWidget(self.ui.tabWidget.findChild(QWidget, "tab1_inventory"))
-                count_sql, data_sql = getTableViewsSqlQueries(table_view.objectName(), ACCESSED_BY_LIST, SHOW_ALL)
+                    self.ui.tabWidget.setCurrentWidget(
+                        self.ui.tabWidget.findChild(QWidget, "tab1_inventory"))
+                count_sql, data_sql = getTableViewsSqlQueries(
+                    table_viewID=TableViewId.INVEN_TABLE_VIEW,
+                    ACCESSED_BY_LIST=ACCESSED_BY_LIST,
+                    SHOW_ALL=SHOW_ALL)
                 
                 if not SHOW_ALL and ACCESSED_BY_LIST:
                     count_params = (self.ui.tables_ListWidget.currentItem().text(),)
@@ -475,96 +489,95 @@ class MainWindow(QMainWindow):
                 self.ui.label_feedbackInventory.hide()
 
 
-            case "tv_sales_data":
-                self.IDs_saleDetails.clear() # limpia los IDs
-                count_sql, data_sql = getTableViewsSqlQueries(table_view.objectName(), ACCESSED_BY_LIST, SHOW_ALL)
+            case "SALES_TABLE_VIEW":
+                count_sql, data_sql = getTableViewsSqlQueries(
+                    table_viewID=TableViewId.SALES_TABLE_VIEW
+                )
                 self.ui.label_feedbackSales.hide()
 
 
-            case "tv_debts_data":
+            case "DEBTS_TABLE_VIEW":
                 # TODO: declarar consultas sql para también traer los datos necesarios
-                pass
-                # getTableViewsSqlQueries()
+                ...
         
-        self.__startWorker(table_view, data_sql, data_params, count_sql, count_params)
+        self.__instanciateSelectWorkerAndThread(
+            table_viewID=table_viewID,
+            data_sql=data_sql,
+            data_params=data_params,
+            count_sql=count_sql,
+            count_params=count_params
+        )
         return None
     
     
-    def __startWorker(self, table_view:QTableView, data_sql:str, data_params:tuple=None, count_sql:str=None, 
-                    count_params:tuple=None, db_operation:int=DBQueries.SELECT_REGISTERS.value) -> None:
+    def __instanciateSelectWorkerAndThread(self, table_viewID:QTableView, data_sql:str, 
+                                           data_params:tuple=..., count_sql:str=..., 
+                                           count_params:tuple=...) -> None:
         '''
         Inicializa un QThread y un worker para realizar un tipo de consultas a la base de 
         datos de forma asíncrona, conecta sus señales y slots.
 
         Parámetros
         ----------
-        table_view: QTableView
+        table_viewID: TableViewId
             QTableView asociado al modelo de datos y QProgressBar que hay que actualizar.
         data_sql: str
-            Consulta de tipo CRUD
+            Consulta de tipo SELECT
         data_params: tuple, opcional
-            Parámetros de la consulta, por defecto es None
+            Parámetros de la consulta SELECT
         count_sql: str, opcional
             Consulta de tipo SELECT COUNT() para obtener la cantidad de registros coincidentes
         count_params: tuple, opcional
-            Parámetros de la consulta de tipo SELECT COUNT()
-        db_operation : int, opcional
-            Flag que determina el tipo de operación que lleva a cabo el worker, por defecto es 1 (SELECT)
+            Parámetros de la consulta SELECT COUNT()
 
         Retorna
         -------
         None
         '''
-        match db_operation:
-            case DBQueries.SELECT_REGISTERS.value:
-                self.select_thread = QThread()
-                self.select_worker = WorkerSelect()
-                self.select_worker.moveToThread(self.select_thread)
-                
-                self.select_thread.started.connect(
-                    lambda: self.select_worker.executeReadQuery(
-                        data_sql=data_sql, data_params=data_params,
-                        count_sql=count_sql, count_params=count_params)
-                    )
-                self.select_worker.countFinished.connect(
-                    lambda model_shape: self.__workerOnCountFinished(
-                        tv_name=table_view.objectName(), model_shape=model_shape)
-                    )
-                self.select_worker.registerProgress.connect(
-                    lambda register: self.__workerOnRegisterProgress(
-                        register=register,table_view=table_view)
-                    )
-                self.select_worker.finished.connect(
-                    lambda: self.__workerOnFinished(
-                        tv_name=table_view.objectName())
-                    )
-                self.select_worker.finished.connect(self.select_thread.quit)
-                self.select_worker.finished.connect(self.select_worker.deleteLater)
-                
-                self.select_thread.start()
-            
-            case DBQueries.DELETE_REGISTERS.value:
-                pass
-            
-            case DBQueries.UPDATE_REGISTERS.value:
-                pass
-            
-            case _:
-                pass
+        self.select_thread = QThread()
+        self.select_worker = WorkerSelect()
+        
+        self.select_worker.moveToThread(self.select_thread)
+        
+        self.select_thread.started.connect(
+            lambda: self.select_worker.executeReadQuery(
+                data_sql=data_sql, data_params=data_params,
+                count_sql=count_sql, count_params=count_params
+            )
+        )
+        self.select_worker.countFinished.connect(
+            lambda model_shape: self.__workerOnCountFinished(
+                table_viewID=table_viewID,
+                model_shape=model_shape
+            )
+        )
+        self.select_worker.registerProgress.connect(
+            lambda register: self.__workerOnRegisterProgress(
+                register=register,
+                table_viewID=table_viewID
+            )
+        )
+        self.select_worker.finished.connect(
+            lambda: self.__workerOnFinished(table_viewID=table_viewID)
+        )
+        self.select_worker.finished.connect(self.select_thread.quit)
+        self.select_worker.finished.connect(self.select_worker.deleteLater)
+        
+        self.select_thread.start()
         
         return None
     
     
     @Slot()
-    def __workerOnCountFinished(self, tv_name:str, model_shape:tuple[int, int]=None) -> None:
+    def __workerOnCountFinished(self, table_viewID:TableViewId, model_shape:tuple[int, int]=None) -> None:
         '''
         Instancia un acumulador numpy.array para los datos del modelo, y actualiza el estado 
         del QProgressBar asociado al QTableView.
 
         Parámetros
         ----------
-        tv_name : str
-            Nombre del QTableView que se referencia
+        table_viewID: TableViewID
+            QTableView que se referencia
         model_shape: tuple[int, int]
             Dimensiones del modelo de datos, se usa para instanciar el acumulador
 
@@ -572,13 +585,20 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
-        self.setNpDataAccumulator(tv_name, model_shape)
+        self.setNpDataAccumulator(
+            table_viewID=table_viewID,
+            model_shape=model_shape
+        )
         
-        self.__updateProgressBar(tv_name=tv_name, max_val=model_shape[0])
+        self.__updateProgressBar(
+            table_viewID=table_viewID,
+            max_val=model_shape[0]
+        )
+        return None
     
     
     @Slot(tuple, QTableView)
-    def __workerOnRegisterProgress(self, register:tuple[Any], table_view:QTableView) -> None:
+    def __workerOnRegisterProgress(self, register:tuple[Any], table_viewID:TableViewId) -> None:
         '''
         A medida que se progresa con los registros leídos guarda los IDs necesarios de cada registro, 
         acumula los registros en una variable y actualiza la QProgressBar asociada a ese QTableView.
@@ -586,150 +606,124 @@ class MainWindow(QMainWindow):
         Parámetros
         ----------
         register : tuple[Any]
-            El registro obtenido de la consulta SELECT
-        table_view : QTableView
+            El registro obtenido de la consulta SELECT, la posición [0] debe contener el progreso 
+            de lectura de registros
+        table_viewID : TableViewID
             QTableView al que se referencia
         
         Retorna
         -------
         None
         '''
-        self.__saveTableViewIDs(
-            tv_name=table_view.objectName(), register_id=register[1][0]
-            )
-        self.__updateProgressBar(
-            tv_name=table_view.objectName(),max_val=None, value=register[0]
-            )
+        match table_viewID.name:
+            case "INVEN_TABLE_VIEW":
+                # actualiza la barra de progeso
+                self.__updateProgressBar(
+                    table_viewID=table_viewID,
+                    max_val=None,
+                    value=register[0]
+                )
 
-        # guarda en la posición actual (register[0] marca el progreso de 
-        # lectura) el registro completo
-        self._inv_model_data_acc[register[0]] = register[1]
+                # guarda en la posición actual el registro completo
+                self._inv_model_data_acc[register[0]] = register[1]
+            
+            case "SALES_TABLE_VIEW":
+                # actualiza la barra de progeso
+                self.__updateProgressBar(
+                    table_viewID=table_viewID,
+                    max_val=None,
+                    value=register[0]
+                )
+                
+                # guarda en la posición actual el registro completo
+                self._sales_model_data_acc[register[0]] = register[1]
+            
+            case "DEBTS_TABLE_VIEW":
+                ...
+        
         
         return None
     
     
-    def __updateProgressBar(self, tv_name:str, max_val:int=None, value:int=None) -> None:
+    def __updateProgressBar(self, table_viewID:TableViewId, max_val:int=None, value:int=None) -> None:
         '''
         Actualiza el estado del QProgressBar correspondiente dependiendo del QTableView asociado.
 
         Parámetros
         ----------
-        tv_name : str
+        table_viewID: TableViewID
             Nombre del QTableView al cual está asociado el QProgressBar a actualizar
-        max_val : int, opcional
+        max_val: int, opcional
             Valor máximo del QProgressBar, por defecto es None
-        value : int, opcional
+        value: int, opcional
             Valor actual del QProgressBar, por defecto es None
 
         Retorna
         -------
         None
         '''
-        match tv_name:
-            case "tv_inventory_data":
+        match table_viewID.name:
+            case "INVEN_TABLE_VIEW":
                 self.ui.inventory_progressbar.show() if self.ui.inventory_progressbar.isHidden() else None
                 self.ui.inventory_progressbar.setMaximum(max_val) if max_val is not None and self.ui.inventory_progressbar.maximum() != max_val else None
                 self.ui.inventory_progressbar.setValue(value + 1) if value else None
             
-            case "tv_sales_data":
+            case "SALES_TABLE_VIEW":
                 self.ui.sales_progressbar.show() if self.ui.sales_progressbar.isHidden() else None
                 self.ui.sales_progressbar.setMaximum(max_val) if max_val is not None and self.ui.sales_progressbar.maximum() != max_val else None
                 self.ui.sales_progressbar.setValue(value + 1) if value else None
                 
-            case "tv_debts_data":
+            case "DEBTS_TABLE_VIEW":
                 self.ui.debts_progressbar.show() if self.ui.debts_progressbar.isHidden() else None
                 self.ui.debts_progressbar.setMaximum(max_val) if max_val is not None and self.ui.debts_progressbar.maximum() != max_val else None
                 self.ui.debts_progressbar.setValue(value + 1) if value else None
         return None
     
     
-    def __saveTableViewIDs(self, tv_name:str, register_id:int) -> None:
-        '''
-        A medida que el WORKER encuentra registros guarda los IDs de los registros 
-        coincidentes en una variable asociada a cada QTableView.
-        
-        Parámetros
-        ----------
-        tv_name: str
-            Nombre del QTableView al que referencia
-        register_id: int
-            ID del registro actual para guardar en una variable
-        
-        Retorna None.
-        '''
-        match tv_name:
-            case "tv_inventory_data":
-                self.IDs_products.append(register_id)
-                
-            case "tv_sales_data":
-                self.IDs_saleDetails.append(register_id)
-            
-            case "tv_debts_data":
-                pass
-        return None
-    
-
     @Slot(str)
-    def __workerOnFinished(self, tv_name:str, READ_OPERATION:bool=True) -> None:
+    def __workerOnFinished(self, table_viewID:TableViewId) -> None:
         '''
         Esconde la QProgressBar relacionada con el QTableView, reinicia el valor del 
         QSS de dicha QProgressBar y carga los datos en el QTableView, luego reinicia 
         los acumuladores temporales.
-        Si 'READ_OPERATION' es False es porque se realizaron otras consultas a la base 
-        de datos (DELETE) y el QTableView debe ser recargado.
         
         Parámetros
         ----------
-            tv_name: QTableView
-                nombre del QTableView al que se referencia
-            READ_OPERATION: bool, opcional
-                Flag que determina si la operación que se hizo fue de llenado (READ) a un 
-                QTableView, por defecto es True
+            tv_name: TableViewID
+                QTableView al que se referencia
 
         Retorna
         -------
         None
         '''
-        match tv_name:
-            case "tv_inventory_data":
+        match table_viewID.name:
+            case "INVEN_TABLE_VIEW":
                 self.ui.inventory_progressbar.setStyleSheet("")
                 self.ui.inventory_progressbar.hide()
-                # if not READ_OPERATION:
-                #     # recarga la tabla
-                #     try:
-                #         self.fillTableView(table_view=self.ui.tv_inventory_data, SHOW_ALL=True)
-                #     except AttributeError: # salta porque se intenta recargar la tabla pero nunca se llenó anteriormente
-                #         pass
-                # else:
-                #     pass
-                if READ_OPERATION:
-                    self.inventory_data_model.setModelData(
-                        data=self._inv_model_data_acc,
-                        headers=ModelHeaders.INVENTORY_HEADERS.value)
+                
+                self.inventory_data_model.setModelData(
+                    data=self._inv_model_data_acc,
+                    headers=ModelHeaders.INVENTORY_HEADERS.value)
             
                 # borra el acumulador temporal de datos
                 self._inv_model_data_acc = None
 
                 
-            case "tv_sales_data":
+            case "SALES_TABLE_VIEW":
                 self.ui.sales_progressbar.setStyleSheet("")
                 self.ui.sales_progressbar.hide()
-                if not READ_OPERATION:
-                    # recarga la tabla
-                    self.fillTableView(table_view=self.ui.tv_sales_data, SHOW_ALL=True)
-                else:
-                    pass
-                    # self.ui.tv_sales_data.resizeRowsToContents()
                 
-            case "tv_debts_data":
+                self.sales_data_model.setModelData(
+                    data=self._sales_model_data_acc,
+                    headers=ModelHeaders.SALES_HEADERS.value)
+                
+                # borra el acumulador temp. de datos
+                self._sales_model_data_acc = None
+                
+            case "DEBTS_TABLE_VIEW":
                 self.ui.debts_progressbar.setStyleSheet("")
                 self.ui.debts_progressbar.hide()
-                if not READ_OPERATION:
-                    # recarga la tabla
-                    self.fillTableView(table_view=self.ui.tv_debts_data, SHOW_ALL=True)
-                else:
-                    pass
-                    # self.ui.tv_debts_data.resizeRowsToContents()
+                ...
             
         logging.debug(LoggingMessage.WORKER_SUCCESS)
         return None
@@ -737,24 +731,23 @@ class MainWindow(QMainWindow):
 
     #¡ tablas (CREATE)
     @Slot(str)
-    def handleTableCreateRow(self, table_view:QTableView) -> None:
+    def handleTableCreateRow(self, table_viewID:TableViewId) -> None:
         '''
         Dependiendo del QTableView al que se agregue una fila, se encarga de 
         crear una instancia del QDialog correspondiente que pide los datos 
-        necesarios para la nueva fila. Al final, recarga la tabla correspondiente 
-        llamando a 'self.fillTableView'.
+        necesarios para la nueva fila, y si tienen señales conecta sus señales.
         
         Parámetros
         ----------
-        table_view: QTableView
+        table_viewID: TableViewId
             El QTableView al que se referencia
         
         Retorna
         -------
         None
         '''
-        match table_view.objectName():
-            case "tv_inventory_data":
+        match table_viewID.name:
+            case "INVEN_TABLE_VIEW":
                 productDialog = ProductDialog() # QDialog para añadir un producto nuevo a 'tv_inventory_data'
                 productDialog.setAttribute(Qt.WA_DeleteOnClose, True) # destruye el dialog cuando se cierra
                 
@@ -768,11 +761,14 @@ class MainWindow(QMainWindow):
                 
                 productDialog.exec()
 
-            case "tv_sales_data":
+            case "SALES_TABLE_VIEW":
                 saleDialog = SaleDialog() # QDialog para añadir una venta nueva a 'tv_sales_data' (y posiblemente, una
                                           # deuda a 'tv_debts_data')
                 saleDialog.setAttribute(Qt.WA_DeleteOnClose, True)
                 saleDialog.exec()
+            
+            case "DEBTS_TABLE_VIEW":
+                ...
         
         return None
 
@@ -1290,19 +1286,20 @@ class MainWindow(QMainWindow):
 
         match table_view.objectName():
             case "tv_sales_data":
+                pass
                 # actualiza el producto en Detalle_Ventas
-                self._db_repo.updateRegisters(
-                    upd_sql="UPDATE Detalle_Ventas SET IDproducto = (SELECT IDproducto FROM Productos WHERE nombre = ?) WHERE ID_detalle_venta = ?;",
-                    upd_params=(combobox.currentText(), str(self.IDs_saleDetails[curr_index.row()]),) )
-                table_view.item(curr_index.row(), curr_index.column()).setText(f"{combobox.currentText()}")
+                # self._db_repo.updateRegisters(
+                #     upd_sql="UPDATE Detalle_Ventas SET IDproducto = (SELECT IDproducto FROM Productos WHERE nombre = ?) WHERE ID_detalle_venta = ?;",
+                #     upd_params=(combobox.currentText(), str(self.IDs_saleDetails[curr_index.row()]),) )
+                # table_view.item(curr_index.row(), curr_index.column()).setText(f"{combobox.currentText()}")
 
-                # obtengo la cantidad de la columna "cantidad" para luego unirlo a la unidad de medida
-                quantity = table_view.item(curr_index.row(), 1).text().split(" ")[0].strip()
+                # # obtengo la cantidad de la columna "cantidad" para luego unirlo a la unidad de medida
+                # quantity = table_view.item(curr_index.row(), 1).text().split(" ")[0].strip()
 
-                # obtengo la unidad de medida del producto actual para colocarlo en la columna "cantidad"
-                new_unit = self._db_repo.selectRegisters(data_sql="SELECT unidad_medida FROM Productos WHERE nombre = ?;",
-                                         data_params=(combobox.currentText(),) )[0][0]
-                table_view.item(curr_index.row(), 1).setText(f"{quantity} {new_unit}")
+                # # obtengo la unidad de medida del producto actual para colocarlo en la columna "cantidad"
+                # new_unit = self._db_repo.selectRegisters(data_sql="SELECT unidad_medida FROM Productos WHERE nombre = ?;",
+                #                          data_params=(combobox.currentText(),) )[0][0]
+                # table_view.item(curr_index.row(), 1).setText(f"{quantity} {new_unit}")
 
         combobox.deleteLater()
         # remueve los widgets de las celdas (para que se puedan modificar sólo una vez al mismo tiempo las comboboxes)
@@ -1367,33 +1364,36 @@ class MainWindow(QMainWindow):
                             price_type = str(price_type.group()).upper().replace(" ", "")
                             lineedit_text = sub(pattern, price_type, lineedit.text())
                         
-                        self._db_repo.updateRegisters(
-                            upd_sql="UPDATE Ventas SET detalles_venta = ? WHERE IDventa = (SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?);",
-                            upd_params=(lineedit_text, str(self.IDs_saleDetails[curr_index.row()]), ))
-                        table_view.item(curr_index.row(), curr_index.column()).setText(f"{lineedit_text}")
+                        # self._db_repo.updateRegisters(
+                        #     upd_sql="UPDATE Ventas SET detalles_venta = ? WHERE IDventa = (SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?);",
+                        #     upd_params=(lineedit_text, str(self.IDs_saleDetails[curr_index.row()]), ))
+                        # table_view.item(curr_index.row(), curr_index.column()).setText(f"{lineedit_text}")
                     
                     case 1: # cantidad
-                        self._db_repo.updateRegisters(
-                            upd_sql="UPDATE Detalle_Ventas SET cantidad = ? WHERE ID_detalle_venta = ?;",
-                            upd_params=(lineedit.text().replace(",","."), str(self.IDs_saleDetails[curr_index.row()]), ))
-                        # toma la unidad de medida (si tiene) y la concatena con la nueva cantidad
-                        new_prev_text = prev_text.split(" ")[1] if len(prev_text.split(" ")) > 1 else ""
-                        lineedit_text = lineedit.text().replace(".",",")
-                        table_view.item(curr_index.row(), curr_index.column()).setText(f"{lineedit_text} {new_prev_text}")
+                        ...
+                        # self._db_repo.updateRegisters(
+                        #     upd_sql="UPDATE Detalle_Ventas SET cantidad = ? WHERE ID_detalle_venta = ?;",
+                        #     upd_params=(lineedit.text().replace(",","."), str(self.IDs_saleDetails[curr_index.row()]), ))
+                        # # toma la unidad de medida (si tiene) y la concatena con la nueva cantidad
+                        # new_prev_text = prev_text.split(" ")[1] if len(prev_text.split(" ")) > 1 else ""
+                        # lineedit_text = lineedit.text().replace(".",",")
+                        # table_view.item(curr_index.row(), curr_index.column()).setText(f"{lineedit_text} {new_prev_text}")
                     
                     case 3: # costo total
-                        self._db_repo.updateRegisters(
-                            upd_sql="UPDATE Detalle_Ventas SET costo_total = ? WHERE ID_detalle_venta = ?;",
-                            upd_params=(lineedit.text().replace(",","."), str(self.IDs_saleDetails[curr_index.row()]), ))
-                        lineedit_text = lineedit.text().replace(".",",")
-                        table_view.item(curr_index.row(), curr_index.column()).setText(f"{lineedit_text.strip()}")
+                        ...
+                        # self._db_repo.updateRegisters(
+                        #     upd_sql="UPDATE Detalle_Ventas SET costo_total = ? WHERE ID_detalle_venta = ?;",
+                        #     upd_params=(lineedit.text().replace(",","."), str(self.IDs_saleDetails[curr_index.row()]), ))
+                        # lineedit_text = lineedit.text().replace(".",",")
+                        # table_view.item(curr_index.row(), curr_index.column()).setText(f"{lineedit_text.strip()}")
                     
                     case 4: # abonado
-                        self._db_repo.updateRegisters(
-                            upd_sql="UPDATE Detalle_Ventas SET abonado = ? WHERE ID_detalle_venta = ?;",
-                            upd_params=(lineedit.text().replace(",","."), str(self.IDs_saleDetails[curr_index.row()]), ))
-                        lineedit_text = lineedit.text().replace(".",",")
-                        table_view.item(curr_index.row(), curr_index.column()).setText(f"{lineedit_text.strip()}")
+                        ...
+                        # self._db_repo.updateRegisters(
+                        #     upd_sql="UPDATE Detalle_Ventas SET abonado = ? WHERE ID_detalle_venta = ?;",
+                        #     upd_params=(lineedit.text().replace(",","."), str(self.IDs_saleDetails[curr_index.row()]), ))
+                        # lineedit_text = lineedit.text().replace(".",",")
+                        # table_view.item(curr_index.row(), curr_index.column()).setText(f"{lineedit_text.strip()}")
         
         # borra el lineedit
         if table_view.cellWidget(curr_index.row(), curr_index.column()): #! veo si existe porque, por alguna razón, al
@@ -1429,10 +1429,11 @@ class MainWindow(QMainWindow):
         '''
         match table_view.objectName():
             case "tv_sales_data":
-                self._db_repo.updateRegisters(
-                    upd_sql="UPDATE Ventas SET fecha_hora = ? WHERE IDventa = (SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?);",
-                    upd_params=(datetimeedit.text(), self.IDs_saleDetails[curr_index.row()], ))
-                table_view.item(curr_index.row(), curr_index.column()).setText(f"{str(datetimeedit.text()).strip()}")
+                ...
+                # self._db_repo.updateRegisters(
+                #     upd_sql="UPDATE Ventas SET fecha_hora = ? WHERE IDventa = (SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?);",
+                #     upd_params=(datetimeedit.text(), self.IDs_saleDetails[curr_index.row()], ))
+                # table_view.item(curr_index.row(), curr_index.column()).setText(f"{str(datetimeedit.text()).strip()}")
             
             case _:
                 pass
@@ -1648,7 +1649,7 @@ class MainWindow(QMainWindow):
             
             # reinicio y especifico dimensiones del acumulador
             self.setNpDataAccumulator(
-                tv_name=self.ui.tv_inventory_data.objectName(),
+                table_viewID=TableViewId.INVEN_TABLE_VIEW,
                 model_shape=(self._UPD_BATCH_SIZE, 2) # array[nuevo valor][IDproducto]
             )
             # paso al modelo los nuevos valores

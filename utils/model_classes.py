@@ -17,7 +17,7 @@ class InventoryTableModel(QAbstractTableModel):
     '''
     Clase MODELO que contiene los datos de los productos para la VISTA 'tv_inventory_data'.
     Esta clase no maneja operaciones a bases de datos.
-    Los datos son guardados en la variable 'self.data'.
+    Los datos son guardados en la variable 'self._data'.
     
     datos en self._data:
         (posición ┇ dato de base de datos)
@@ -44,6 +44,7 @@ class InventoryTableModel(QAbstractTableModel):
         self._db_repo = DatabaseRepository()
         
     
+    #¡ dimensiones
     def rowCount(self, parent:QModelIndex | QPersistentModelIndex=QModelIndex()) -> int:
         if self._data is not None:
             return len(self._data)
@@ -56,11 +57,12 @@ class InventoryTableModel(QAbstractTableModel):
         return 0
     
     
-    # hace el modelo editable
+    #¡ flags
     def flags(self, index: QModelIndex | QPersistentModelIndex) -> Qt.ItemFlag:
         return Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsEditable
     
     
+    #¡ datos
     def setData(self, index: QModelIndex | QPersistentModelIndex, 
                 value: Any, role: int = Qt.ItemDataRole.EditRole) -> bool:
         '''
@@ -136,7 +138,7 @@ class InventoryTableModel(QAbstractTableModel):
         if not index.isValid():
             return None
         
-        #* datos: 0 c.nombre_categoria, 1 p.nombre, 2 p.descripcion, 3 p.stock, 
+        #* columnas: 0 c.nombre_categoria, 1 p.nombre, 2 p.descripcion, 3 p.stock, 
         #* 4 p.unidad_medida, 5 p.precio_unit, 6 p.precio_comerc
         
         row:int = index.row()
@@ -165,8 +167,8 @@ class InventoryTableModel(QAbstractTableModel):
                 match col:
                     case 3: # stock
                         try:
-                            if float(self._data[row][4]) <= 15.0:
-                                return TableBgColors.LOW_STOCK_ROW
+                            if float(self._data[row][4]) <= 5.0:
+                                return TableBgColors.LOW_STOCK_ROW.value
                         except ValueError:
                             pass
                     
@@ -179,7 +181,7 @@ class InventoryTableModel(QAbstractTableModel):
             case Qt.ItemDataRole.ForegroundRole:
                 if col == 3: # stock
                     try:
-                        if float(self._data[row][4]) <= 15.0:
+                        if float(self._data[row][4]) <= 5.0:
                             return QBrush(TableFontColor.CONTRAST_RED.value)
                         
                     except ValueError:
@@ -201,7 +203,8 @@ class InventoryTableModel(QAbstractTableModel):
             return str(self._headers[section])
         return None
     
-    
+
+    #¡ actualización del modelo    
     def setModelData(self, data:Sequence[Sequence[Any]], headers:Sequence[str]) -> None:
         '''
         Guarda los datos recibidos en la variable 'self._data' y coloca los headers.
@@ -283,7 +286,6 @@ class InventoryTableModel(QAbstractTableModel):
         return True
 
 
-    # TODO: implementar la lógica para añadir filas
     def insertRows(self, row:int, count:int, data_to_insert:dict[Any], 
                    parent:QModelIndex = QModelIndex()) -> bool:
         '''
@@ -319,6 +321,171 @@ class InventoryTableModel(QAbstractTableModel):
         self.endInsertRows()
                 
         return True
+
+
+#¡ == MODELO DE VENTAS ============================================================================
+
+
+class SalesTableModel(QAbstractTableModel):
+    '''
+    Clase MODELO que contiene los datos de los productos para la VISTA 'tv_sales_data'.
+    Esta clase no maneja operaciones a bases de datos.
+    Los datos son guardados en la variable 'self._data'.
+    
+    datos en self._data:
+        (posición ┇ dato de base de datos)
+        0 ┇ dv.ID_detalle_venta
+        1 ┇ v.detalles_venta
+        2 ┇ dv.cantidad
+        3 ┇ p.unidad_medida
+        3 ┇ p.nombre
+        4 ┇ dv.costo_total
+        5 ┇ dv.abonado
+        6 ┇ v.fecha_hora
+    '''
+    # señal para actualizar datos en MainWindow
+    dataToUpdate:Signal = Signal(object)
+
+    def __init__(self, data:ndarray=None, headers:Sequence[str]=None, 
+                 parent:QObject = ...) -> None:
+        super(SalesTableModel, self).__init__()
+        
+        self._data = data
+        self._headers = headers
+        self._parent = parent
+        self._db_repo = DatabaseRepository()
+    
+    
+    #¡ dimensiones
+    def rowCount(self, parent:QObject = ...) -> int:
+        if self._data is not None:
+            return self._data.shape[0]
+    
+    
+    def columnCount(self, parent:QObject = ...):
+        if self._headers is not None:
+            return len(self._headers)
+    
+    
+    #¡ flags
+    def flags(self, index:QModelIndex | QPersistentModelIndex) -> Qt.ItemFlag:
+        return Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsEditable
+    
+    
+    #¡ datos
+    def setData(self, index:QModelIndex | QPersistentModelIndex, value:Any, 
+                role:Qt.ItemDataRole = Qt.ItemDataRole.EditRole) -> bool:
+        '''
+        Realiza la actualización de datos dentro del modelo y además emite la 
+        señal 'dataToUpdate' con el índice, el ID_detalle_venta y el valor nuevo, para 
+        poder actualizar la base de datos a partir de esos datos.
+        '''
+        if role == Qt.ItemDataRole.EditRole:
+            match index.column():
+                case 0:
+                    ...
+        
+        return False
+    
+    
+    def data(self, index:QModelIndex | QPersistentModelIndex, role:Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole) -> Any:
+        if not index.isValid():
+            return None
+        
+        #* columnas: 0: detalle de venta | 
+        #* 1: cantidad (+ unidad de medida) | 2: producto | 
+        #* 3: costo total | 4: abonado | 5: fecha y hora
+        
+        row:int = index.row()
+        col:int = index.column()
+        
+        match role:
+            case Qt.ItemDataRole.DisplayRole:
+                match col:
+                    case 0: # detalle de venta
+                        return self._data[row, 1]
+                    
+                    case 1: # cantidad (+ unidad de medida)
+                        return f"{self._data[row, 2]} {self._data[row, 3]}".replace(".", ",")
+                    
+                    case 2: # producto
+                        return self._data[row, 4]
+                    
+                    case 3: # costo total
+                        return str(self._data[row, 5]).replace(".", ",")
+                    
+                    case 4: # abonado
+                        return str(self._data[row, 6]).replace(".", ",")
+                    
+                    case 5: # fecha y hora
+                        return self._data[row, 7]
+            
+            case Qt.ItemDataRole.BackgroundRole:
+                match col:
+                    case 3 | 4: # costo total | abonado
+                        # si lo abonado es menor al costo total, le da un fondo rojizo
+                        if float(self._data[row, 5]) > float(self._data[row, 6]):
+                            return TableBgColors.SALES_LOWER_PAID.value
+                    
+            case Qt.ItemDataRole.ForegroundRole:
+                match col:
+                    case 3 | 4: # costo total | abonado
+                        # si lo abonado es menor al costo total, le da un fondo rojizo
+                        if float(self._data[row, 5]) > float(self._data[row, 6]):
+                            return TableFontColor.CONTRAST_RED.value
+                    
+            case Qt.ItemDataRole.TextAlignmentRole:
+                match col:
+                    case 1 | 3 | 4: # cantidad | costo total | abonado
+                        return Qt.AlignmentFlag.AlignCenter
+                    
+                    case 5: # fecha y hora
+                        return Qt.AlignmentFlag.AlignRight
+                    
+                    case _:
+                        return Qt.AlignmentFlag.AlignLeft
+                    
+        return None
+    
+    
+    def headerData(self, section:int, orientation:Qt.Orientation, 
+                   role:Qt.ItemDataRole=Qt.ItemDataRole.DisplayRole) -> str|None:
+        if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
+            return str(self._headers[section])
+        return None
+    
+    
+    #¡ actualización del modelo
+    def setModelData(self, data:Sequence[Sequence[Any]], headers:Sequence[str]) -> None:
+        '''
+        Guarda los datos recibidos en la variable 'self._data' y coloca los headers.
+        Juntos, conforman el set de datos del MODELO.
+
+        Parámetros
+        ----------
+        data : Sequence[Sequence[Any]]
+            Datos para almacenar en el modelo
+        headers : Sequence[str]
+            Headers del modelo
+        
+        Retorna
+        -------
+        None
+        '''
+        self.beginResetModel()
+        self._data = data
+        self._headers = headers
+        self.endResetModel()
+        return None
+
+
+
+
+
+
+
+
+
 
 
 
