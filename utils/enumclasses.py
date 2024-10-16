@@ -62,9 +62,10 @@ class TableFontColor(Enum):
 class TableBgColors(Enum):
     '''Enum con QColors para columnas de QTableViews. Contiene sus versiones normales 
     y las variantes de color para filas alternantes.'''
-    LOW_STOCK_ROW = QColor(245, 125, 125, 255)
+    LOW_STOCK_ROW = QColor(245, 165, 165, 255)
     UNIT_PRICE_ROW = QColor(253, 214, 118, 200)
     COMERC_PRICE_ROW = QColor(251, 189, 173, 200)
+    SALES_LOWER_PAID = QColor(226, 180, 177, 255)
 
 
 
