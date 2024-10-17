@@ -13,6 +13,9 @@ from utils.enumclasses import (TableBgColors, TableFontColor)
 from utils.dboperations import (DatabaseRepository)
 
 
+#¡ == MODELO DE PRODUCTOS =========================================================================
+
+
 class InventoryTableModel(QAbstractTableModel):
     '''
     Clase MODELO que contiene los datos de los productos para la VISTA 'tv_inventory_data'.
@@ -332,7 +335,7 @@ class SalesTableModel(QAbstractTableModel):
     Esta clase no maneja operaciones a bases de datos.
     Los datos son guardados en la variable 'self._data'.
     
-    datos en self._data:
+    ### datos en self._data:
         (posición ┇ dato de base de datos)
         0 ┇ dv.ID_detalle_venta
         1 ┇ v.detalles_venta
@@ -342,6 +345,14 @@ class SalesTableModel(QAbstractTableModel):
         4 ┇ dv.costo_total
         5 ┇ dv.abonado
         6 ┇ v.fecha_hora
+    
+    ### columnas:
+        0 detalle de venta
+        1: cantidad (+ unidad de medida)
+        2: producto
+        3: costo total
+        4: abonado
+        5: fecha y hora
     '''
     # señal para actualizar datos en MainWindow
     dataToUpdate:Signal = Signal(object)
@@ -382,19 +393,84 @@ class SalesTableModel(QAbstractTableModel):
         '''
         if role == Qt.ItemDataRole.EditRole:
             match index.column():
-                case 0:
-                    ...
+                case 0: # detalle de venta
+                    #? no modifica el modelo si el nuevo dato es igual al anterior
+                    if str(value) == str(self._data[index.row()][index.column() + 1]):
+                        return False
+                    
+                    self._data[index.row()][index.column() + 1] = value
+                    
+                    # actualiza detalles de venta en MainWindow
+                    self.dataToUpdate.emit(
+                        (index.column(), self._data[index.row()][0], value)
+                        )
+                    
+                    self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
+                    return True
         
+                case 1: # cantidad
+                    value = str(value).replace(",", ".").strip()
+                    if value == str(self._data[index.row()][index.column() + 1]):
+                        return False
+                    
+                    self._data[index.row()][index.column() + 1] = float(value)
+                    
+                    # actualiza cantidad en MainWindow
+                    self.dataToUpdate.emit(
+                        (index.column(), self._data[index.row()][0], value)
+                    )
+                    
+                    self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
+                    return True
+                    
+                case 2: # producto
+                    if value == str(self._data[index.row()][index.column() + 2]):
+                        return False
+                    
+                    self._data[index.row()][index.column() + 2] = value
+                    
+                    # actualiza producto en MainWindow
+                    self.dataToUpdate.emit(
+                        (index.column(), self._data[index.row()][0], value)
+                    )
+                    
+                    self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
+                    return True
+                
+                case 3 | 4: # costo total | abonado
+                    value = str(value).replace(",", ".")
+                    if str(value) == str(self._data[index.row()][index.column() + 2]):
+                        return False
+                    
+                    self._data[index.row()][index.column() + 2] = value
+                    
+                    # actualiza detalles de venta en MainWindow
+                    self.dataToUpdate.emit(
+                        (index.column(), self._data[index.row()][0], value)
+                        )
+                    
+                    self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
+                    return True
+                
+                case 5: # fecha y hora
+                    if str(value) == str(self._data[index.row()][index.column() + 2]):
+                        return False
+                    
+                    self._data[index.row()][index.column() + 2] = value
+                    
+                    # actualiza detalles de venta en MainWindow
+                    self.dataToUpdate.emit(
+                        (index.column(), self._data[index.row()][0], value)
+                        )
+                    
+                    self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
+                    return True
         return False
     
     
     def data(self, index:QModelIndex | QPersistentModelIndex, role:Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole) -> Any:
         if not index.isValid():
             return None
-        
-        #* columnas: 0: detalle de venta | 
-        #* 1: cantidad (+ unidad de medida) | 2: producto | 
-        #* 3: costo total | 4: abonado | 5: fecha y hora
         
         row:int = index.row()
         col:int = index.column()
@@ -479,7 +555,7 @@ class SalesTableModel(QAbstractTableModel):
         return None
 
 
-
+    # TODO: implementar eliminar/crear filas
 
 
 
