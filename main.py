@@ -13,7 +13,7 @@ from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemVa
 from ui.ui_mainwindow import (Ui_MainWindow)
 from utils.functionutils import *
 from utils.model_classes import (InventoryTableModel, SalesTableModel)
-from utils.delegates import (InventoryDelegate)
+from utils.delegates import (InventoryDelegate, SalesDelegate)
 from utils.workerclasses import (WorkerSelect, WorkerUpdate)
 from utils.dboperations import (DatabaseRepository)
 from utils.customvalidators import (SalePaidValidator)
@@ -46,9 +46,13 @@ class MainWindow(QMainWindow):
         self.sales_data_model:SalesTableModel = SalesTableModel()
         self.ui.tv_sales_data.setModel(self.sales_data_model)
         
-        # delegados
+        # delegado de inventario
         self.inventory_delegate = InventoryDelegate()
         self.ui.tv_inventory_data.setItemDelegate(self.inventory_delegate)
+        
+        # delegado de ventas
+        self.sales_delegate = SalesDelegate(self.ui.dateTimeEdit_sale.displayFormat())
+        self.ui.tv_sales_data.setItemDelegate(self.sales_delegate)
         
         # declara e instancia variables
         self.setup_variables()
@@ -162,7 +166,6 @@ class MainWindow(QMainWindow):
         #* (CREATE) añadir nuevo producto a tabla 'tv_inventory_data'
         self.ui.btn_add_product_inventory.clicked.connect(lambda: self.handleTableCreateRow(TableViewId.INVEN_TABLE_VIEW))
         
-        # TODO: reimplementar las funciones de DELETE
         #* (DELETE) eliminar un producto de 'tv_inventory_data'
         self.ui.btn_delete_product_inventory.clicked.connect(lambda: self.handleTableDeleteRows(TableViewId.INVEN_TABLE_VIEW))
         
@@ -171,7 +174,7 @@ class MainWindow(QMainWindow):
             lambda params: self.__onInventoryModelDataToUpdate(
                 column=params[0], IDproduct=params[1], new_val=params[2]))
         
-        # delegados
+        #* delegado de inventario
         self.inventory_delegate.fieldIsValid.connect(self.__onDelegateValidationSucceded)
         self.inventory_delegate.fieldIsInvalid.connect(self.__onDelegateValidationFailed)
         
@@ -183,7 +186,7 @@ class MainWindow(QMainWindow):
         
         self.ui.checkbox_comercial_prices.stateChanged.connect(self.handleCheckboxStateChange)
         
-        # señales del lineedit de porcentajes
+        #* lineedit de porcentajes
         self.ui.lineEdit_percentage_change.editingFinished.connect(self.onLePercentageEditingFinished)
         self.ui.lineEdit_percentage_change.validator().validationSucceeded.connect(
             self.__onPercentageValidatorSucceded)
@@ -204,8 +207,17 @@ class MainWindow(QMainWindow):
         self.ui.btn_delete_product_sales.clicked.connect(lambda: self.handleTableDeleteRows(TableViewId.SALES_TABLE_VIEW))
         
         #* (UPDATE) modificar celdas de 'tv_sales_data'
+        self.sales_data_model.dataToUpdate.connect(
+            lambda params: self.__onSalesModelDataToUpdate(
+                column=params[0], IDsales_detail=params[1], new_val=params[2]
+            )
+        )
         # TODO: reimplementar UPDATES de Ventas
         # self.ui.tv_sales_data.doubleClicked.connect(lambda: self.handleTableUpdateItem(self.ui.tv_sales_data, self.ui.tv_sales_data.currentIndex()) )
+        
+        #* delegado de ventas
+        self.sales_delegate.fieldIsValid.connect(self.__onDelegateValidationSucceded)
+        self.sales_delegate.fieldIsInvalid.connect(self.__onDelegateValidationFailed)
         
         #* formulario de ventas
         self.ui.btn_add_product.clicked.connect(self.addSalesInputListItem)
@@ -283,6 +295,7 @@ class MainWindow(QMainWindow):
         self.ui.label_feedbackInventory.hide()
         self.ui.label_feedbackChangePercentage.hide()
         self.ui.label_feedbackSales.hide()
+        self.ui.label_feedbackDebts.hide()
         self.ui.inventory_progressbar.hide()
         self.ui.sales_progressbar.hide()
         self.ui.debts_progressbar.hide()
@@ -1275,6 +1288,32 @@ class MainWindow(QMainWindow):
         '''
         self.__upd_reg_count = 0
         self._UPD_BATCH_SIZE = 0
+        return None
+    
+    
+    @Slot(int, int, object)
+    def __onSalesModelDataToUpdate(self, column:int, IDsales_detail:int,
+                                       new_val:Any) -> None:
+        '''
+        Actualiza la base de datos con el valor nuevo de Ventas.
+        
+        Parámetros
+        ----------
+        column : int
+            Columna del item modificado
+        IDsales_detail : int
+            IDproducto en la base de datos del item modificado
+        new_val : Any
+            Valor nuevo del item
+        
+        Retorna
+        -------
+        None
+        '''
+        print(f"columna: {column} | IDdetalle_venta: {IDsales_detail} | nuevo valor: {new_val}")
+        match column:
+            case 0: # categoría
+                ...
         return None
     
     
