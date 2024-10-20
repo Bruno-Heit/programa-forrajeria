@@ -154,4 +154,5 @@ class RegexExps(StrEnum):
     PROD_COMERC_PRICE = "\d{0,8}((\.|,)\d{0,2})?"
     PERCENTAGE_CHANGE = "^([-+]?\d{0,4}((\.|,)\d{0,2})?)|(\d{1,8}((\.|,)\d{0,2})?)$"
     
+    SALES_DETAILS = "(\([\s]*P[\s]*\.[\s]*NORMAL[\s]*\)|\([\s]*P[\s]*\.[\s]*COMERCIAL[\s]*\))$"
     # TODO: seguir poniendo acá las expresiones de los validadores

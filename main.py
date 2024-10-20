@@ -209,7 +209,10 @@ class MainWindow(QMainWindow):
         #* (UPDATE) modificar celdas de 'tv_sales_data'
         self.sales_data_model.dataToUpdate.connect(
             lambda params: self.__onSalesModelDataToUpdate(
-                column=params[0], IDsales_detail=params[1], new_val=params[2]
+                column=params['column'],
+                IDsales_detail=params['IDsales_detail'],
+                new_val=params['new_value'],
+                quantity_index=params['quantity_index'] if 'quantity_index' in params else None
             )
         )
         # TODO: reimplementar UPDATES de Ventas
@@ -1006,6 +1009,7 @@ class MainWindow(QMainWindow):
 
 
     #¡ tablas (UPDATE)
+    #¡¡ ....... inventario ........................................................................
     @Slot(int, int, object)
     def __onInventoryModelDataToUpdate(self, column:int, IDproduct:int,
                                        new_val:Any | list[str]) -> None:
@@ -1291,11 +1295,16 @@ class MainWindow(QMainWindow):
         return None
     
     
+    #¡¡ ....... ventas ............................................................................
     @Slot(int, int, object)
     def __onSalesModelDataToUpdate(self, column:int, IDsales_detail:int,
-                                       new_val:Any) -> None:
+                                       new_val:Any, quantity_index:QModelIndex = None) -> None:
         '''
-        Actualiza la base de datos con el valor nuevo de Ventas.
+        Actualiza la base de datos con el valor nuevo de la sección de Ventas. 
+        Además, en caso de que la columna modificada sea la de "producto" 
+        actualiza el modelo para mostrar la unidad de medida de ese producto 
+        seleccionado, y si la columna modifica es la de "fecha y hora" actualiza 
+        el nuevo horario tanto en la tabla "Ventas" como en "Deudas".
         
         Parámetros
         ----------
@@ -1305,184 +1314,100 @@ class MainWindow(QMainWindow):
             IDproducto en la base de datos del item modificado
         new_val : Any
             Valor nuevo del item
+        quantity_index : QModelIndex, opcional
+            índice de la columna "cantidad" en la misma fila que el producto 
+            modificado, sólo se usa cuando el registro modificado es parte 
+            de la columna "producto"
         
         Retorna
         -------
         None
         '''
-        print(f"columna: {column} | IDdetalle_venta: {IDsales_detail} | nuevo valor: {new_val}")
         match column:
-            case 0: # categoría
-                ...
-        return None
-    
-    
-    #! reimplementar método y luego borrar
-    def __tableComboBoxOnCurrentTextChanged(self, table_view:QTableView, curr_index:QModelIndex, 
-                                            combobox:QComboBox) -> None:
-        new_unit:str | None # y el valor de la unidad ya seleccionado.
-        quantity:float | int # cantidad seleccionada.
-
-        match table_view.objectName():
-            case "tv_sales_data":
-                pass
-                # actualiza el producto en Detalle_Ventas
-                # self._db_repo.updateRegisters(
-                #     upd_sql="UPDATE Detalle_Ventas SET IDproducto = (SELECT IDproducto FROM Productos WHERE nombre = ?) WHERE ID_detalle_venta = ?;",
-                #     upd_params=(combobox.currentText(), str(self.IDs_saleDetails[curr_index.row()]),) )
-                # table_view.item(curr_index.row(), curr_index.column()).setText(f"{combobox.currentText()}")
-
-                # # obtengo la cantidad de la columna "cantidad" para luego unirlo a la unidad de medida
-                # quantity = table_view.item(curr_index.row(), 1).text().split(" ")[0].strip()
-
-                # # obtengo la unidad de medida del producto actual para colocarlo en la columna "cantidad"
-                # new_unit = self._db_repo.selectRegisters(data_sql="SELECT unidad_medida FROM Productos WHERE nombre = ?;",
-                #                          data_params=(combobox.currentText(),) )[0][0]
-                # table_view.item(curr_index.row(), 1).setText(f"{quantity} {new_unit}")
-
-        combobox.deleteLater()
-        # remueve los widgets de las celdas (para que se puedan modificar sólo una vez al mismo tiempo las comboboxes)
-        removeTableCellsWidgets(table_view)
-        # vuelve a activar el ordenamiento de la tabla
-        # table_view.setSortingEnabled(True)
-        return None
-
-
-    #! reimplementar método y luego borrar
-    @Slot(QTableView, QModelIndex, QLineEdit, str)
-    def __tableLineEditOnReturnPressed(self, table_view:QTableView, curr_index:QModelIndex, lineedit:QLineEdit, prev_text:str) -> None:
-        '''
-        Este método es llamado desde la señal 'self.lineedit.returnPressed' y sólo se ejecutará cuando el input 
-        sea válido ('validador.State.Acceptable').
-        
-        Declara la consulta sql y los parámetros y luego hace la consulta UPDATE a la base de datos con el nuevo 
-        dato ingresado a partir del nuevo texto introducido en 'lineedit'. Luego sustituye el valor actual de 
-        la celda por el nuevo.
-        Al finalizar, remueve 'lineedit' de la celda de 'table_view'.
-        
-        Este método llama a:
-        - self._db_repo.updateRegisters: para realizar las consultas UPDATE.
-        - removeTableCellsWidgets: para quitar los QLineEdit de 'table_view'.
-        
-        PARAMS:
-        - table_view: el QTableView al que se referencia.
-        - curr_index: índice de la celda seleccionada de 'table_view'.
-        - lineedit: el QLineEdit que envía la señal.
-        - prev_text: el texto que había antes en la celda.
-        
-        Retorna None.
-        '''
-        full_stock:list[str] # var. aux. con el texto completo del stock
-        percentage_diff:float # el porcentaje de diferencia entre el valor viejo y el nuevo, se usa junto a new_total_debt...
-        new_debt_term:float # para calcular el nuevo valor en Deudas.total_adeudado. new_debt_term es el segundo término de la 
-                             # expresión "total_adeudado * (1 + percentage_diff / 100)", siendo "(1 + percentage_diff / 100)".
-        
-        pattern:Pattern # patrón para buscar (P.NORMAL)|(P.COMERCIAL) en lineedit.text()
-        price_type:Match # var. aux. con substring (P.NORMAL)|(P.COMERCIAL) obtenido de 'prev_text'
-        lineedit_text:str # var. aux. placeholder para formatear texto de celdas
-
-
-        match table_view.objectName():
-
-            case "tv_sales_data":
-                match curr_index.column():
-                    case 0: # detalle de venta
-                        pattern = compile("(\([\s]*P[\s]*\.[\s]*NORMAL[\s]*\)|\([\s]*P[\s]*\.[\s]*COMERCIAL[\s]*\))$", IGNORECASE)
-                        
-                        # verifica si (P. NORMAL) | (P. COMERCIAL) está, sino lo toma de prev_text y lo coloca al final
-                        if not search(pattern, lineedit.text()):
-                            # obtiene (P. NORMAL) | (P. COMERCIAL) de prev_text
-                            price_type = search(pattern, prev_text)
-                            # lo pone en mayúsculas
-                            price_type = str(price_type.group()).upper()
-                            
-                            lineedit_text = f"{lineedit.text()} {price_type}"
-                        # si SÍ ESTÁ lo reemplaza...
-                        else:
-                            price_type = search(pattern, lineedit.text())
-                            price_type = str(price_type.group()).upper().replace(" ", "")
-                            lineedit_text = sub(pattern, price_type, lineedit.text())
-                        
-                        # self._db_repo.updateRegisters(
-                        #     upd_sql="UPDATE Ventas SET detalles_venta = ? WHERE IDventa = (SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?);",
-                        #     upd_params=(lineedit_text, str(self.IDs_saleDetails[curr_index.row()]), ))
-                        # table_view.item(curr_index.row(), curr_index.column()).setText(f"{lineedit_text}")
-                    
-                    case 1: # cantidad
-                        ...
-                        # self._db_repo.updateRegisters(
-                        #     upd_sql="UPDATE Detalle_Ventas SET cantidad = ? WHERE ID_detalle_venta = ?;",
-                        #     upd_params=(lineedit.text().replace(",","."), str(self.IDs_saleDetails[curr_index.row()]), ))
-                        # # toma la unidad de medida (si tiene) y la concatena con la nueva cantidad
-                        # new_prev_text = prev_text.split(" ")[1] if len(prev_text.split(" ")) > 1 else ""
-                        # lineedit_text = lineedit.text().replace(".",",")
-                        # table_view.item(curr_index.row(), curr_index.column()).setText(f"{lineedit_text} {new_prev_text}")
-                    
-                    case 3: # costo total
-                        ...
-                        # self._db_repo.updateRegisters(
-                        #     upd_sql="UPDATE Detalle_Ventas SET costo_total = ? WHERE ID_detalle_venta = ?;",
-                        #     upd_params=(lineedit.text().replace(",","."), str(self.IDs_saleDetails[curr_index.row()]), ))
-                        # lineedit_text = lineedit.text().replace(".",",")
-                        # table_view.item(curr_index.row(), curr_index.column()).setText(f"{lineedit_text.strip()}")
-                    
-                    case 4: # abonado
-                        ...
-                        # self._db_repo.updateRegisters(
-                        #     upd_sql="UPDATE Detalle_Ventas SET abonado = ? WHERE ID_detalle_venta = ?;",
-                        #     upd_params=(lineedit.text().replace(",","."), str(self.IDs_saleDetails[curr_index.row()]), ))
-                        # lineedit_text = lineedit.text().replace(".",",")
-                        # table_view.item(curr_index.row(), curr_index.column()).setText(f"{lineedit_text.strip()}")
-        
-        # borra el lineedit
-        if table_view.cellWidget(curr_index.row(), curr_index.column()): #! veo si existe porque, por alguna razón, al
-            lineedit.deleteLater()                                         #! lineedit en 'tv_sales_data' no lo encuentra.
-        # remueve todos los widgets                                        #! Igualmente 'removeTableCellWidgets' le da 
-        removeTableCellsWidgets(table_view)                              #! permiso al 'garbage collector' de borrarlos...
-        
-        # vuelvo a activar el ordenamiento de la tabla
-        # table_view.setSortingEnabled(True)
-        return None
-
-
-    #! reimplementar método y luego borrar
-    @Slot(QTableView, QModelIndex, QDateTimeEdit)
-    def __tableDateTimeOnEditingFinished(self, table_view:QTableView, curr_index:QModelIndex, datetimeedit:QDateTimeEdit) -> None:
-        '''
-        Este método es llamado desde la señal 'self.datetimeedit.editingFinished'.
-        
-        Declara la consulta UPDATE y sus parámetros y luego hace la consulta a la base de datos para actualizar 
-        el valor de 'datetimeedit', luego sustituye el valor actual de la celda por el nuevo.
-        Al finalizar, remueve 'datetimeedit' de la celda de 'table_view'.
-        
-        Este método llama a:
-        - self._db_repo.updateRegisters: para realizar las consultas UPDATE.
-        - removeTableCellsWidgets: para quitar los QDateTimeEdit de 'table_view'.
-        
-        PARAMS:
-        - table_view: el QTableView al que se referencia.
-        - curr_index: índice de la celda seleccionada de 'table_view'.
-        - datetimeedit: el QDateTimeEdit que envía la señal.
-        
-        Retorna None.
-        '''
-        match table_view.objectName():
-            case "tv_sales_data":
-                ...
-                # self._db_repo.updateRegisters(
-                #     upd_sql="UPDATE Ventas SET fecha_hora = ? WHERE IDventa = (SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?);",
-                #     upd_params=(datetimeedit.text(), self.IDs_saleDetails[curr_index.row()], ))
-                # table_view.item(curr_index.row(), curr_index.column()).setText(f"{str(datetimeedit.text()).strip()}")
+            case 0: # detalle de ventas
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Ventas 
+                                   SET detalles_venta = ? 
+                                   WHERE IDventa = (
+                                       SELECT IDventa 
+                                       FROM Detalle_Ventas 
+                                       WHERE ID_detalle_venta = ?);''',
+                        upd_params=(new_val, IDsales_detail,)
+                        )
             
-            case _:
-                pass
+            case 1: # cantidad (+ unidad de medida)
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Detalle_Ventas 
+                                   SET cantidad = ? 
+                                   WHERE ID_detalle_venta = ?;''',
+                        upd_params=(new_val, IDsales_detail,)
+                        )
+            
+            case 2: # producto
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Detalle_Ventas 
+                                   SET IDproducto = (
+                                       SELECT IDproducto 
+                                       FROM Productos 
+                                       WHERE nombre = ?) 
+                                   WHERE ID_detalle_venta = ?;''',
+                        upd_params=(new_val, IDsales_detail,)
+                        )
+                
+                    # actualiza el modelo con la nueva unidad de medida del nuevo producto elegido
+                    self.sales_data_model.updateMeasurementUnit(
+                        quantity_index=quantity_index,
+                        new_value=self._db_repo.selectRegisters(
+                            data_sql='''SELECT unidad_medida 
+                                        FROM Productos 
+                                        WHERE nombre = ?;''',
+                            data_params=(self.sales_data_model._data[quantity_index.row(), 4],)
+                            )[0][0]
+                    )
+                
+            case 3: # costo total
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Detalle_Ventas 
+                                   SET costo_total = ? 
+                                   WHERE ID_detalle_venta = ?;''',
+                        upd_params=(new_val, IDsales_detail)
+                    )
+            
+            case 4: # abonado
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Detalle_Ventas 
+                                   SET abonado = ? 
+                                   WHERE ID_detalle_venta = ?;''',
+                        upd_params=(new_val, IDsales_detail)
+                    )
+            
+            case 5: # fecha y hora
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Ventas 
+                                   SET fecha_hora = ? 
+                                   WHERE IDventa = (
+                                       SELECT IDventa 
+                                       FROM Detalle_Ventas 
+                                       WHERE ID_detalle_venta = ?);''',
+                        upd_params=(new_val, IDsales_detail)
+                    )
+                    
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Deudas 
+                                   SET fecha_hora = ? 
+                                   WHERE IDdeuda = (
+                                       SELECT IDdeuda 
+                                       FROM Detalle_Ventas 
+                                       WHERE ID_detalle_venta = ?);''',
+                        upd_params=(new_val, IDsales_detail)
+                    )
         
-        #? verifico si el calendar tiene el foco puesto porque cuando se muestra el popup cambia el foco y envía 
-        #? la señal 'editingFinished' a éste método, lo que hace que se cierre instantáneamente. La comparación 
-        #? de abajo hace que no se cierre el calendar y permita editar la fecha.
-        if not datetimeedit.calendarWidget().hasFocus():
-            datetimeedit.deleteLater()
-            removeTableCellsWidgets(table_view)
         return None
 
 

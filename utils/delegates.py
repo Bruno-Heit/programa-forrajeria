@@ -7,13 +7,14 @@ from PySide6.QtWidgets import (QWidget, QStyledItemDelegate, QStyleOptionViewIte
 from PySide6.QtCore import (Qt, QModelIndex, QSize, QPersistentModelIndex, 
                             QAbstractItemModel, Signal, Slot, QDateTime)
 
-from utils.enumclasses import (TableViewId)
+from utils.enumclasses import (TableViewId, RegexExps)
 from utils.functionutils import (getProductsCategories, createCompleter, getProductNames)
 from utils.customvalidators import (ProductNameValidator, ProductStockValidator, 
                                     ProductUnitPriceValidator, ProductComercPriceValidator,
                                     SaleDetailsValidator, SaleQuantityValidator, 
                                     SaleTotalCostValidator, SalePaidValidator)
 
+from re import (compile, IGNORECASE, search, sub)
 
 #¡ == DELEGADO DE PRODUCTOS =======================================================================
 
@@ -37,6 +38,7 @@ class InventoryDelegate(QStyledItemDelegate):
             case 0: # categoría
                 editor = QComboBox(parent)
                 editor.setEditable(False)
+                editor.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
                 editor.setFrame(False)
                 editor.addItems(getProductsCategories())
                 editor.setPlaceholderText("Seleccionar una categoría")
@@ -210,6 +212,7 @@ class SalesDelegate(QStyledItemDelegate):
             case 2: # producto
                 editor = QComboBox(parent)
                 editor.setEditable(False)
+                editor.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
                 editor.setFrame(False)
                 editor.addItems(getProductNames())
                 editor.setPlaceholderText("Seleccionar un producto...")
@@ -301,21 +304,36 @@ class SalesDelegate(QStyledItemDelegate):
         col:int = index.column()
         
         #* formateo de datos
-        if isinstance(editor, QComboBox):
+        if isinstance(editor, QComboBox): # producto
             value = editor.currentText()
             
-        elif isinstance(editor, QLineEdit):
+        elif isinstance(editor, QLineEdit): # detalle de venta | cantidad | costo total | abonado
             value = editor.text().strip()
             match col:
+                case 0: # detalle de venta
+                    pattern = compile(RegexExps.SALES_DETAILS.value, IGNORECASE)
+                    # busca en el valor el patrón de (P. NORMAL) ó (P. COMERCIAL)
+                    price_type = search(pattern, value)
+                    
+                    # verifica si alguno de esos strings está, sino lo coloca al final
+                    if not search(pattern, value):
+                        price_type = search(pattern, model._data[index.row()][index.column() + 1])
+                        price_type = str(price_type.group()).upper()
+                        
+                        value = f"{value} {price_type}"
+                    
+                    # si SÍ ESTÁ lo reemplaza...
+                    else:
+                        price_type = str(price_type.group()).upper().replace(" ", "")
+                        value = sub(pattern, price_type, value)
+                
                 case 1 | 3 | 4: # cantidad | costo total | abonado
                     if value.split(" ")[0].endswith((",",".")):
                         value = value.rstrip(",.")
 
-                case _:
-                    pass
             editor.setText(value)
         
-        elif isinstance(editor, QDateTimeEdit):
+        elif isinstance(editor, QDateTimeEdit): # fecha y hora
             value = editor.text()
         
         model.setData(index, value, Qt.ItemDataRole.EditRole)

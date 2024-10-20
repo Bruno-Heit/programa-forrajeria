@@ -341,10 +341,10 @@ class SalesTableModel(QAbstractTableModel):
         1 ┇ v.detalles_venta
         2 ┇ dv.cantidad
         3 ┇ p.unidad_medida
-        3 ┇ p.nombre
-        4 ┇ dv.costo_total
-        5 ┇ dv.abonado
-        6 ┇ v.fecha_hora
+        4 ┇ p.nombre
+        5 ┇ dv.costo_total
+        6 ┇ dv.abonado
+        7 ┇ v.fecha_hora
     
     ### columnas:
         0 detalle de venta
@@ -355,7 +355,10 @@ class SalesTableModel(QAbstractTableModel):
         5: fecha y hora
     '''
     # señal para actualizar datos en MainWindow
-    dataToUpdate:Signal = Signal(object)
+    dataToUpdate:Signal = Signal(object) # emite dict[columna, IDdetalle_venta, nuevo valor], 
+                                         # excepto si se elige otro producto, entonces emite 
+                                         # dict[columna, IDdetalle_venta, nuevo valor, índice 
+                                         # de columna "cantidad"]
 
     def __init__(self, data:ndarray=None, headers:Sequence[str]=None, 
                  parent:QObject = ...) -> None:
@@ -383,13 +386,14 @@ class SalesTableModel(QAbstractTableModel):
         return Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsEditable
     
     
-    #¡ datos
+    #¡ datos    
     def setData(self, index:QModelIndex | QPersistentModelIndex, value:Any, 
                 role:Qt.ItemDataRole = Qt.ItemDataRole.EditRole) -> bool:
         '''
         Realiza la actualización de datos dentro del modelo y además emite la 
-        señal 'dataToUpdate' con el índice, el ID_detalle_venta y el valor nuevo, para 
-        poder actualizar la base de datos a partir de esos datos.
+        señal 'dataToUpdate' con el índice, el ID_detalle_venta y el valor nuevo 
+        (en caso de modificarse el producto, emite también el índice de la columna 
+        "cantidad"), para poder actualizar la base de datos a partir de esos datos.
         '''
         if role == Qt.ItemDataRole.EditRole:
             match index.column():
@@ -402,7 +406,9 @@ class SalesTableModel(QAbstractTableModel):
                     
                     # actualiza detalles de venta en MainWindow
                     self.dataToUpdate.emit(
-                        (index.column(), self._data[index.row()][0], value)
+                        {'column': index.column(),
+                         'IDsales_detail': self._data[index.row()][0],
+                         'new_value': value}
                         )
                     
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
@@ -417,7 +423,9 @@ class SalesTableModel(QAbstractTableModel):
                     
                     # actualiza cantidad en MainWindow
                     self.dataToUpdate.emit(
-                        (index.column(), self._data[index.row()][0], value)
+                        {'column': index.column(),
+                         'IDsales_detail': self._data[index.row()][0],
+                         'new_value': value}
                     )
                     
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
@@ -428,10 +436,15 @@ class SalesTableModel(QAbstractTableModel):
                         return False
                     
                     self._data[index.row()][index.column() + 2] = value
-                    
+
                     # actualiza producto en MainWindow
                     self.dataToUpdate.emit(
-                        (index.column(), self._data[index.row()][0], value)
+                        {'row': index.row(),
+                         'column': index.column(),
+                         'IDsales_detail': self._data[index.row()][0],
+                         'new_value': value,
+                         'quantity_index': self.index(index.row(), 1)
+                         }
                     )
                     
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
@@ -446,7 +459,9 @@ class SalesTableModel(QAbstractTableModel):
                     
                     # actualiza detalles de venta en MainWindow
                     self.dataToUpdate.emit(
-                        (index.column(), self._data[index.row()][0], value)
+                        {'column': index.column(),
+                         'IDsales_detail': self._data[index.row()][0],
+                         'new_value': value}
                         )
                     
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
@@ -460,7 +475,9 @@ class SalesTableModel(QAbstractTableModel):
                     
                     # actualiza detalles de venta en MainWindow
                     self.dataToUpdate.emit(
-                        (index.column(), self._data[index.row()][0], value)
+                        {'column': index.column(),
+                         'IDsales_detail': self._data[index.row()][0],
+                         'new_value': value}
                         )
                     
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
@@ -555,6 +572,28 @@ class SalesTableModel(QAbstractTableModel):
         return None
 
 
+    def updateMeasurementUnit(self, quantity_index:QModelIndex, new_value:str) -> None:
+        '''
+        Actualiza el valor de la unidad de medida en el atributo '_data'. 
+        NOTA: se llama a éste método desde 'MainWindow' cuando se cambia el 
+        producto elegido.
+
+        Parámetros
+        ----------
+        quantity_index : QModelIndex
+            índice del registro modificado
+        new_value : str
+            la nueva unidad de medida correspondiente al producto
+        
+        Retorna
+        -------
+        None
+        '''
+        self._data[quantity_index.row(), quantity_index.column() + 2] = new_value
+        
+        self.dataChanged.emit(quantity_index, quantity_index, [Qt.ItemDataRole.EditRole])
+        return None
+        
     # TODO: implementar eliminar/crear filas
 
 
