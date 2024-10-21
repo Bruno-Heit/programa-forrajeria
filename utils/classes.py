@@ -447,11 +447,31 @@ class SaleDialog(QDialog):
     '''QDialog creado al presionar el botón 'MainWindow.btn_add_product_sales'. Sirve para crear un nuevo registro 
     de venta en la tabla "Ventas", de detalles de venta en "Detalle_Ventas", de deuda en "Deudas" (si hay diferencia 
     entre lo abonado y el costo total) y de deudor en "Deudores" (si hay deuda) en la base de datos.'''
+    dataFilled:Signal = Signal(object) # emite un dict con todos los datos introducidos a MainWindow
+    
     def __init__(self):
         super(SaleDialog, self).__init__()
         self.saleDialog_ui = Ui_saleDialog()
         self.saleDialog_ui.setupUi(self)
 
+        self.setup_ui()
+        
+        self.setup_variables()
+        
+        self.setup_signals()
+        
+        return None
+
+    
+    def setup_ui(self) -> None:
+        '''
+        Método que sirve para simplificar la lectura del método 'self.__init__'.
+        Contiene inicializaciones y ajustes de algunos Widgets.
+        
+        Retorna
+        -------
+        None
+        '''
         self.setWindowTitle("Nueva venta")
 
         self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setText("Aceptar")
@@ -504,6 +524,7 @@ class SaleDialog(QDialog):
         self.saleDialog_ui.debtor_data.setEnabled(False)
         self.saleDialog_ui.debtor_data.hide()
         
+        # TODO: crear un modelo de datos exclusivamente para estos completers
         # QCompleters #! estos completers son "iniciales" y cambian cuando el usuario escribe en uno de ellos.
                       #! Al principio tienen todos los valores de nombres/apellidos de la base de datos, pero 
                       #! al ingresar por ej. un nombre el campo de apellido se actualiza con los apellidos que 
@@ -518,6 +539,7 @@ class SaleDialog(QDialog):
         self.saleDialog_ui.lineEdit_saleDetail.setValidator(self.sale_detail_validator)
         self.saleDialog_ui.lineEdit_productQuantity.setValidator(self.quantity_validator)
         self.saleDialog_ui.lineEdit_totalPaid.setValidator(self.total_paid_validator)
+        
         # validadores de cuenta corriente
         self.debtor_name_validator = DebtorNameValidator(self.saleDialog_ui.lineEdit_debtorName)
         self.debtor_surname_validator = DebtorSurnameValidator(self.saleDialog_ui.lineEdit_debtorSurname)
@@ -527,7 +549,20 @@ class SaleDialog(QDialog):
         self.saleDialog_ui.lineEdit_debtorSurname.setValidator(self.debtor_surname_validator)
         self.saleDialog_ui.lineEdit_phoneNumber.setValidator(self.phone_number_validator)
         self.saleDialog_ui.lineEdit_postalCode.setValidator(self.postal_code_validator)
+        return None
+    
+    
+    def setup_variables(self) -> None:
+        '''
+        Al igual que el método 'self.setup_ui' y 'self.setup_signals', este 
+        método tiene el objeto de simplificar la lectura del método 'self.__init__'.
+        Contiene las declaraciones de variables locales que se usan a lo largo de la 
+        ejecución del QDialog.
         
+        Retorna
+        -------
+        None
+        '''
         # flags de validación
         self.VALID_FIELDS:dict[str,bool|None] = {
             'PRODUCT_NAME': None,
@@ -540,9 +575,21 @@ class SaleDialog(QDialog):
         }
         
         # variables
-        self.TOTAL_COST:float|None = None # se obtiene en __setDetailsAndCost, si el precio está disponible, sino es None
+        self.TOTAL_COST:float|None = None # se obtiene en __setDetailsAndCost, si el precio está disponible, sino es None        
+        return None
+    
+    
+    def setup_signals(self) -> None:
+        '''
+        Al igual que los métodos 'self.setup_ui' y 'self.setup_variables', este 
+        método tiene el objeto de simplificar la lectura del método 'self.__init__'.
+        Contiene las declaraciones de señales/slots de Widgets ya existentes 
+        desde la instanciación de 'MainWindow'.
         
-        
+        Retorna
+        -------
+        None
+        '''
         #--- SEÑALES --------------------------------------------------
         # combobox nombre de producto (venta)
         self.saleDialog_ui.comboBox_productName.currentIndexChanged.connect(self.validateProductNameField)
@@ -601,8 +648,10 @@ class SaleDialog(QDialog):
         
         # botón Ok (Aceptar)
         self.saleDialog_ui.buttonBox.accepted.connect(self.handleOkClicked)
-
-    #### MÉTODOS #####################################################
+        return None
+    
+    
+    #¡ validadores
     @Slot(str)
     def validatorOnValidationSucceded(self, field_validated:str) -> None:
         '''
@@ -802,6 +851,7 @@ class SaleDialog(QDialog):
         return None
 
 
+    #¡ campos
     @Slot()
     def handleNameAndQuantityAndPriceChange(self) -> None:
         '''
@@ -1126,7 +1176,7 @@ class SaleDialog(QDialog):
         return pos_to_check
 
 
-    # funciones generales
+    #¡ funciones generales
     def __setSaleDialogSize(self, min_width:int, min_height:int, hide_debtor_data:bool) -> None:
         '''
         Es llamado desde 'self.__updateDebtorDataVisibility'.
@@ -1244,7 +1294,8 @@ class SaleDialog(QDialog):
         #! lo pongo entre un try-except porque si falla algo necesito hacer un rollback
         try:
             # declara la consulta sql y params de Ventas y hace la consulta...
-            sql_sales:str = "INSERT INTO Ventas(fecha_hora, detalles_venta) VALUES(?,?);"
+            sql_sales:str = '''INSERT INTO Ventas(fecha_hora, detalles_venta) 
+                               VALUES(?,?);'''
             params_sales:tuple = (values[6], values[0],)
             cursor.execute(sql_sales, params_sales)
             conn.commit()
@@ -1252,43 +1303,98 @@ class SaleDialog(QDialog):
             # si el largo de 'values' es de 12, es porque hay una deuda/cantidad a favor dentro de la compra...
             if len(values) == 12:
                 # verifica si el deudor en Deudores existe
-                sql_verify:str = "SELECT COUNT(*) FROM Deudores WHERE nombre = ? AND apellido = ?;"
+                sql_verify:str = '''SELECT COUNT(*) 
+                                    FROM Deudores 
+                                    WHERE nombre = ? 
+                                        AND apellido = ?;'''
                 params_verify:tuple = (values[7], values[8],)
                 verify_query = makeReadQuery(sql_verify, params_verify)[0][0]
 
                 # si no existe ese deudor, lo agrega...
                 if not verify_query:
                     # declara la consulta sql y params de Deudores y hace la consulta...
-                    sql_debtor:str = "INSERT INTO Deudores(nombre, apellido, num_telefono, direccion, codigo_postal) VALUES(?, ?, ?, ?, ?);"
-                    params_debtor:tuple = (values[7], values[8], values[9], values[10], values[11],)
+                    sql_debtor:str = '''INSERT INTO Deudores(
+                                            nombre, apellido, 
+                                            num_telefono, direccion, 
+                                            codigo_postal) 
+                                        VALUES(?, ?, ?, ?, ?);'''
+                    params_debtor:tuple = (values[7], values[8], 
+                                           values[9], values[10], 
+                                           values[11],)
                     cursor.execute(sql_debtor, params_debtor)
                     conn.commit()
                 
                 # declara la consutla sql y params de Deudas y hace la consulta...
-                sql_debt:str = "INSERT INTO Deudas(fecha_hora, total_adeudado, IDdeudor, eliminado) VALUES(?, ?, (SELECT IDdeudor FROM Deudores WHERE nombre = ? AND apellido = ?), 0);"
+                sql_debt:str = '''INSERT INTO Deudas(
+                                    fecha_hora, total_adeudado, 
+                                    IDdeudor, eliminado) 
+                                  VALUES(?, ?, (SELECT IDdeudor 
+                                        FROM Deudores 
+                                        WHERE nombre = ? 
+                                            AND apellido = ?), 
+                                        0);'''
                 params_debt:tuple = (values[6], round(values[4] - values[5],2), values[7], values[8],)
                 cursor.execute(sql_debt, params_debt)
                 conn.commit()
 
                 # al final, declara la consulta y los parámetros para Detalle_Ventas...
-                sql_saleDetail:str = "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?,?,(SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?),?, (SELECT IDdeuda FROM Deudas WHERE fecha_hora = ? AND IDdeudor = (SELECT IDdeudor FROM Deudores WHERE nombre = ? AND apellido = ?) ) );"
-                params_saleDetail:tuple = (values[2], values[4], values[1], values[6], values[0], values[5], values[6], values[7], values[8],)
+                sql_saleDetail:str = '''INSERT INTO Detalle_Ventas(
+                                            cantidad, costo_total, IDproducto, 
+                                            IDventa, abonado, IDdeuda) 
+                                        VALUES(?,?,(
+                                            SELECT IDproducto 
+                                            FROM Productos 
+                                            WHERE nombre = ?), 
+                                            (SELECT IDventa 
+                                            FROM Ventas 
+                                            WHERE fecha_hora = ? 
+                                                AND detalles_venta = ?),
+                                            ?, (
+                                            SELECT IDdeuda 
+                                            FROM Deudas 
+                                            WHERE fecha_hora = ? 
+                                            AND IDdeudor = (
+                                                SELECT IDdeudor 
+                                                FROM Deudores 
+                                                WHERE nombre = ? 
+                                                AND apellido = ?) 
+                                                ) 
+                                            );'''
+                params_saleDetail:tuple = (values[2], values[4], values[1], 
+                                           values[6], values[0], values[5], 
+                                           values[6], values[7], values[8],)
             
             # si lo abonado es igual al total...
             else:
                 # declara la consulta sql y los params de Detalle_Ventas (solamente de esa tabla)...
-                sql_saleDetail:str = "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, NULL);"
-                params_saleDetail:tuple = (values[2], values[4], values[1], values[6], values[0], values[5],)
+                sql_saleDetail:str = '''INSERT INTO Detalle_Ventas(
+                                            cantidad, costo_total, IDproducto, 
+                                            IDventa, abonado, IDdeuda) 
+                                        VALUES(?, ?, (
+                                            SELECT IDproducto 
+                                            FROM Productos 
+                                            WHERE nombre = ?), (
+                                            SELECT IDventa 
+                                            FROM Ventas 
+                                            WHERE fecha_hora = ? 
+                                            AND detalles_venta = ?), 
+                                            ?, NULL);'''
+                params_saleDetail:tuple = (values[2], values[4], values[1], 
+                                           values[6], values[0], values[5],)
             
             # hace la consulta a Detalle_Ventas
             cursor.execute(sql_saleDetail, params_saleDetail)
             conn.commit()
             
             # antes de terminar, actualiza el stock en Productos (resta al stock la cantidad vendida)
-            sql_product:str = "UPDATE Productos SET stock = stock - ? WHERE nombre = ?;"
+            sql_product:str = '''UPDATE Productos 
+                                 SET stock = stock - ? 
+                                 WHERE nombre = ?;'''
             params_product:tuple = (values[2], values[1],)
             cursor.execute(sql_product, params_product)
             conn.commit()
+            
+            self.__emitDataFilled(values=values)
             
         except sqlite3Error as err:
             conn.rollback()
@@ -1296,6 +1402,64 @@ class SaleDialog(QDialog):
         
         finally:
             conn.close()
+        return None
+    
+    
+    def __emitDataFilled(self, values:tuple[Any]) -> None:
+        '''
+        Convierte los datos recibidos en un diccionario y los emite por medio de 
+        la señal 'dataFilled' a MainWindow para, desde ahí, actualizar el MODELO 
+        de datos.
+
+        Parámetros
+        ----------
+        values : tuple[Any]
+            datos a emitir a MainWindow
+
+        Retorna
+        -------
+        None
+        '''
+        values_to_dict:dict[str, Any] = {}
+        
+        with DatabaseRepository() as db_repo:
+            values_to_dict = {
+                'IDsale_detail': db_repo.selectRegisters(
+                    data_sql='''SELECT ID_detalle_venta 
+                                FROM Detalle_Ventas 
+                                ORDER BY ID_detalle_venta DESC 
+                                LIMIT 1;''')[0][0],
+                'sale_detail': values[0],
+                'product_quantity': values[2],
+                'product_measurement_unit': db_repo.selectRegisters(
+                    data_sql='''SELECT unidad_medida 
+                                FROM Productos 
+                                WHERE nombre = ?;''',
+                    data_params=(values[1],) )[0][0],
+                'product_name': values[1],
+                'total_cost': values[4],
+                'total_paid': values[5],
+                'datetime': values[6],
+                'THERE_IS_DEBT': False
+            }
+            
+            # si el largo de la tupla es de 12 es porque hay deuda
+            if len(values) == 12:
+                values_to_dict.update({
+                    'IDdebt': db_repo.selectRegisters(
+                        data_sql='''SELECT IDdeuda 
+                                    FROM Deudas 
+                                    ORDER BY IDdeuda DESC
+                                    LIMIT 1;''')[0][0],
+                    'debtor_name': values[7],
+                    'debtor_surname': values[8],
+                    'debtor_phone_number': values[9],
+                    'debtor_direction': values[10],
+                    'debtor_postal_code': values[11],
+                    'THERE_IS_DEBT': True
+                })
+                
+            self.dataFilled.emit(values_to_dict)
         return None
 
 
