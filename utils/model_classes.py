@@ -65,6 +65,29 @@ class InventoryTableModel(QAbstractTableModel):
         return Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsEditable
     
     
+    def modelHasData(self) -> bool:
+        '''
+        Devuelve un flag que determina si el modelo de datos tiene datos 
+        o si está vacío.
+
+        Retorna
+        -------
+        bool
+            flag que determina la existencia de datos en el modelo
+        '''
+        try:
+            if self._data.shape:
+                return True
+        
+        except NameError:
+            return False
+        
+        except AttributeError:
+            return False
+        
+        return True
+    
+    
     #¡ datos
     def setData(self, index: QModelIndex | QPersistentModelIndex, 
                 value: Any, role: int = Qt.ItemDataRole.EditRole) -> bool:
@@ -289,7 +312,7 @@ class InventoryTableModel(QAbstractTableModel):
         return True
 
 
-    def insertRows(self, row:int, count:int, data_to_insert:dict[Any], 
+    def insertRows(self, row:int, count:int, data_to_insert:dict[str, Any], 
                    parent:QModelIndex = QModelIndex()) -> bool:
         '''
         Actualiza el MODELO de datos agregando los datos introducidos en el QDialog 
@@ -386,6 +409,29 @@ class SalesTableModel(QAbstractTableModel):
         return Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsEditable
     
     
+    def modelHasData(self) -> bool:
+        '''
+        Devuelve un flag que determina si el modelo de datos tiene datos 
+        o si está vacío.
+
+        Retorna
+        -------
+        bool
+            flag que determina la existencia de datos en el modelo
+        '''
+        try:
+            if self._data.shape:
+                return True
+        
+        except NameError:
+            return False
+        
+        except AttributeError:
+            return False
+        
+        return True
+    
+    
     #¡ datos    
     def setData(self, index:QModelIndex | QPersistentModelIndex, value:Any, 
                 role:Qt.ItemDataRole = Qt.ItemDataRole.EditRole) -> bool:
@@ -457,7 +503,7 @@ class SalesTableModel(QAbstractTableModel):
                     
                     self._data[index.row()][index.column() + 2] = value
                     
-                    # actualiza detalles de venta en MainWindow
+                    # actualiza costo total | abonado en MainWindow
                     self.dataToUpdate.emit(
                         {'column': index.column(),
                          'IDsales_detail': self._data[index.row()][0],
@@ -473,7 +519,7 @@ class SalesTableModel(QAbstractTableModel):
                     
                     self._data[index.row()][index.column() + 2] = value
                     
-                    # actualiza detalles de venta en MainWindow
+                    # actualiza fecha y hora en MainWindow
                     self.dataToUpdate.emit(
                         {'column': index.column(),
                          'IDsales_detail': self._data[index.row()][0],
@@ -593,10 +639,31 @@ class SalesTableModel(QAbstractTableModel):
         
         self.dataChanged.emit(quantity_index, quantity_index, [Qt.ItemDataRole.EditRole])
         return None
-        
+    
+
     # TODO: implementar eliminar/crear filas
-
-
+    def insertRows(self, row, count, data_to_insert:dict[str, Any], 
+                   parent:QModelIndex = QModelIndex()):
+        if row < 0 or row > self.rowCount():
+            return False
+        
+        self.beginInsertRows(parent, row, row + count - 1)
+        # actualiza el atributo '_data'
+        dict_to_ndarray:ndarray = array( # convierte el dict a un array de Numpy
+            object=[data_to_insert["product_ID"],
+                    data_to_insert["product_category"],
+                    data_to_insert["product_name"],
+                    data_to_insert["product_description"],
+                    data_to_insert["product_stock"],
+                    data_to_insert["product_measurement_unit"],
+                    data_to_insert["product_unit_price"],
+                    data_to_insert["product_comercial_price"]]
+            )
+        # 'numpy.vstack' concatena ambos arrays de forma vertical, es decir, por filas
+        self._data = vstack((self._data, dict_to_ndarray))
+        self.endInsertRows()
+                
+        return True
 
 
 
