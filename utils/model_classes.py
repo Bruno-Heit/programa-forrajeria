@@ -641,7 +641,6 @@ class SalesTableModel(QAbstractTableModel):
         return None
     
 
-    # TODO: implementar eliminar/crear filas
     def insertRows(self, row, count, data_to_insert:dict[str, Any], 
                    parent:QModelIndex = QModelIndex()):
         if row < 0 or row > self.rowCount():
@@ -650,14 +649,14 @@ class SalesTableModel(QAbstractTableModel):
         self.beginInsertRows(parent, row, row + count - 1)
         # actualiza el atributo '_data'
         dict_to_ndarray:ndarray = array( # convierte el dict a un array de Numpy
-            object=[data_to_insert["product_ID"],
-                    data_to_insert["product_category"],
-                    data_to_insert["product_name"],
-                    data_to_insert["product_description"],
-                    data_to_insert["product_stock"],
+            object=[data_to_insert["IDsale_detail"],
+                    data_to_insert["sale_detail"],
+                    data_to_insert["product_quantity"],
                     data_to_insert["product_measurement_unit"],
-                    data_to_insert["product_unit_price"],
-                    data_to_insert["product_comercial_price"]]
+                    data_to_insert["product_name"],
+                    data_to_insert["total_cost"],
+                    data_to_insert["total_paid"],
+                    data_to_insert["datetime"]]
             )
         # 'numpy.vstack' concatena ambos arrays de forma vertical, es decir, por filas
         self._data = vstack((self._data, dict_to_ndarray))
