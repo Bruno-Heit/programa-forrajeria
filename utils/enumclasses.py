@@ -141,6 +141,32 @@ class TypeSideBar(IntEnum):
 
 
 
+# nombres predeterminados de columnas de tablas
+class TableViewColumn(StrEnum):
+    '''Clase de tipo 'IntEnum' con los nombres predeterminados de las columnas de las 
+    VISTAS.'''
+    INV_CATEGORY = 0
+    INV_PRODUCT_NAME = 1
+    INV_DECRIPTION = 2
+    INV_STOCK = 3
+    INV_NORMAL_PRICE = 4
+    INV_COMERCIAL_PRICE = 5
+    
+    SALES_DETAIL = 0
+    SALES_QUANTITY = 1
+    SALES_PRODUCT_NAME = 2
+    SALES_TOTAL_COST = 3
+    SALES_TOTAL_PAID = 4
+    SALES_DATETIME = 5
+    
+    ...
+    # TODO: poner acá los nombres de columnas de tabla de Deudas
+
+
+
+
+
+# expresiones regulares para validadores o búsqueda
 class RegexExps(StrEnum):
     '''
     Clase StrEnum con expresiones regulares predefinidas, creadas principalmente para 
