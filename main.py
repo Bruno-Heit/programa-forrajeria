@@ -18,7 +18,8 @@ from utils.workerclasses import (WorkerSelect, WorkerUpdate)
 from utils.dboperations import (DatabaseRepository)
 from utils.customvalidators import (SalePaidValidator)
 from utils.enumclasses import (LoggingMessage, DBQueries, ModelHeaders, TableViewId, 
-                               LabelFeedbackStyle, InventoryPriceType, TypeSideBar)
+                               LabelFeedbackStyle, InventoryPriceType, TypeSideBar, 
+                               TableViewColumns)
 
 from resources import (rc_icons)
 
@@ -767,7 +768,7 @@ class MainWindow(QMainWindow):
                 productDialog = ProductDialog() # QDialog para añadir un producto nuevo a 'tv_inventory_data'
                 productDialog.setAttribute(Qt.WA_DeleteOnClose, True) # destruye el dialog cuando se cierra
                 
-                # conecta señal para actualizar el MODELO
+                # conecta señal para actualizar el MODELO de inventario
                 productDialog.dataFilled.connect(
                     lambda data_to_insert: self.insertDataIntoModel(
                         table_viewID=TableViewId.INVEN_TABLE_VIEW,
@@ -781,6 +782,15 @@ class MainWindow(QMainWindow):
                 saleDialog = SaleDialog() # QDialog para añadir una venta nueva a 'tv_sales_data' (y posiblemente, una
                                           # deuda a 'tv_debts_data')
                 saleDialog.setAttribute(Qt.WA_DeleteOnClose, True)
+                
+                # conecta señal para actualizar el MODELO de ventas
+                saleDialog.dataFilled.connect(
+                    lambda data_to_insert: self.insertDataIntoModel(
+                        table_viewID=TableViewId.SALES_TABLE_VIEW,
+                        data_to_insert=data_to_insert
+                    )
+                )
+                
                 saleDialog.exec()
             
             case "DEBTS_TABLE_VIEW":
@@ -814,15 +824,81 @@ class MainWindow(QMainWindow):
                     data_to_insert=data_to_insert)
             
             case 'SALES_TABLE_VIEW':
-                ...
+                self.__updateStockOnSaleCreation(data_to_insert=data_to_insert)
+                
+                # le paso los datos al modelo, excepto el flag 'THERE_IS_DEBT', 
+                # porque el modelo no lo necesita
+                self.sales_data_model.insertRows(
+                    row=self.inventory_data_model.rowCount(),
+                    count=1,
+                    data_to_insert={key: value for key, value in data_to_insert.items() if 'THERE_IS_DEBT' not in key}
+                )
+                
+                # si hay deuda también actualiza el MODELO de deudas
+                if data_to_insert['THERE_IS_DEBT']:
+                    ...
             
             case 'DEBTS_TABLE_VIEW':
                 ...
         
         return None
+    
+    
+    def __updateStockOnSaleCreation(self, data_to_insert:dict[Any]) -> None:
+        '''
+        Actualiza el stock en el MODELO de inventario cuando se agrega una nueva 
+        venta al MODELO de ventas.
+
+        Parámetros
+        ----------
+        data_to_insert : dict[Any]
+            datos con los que actualizar el MODELO DE DATOS correspondiente
+
+        Retorna
+        -------
+        None
+        '''
+        found_index_row:int = None
+        target_index:QModelIndex
+        curr_stock:str|float
+        measurement_unit:str
+        new_value:float
+        
+        # si el modelo no está vacío...
+        if self.inventory_data_model.modelHasData():
+            # obtengo el índice donde modificar el stock
+            found_index_row = self.inventory_data_model.match(
+                self.inventory_data_model.index(0, TableViewColumns.INV_PRODUCT_NAME.value), # busca desde la 1ra fila, 2da columna (de nombre).
+                Qt.ItemDataRole.DisplayRole.value,          # devuelve la coincidencia como texto.
+                data_to_insert['product_name'],             # el dato a buscar.
+                1,                                          # cantidad de coincidencias para que deje de buscar.
+                Qt.MatchFlag.MatchExactly                   # determina el criterio de búsqueda (debe ser exacto el string).
+            )[0].row()                                      # obtengo del elemento [0] sólo el valor de la fila.
+            
+            if found_index_row is not None:
+                # obtiene el stock en esa fila
+                target_index = self.inventory_data_model.index(
+                    found_index_row,
+                    TableViewColumns.INV_STOCK.value
+                )
+                curr_stock, measurement_unit = target_index.data(Qt.ItemDataRole.DisplayRole).split(" ", 1)
+                
+                # resta al stock anterior la cantidad introducida
+                try:
+                    new_value = round(
+                        float(curr_stock.replace(",",".").strip()) - float(data_to_insert["product_quantity"]),
+                        2)
+                    new_value = f"{new_value} {measurement_unit}"
+                
+                    self.inventory_data_model.setData(target_index, new_value, Qt.ItemDataRole.EditRole)
+                
+                except:
+                    pass
+        return None
 
 
     #¡ tablas (DELETE)
+    # TODO: implementar eliminar ventas del modelo y vista
     @Slot(QTableView)
     def handleTableDeleteRows(self, table_viewID:TableViewId) -> None:
         '''
@@ -909,6 +985,10 @@ class MainWindow(QMainWindow):
         self.__instanciateDeleteWorkerAndThread(table_viewID, params_ids)
         
         return None
+
+
+    def __deleteSalesRows(self, table_viewID:TableViewId=TableViewId.SALES_TABLE_VIEW) -> None:
+        ...
 
 
     def __getDeleteData(self, table_viewID:TableViewId, selected_rows:Iterable) -> Iterable[tuple]:

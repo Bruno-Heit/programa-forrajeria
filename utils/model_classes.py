@@ -641,6 +641,7 @@ class SalesTableModel(QAbstractTableModel):
         return None
     
 
+    # TODO: implementar eliminar filas
     def insertRows(self, row, count, data_to_insert:dict[str, Any], 
                    parent:QModelIndex = QModelIndex()):
         if row < 0 or row > self.rowCount():
