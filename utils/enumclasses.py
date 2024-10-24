@@ -142,7 +142,7 @@ class TypeSideBar(IntEnum):
 
 
 # nombres predeterminados de columnas de tablas
-class TableViewColumns(StrEnum):
+class TableViewColumns(IntEnum):
     '''Clase de tipo 'IntEnum' con los nombres predeterminados de las columnas de las 
     VISTAS.'''
     INV_CATEGORY = 0
