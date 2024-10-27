@@ -4,7 +4,7 @@ En este archivo están todas las clases de WORKER THREADS
 from PySide6.QtCore import (QObject, Signal, Slot)
 
 from utils.functionutils import (createConnection)
-from utils.enumclasses import (LoggingMessage)
+from utils.enumclasses import (LoggingMessage, TableViewId)
 from utils.dboperations import (DatabaseRepository)
 
 from sqlite3 import (Connection, Error as sqlite3Error)
@@ -81,18 +81,26 @@ class WorkerDelete(QObject):
     progress = Signal(int) # devuelve un int con el progreso que lleva borrado para actualizar el progressbar en MainWindow.
     finished = Signal(int)
     
-    def executeDeleteQuery(self, params:list[tuple[int,str]], sql:str=None, mult_sql:tuple[str]=None) -> None:
+    def executeDeleteQuery(self, params:Iterable[Any] | dict[str, list], sql:str=None, 
+                           mult_sql:tuple[str]=None, table_viewID:TableViewId=TableViewId.INVEN_TABLE_VIEW) -> None:
         '''
         Hace la consulta DELETE a la base de datos.
         
-        PARAMS
-        - sql: la consulta DELETE para eliminar los registros de una tabla. Por defecto es None.
-        - params: los parámetros como iterable para la consulta DELETE 'sql'. Cada '[tuple]' tiene un 'int' con el ID y un 
-        'str' con un valor único del registro (ej.:nombre de un producto, fecha y hora de una venta, etc.).
-        - mult_sql: consultas DELETE y sus parámetros en formato tuple[str]. Por defecto es None.
-        
-        Se recibe el parámetro 'mult_sql' cuando se deben realizar consultas DELETE en más de una tabla en forma 
-        consecutiva (por ej.: en Detalle_Ventas se debe borrar registros de Ventas también).
+        Parámetros
+        ----------
+        params : Iterable[Any] | dict[list]
+            parámetros para la consulta DELETE, será un 'dict[list]' cuando el 
+            parámetro 'mult_sql' sea diferente de None. Cada 'dict' tiene los 
+            IDs necesarios para la consulta
+        sql : str, opcional
+            consulta DELETE para eliminar registros de una tabla
+        mult_sql : tuple[str], opcional
+            consultas DELETE y sus parámetros en formato tuple[str], se recibe 
+            cuando se deben realizar consultas DELETE en más de una tabla en forma 
+            consecutiva (por ej.: en Detalle_Ventas se debe borrar registros de 
+            Ventas también).
+        table_viewID : TableViewId, opcional
+            vista a la que se referencia
         
         SEÑALES:
         La señal 'finished' emite:
@@ -101,6 +109,10 @@ class WorkerDelete(QObject):
         - sqlite3.Error.sqlite_errorcode: si hubo un error concreto, emite el código de error de sqlite3.
         
         La señal 'progress' emite un int que indica el progreso de borrado.
+        
+        Retorna
+        -------
+        None
         '''
         conn = createConnection("database/inventario.db")
         if not conn:
@@ -108,22 +120,26 @@ class WorkerDelete(QObject):
         cursor = conn.cursor()
         
         try:
-            # se borra de una sola tabla (ej.: Productos)
-            if sql and not mult_sql:
-                for n,param in enumerate(params):
-                    cursor.execute(sql, param)
-                    conn.commit()
-                    self.progress.emit(n)
-                logging.debug(LoggingMessage.DEBUG_DB_MULT_DELETE_SUCCESS)
-            
-            # se borra de más de una tabla (ej.: Detalle_Ventas, Ventas y Deudas)
-            elif not sql and mult_sql:
-                for n,param in enumerate(params):
-                    for sql in mult_sql:
-                        cursor.execute(sql, param[:sql.count("?")])
+            match table_viewID.name:
+                case "INVEN_TABLE_VIEW":
+                    for n,param in enumerate(params):
+                        cursor.execute(sql, param)
                         conn.commit()
-                    self.progress.emit(n)
-                logging.debug(LoggingMessage.DEBUG_DB_MULT_DELETE_SUCCESS)
+                        self.progress.emit(n)
+                    logging.debug(LoggingMessage.DEBUG_DB_MULT_DELETE_SUCCESS)
+            
+                # al ser de VENTAS, params es 'dict[list]', donde cada item 
+                # tiene los IDs necesarios para las 3 tablas
+                case "SALES_TABLE_VIEW":
+                    # recorre cada (consulta sql, item) simultáneamente
+                    for n, ( sql, (_, values) ) in enumerate( zip(mult_sql, params.items()) ):
+                        # recorre cada valor de la lista 'values' y hace las consultas (en orden, 
+                        # borra Detalle_Ventas, Ventas y marca "eliminado" en Deudas)
+                        for val in values:
+                            cursor.execute(sql, (val,))
+                            conn.commit()
+                        self.progress.emit(n)
+                    logging.debug(LoggingMessage.DEBUG_DB_MULT_DELETE_SUCCESS)
             
         
         except sqlite3Error as err: #! errores de base de datos, consultas, etc.
