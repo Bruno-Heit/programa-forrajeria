@@ -14,7 +14,7 @@ from ui.ui_mainwindow import (Ui_MainWindow)
 from utils.functionutils import *
 from utils.model_classes import (InventoryTableModel, SalesTableModel)
 from utils.delegates import (InventoryDelegate, SalesDelegate)
-from utils.workerclasses import (WorkerSelect, WorkerUpdate)
+from utils.workerclasses import (WorkerSelect, WorkerUpdate, WorkerDelete)
 from utils.dboperations import (DatabaseRepository)
 from utils.customvalidators import (SalePaidValidator)
 from utils.enumclasses import (LoggingMessage, DBQueries, ModelHeaders, TableViewId, 
@@ -698,7 +698,7 @@ class MainWindow(QMainWindow):
     
     
     @Slot(str)
-    def __workerOnFinished(self, table_viewID:TableViewId) -> None:
+    def __workerOnFinished(self, table_viewID:TableViewId, READ_OPERATION:bool=True) -> None:
         '''
         Esconde la QProgressBar relacionada con el QTableView, reinicia el valor del 
         QSS de dicha QProgressBar y carga los datos en el QTableView, luego reinicia 
@@ -706,8 +706,11 @@ class MainWindow(QMainWindow):
         
         Parámetros
         ----------
-            tv_name: TableViewID
-                QTableView al que se referencia
+        tv_name : TableViewID
+            QTableView al que se referencia
+        READ_OPERATION : bool, opcional
+            determina si la operación a base de datos es de lectura, sino no reinicia 
+            el contenido de la tabla
 
         Retorna
         -------
@@ -718,9 +721,10 @@ class MainWindow(QMainWindow):
                 self.ui.inventory_progressbar.setStyleSheet("")
                 self.ui.inventory_progressbar.hide()
                 
-                self.inventory_data_model.setModelData(
-                    data=self._inv_model_data_acc,
-                    headers=ModelHeaders.INVENTORY_HEADERS.value)
+                if READ_OPERATION:
+                    self.inventory_data_model.setModelData(
+                        data=self._inv_model_data_acc,
+                        headers=ModelHeaders.INVENTORY_HEADERS.value)
             
                 # borra el acumulador temporal de datos
                 self._inv_model_data_acc = None
@@ -730,9 +734,10 @@ class MainWindow(QMainWindow):
                 self.ui.sales_progressbar.setStyleSheet("")
                 self.ui.sales_progressbar.hide()
                 
-                self.sales_data_model.setModelData(
-                    data=self._sales_model_data_acc,
-                    headers=ModelHeaders.SALES_HEADERS.value)
+                if READ_OPERATION:
+                    self.sales_data_model.setModelData(
+                        data=self._sales_model_data_acc,
+                        headers=ModelHeaders.SALES_HEADERS.value)
                 
                 # borra el acumulador temp. de datos
                 self._sales_model_data_acc = None
@@ -898,7 +903,6 @@ class MainWindow(QMainWindow):
 
 
     #¡ tablas (DELETE)
-    # TODO: implementar eliminar ventas del modelo y vista
     @Slot(QTableView)
     def handleTableDeleteRows(self, table_viewID:TableViewId) -> None:
         '''
@@ -922,23 +926,7 @@ class MainWindow(QMainWindow):
                 self.__deleteInventoryRows()
             
             case "SALES_TABLE_VIEW":
-                # TODO: una vez creado el modelo de ventas, obtener los datetime desde dicho modelo
-                pass
-                # dateTime_to_delete = self.__getTableElementsToDelete(table_view, selected_rows)
-                
-                # # obtiene ids de las filas seleccionadas
-                # ids_to_delete = [self.IDs_saleDetails[n_id] for n_id in selected_rows]
-                
-                # mult_sql:tuple[str] = (
-                #     "DELETE FROM Ventas WHERE IDventa = (SELECT IDventa FROM Detalle_Ventas WHERE ID_detalle_venta = ?) AND fecha_hora = ?;",
-                #     "DELETE FROM Detalle_Ventas WHERE ID_detalle_venta = ?;",
-                #     )
-                
-                # # une 'ids_to_delete' y 'dateTime_to_delete' en una lista[(id, fecha_y_hora)]
-                # params = [(id, datetime) for id,datetime in zip(ids_to_delete, dateTime_to_delete)]
-                
-                # self.ui.sales_progressbar.setMaximum(len(params))
-                # self.ui.sales_progressbar.setStyleSheet("QProgressBar::chunk {background-color: qlineargradient(spread:reflect, x1:0.119, y1:0.426, x2:0.712045, y2:0.926, stop:0.0451977 rgba(255, 84, 87, 255), stop:0.59887 rgba(255, 161, 71, 255));}")
+                self.__deleteSalesRows()
 
             case "DEBTS_TABLE_VIEW":
                 pass
@@ -981,49 +969,121 @@ class MainWindow(QMainWindow):
         # actualiza el MODELO de datos
         self.inventory_data_model.removeSelectedModelRows(selected_rows)
         
-        # instancia y ejecuta WORKER y THREAD
+        # # instancia y ejecuta WORKER y THREAD
         self.__instanciateDeleteWorkerAndThread(table_viewID, params_ids)
         
         return None
 
 
     def __deleteSalesRows(self, table_viewID:TableViewId=TableViewId.SALES_TABLE_VIEW) -> None:
-        ...
+        '''
+        Elimina los productos seleccionados en el MODELO de ventas, actualiza 
+        la VISTA y marca las deudas (si hay) en la base de datos como eliminadas.
+
+        Parámetros
+        ----------
+        table_viewID : TableViewId, opcional
+            QTableView al que se refencia
+
+        Retorna
+        -------
+        None
+        '''
+        # obtiene las filas seleccionadas
+        selected_rows = getSelectedTableRows(self.ui.tv_sales_data)
+        
+        if not selected_rows:
+            return None
+        
+        # cambia la progress-bar para representar las eliminaciones
+        self.ui.sales_progressbar.setMaximum(len(selected_rows))
+        self.ui.sales_progressbar.setStyleSheet(
+            '''QProgressBar::chunk {
+                background-color: qlineargradient(spread:reflect, x1:0.119, y1:0.426, 
+                    x2:0.712045, y2:0.926, stop:0.0451977 rgba(255, 84, 87, 255), 
+                    stop:0.59887 rgba(255, 161, 71, 255));
+                }''')
+        
+        # # obtiene ids de las filas seleccionadas
+        params_ids = self.__getDeleteData(table_viewID, selected_rows)
+        
+        # actualiza el modelo de ventas
+        self.sales_data_model.removeSelectedModelRows(selected_rows)
+        
+        # instancia y ejecuta WORKER y THREAD
+        self.__instanciateDeleteWorkerAndThread(table_viewID, params_ids)
+        
+        return None
 
 
-    def __getDeleteData(self, table_viewID:TableViewId, selected_rows:Iterable) -> Iterable[tuple]:
+    def __getDeleteData(self, table_viewID:TableViewId, selected_rows:Iterable) -> Iterable[tuple | dict]:
         '''
         Obtiene los datos necesarios desde el MODELO de datos de la VISTA especifica 
         para poder realizar las consultas.
-        Si la VISTA es:
-            1. Inventario: obtiene los IDs de los productos
-            ...
 
         Parámetros
         ----------
         table_viewID : TableViewId
             QTableView al que se refencia
+        selected_rows : Iterable
+            las filas seleccionadas en la vista
 
         Retorna
         -------
-        Iterable[tuple]
+        Iterable[tuple | dict]
             iterable con los datos necesarios para las consultas
         '''
-        data:list[Any] = []
+        data:list[Any] | dict[list] = []
+        id_sales:list[Any] # tiene los IDventa.
+        id_debts:list[Any] # tiene los IDdeuda.
+        _placeholders:str # tiene los placeholders (?) necesarios para obtener los IDventa | IDdeuda en la consulta sql.
         
         match table_viewID.name:
             case "INVEN_TABLE_VIEW":
                 # obtiene los IDs de los productos y los convierte en tuple[ID]
                 for row in selected_rows:
                     data.append( (self.inventory_data_model._data[row][0],) )
+                data = tuple(data)
             
             case "SALES_TABLE_VIEW":
-                pass
+                # obtiene los IDs de detalle de venta y los convierte en tuple[ID]
+                for row in selected_rows:
+                    data.append(self.sales_data_model._data[row][0])
+                
+                with self._db_repo as db_repo:
+                    # obtiene los IDs de ventas
+                    _placeholders = ','.join(['?'] * len(data)) # crea una cadena de '?,?,?...' largo como la cantidad de ids
+                    
+                    id_sales = db_repo.selectRegisters(
+                        data_sql=f'''SELECT DISTINCT v.IDventa 
+                                     FROM Ventas AS v 
+                                     INNER JOIN Detalle_Ventas AS dv ON dv.IDventa = v.IDventa 
+                                     WHERE dv.ID_detalle_venta IN ({_placeholders});''',
+                        data_params=data
+                    )
+                    id_sales = [id_debt[0] for id_debt in id_sales]
+                    
+                    # obtiene los IDs de deudas
+                    id_debts = db_repo.selectRegisters(
+                        data_sql=f'''SELECT DISTINCT d.IDdeuda 
+                                     FROM Deudas AS d 
+                                     INNER JOIN Detalle_Ventas AS dv ON dv.IDdeuda = d.IDdeuda 
+                                     WHERE dv.ID_detalle_venta IN ({_placeholders});''',
+                        data_params=data
+                    )
+                    id_debts = [id_debt[0] for id_debt in id_debts]
+                    
+                    # convierte data a un dict[lista de ids]
+                    data = {
+                        "ID_sales_detail": data,
+                        "IDsales": id_sales,
+                        "IDdebts": id_debts
+                    }
             
             case "DEBTS_TABLE_VIEW":
                 pass
         
-        return tuple(data)
+        return data
 
 
     def __instanciateDeleteWorkerAndThread(self, table_viewID:TableViewId, del_params:Iterable[tuple]) -> None:
@@ -1052,34 +1112,48 @@ class MainWindow(QMainWindow):
                 self.DELETE_THREAD.started.connect(lambda: self.update_worker.executeUpdateQuery(
                     sql="UPDATE Productos SET eliminado = 1 WHERE IDproducto = ?",
                     params=del_params)
-                    )
+                )
                 self.update_worker.progress.connect(lambda value: self.__updateProgressBar(
-                    tv_name=self.ui.tv_inventory_data.objectName(),
+                    table_viewID=table_viewID,
                     value=value)
-                    )
+                )
                 
                 self.update_worker.finished.connect(lambda: self.__workerOnFinished(
-                    tv_name=self.ui.tv_inventory_data.objectName(),
+                    table_viewID=TableViewId.INVEN_TABLE_VIEW,
                     READ_OPERATION=False)
-                    )
+                )
                 self.update_worker.finished.connect(self.DELETE_THREAD.quit)
                 self.DELETE_THREAD.finished.connect(self.update_worker.deleteLater)
             
             case "SALES_TABLE_VIEW":
-                pass
-                # self.delete_worker = WorkerDelete()
-                # self.delete_worker.moveToThread(self.DELETE_THREAD)
-                # self.DELETE_THREAD.started.connect(lambda: self.delete_worker.executeDeleteQuery(
-                #     params=params,
-                #     mult_sql=mult_sql))
-                # self.delete_worker.progress.connect(lambda value: self.__updateProgressBar(
-                #     tv_name=table_view.objectName(),
-                #     value=value))
-                # self.delete_worker.finished.connect(lambda: self.__workerOnFinished(
-                #     tv_name=table_view.objectName(),
-                #     READ_OPERATION=False) )
-                # self.delete_worker.finished.connect(self.DELETE_THREAD.quit)
-                # self.DELETE_THREAD.finished.connect(self.delete_worker.deleteLater)
+                # borra registros de Ventas y Detalle_Ventas
+                mult_sql:tuple[str] = (
+                    '''DELETE FROM Detalle_Ventas 
+                       WHERE ID_detalle_venta = ?;''',
+                    '''DELETE FROM Ventas 
+                       WHERE IDventa = ?;''',
+                    '''UPDATE Deudas 
+                       SET eliminado = 1 
+                       WHERE IDdeuda = ?;'''
+                    )
+                self.delete_worker = WorkerDelete()
+                self.delete_worker.moveToThread(self.DELETE_THREAD)
+                
+                self.DELETE_THREAD.started.connect(lambda: self.delete_worker.executeDeleteQuery(
+                    mult_sql=mult_sql,
+                    params=del_params,
+                    table_viewID=TableViewId.SALES_TABLE_VIEW)
+                )
+                self.delete_worker.progress.connect(lambda value: self.__updateProgressBar(
+                    table_viewID=table_viewID,
+                    value=value)
+                )
+                self.delete_worker.finished.connect(lambda: self.__workerOnFinished(
+                    table_viewID=table_viewID,
+                    READ_OPERATION=False) )
+                
+                self.delete_worker.finished.connect(self.DELETE_THREAD.quit)
+                self.DELETE_THREAD.finished.connect(self.delete_worker.deleteLater)
             
             case "DEBTS_TABLE_VIEW":
                 pass

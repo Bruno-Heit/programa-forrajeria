@@ -641,7 +641,64 @@ class SalesTableModel(QAbstractTableModel):
         return None
     
 
-    # TODO: implementar eliminar filas
+    def removeSelectedModelRows(self, selected_rows:Sequence) -> None:
+        '''
+        Actualiza el MODELO de datos eliminando los datos de las filas seleccionadas 
+        en bloques de filas, ya que es más eficiente que hacerlo de a una.
+
+        Parámetros
+        ----------
+        selected_rows : Sequence
+            secuencia con las filas seleccionadas
+        
+        Retorna
+        -------
+        None
+        '''
+        blocks:list[tuple[int, int]] = []
+        start_block:int = selected_rows[0] # puntero al primer elemento del bloque
+        end_block:int = start_block # puntero al último elemento del bloque
+        
+        # ordeno las filas para trabajar con bloques de filas continuas
+        selected_rows = sorted(selected_rows)
+        
+        # agrupo filas continuas
+        for row in selected_rows[1:]:
+            # verifica si el elemento actual es 1 mayor al anterior, básicamente
+            if row == end_block + 1:
+                end_block = row
+        
+            # sino, es porque las filas no son continuas, así que guardamos el bloque 
+            # anterior y empezamos con otro nuevo
+            else:
+                blocks.append( (start_block, end_block) )
+                start_block = row
+                end_block = row
+        
+        # guardo el último bloque
+        blocks.append( (start_block, end_block) )
+        
+        # elimina los datos en orden inverso para evitar problemas de índices
+        for start, end in reversed(blocks):
+            self.removeRows(start, end - start + 1)
+        
+        return None
+    
+    
+    def removeRows(self, row:int, count:int, parent:QModelIndex=QModelIndex()) -> bool:
+        # verifica que las filas estén dentro del rango válido
+        if row < 0 or (row + count) > self.rowCount():
+            return False
+
+        # elimina las filas seleccionadas del modelo        
+        self.beginRemoveRows(parent, row, row + count - 1)
+        # s_[inicio:final] es la forma simple que tiene numpy de hacer 'slicing'
+        self._data = delete(self._data, s_[row:row + count], axis=0)
+        self.endRemoveRows()
+        
+        return True
+    
+    
     def insertRows(self, row, count, data_to_insert:dict[str, Any], 
                    parent:QModelIndex = QModelIndex()):
         if row < 0 or row > self.rowCount():
