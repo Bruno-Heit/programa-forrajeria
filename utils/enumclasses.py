@@ -141,6 +141,20 @@ class TypeSideBar(IntEnum):
 
 
 
+# [ListItemValues] tipos de campos para validar
+class ListItemValuesField(IntEnum):
+    '''Clase de tipo 'IntEnum' con los campos de los cuales se guarda registro en la clase.'''
+    PRODUCT_ID = 0
+    PRODUCT_NAME = 1
+    QUANTITY = 2
+    SUBTOTAL = 3
+    IS_COMERCIAL_PRICE = 4
+    SALE_DETAILS = 5
+
+
+
+
+
 # nombres predeterminados de columnas de tablas
 class TableViewColumns(IntEnum):
     '''Clase de tipo 'IntEnum' con los nombres predeterminados de las columnas de las 
@@ -167,18 +181,20 @@ class TableViewColumns(IntEnum):
 
 
 # expresiones regulares para validadores o búsqueda
-class RegexExps(StrEnum):
+class Regex(StrEnum):
     '''
     Clase StrEnum con expresiones regulares predefinidas, creadas principalmente para 
-    usarse en 'utils.customvalidators.py'.
+    usarse en 'utils.customvalidators.py', pero no exclusivamente.
     '''
     SEARCH_BAR = "[^;\"']*"
     
     PROD_NAME = "[^;\"']{1,50}"
     PROD_STOCK = "(\d{1,8}(\.|,)?\d{0,2} {1}[a-zA-Z]{0,20})|(\d{1,8}(\.|,)?\d{0,2})"
-    PROD_UNIT_PRICE = "\d{1,8}((\.|,)?\d{0,2})?"
+    PROD_UNIT_PRICE = "\d{1,8}((\.|,){1}\d{0,2})?"
     PROD_COMERC_PRICE = "\d{0,8}((\.|,)\d{0,2})?"
     PERCENTAGE_CHANGE = "^([-+]?\d{0,4}((\.|,)\d{0,2})?)|(\d{1,8}((\.|,)\d{0,2})?)$"
     
-    SALES_DETAILS = "(\([\s]*P[\s]*\.[\s]*NORMAL[\s]*\)|\([\s]*P[\s]*\.[\s]*COMERCIAL[\s]*\))$"
+    SALES_DETAILS_PRICE_TYPE = "(\([\s]*P[\s]*\.[\s]*PÚBLICO[\s]*\)|\([\s]*P[\s]*\.[\s]*COMERCIAL[\s]*\))$"
+    SALES_DETAILS_FULL = "[0-9]{1,8}(\.|,)?[0-9]{0,2}\sde .{1,}\s(\([\s]*P[\s]*\.[\s]*PÚBLICO[\s]*\)|\([\s]*P[\s]*\.[\s]*COMERCIAL[\s]*\))$"
+    SALES_QUANTITY = "[0-9]{1,8}(\.|,)?[0-9]{0,2}"
     # TODO: seguir poniendo acá las expresiones de los validadores
