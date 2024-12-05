@@ -9,7 +9,7 @@ from PySide6.QtGui import (QValidator, QRegularExpressionValidator,
                            QIntValidator, QDoubleValidator)
 
 from utils.dboperations import (makeReadQuery)
-from utils.enumclasses import (RegexExps)
+from utils.enumclasses import (Regex)
 
 from re import (fullmatch, compile, Pattern, IGNORECASE)
 import logging
@@ -20,7 +20,7 @@ class SearchBarValidator(QValidator):
     '''Validador para las barras de búsquedas. A diferencia de otros validadores, este no emite señales.'''
     def __init__(self, parent=None):
         super(SearchBarValidator, self).__init__()
-        self.pattern:Pattern = compile(RegexExps.SEARCH_BAR.value, flags=IGNORECASE)
+        self.pattern:Pattern = compile(Regex.SEARCH_BAR.value, flags=IGNORECASE)
     
     
     def validate(self, text: str, pos: int) -> object:
@@ -45,7 +45,7 @@ class ProductNameValidator(QValidator):
     
     def __init__(self, prev_name:str, parent:QWidget=None):
         super(ProductNameValidator, self).__init__()
-        self.pattern:Pattern = compile(RegexExps.PROD_NAME.value, flags=IGNORECASE)
+        self.pattern:Pattern = compile(Regex.PROD_NAME.value, flags=IGNORECASE)
         self.prev_name:str = prev_name
     
     
@@ -84,7 +84,7 @@ class ProductNameValidator(QValidator):
 class ProductStockValidator(QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar el stock y 
     la unidad de medida de un producto. Si no se especifica el 'pattern' se 
-    asigna automáticamente el valor de 'enumclasses.RegexExps.PROD_STOCK'.
+    asigna automáticamente el valor de 'enumclasses.Regex.PROD_STOCK'.
     
     Parámetros
     ----------
@@ -97,7 +97,7 @@ class ProductStockValidator(QRegularExpressionValidator):
     def __init__(self, pattern:Pattern | str=None, parent=None):
         super(ProductStockValidator, self).__init__()
         if not pattern:
-            self.pattern:Pattern = compile(RegexExps.PROD_STOCK.value, IGNORECASE)
+            self.pattern:Pattern = compile(Regex.PROD_STOCK.value, IGNORECASE)
         else:
             self.pattern:Pattern = compile(pattern, IGNORECASE)
     
@@ -129,7 +129,7 @@ class ProductUnitPriceValidator(QRegularExpressionValidator):
     
     def __init__(self, parent=None):
         super(ProductUnitPriceValidator, self).__init__()
-        self.pattern:Pattern = compile(RegexExps.PROD_UNIT_PRICE.value)
+        self.pattern:Pattern = compile(Regex.PROD_UNIT_PRICE.value)
     
     
     def validate(self, text: str, pos: int) -> object:
@@ -160,7 +160,7 @@ class ProductComercPriceValidator(QRegularExpressionValidator):
     
     def __init__(self, parent=None):
         super(ProductComercPriceValidator, self).__init__()
-        self.pattern:Pattern = compile(RegexExps.PROD_COMERC_PRICE.value)
+        self.pattern:Pattern = compile(Regex.PROD_COMERC_PRICE.value)
     
     
     def validate(self, text: str, pos: int) -> object:
@@ -191,7 +191,7 @@ class PercentageValidator(QRegularExpressionValidator):
     
     def __init__(self, parent=None) -> None:
         super(PercentageValidator, self).__init__()
-        self.pattern:Pattern = compile(RegexExps.PERCENTAGE_CHANGE.value)
+        self.pattern:Pattern = compile(Regex.PERCENTAGE_CHANGE.value)
     
     
     def validate(self, text:str, pos:int) -> object:
@@ -218,6 +218,7 @@ class PercentageValidator(QRegularExpressionValidator):
 
 
 #¡ tabla VENTAS ===================================================================================
+# TODO: reemplazar los patrones con las expresiones regulares de enumclasses.py
 class SaleDetailsValidator(QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar los detalles de una venta.'''
     validationSucceeded = Signal()
@@ -250,19 +251,39 @@ class SaleQuantityValidator(QRegularExpressionValidator):
     def __init__(self, parent=None):
         super(SaleQuantityValidator, self).__init__()
         self.AVAILABLE_STOCK:tuple[float,str] = None
-        self.pattern:Pattern = compile("[0-9]{1,8}(\.|,)?[0-9]{0,2}")
+        self.pattern:Pattern = compile(Regex.SALES_QUANTITY.value)
     
     
     def setAvailableStock(self, stock:tuple[float,str]) -> None:
         '''
         Coloca el valor de 'stock' en 'self.AVAILABLE_STOCK'.
         
-        'stock[0]' representa la cantidad como float en stock del producto, y 'stock[1]' representa la unidad de 
-        medida como str.
+        Parámetros
+        ----------
+        stock : tuple[float, str] 
+            la cantidad en stock del producto como float y la unidad de medida 
+            como str
         
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
         self.AVAILABLE_STOCK = stock
+        return None
+    
+    
+    def getAvailableStock(self) -> tuple[float, str] | None:
+        '''
+        Devuelve el stock disponible.
+
+        Retorna
+        -------
+        tuple[float, str] | None
+            si hay un stock guardado en el validador devuelve una 
+            tupla[cantidad, unidad de medida], sino None
+        '''
+        if self.AVAILABLE_STOCK:
+            return self.AVAILABLE_STOCK
         return None
     
     
@@ -274,7 +295,6 @@ class SaleQuantityValidator(QRegularExpressionValidator):
     
     
     def validate(self, text: str, pos: int) -> object:
-        
         if text.strip() == "":
             self.validationFailed.emit("La cantidad no puede estar vacía")
             return QRegularExpressionValidator.State.Intermediate, text, pos
