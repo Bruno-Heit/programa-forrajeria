@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (QWidget, QStyledItemDelegate, QStyleOptionViewIte
 from PySide6.QtCore import (Qt, QModelIndex, QSize, QPersistentModelIndex, 
                             QAbstractItemModel, Signal, Slot, QDateTime)
 
-from utils.enumclasses import (TableViewId, RegexExps)
+from utils.enumclasses import (TableViewId, Regex)
 from utils.functionutils import (getProductsCategories, createCompleter, getProductNames)
 from utils.customvalidators import (ProductNameValidator, ProductStockValidator, 
                                     ProductUnitPriceValidator, ProductComercPriceValidator,
@@ -311,7 +311,7 @@ class SalesDelegate(QStyledItemDelegate):
             value = editor.text().strip()
             match col:
                 case 0: # detalle de venta
-                    pattern = compile(RegexExps.SALES_DETAILS.value, IGNORECASE)
+                    pattern = compile(Regex.SALES_DETAILS_PRICE_TYPE.value, IGNORECASE)
                     # busca en el valor el patrón de (P. NORMAL) ó (P. COMERCIAL)
                     price_type = search(pattern, value)
                     
