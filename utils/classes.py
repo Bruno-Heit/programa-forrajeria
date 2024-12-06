@@ -2138,7 +2138,6 @@ class ListItemWidget(QWidget):
         self.field_values.setProductName(product_name=curr_name)
         
         # emite señal con los valores de los campos
-        # TODO: en MainWindow, corregir el acceso a los datos
         self.fieldsValidated.emit(self.field_values)
         
         return None
