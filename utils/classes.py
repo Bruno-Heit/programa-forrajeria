@@ -13,7 +13,7 @@ from resources import (rc_icons)
 from utils.functionutils import *
 from utils.workerclasses import *
 from utils.dboperations import *
-from utils.enumclasses import *
+from utils.enumclasses import (WidgetStyle, InventoryPriceType, ListItemValuesField)
 
 from sqlite3 import (Error as sqlite3Error)
 from phonenumbers import (parse, format_number, is_valid_number, PhoneNumber, PhoneNumberFormat, NumberParseException)
@@ -604,7 +604,8 @@ class SaleDialog(QDialog):
         
         # checkbox de tipo de precio (venta)
         self.saleDialog_ui.checkBox_comercialPrice.clicked.connect(
-            lambda: self.handleNameAndQuantityAndPriceChange() if self.VALID_FIELDS['PRODUCT_QUANTITY'] else None)
+            lambda: self.onFieldsChange if self.VALID_FIELDS['PRODUCT_QUANTITY'] else None
+        )
         
         # lineedit total pago (venta)
         self.saleDialog_ui.lineEdit_totalPaid.editingFinished.connect(self.onTotalPaidEditingFinished)
@@ -682,7 +683,7 @@ class SaleDialog(QDialog):
                     self.saleDialog_ui.label_productQuantity_feedback.setText(f"El stock disponible es de {self.quantity_validator.AVAILABLE_STOCK[0]} {self.quantity_validator.AVAILABLE_STOCK[1]}")
                 
                     # actualiza los detalles de venta, costo total y crea un completer para el campo de total abonado
-                    self.handleNameAndQuantityAndPriceChange()
+                    self.onFieldsChange()
                 
                 # sea el nombre válido o no, igualmente cambia los estilos del label y el lineedit
                 self.saleDialog_ui.label_productQuantity_feedback.setStyleSheet(WidgetStyle.LABEL_NEUTRAL_VAL.value)
@@ -802,13 +803,13 @@ class SaleDialog(QDialog):
         4. coloca el stock disponible en 'label_productQuantity_feedback' con un estilo personalizado.
         5. si el campo es válido obtiene el stock del producto y lo guarda en 'SaleQuantityValidator.AVAILABLE_STOCK'.
         6. si el campo es válido comprueba si también lo es la cantidad y de ser ambos válidos llama a 
-        'self.handleNameAndQuantityAndPriceChange'.
+        'self.onFieldsChange'.
         
         Este método llama a:
         - SaleQuantityValidator.setsetAvailableStock: para almacenar en el validador de cantidad el 
         stock disponible.
         - functionutils.getCurrentProductStock: para actualizar el stock disponible en 'self.AVAILABLE_STOCK'.
-        - self.handleNameAndQuantityAndPriceChange: para actualizar los detalles y el costo total de la venta.
+        - self.onFieldsChange: para actualizar los detalles y el costo total de la venta.
         
         Retorna None.
         '''
@@ -846,14 +847,14 @@ class SaleDialog(QDialog):
             
             # si también la cantidad es válida, actualiza los detalles de venta y el costo total...
             if self.VALID_FIELDS['PRODUCT_QUANTITY']:
-                self.handleNameAndQuantityAndPriceChange()
+                self.onFieldsChange()
             
         return None
 
 
     #¡ campos
     @Slot()
-    def handleNameAndQuantityAndPriceChange(self) -> None:
+    def onFieldsChange(self) -> None:
         '''
         Es llamado desde:
         - self.validateProductNameField: cuando el índice de 'comboBox_productName' cambia.
@@ -897,7 +898,7 @@ class SaleDialog(QDialog):
     
     def __setDetailsAndCost(self) -> None:
         '''
-        Es llamado desde 'self.handleNameAndQuantityAndPriceChange'.
+        Es llamado desde 'self.onFieldsChange'.
         
         Obtiene el precio normal ó comercial dependiendo de si 'checkBox_comercialPrice' está checkeada, luego 
         obtiene el costo desde la base de datos y lo calcula a partir de la cantidad ingresada y cambia el texto 
@@ -1115,7 +1116,7 @@ class SaleDialog(QDialog):
     def verifyFieldsValidity(self, TOGGLE_DEBTOR_DATA:bool=None) -> None:
         '''
         Es llamado desde los métodos 'self.validatorOnValidationSucceded'|'self.validatorOnValidationFailed'|
-        'onTotalPaidEditingFinished'|'self.handleNameAndQuantityAndPriceChange'.
+        'onTotalPaidEditingFinished'|'self.onFieldsChange'.
         
         Revisa si todos los campos tienen valores válidos y activa/desactiva el botón "Aceptar" dependiendo del caso, 
         y además muestra/esconde 'debtor_data' dependiendo del parámetro 'TOGGLE_DEBTOR_DATA'. Para actualizar el estado 
@@ -1123,7 +1124,7 @@ class SaleDialog(QDialog):
         
         PARAMS:
         - TOGGLE_DEBTOR_DATA: flag que determina si mostrar/ocultar 'debtor_data'. Por defecto es None. Es enviado 
-        cuando el método es llamado desde 'onTotalPaidEditingFinished'|'self.handleNameAndQuantityAndPriceChange'.
+        cuando el método es llamado desde 'onTotalPaidEditingFinished'|'self.onFieldsChange'.
         
         Retorna None.
         '''
@@ -1467,25 +1468,389 @@ class SaleDialog(QDialog):
 
 
 # valores de los campos de ListItemWidget
-class ListItemValues():
+class ListItemValues(QObject):
     '''
-    Clase que contiene los valores de los campos de ListItemWidget. El principal uso de la clase es para 
-    emitir de forma más sencilla los valores desde ListWidgetItem a MainWindow.
+    Clase que contiene los valores de los campos de ListItemWidget. El principal 
+    uso de la clase es para emitir de forma más sencilla los valores desde 
+    ListWidgetItem a MainWindow.
     '''
-    def __init__(self, object_name:str, product_name:str=None, quantity:float=None, subtotal:float=None, ALL_VALID:bool=False):
+    productNameChanged:Signal = Signal(str) # emite el nuevo nombre
+    quantityChanged:Signal = Signal(float) # emite la nueva cantidad
+    priceTypeChanged:Signal = Signal(object) # emite el nuevo tipo de precio como 'InventoryPriceType'
+    subtotalChanged:Signal = Signal(object) # emite el nuevo subtotal, que puede ser float 
+                                            # ó None (None si es inválido o no fue calculado)
+    saleDetailsChanged:Signal = Signal(str) # emite el nuevo detalle de la venta
+    
+    def __init__(self, object_name:str):
+        super(ListItemValues, self).__init__()
+        
         self.object_name:str = object_name
+        self.__product_id:int = None
         
-        self.product_name:str = product_name
+        self.__product_name:str = None
+        self.__quantity:int = None
+        self.__subtotal:float = None
         
-        self.product_id:int
+        self.__is_comercial_price:bool = self.setPriceType()
+        self.__sale_details:str = ''
         
-        self.quantity:float = quantity
-        self.subtotal:float = subtotal
+        # validez de los datos
+        self.__FIELDS_VALIDITY:dict[str, bool | None] = { #? guarda valores True | False | None, siendo el valor de verdad 
+            ListItemValuesField.PRODUCT_NAME.value: None, #? en realidad triestado, True y False representan la validez del 
+            ListItemValuesField.QUANTITY.value: None      #? en realidad triestado, True y False representan la validez del 
+        }                                                 #? del valor en el campo, si es None es porque está vacío el campo.
         
-        self.is_comercial_price:bool = None
-        self.sale_details:str = None
+        #* señales
+        self.productNameChanged.connect(self.setSubtotal)
+        self.quantityChanged.connect(self.setSubtotal)
+        self.priceTypeChanged.connect(self.setSubtotal)
+        self.subtotalChanged.connect(lambda: self.setSaleDetails(curr_sale_detail=self.__sale_details))
         
-        self.ALL_VALID:bool = ALL_VALID
+        return None
+    
+    
+    # setters
+    def setProductId(self, product_id:int=None) -> None:
+        '''
+        Guarda el IDproducto.
+        
+        Parámetros
+        ----------
+        product_id : int, opcional
+            IDproducto del producto, por defecto es None
+        
+        Retorna
+        -------
+        None
+        '''
+        self.__product_id = product_id
+        return None
+    
+    
+    def setProductName(self, product_name:str=None) -> None:
+        '''
+        Guarda el nombre del producto y emite la señal 'productNameChanged' si 
+        el nombre del producto cambió.
+        
+        Parámetros
+        ----------
+        product_name : str, opcional
+            nombre del producto, por defecto es None
+        
+        Retorna
+        -------
+        None
+        '''
+        self.__product_name = product_name
+        self.productNameChanged.emit(product_name)
+        
+        return None
+    
+    
+    def setQuantity(self, quantity:float=None) -> None:
+        '''
+        Guarda la cantidad y emite la señal 'quantityChanged' si la cantidad 
+        cambió.
+        
+        Parámetros
+        ----------
+        quantity : float, opcional
+            cantidad del producto, por defecto es None
+        
+        Retorna
+        -------
+        None
+        '''
+        self.__quantity = quantity
+        self.quantityChanged.emit(quantity)
+        return None
+    
+    
+    @Slot()
+    def setSubtotal(self) -> None:
+        '''
+        Calcula el subtotal a partir del precio del producto y la cantidad, y 
+        emite la señal 'subtotalChanged'.
+        Nota: El precio es obtenido desde la base de datos en este método.
+        
+        Retorna
+        -------
+        None
+        '''
+        self.__subtotal = None if not self.isAllValid() else self.__getPrice()
+        
+        self.subtotalChanged.emit(self.__subtotal)
+        return None
+    
+    
+    def __getPrice(self) -> float | None:
+        '''
+        Obtiene el precio correspondiente (comercial o normal) de la base de 
+        datos y lo devuelve si existe.
+        
+        Retorna
+        -------
+        float | None
+            será un float si el precio existe y es mayor a 0, sino None
+        '''
+        with DatabaseRepository() as db_repo:
+            match self.isComercialPrice():
+                # si el precio es comercial...
+                case True:
+                        total_cost = db_repo.selectRegisters(
+                            data_sql='''SELECT ? * precio_comerc 
+                                        FROM Productos 
+                                        WHERE nombre = ?;''',
+                            data_params=(
+                                self.__quantity,
+                                self.__product_name,
+                            )
+                        )
+                
+                # si es normal...
+                case False:
+                        total_cost = db_repo.selectRegisters(
+                            data_sql='''SELECT ? * precio_unit 
+                                        FROM Productos 
+                                        WHERE nombre = ?;''',
+                            data_params=(
+                                self.__quantity,
+                                self.__product_name,
+                            )
+                        )
+        
+        if total_cost:
+            total_cost = total_cost[0][0]
+        return total_cost if total_cost else None
+    
+    
+    def setPriceType(self, price_type:InventoryPriceType=InventoryPriceType.NORMAL) -> None:
+        '''
+        Guarda el tipo de precio del producto y emite la señal 'priceTypeChanged'.
+        
+        Parámetros
+        ----------
+        price_type : InventoryPriceType, opcional
+            tipo de precio del producto, por defecto es NORMAL
+        
+        Retorna
+        -------
+        None
+        '''
+        self.__is_comercial_price = False if price_type == InventoryPriceType.NORMAL else True
+        self.priceTypeChanged.emit(price_type)
+        return None
+    
+    
+    @Slot(object)
+    def setSaleDetails(self, curr_sale_detail:str) -> None:
+        '''
+        Guarda el detalle de la venta y emite la señal 'saleDetailsChanged'.
+        
+        Parámetros
+        ----------
+        curr_sale_detail : str
+            el detalle de la venta actual, sobre el que se hacen cambios si no 
+            fue modificado por el usuario
+        
+        Retorna
+        -------
+        None
+        '''
+        pattern:Pattern = compile(pattern=Regex.SALES_DETAILS_FULL.value, flags=IGNORECASE)
+        new_text:str
+        
+        price_type:str = "P. COMERCIAL" if self.isComercialPrice() else "P. PÚBLICO"
+
+        if self.isAllValid():
+            # si el patrón coincide reemplaza el texto (significa que no lo escribió 
+            # el usuario)
+            if fullmatch(pattern, curr_sale_detail) or curr_sale_detail.strip() == "":
+                self.__sale_details = f"{self.getQuantity()} de {self.getProductName()} ({price_type})"
+            
+            # si no coincide es porque lo escribió el usuario (sólo reemplaza el tipo de precio)
+            else:
+                new_text = curr_sale_detail
+                new_text = sub(
+                    pattern=Regex.SALES_DETAILS_PRICE_TYPE.value,
+                    repl="",
+                    string=curr_sale_detail,
+                    flags=IGNORECASE)
+                new_text = f"{new_text.strip()} ({price_type})"
+                
+                self.__sale_details = new_text
+            
+            self.saleDetailsChanged.emit(self.__sale_details)
+        return None
+    
+    
+    def setFieldValidity(self, field:ListItemValuesField, validity:bool) -> None:
+        '''
+        Guarda el valor de verdad del campo especificado.
+        
+        Parámetros
+        ----------
+        field : ListItemValuesField
+            campo al que asignarle el nuevo valor de verdad
+        validity : bool | None
+            nuevo valor de verdad del campo
+        
+        Retorna
+        -------
+        None
+        '''
+        match field:
+            case ListItemValuesField.PRODUCT_NAME:
+                self.__FIELDS_VALIDITY[ListItemValuesField.PRODUCT_NAME.value] = validity
+            
+            case ListItemValuesField.QUANTITY:
+                self.__FIELDS_VALIDITY[ListItemValuesField.QUANTITY.value] = validity
+        
+        return None
+    
+    
+    # getters
+    def getProductId(self) -> int | None:
+        '''
+        Devuelve el IDproducto.
+
+        Retorna
+        -------
+        int | None
+            el valor será int si existe, sino None
+        '''
+        return self.__product_id
+    
+    
+    def getProductName(self) -> str | None:
+        '''
+        Devuelve el nombre del producto.
+
+        Retorna
+        -------
+        str | None
+            el valor será str si existe, sino None
+        '''
+        return self.__product_name
+    
+    
+    def getQuantity(self) -> float | None:
+        '''
+        Devuelve la cantidad.
+
+        Retorna
+        -------
+        float | None
+            el valor será float si existe, sino None
+        '''
+        return self.__quantity
+    
+    
+    def getSubtotal(self) -> float | None:
+        '''
+        Devuelve el subtotal de la compra actual.
+
+        Retorna
+        -------
+        float | None
+            el valor será float si existe, sino None
+        '''
+        return self.__subtotal
+    
+    
+    def isComercialPrice(self) -> bool:
+        '''
+        Devuelve un valor de verdad que determina si el precio a cobrar es 
+        comercial.
+
+        Retorna
+        -------
+        bool
+            devuelve True si es comercial, en cualquier otro caso False
+        '''
+        return True if self.__is_comercial_price else False
+    
+    
+    def getSaleDetails(self) -> str:
+        '''
+        Devuelve el detalle de la venta.
+
+        Retorna
+        -------
+        str
+        '''
+        return self.__sale_details
+    
+    
+    def isNameValid(self) -> bool | None:
+        '''
+        Devuelve True | False dependiendo de si el campo de nombre del producto 
+        es válido o no.
+
+        Retorna
+        -------
+        bool | None
+            valor de verdad del campo de nombre del producto, si es None es 
+            porque el nombre del producto aún no fue validado
+        '''
+        return self.__FIELDS_VALIDITY[ListItemValuesField.PRODUCT_NAME.value]
+    
+    
+    def isQuantityValid(self) -> bool | None:
+        '''
+        Devuelve True | False dependiendo de si el campo de cantidad del producto 
+        es válido o no.
+
+        Retorna
+        -------
+        bool | None
+            valor de verdad del campo de cantidad, si es None es porque la 
+            cantidad del producto aún no fue validada
+        '''
+        return self.__FIELDS_VALIDITY[ListItemValuesField.QUANTITY.value]
+    
+    
+    def isAllValid(self) -> bool:
+        '''
+        Devuelve un valor de verdad que determina si ambos valores (el nombre 
+        y la cantidad) son válidos.
+
+        Retorna
+        -------
+        bool
+            será True sólo si ambos valores son válidos, sino False
+        '''
+        return all(self.__FIELDS_VALIDITY.values())
+    
+    
+    def getValues(self) -> dict[str, Any]:
+        '''
+        Devuelve todos los valores del producto actual.
+
+        Retorna
+        -------
+        dict[str, Any]
+            diccionario con los nombre de los campos con sus respectivos 
+            valores
+        '''
+        return {
+            ListItemValuesField.PRODUCT_ID.name: self.__product_id,
+            ListItemValuesField.PRODUCT_NAME.name: self.__product_name,
+            ListItemValuesField.QUANTITY.name: self.__quantity,
+            ListItemValuesField.SUBTOTAL.name: self.__subtotal,
+            ListItemValuesField.IS_COMERCIAL_PRICE.name: self.__is_comercial_price,
+            ListItemValuesField.SALE_DETAILS.name: self.__sale_details
+        }
+    
+    
+    def __repr__(self) -> str:
+        return f'''[ID {self.__product_id}]{self.object_name}: \
+            \n\tproduct_name: {self.__product_name}\
+            \tquantity: {self.__quantity}\
+            \tsubtotal: {self.__subtotal}\
+            \n\tis_comercial_price: {self.__is_comercial_price}\
+            \n\tsale_details: {self.__sale_details}\
+            \n\tall_valid: {self.isAllValid()}'''
 
 
 
@@ -1494,9 +1859,10 @@ class ListItemValues():
 # item de tipo widget de la lista del formulario de Ventas
 class ListItemWidget(QWidget):
     '''
-    Item creado dinámicamente dentro de la lista de formulario de ventas 'MainWindow.sales_input_list'. Sirve para 
-    seleccionar un producto, la cantidad vendida, el tipo de precio (comercial o normal) y darle alguna descripción a 
-    la venta.
+    Item creado dinámicamente dentro de la lista de formulario de ventas 
+    'MainWindow.sales_input_list'. Sirve para seleccionar un producto, 
+    la cantidad vendida, el tipo de precio (comercial o normal) y darle 
+    alguna descripción a la venta.
     '''
     fieldsValidated = Signal(object) # emite un objeto tipo 'ListItemValues' con todos los valores de los campos
     deleteItem = Signal(str) # emite el 'objectName' del item
@@ -1505,8 +1871,35 @@ class ListItemWidget(QWidget):
         super(ListItemWidget, self).__init__()
         self.listItem = Ui_listProduct()
         self.listItem.setupUi(self)
+        
+        self.setup_ui(obj_name=obj_name)
+        
+        # instancia que contiene los valores de los campos (tomo como referencia 
+        # la programación MODELO-VISTA, siendo la clase ListItemValues algo similar 
+        # a un MODELO DE DATOS, pero mucho más simple y sencilla)
+        self.field_values:ListItemValues = ListItemValues(object_name=self.objectName())
+        
+        self.setup_signals()
+        return None
+
+
+    def setup_ui(self, obj_name:str) -> None:
+        '''
+        Método que sirve para simplificar la lectura del método 'self.__init__'.
+        Contiene inicializaciones y ajustes de algunos Widgets.
+        
+        Parámetros
+        ----------
+        obj_name : str
+            nombre único del objecto actual, a modo de identificador
+        
+        Retorna
+        -------
+        None
+        '''
         # desactiva checkBox_comercialPrice
         self.listItem.checkBox_comercialPrice.setEnabled(False)
+        
         # coloca el objectName
         self.setObjectName(obj_name)
         
@@ -1522,27 +1915,33 @@ class ListItemWidget(QWidget):
         
         # lleno el combobox de nombres
         self.listItem.comboBox_productName.addItems(getProductNames())
+        self.listItem.comboBox_productName.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
+        
+        # quita del combobox el item inicial
+        self.listItem.comboBox_productName.setCurrentIndex(-1)
 
         # validadores
         self.quantity_validator = SaleQuantityValidator(self.listItem.lineEdit_productQuantity)
         self.sale_detail_validator = SaleDetailsValidator(self.listItem.lineEdit_saleDetail)
         self.listItem.lineEdit_saleDetail.setValidator(self.sale_detail_validator)
         self.listItem.lineEdit_productQuantity.setValidator(self.quantity_validator)
+        return None
+    
+    
+    def setup_signals(self) -> None:
+        '''
+        Al igual que los métodos 'self.setup_ui', este método tiene el objeto 
+        de simplificar la lectura del método 'self.__init__'.
+        Contiene las declaraciones de señales/slots de Widgets ya existentes 
+        desde la instanciación de 'MainWindow'.
         
-        # variables
-        self.VALID_FIELDS:dict[str,bool|None] = {
-            'PRODUCT_NAME':None,
-            'PRODUCT_QUANTITY':None
-        }
-        self.TOTAL_COST:float|None = None # se obtiene en __setDetailsAndCost, si el precio está disponible, sino es None
-        self.field_values:ListItemValues = ListItemValues(object_name=self.objectName()) # inicializa el objeto, y es llenado 
-                                                                                         # con valores en las funciones 
-                                                                                         # validadoras correspondientes a cada 
-                                                                                         # campo.
-
+        Retorna
+        -------
+        None
+        '''
         #--- SEÑALES --------------------------------------------------
         # nombre de producto
-        self.listItem.comboBox_productName.currentIndexChanged.connect(self.validateProductNameField)
+        self.listItem.comboBox_productName.currentIndexChanged.connect(self.onComboboxIndexChange)
         
         # cantidad de producto
         self.listItem.lineEdit_productQuantity.editingFinished.connect(self.onQuantityEditingFinished)
@@ -1551,330 +1950,413 @@ class ListItemWidget(QWidget):
         self.quantity_validator.validationFailed.connect(self.validatorOnValidationFailed)
         
         # checkbox tipo de precio
-        self.listItem.checkBox_comercialPrice.stateChanged.connect(lambda: self.handleNameAndQuantityAndPriceChange(True))
+        self.listItem.checkBox_comercialPrice.checkStateChanged.connect(self.onCheckStateChange)
+        
+        # cambios en el detalle de venta
+        self.listItem.lineEdit_saleDetail.editingFinished.connect(
+            lambda: self.onSaleDetailEdit(
+                text=self.listItem.lineEdit_saleDetail.text()
+            )
+        )
+        
+        # cambios en ListItemValues
+        self.field_values.subtotalChanged.connect(self.onSubtotalChanged)
+        self.field_values.saleDetailsChanged.connect(self.onSaleDetailsChange)
         
         # botón borrar elemento
         self.listItem.btn_deleteCurrentProduct.clicked.connect(self.deleteCurrentItem)
-
-        
+        return None
+    
+    
     #### MÉTODOS #####################################################
-    # eliminar el item actual
+    #* eliminar el item actual
     @Slot()
     def deleteCurrentItem(self) -> None:
         '''
-        Es llamado desde la señal 'clicked' de 'btn_deleteCurrentProduct'.
+        Emite la señal 'deletedItem' al QListWidget 'MainWindow.sales_input_list' 
+        para eliminar éste item de la lista.
         
-        Emite la señal 'deletedItem' al QListWidget 'MainWindow.sales_input_list' (es conectada en el método 
-        'MainWindow.addSalesInputListItem') de que se eliminó el item y elimina éste item de la lista.
-        
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
         self.deleteItem.emit(self.objectName())
         self.deleteLater()
         return None
 
 
+    #* validación
     @Slot(str)
     def validatorOnValidationSucceded(self) -> None:
         '''
-        Es llamado desde la señal 'validationFailed' del validador de cantidad.
+        Si además el nombre es válido, cambia el valor del flag asociado al 
+        campo de cantidad a True y cambia el QSS del campo.
+        NOTA: redimensiona 'ListItemWidget' para que se pueda mostrar el mensaje 
+        correctamente.
         
-        Cambia el valor del flag asociado al campo de cantidad a True y cambia el QSS del campo.
-        Activa 'checkBox_comercialPrice', y al finalizar llama a 'self.verifyFieldsValidity' para 
-        comprobar si el nombre es válido.
-        
-        NOTA: redimensiona 'ListItemWidget' para que se pueda mostrar el mensaje correctamente.
-        
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
-        # sólo puedo validar completamente la cantidad cuando el nombre sea válido
-        if self.VALID_FIELDS['PRODUCT_NAME']:
-            self.VALID_FIELDS['PRODUCT_QUANTITY'] = True
-            self.listItem.lineEdit_productQuantity.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
-            self.listItem.label_quantityFeedback.setText(f"El stock disponible es de {self.quantity_validator.AVAILABLE_STOCK[0]} {self.quantity_validator.AVAILABLE_STOCK[1]}")
-            
-            # actualiza los detalles de venta y costo total
-            self.handleNameAndQuantityAndPriceChange()
+        _avail_stock:tuple[float, str] # stock disponible
         
-        # sea el nombre válido o no, igualmente cambia los estilos del label y el lineedit
+        # actualiza la validez y la cantidad
+        self.field_values.setFieldValidity(ListItemValuesField.QUANTITY, True)
+            
+        # cambia el estilo de los campos
+        self.listItem.lineEdit_productQuantity.setStyleSheet(
+            WidgetStyle.FIELD_VALID_VAL.value
+        )
+        
+        if self.field_values.isNameValid():
+            # actualiza el mensaje de stock
+            _avail_stock = self.quantity_validator.getAvailableStock()
+            self.listItem.label_quantityFeedback.setText(f"stock disponible: {_avail_stock[0]} {_avail_stock[1]}")
+            
+        # cambia los estilos del label y el lineedit
         self.listItem.label_quantityFeedback.setStyleSheet(WidgetStyle.LABEL_NEUTRAL_VAL.value)
         self.listItem.lineEdit_productQuantity.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
         
-        if not "El stock disponible" in self.listItem.label_quantityFeedback.text():
+        # si no hay mensaje de stock disponible en el label lo pone en blanco
+        if not "stock disponible" in self.listItem.label_quantityFeedback.text():
             self.listItem.label_quantityFeedback.setText("")
-        
-        self.listItem.checkBox_comercialPrice.setEnabled(True)
         
         # ajusta el tamaño del label
         self.listItem.label_quantityFeedback.adjustSize()
         
-        self.verifyFieldsValidity()
         return None
         
     
     @Slot(str)
     def validatorOnValidationFailed(self, error_message:str) -> None:
         '''
-        Cambia el valor del flag asociado al campo de cantidad a False, cambia el QSS del campo y muestra el 
-        mensaje 'error_message' en el QLabel asociado al campo con feedback.
-        Desactiva 'checkBox_comercialPrice' si el campo de cantidad está vacío.
+        Cambia el valor del flag asociado al campo de cantidad a False, cambia 
+        el QSS del campo y muestra el mensaje de error en el QLabel asociado 
+        al campo con feedback. Desactiva 'checkBox_comercialPrice' si el campo 
+        de cantidad está vacío.
         
-        Retorna None.
+        Parámetros
+        ----------
+        error_message : str
+            mensaje de error para mostrar al usuario
+        
+        Retorna
+        -------
+        None
         '''
-        self.VALID_FIELDS['PRODUCT_QUANTITY'] = False
-        self.listItem.lineEdit_productQuantity.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
+        self.field_values.setFieldValidity(ListItemValuesField.QUANTITY, False)
+        
+        self.listItem.lineEdit_productQuantity.setStyleSheet(
+            WidgetStyle.FIELD_INVALID_VAL.value
+        )
         self.listItem.label_quantityFeedback.show()
+        
         # resetea el estilo del campo (por defecto es rojo, igual que los otros de feedback)
         self.listItem.label_quantityFeedback.setStyleSheet("")
         self.listItem.label_quantityFeedback.setText(error_message)
         
-        self.listItem.checkBox_comercialPrice.setEnabled(False) if not self.listItem.lineEdit_productQuantity.text() else None
-        
-        self.verifyFieldsValidity()
         return None
 
 
+    #* combobox de nombre
     @Slot()
-    def validateProductNameField(self) -> None:
+    def onComboboxIndexChange(self) -> None:
         '''
-        Es llamado desde la señal 'currentIndexChanged' cuando el campo validado es el de nombre del producto.
+        Valida el campo de nombre de producto y si es válido actualiza el stock 
+        en el validador de cantidad y lo muestra.
+        Si ambos campos (nombre de producto y cantidad) son válidos, actualiza 
+        el detalle de venta o el precio dependiendo del tipo de precio 
+        seleccionado, y también actualiza 'field_values' con el nombre.
         
-        Este método hace lo siguiente:
-        1. actualiza self.VALID_FIELDS['PRODUCT_NAME'] dependiendo de la validez del campo...
-        2. esconde/muestra y cambia el texto de 'label_productName_feedback' dependiendo de la validez...
-        3. cambia el estilo del QLabel de feedback asociado y del propio QComboBox...
-        4. coloca el stock disponible en 'label_productQuantity_feedback' con un estilo personalizado.
-        5. si el campo es válido obtiene el stock del producto y lo guarda en 'SaleQuantityValidator.AVAILABLE_STOCK'.
-        6. si el campo es válido comprueba si también lo es la cantidad y de ser ambos válidos llama a 
-        'self.handleNameAndQuantityAndPriceChange'.
-        7. Si el campo es válido, asigna el nuevo valor en 'ListItemValues.product_name'.
-        
-        Este método llama a:
-        - SaleQuantityValidator.setsetAvailableStock: para almacenar en el validador de cantidad el 
-        stock disponible.
-        - functionutils.getCurrentProductStock: para actualizar el stock disponible en 'self.AVAILABLE_STOCK'.
-        - self.handleNameAndQuantityAndPriceChange: para actualizar los detalles y el costo total de la venta.
-        
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
-        # si no se eligió el nombre del producto asigna el índice -1
-        if self.listItem.comboBox_productName.currentText().strip() == "":
-            self.listItem.comboBox_productName.setCurrentIndex(-1)
-        
-        # si no hay un producto seleccionado (si índice es -1)...
+        # si no hay un producto seleccionado...
         if self.listItem.comboBox_productName.currentIndex() == -1:
-            self.VALID_FIELDS['PRODUCT_NAME'] = False
+            self.field_values.setFieldValidity(ListItemValuesField.PRODUCT_NAME, False)
+            
             self.listItem.label_nameFeedback.show()
             self.listItem.label_nameFeedback.setText("Se debe seleccionar un producto")
-            self.listItem.comboBox_productName.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
+            self.listItem.comboBox_productName.setStyleSheet(
+                WidgetStyle.FIELD_INVALID_VAL.value
+            )
         
         # si el campo es válido...
         else:
-            self.VALID_FIELDS['PRODUCT_NAME'] = True
+            self.field_values.setFieldValidity(ListItemValuesField.PRODUCT_NAME, True)
+            
             self.listItem.label_nameFeedback.hide()
-            self.listItem.comboBox_productName.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
+            self.listItem.comboBox_productName.setStyleSheet(
+                WidgetStyle.FIELD_VALID_VAL.value
+            )
             
-            # guarda el stock del producto en el validador de cantidad
-            self.quantity_validator.setAvailableStock(getCurrentProductStock(
-                self.listItem.comboBox_productName.itemText(self.listItem.comboBox_productName.currentIndex()) ))
-            
-            # coloca el stock en 'label_quantityFeedback'
-            self.listItem.label_quantityFeedback.show()
-            self.listItem.label_quantityFeedback.setStyleSheet(WidgetStyle.LABEL_NEUTRAL_VAL.value)
-            self.listItem.label_quantityFeedback.setText(f"El stock disponible es de {self.quantity_validator.AVAILABLE_STOCK[0]} {self.quantity_validator.AVAILABLE_STOCK[1]}")
-            
-            #? llama a validar la cantidad porque, si se modificó primero la cantidad y el válida, y luego 
-            #? se elige un nombre de producto que es válido pero no tiene esa cantidad en stock entonces 
-            #? el campo de cantidad devuelve un "falso positivo"... de ésta forma se arregla
-            self.quantity_validator.validate(self.listItem.lineEdit_productQuantity.text(), 0)
-            
-            # si también la cantidad es válida, actualiza los detalles de venta y el costo total...
-            if self.VALID_FIELDS['PRODUCT_QUANTITY']:
-                self.handleNameAndQuantityAndPriceChange()
-                
-            # actualiza 'self.field_values'
-            self.field_values.product_name = self.listItem.comboBox_productName.itemText(
-                self.listItem.comboBox_productName.currentIndex())
-            
-            self.verifyFieldsValidity()
+            self.__onValidProductName(
+                curr_name=self.listItem.comboBox_productName.itemText(
+                    self.listItem.comboBox_productName.currentIndex()
+                )
+            )
+        
+        return None
+    
+    
+    def __onValidProductName(self, curr_name:str) -> None:
+        '''
+        si el nombre del producto elegido es válido actualiza el stock en el 
+        validador de cantidad y lo muestra.
+        Si ambos campos (nombre de producto y cantidad) son válidos, actualiza 
+        el detalle de venta o el precio dependiendo del tipo de precio 
+        seleccionado, y también actualiza 'field_values' con el nombre.
+        
+        Parámetros
+        ----------
+        curr_name : str
+            nombre actual del combobox
+        
+        Retorna
+        -------
+        None
+        '''
+        # actualiza el stock disponible en el validador de cantidad...
+        self.__updateAvailableStock()
+        # ...y muestra el stock disponible
+        self.__showAvailableStock()
+        
+        #? llama a validar la cantidad porque, si se modificó primero la 
+        #? cantidad y es válida, y luego se elige un nombre de producto 
+        #? que es válido pero no tiene esa cantidad en stock entonces el 
+        #? campo de cantidad devuelve un "falso positivo"... así se arregla
+        self.quantity_validator.validate(
+            self.listItem.lineEdit_productQuantity.text(),
+            0
+        )
+        
+        # habilita/deshabilita el checkbox de precio comercial
+        self.__toggleCheckboxOnProductName(curr_name=curr_name)
+        
+        # actualiza 'self.field_values' con el nombre
+        self.field_values.setProductName(product_name=curr_name)
+        
+        # emite señal con los valores de los campos
+        # TODO: en MainWindow, corregir el acceso a los datos
+        self.fieldsValidated.emit(self.field_values)
         
         return None
 
 
-    @Slot()
-    def handleNameAndQuantityAndPriceChange(self, called_from_checkbox:bool=False) -> None:
+    def __updateAvailableStock(self) -> None:
         '''
-        Es llamado desde:
-        - self.validateProductNameField: cuando el índice de 'comboBox_productName' cambia.
-        - self.validatorOnValidationSucceded: cuando el valor de 'lineEdit_productQuantity' cambia.
-        - la señal 'checkBox_comercialPrice.clicked': cuando el estado de 'checkBox_comercialPrice' cambia.
-        
-        Asigna el valor True|False a 'ListItemValues.is_comercial_price' dependiendo del estado de 
-        'checkBox_comercialPrice', cambia el texto del QLabel de subtotal, coloca los detalles de la 
-        venta en su QLineEdit. Por último, al finalizar llama a 'self.verifyFieldsValidity'.
-        
-        PARAMS:
-        - called_from_checkbox: flag que determina si el método es llamado desde la señal 'clicked' de 
-        'checkBox_comercialPrice'. Por defecto es False. Sirve para no llamar tantas veces al método 
-        'self.verifyFieldsValidity'.
-        
-        Este método llama a:
-        - self.__setDetailsAndCost: para actualizar los detalles de venta y el costo total.
-        - self.verifyFieldsValidity: para revisar el estado de validez de los campos.
-        
-        Retorna None.
+        Actualiza el stock disponible en el validador de cantidad a partir del 
+        producto seleccionado.
+
+        Retorna
+        -------
+        None
         '''
-        # actualiza 'self.field_values'
-        self.field_values.is_comercial_price = True if self.listItem.checkBox_comercialPrice.isChecked() else False
+        self.quantity_validator.setAvailableStock(
+                getCurrentProductStock(
+                    self.listItem.comboBox_productName.itemText(
+                        self.listItem.comboBox_productName.currentIndex()
+                    )
+                )
+            )
+        return None
+
+
+    def __showAvailableStock(self) -> None:
+        '''
+        Muestra el stock disponible en un label debajo de la cantidad vendida.
+
+        Retorna
+        -------
+        None
+        '''
+        # coloca el stock en 'label_quantityFeedback'
+        self.listItem.label_quantityFeedback.show()
+        self.listItem.label_quantityFeedback.setStyleSheet(
+            WidgetStyle.LABEL_NEUTRAL_VAL.value
+        )
+        self.listItem.label_quantityFeedback.setText(
+            "El stock disponible es de {} {}".format(
+                self.quantity_validator.AVAILABLE_STOCK[0], self.quantity_validator.AVAILABLE_STOCK[1]
+            )
+        )
+        return None
+
+
+    def __toggleCheckboxOnProductName(self, curr_name:str) -> None:
+        '''
+        activa/desactiva el checkbox de precio comercial dependiendo de 
+        si el producto actualmente seleccionado tiene un precio comercial 
+        o no.
+
+        Parámetros
+        ----------
+        curr_name : str
+            nombre de producto seleccionado
+
+        Retorna
+        -------
+        None
+        '''
+        registers:Any
         
-        # cambia los detalles de venta y el label con el costo total
-        self.__setDetailsAndCost()
-        
-        #? llama a verificar los otros campos solo si cambia el estado de 'checkBox_comercialPrice', sino hace muchas 
-        #? llamadas a self.verifyFieldsValidity() al pedo...
-        self.verifyFieldsValidity() if called_from_checkbox else None
+        with DatabaseRepository() as db_repo:
+            # obtiene el precio comercial
+            registers = db_repo.selectRegisters(
+                data_sql='''SELECT precio_comerc 
+                            FROM Productos 
+                            WHERE nombre = ?;''',
+                data_params=(curr_name,)
+            )[0][0]
+            
+            # la desmarca
+            self.listItem.checkBox_comercialPrice.setChecked(False)
+            
+            # si no es un valor NULO (0, 0.0, None, etc...) activa el checkbox
+            if registers:
+                self.listItem.checkBox_comercialPrice.setEnabled(True)
+            
+            # sino lo desactiva
+            else:
+                self.listItem.checkBox_comercialPrice.setEnabled(False)
+                self.field_values.setPriceType(InventoryPriceType.NORMAL)
+
+        return None
+    
+
+    #* checkbox de tipo de precio
+    def onCheckStateChange(self, state:Qt.CheckState) -> None:
+        '''
+        Actualiza el valor de 'field_values.is_comercial_price' con el nuevo 
+        estado de la checkbox y actualiza el precio y el detalle de la venta.
+
+        Parámetros
+        ----------
+        state : Qt.CheckState
+            estado actual del checkbox
+
+        Retorna
+        -------
+        None
+        '''
+        match state:
+            case state.Unchecked:
+                # actualiza 'self.field_values'
+                self.field_values.setPriceType(InventoryPriceType.NORMAL)
+            
+            case state.Checked:
+                # actualiza 'self.field_values'
+                self.field_values.setPriceType(InventoryPriceType.COMERCIAL)
+                
         return None
 
 
     @Slot()
     def onQuantityEditingFinished(self) -> None:
         '''
-        Es llamado desde la señal 'editingFinished' de 'lineEdit_productQuantity'.
+        Formatea el texto del campo y lo vuelve a asignar al campo de cantidad 
+        y actualiza 'self.field_values'.
         
-        Formatea el texto del campo y lo vuelve a asignar al campo de cantidad, además asigna el nuevo 
-        valor de cantidad a 'ListItemValues.quantity'.
-        
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
         # cambia puntos por comas, si termina con "." ó "," lo saca
         field_text = self.listItem.lineEdit_productQuantity.text()
         
-        if field_text.endswith((",",".")):
-            field_text = field_text.rstrip(",")
-            field_text = field_text.rstrip(".")
-        
+        field_text = field_text.rstrip(",.")
         field_text = field_text.replace(".",",")
         
         self.listItem.lineEdit_productQuantity.setText(field_text)
         
         # actualiza 'self.field_values'
-        self.field_values.quantity = float(field_text)
-        
-        self.verifyFieldsValidity()
-        
-        return None
-
-
-    def verifyFieldsValidity(self) -> None:
-        '''
-        Es llamado desde los métodos 'self.validatorOnValidationSucceded'|'self.validatorOnValidationFailed'|
-        'self.handleNameAndQuantityAndPriceChange'|'self.onQuantityEditingFinished'|'self.validateProductNameField'.
-        
-        Revisa si los campos de nombre y cantidad tienen valores válidos y emite la señal 'fieldsValidated' 
-        a MainWindow con 'self.field_values', objeto de tipo 'ListItemValues'.
-        
-        Retorna None.
-        '''
-        # verifica si todos los valores de self.VALID_FIELDS son True y emite la señal a MainWindow...
-        if self.TOTAL_COST and all(self.VALID_FIELDS.values()):
-            self.field_values.ALL_VALID = True
-            self.fieldsValidated.emit(self.field_values)
-
-        else:
-            self.field_values.ALL_VALID = False
-            self.fieldsValidated.emit(self.field_values)
+        self.field_values.setQuantity(
+            float(field_text.replace(",","."))
+        )
         
         return None
 
 
-    def __setDetailsAndCost(self) -> None:
+    @Slot(object)
+    def onSubtotalChanged(self, subtotal:float | None) -> None:
         '''
-        Es llamado desde 'self.handleNameAndQuantityAndPriceChange'.
+        Muestra el costo en la interfaz.
         
-        Obtiene el precio normal ó comercial dependiendo de si 'checkBox_comercialPrice' está checkeada, luego 
-        obtiene el costo desde la base de datos y lo calcula a partir de la cantidad ingresada y cambia el texto 
-        de 'label_subtotal' de acuerdo al costo total.
-        Luego coloca la cantidad del producto vendido, el nombre y el tipo de precio aplicado en 'lineEdit_saleDetail'.
-        Actualiza 'self.field_values', objeto de tipo 'ListItemValues', con el subtotal y los detalles de la venta.
+        Parámetros
+        ----------
+        subtotal : float | None
+            el subtotal de la venta actual, será float si existe y es válido 
+            sino None
         
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
-        total_cost:float|str # si existe el float, sino un str con "SUBTOTAL"
-        pattern:Pattern = compile(
-            pattern="[0-9]{1,8}(\.|,)?[0-9]{0,2}\sde .{1,}\s(\([\s]*P[\s]*\.[\s]*NORMAL[\s]*\)|\([\s]*P[\s]*\.[\s]*COMERCIAL[\s]*\))$",
-            flags=IGNORECASE)
-        re:Match | str
-        new_text:str
-        
-        # ======== PRECIO ====================================================
-        conn = createConnection("database/inventario.db")
-        cursor = conn.cursor()
-        
-        if all(self.VALID_FIELDS.values()):
-            if self.listItem.checkBox_comercialPrice.isChecked():
-                sql = "SELECT ? * precio_comerc FROM Productos WHERE nombre = ?;"
-            else:
-                sql = "SELECT ? * precio_unit FROM Productos WHERE nombre = ?;"
-            params = (
-                float(self.listItem.lineEdit_productQuantity.text().replace(",",".")),
-                self.listItem.comboBox_productName.itemText(self.listItem.comboBox_productName.currentIndex()),)
-            
-            # obtiene el costo total
-            total_cost = cursor.execute(sql, params).fetchone()[0]
-        
-        else:
-            total_cost = 0
-        
-        # si el valor no existe en base de datos devuelve TypeError
+        # si el valor es None devuelve TypeError
         try:
-            if total_cost == 0 or total_cost == 0.0:
-                total_cost = "SUBTOTAL"
+            match subtotal:
+                case 0: # si es 0 ó 0.0 no calcula
+                    subtotal = "SUBTOTAL"
             
-            else:
-                total_cost = f"$ {round(float(total_cost), 2)}"
-                total_cost = total_cost.replace(".",",")
+                case _: # intenta convertir el valor a float
+                    subtotal = f"$ {round(float(subtotal), 2)}"
+                    subtotal = subtotal.replace(".",",")
             
         except TypeError: # no puede convertir None a float
-            total_cost = "SUBTOTAL"
+            subtotal = "SUBTOTAL"
         
         # coloca el precio total
-        self.listItem.label_subtotal.setText(f"<html><head/><body><p><span style=\" font-size: 20px; color: #22577a;\">{total_cost}</span></p></body></html>")
-        
-        # guarda en una variable global el costo total
-        self.TOTAL_COST = float(total_cost.lstrip("$").replace(" ","").replace(",",".")) if total_cost != "SUBTOTAL" else None
-        
-        # actualiza 'self.field_values'
-        self.field_values.subtotal = self.TOTAL_COST
-        
-        # ======== DETALLES DE LA VENTA ======================================
-        
-        # obtiene los valores de cantidad, nombre del producto y tipo de precio (normal ó comercial)
-        quantity = self.listItem.lineEdit_productQuantity.text()
-        product_name = self.listItem.comboBox_productName.currentText()
-        price_type = "P. COMERCIAL" if self.listItem.checkBox_comercialPrice.isChecked() else "P. NORMAL"
+        self.listItem.label_subtotal.setText(
+            f'''<html>
+                    <head/>
+                    <body>
+                        <p>
+                            <span style=\" font-size: 20px; color: #22577a;\">{subtotal}</span>
+                        </p>
+                    </body>
+                </html>'''
+        )
+        return None
 
-        re = match(pattern, self.listItem.lineEdit_saleDetail.text())
-        re = re.group() if re else None
-        # verifica si 'pattern' coincide, y si coincide reemplaza el texto (significa que no lo escribió el usuario)
-        if self.listItem.lineEdit_saleDetail.text().strip() == re or self.listItem.lineEdit_saleDetail.text().strip() == "":
-            self.listItem.lineEdit_saleDetail.setText(f"{quantity} de {product_name} ({price_type})")
+
+    @Slot(str)
+    def onSaleDetailEdit(self, text:str) -> None:
+        '''
+        Modifica los detalles de la venta cuando son modificados por el usuario.
+
+        Parámetros
+        ----------
+        text : str
+            el detalle de la venta introducido
+
+        Retorna
+        -------
+        None
+            _description_
+        '''
+        self.field_values.setSaleDetails(curr_sale_detail=text)
+        return None
+    
+    
+    @Slot(str)
+    def onSaleDetailsChange(self, text:str) -> None:
+        '''
+        Cambia el texto del QLineEdit de detalle de venta.
+
+        Parámetros
+        ----------
+        text : str
+            el detalle de la venta a mostrar
         
-        # si no coincide es porque lo escribió el usuario (sólo reemplaza el tipo de precio)
-        else:
-            new_text = self.listItem.lineEdit_saleDetail.text()
-            new_text = sub(
-                pattern="(\([\s]*P[\s]*\.[\s]*NORMAL[\s]*\)|\([\s]*P[\s]*\.[\s]*COMERCIAL[\s]*\))$",
-                repl="",
-                string=self.listItem.lineEdit_saleDetail.text(),
-                flags=IGNORECASE)
-            new_text = f"{new_text.strip()} ({price_type})"
-            
-            self.listItem.lineEdit_saleDetail.setText(new_text)
-        
-        # actualiza 'self.field_values'
-        self.field_values.sale_details = self.listItem.lineEdit_saleDetail.text()
+        Retorna
+        -------
+        None
+        '''
+        self.listItem.lineEdit_saleDetail.setText(text)
         
         return None
+
 
 
 # DEUDORES (VENTA FINALIZADA) ==================================================================================
