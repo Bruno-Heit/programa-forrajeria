@@ -47,9 +47,6 @@ class MainWindow(QMainWindow):
         self.sales_data_model:SalesTableModel = SalesTableModel()
         self.ui.tv_sales_data.setModel(self.sales_data_model)
         
-        # modelo de datos con nombres para las comboboxes del formulario de ventas
-        # self._comboboxes_data_model:
-        
         #* delegado de inventario
         self.inventory_delegate = InventoryDelegate()
         self.ui.tv_inventory_data.setItemDelegate(self.inventory_delegate)
@@ -218,8 +215,6 @@ class MainWindow(QMainWindow):
                 quantity_index=params['quantity_index'] if 'quantity_index' in params else None
             )
         )
-        # TODO: reimplementar UPDATES de Ventas
-        # self.ui.tv_sales_data.doubleClicked.connect(lambda: self.handleTableUpdateItem(self.ui.tv_sales_data, self.ui.tv_sales_data.currentIndex()) )
         
         #* delegado de ventas
         self.sales_delegate.fieldIsValid.connect(self.__onDelegateValidationSucceded)
@@ -1827,7 +1822,6 @@ class MainWindow(QMainWindow):
 
 
     #¡### VENTAS ######################################################
-    # TODO: continuar refactorizando parte del formulario de VENTAS
     #* métodos de lineEdit_paid
     @Slot()
     def onSalePaidEditingFinished(self) -> None:
@@ -1838,46 +1832,50 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
+        # formatea el campo
         field_text:str = self.ui.lineEdit_paid.text()
         
         field_text = field_text.replace(".",",")
         field_text = field_text.strip()
-        field_text = field_text.rstrip(",")
-        field_text = field_text.lstrip("0")
+        field_text = field_text.rstrip("0,")
+        
+        if field_text.startswith("0"):
+            field_text = field_text.lstrip("0")
         
         self.ui.lineEdit_paid.setText(field_text)
         
+        # muestra el cambio
         self.__setSaleChange()
         return None
 
 
     def __setSaleChange(self) -> None:
         '''
-        Es llamado desde el método 'self.onSalePaidEditingFinished'.
-        
-        Si todos los valores de los items son válidos, muestra el cambio a devolver a partir del valor 
-        de 'lineEdit_paid', o si lo abonado es mayor al total se muestra el cambio que se debe dar en 
-        'label_total_change'.
+        Si todos los valores de los items son válidos, muestra el cambio a 
+        devolver a partir del valor de 'lineEdit_paid', o si lo abonado es 
+        mayor al total se muestra el cambio que se debe dar en 'label_total_change'.
         
         Retorna None.
         '''
         total_paid:float
 
         # si self.TOTAL_COST es None significa que hay items con valores inválidos
-        if self.TOTAL_COST:
-            # si no hay un valor en lineEdit_paid, le pone 0
-            if not self.ui.lineEdit_paid.text():
-                self.ui.lineEdit_paid.setText(f"0.0")
-                
-            # obtiene el total abonado
-            total_paid = float(self.ui.lineEdit_paid.text().replace(",","."))
+        if not self.TOTAL_COST:
+            return None
+        
+        # si no hay un valor en lineEdit_paid, le pone 0
+        if not self.ui.lineEdit_paid.text():
+            self.ui.lineEdit_paid.setText(f"0.0")
+        
+        # obtiene el total abonado
+        total_paid = float(self.ui.lineEdit_paid.text().replace(",","."))
 
-            # verifica si 'self.lineEdit_paid' tiene un valor mayor al total
-            if total_paid > self.TOTAL_COST: # si lo abonado es mayor al total se muestra el cambio
-                self.ui.label_total_change.setText(f"{round(total_paid - self.TOTAL_COST, 2)}")
+        # si 'self.lineEdit_paid' tiene un valor mayor al total muestra el cambio
+        if total_paid > self.TOTAL_COST:
+            self.ui.label_total_change.setText(f"{round(total_paid - self.TOTAL_COST, 2)}")
 
-            else:
-                self.ui.label_total_change.setText("")
+        else:
+            self.ui.label_total_change.setText("")
             
         return None
     
@@ -2182,6 +2180,9 @@ class MainWindow(QMainWindow):
         return None
     
     
+    # TODO: refactorizar parte del botón de finalizar venta, ya está terminada la parte de sales_input_list y también la de 
+    # todo: la tabla con las ventas realizadas. Luego de terminar acá, tengo 2 opciones: empezar con Deudas ó empezar con las 
+    # todo: search-bars.
     #* finalizando compra
     @Slot()
     def onFinishedSale(self) -> None:
