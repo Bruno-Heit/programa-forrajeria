@@ -295,19 +295,35 @@ class SaleQuantityValidator(QRegularExpressionValidator):
     
     
     def validate(self, text: str, pos: int) -> object:
+        _text_to_float:float
+        
         if text.strip() == "":
             self.validationFailed.emit("La cantidad no puede estar vacía")
             return QRegularExpressionValidator.State.Intermediate, text, pos
         
         elif fullmatch(self.pattern, text):
-            try:
-                # si el stock disponible existe y es menor que la cantidad introducida devuelve Invalid
-                if self.AVAILABLE_STOCK and float(text.replace(",",".")) > self.AVAILABLE_STOCK[0]:
-                    self.validationFailed.emit(f"Cantidad mayor al stock (stock: {self.AVAILABLE_STOCK[0]} {self.AVAILABLE_STOCK[1]})")
-                    return QRegularExpressionValidator.State.Invalid, text, pos
+            # si el stock disponible existe
+            if self.AVAILABLE_STOCK:
+                try:
+                    _text_to_float = float(text.replace(",","."))
                     
-            except TypeError as err:
-                logging.error(err)
+                    # si la cantidad es 0 o cualquier valor nulo devuelve Invalid
+                    if not _text_to_float:
+                        self.validationFailed.emit(
+                            f"La cantidad debe ser mayor a 0"
+                        )
+                        return QRegularExpressionValidator.State.Invalid, text, pos
+                    
+                    # si el stock es menor que la cantidad introducida devuelve Invalid
+                    elif _text_to_float > self.AVAILABLE_STOCK[0]:
+                        self.validationFailed.emit(
+                            f"Cantidad mayor al stock (stock: {self.AVAILABLE_STOCK[0]} {self.AVAILABLE_STOCK[1]})"
+                        )
+                        return QRegularExpressionValidator.State.Invalid, text, pos
+                    
+                except TypeError as err:
+                    logging.error(err)
+                    return QRegularExpressionValidator.State.Invalid, text, pos
             
             self.validationSucceeded.emit()
             return QRegularExpressionValidator.State.Acceptable, text, pos
