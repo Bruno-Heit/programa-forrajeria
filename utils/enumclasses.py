@@ -142,7 +142,7 @@ class TypeSideBar(IntEnum):
 
 
 # [ListItemValues] tipos de campos para validar
-class ListItemValuesField(IntEnum):
+class ListItemFields(IntEnum):
     '''Clase de tipo 'IntEnum' con los campos de los cuales se guarda registro en la clase.'''
     PRODUCT_ID = 0
     PRODUCT_NAME = 1
@@ -150,6 +150,7 @@ class ListItemValuesField(IntEnum):
     SUBTOTAL = 3
     IS_COMERCIAL_PRICE = 4
     SALE_DETAILS = 5
+    IS_ALL_VALID = 6
 
 
 
