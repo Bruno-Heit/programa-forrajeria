@@ -9,7 +9,7 @@ from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot)
 from PySide6.QtGui import (QIcon)
 
 from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemValues, 
-                           DebtorDataDialog, DebtsTablePersonData, WidgetStyle)
+                           DebtorDataDialog, DebtsTablePersonData, WidgetStyle, ListItemFields)
 from ui.ui_mainwindow import (Ui_MainWindow)
 from utils.functionutils import *
 from utils.model_classes import (InventoryTableModel, SalesTableModel)
@@ -39,19 +39,22 @@ class MainWindow(QMainWindow):
         # repositorio de base de datos
         self._db_repo:DatabaseRepository = DatabaseRepository()
         
-        # modelo de datos de Inventario
+        #* modelo de datos de Inventario
         self.inventory_data_model:InventoryTableModel = InventoryTableModel()
         self.ui.tv_inventory_data.setModel(self.inventory_data_model)
         
-        # modelo de datos de Ventas
+        #* modelo de datos de Ventas
         self.sales_data_model:SalesTableModel = SalesTableModel()
         self.ui.tv_sales_data.setModel(self.sales_data_model)
         
-        # delegado de inventario
+        # modelo de datos con nombres para las comboboxes del formulario de ventas
+        # self._comboboxes_data_model:
+        
+        #* delegado de inventario
         self.inventory_delegate = InventoryDelegate()
         self.ui.tv_inventory_data.setItemDelegate(self.inventory_delegate)
         
-        # delegado de ventas
+        #* delegado de ventas
         self.sales_delegate = SalesDelegate(self.ui.dateTimeEdit_sale.displayFormat())
         self.ui.tv_sales_data.setItemDelegate(self.sales_delegate)
         
@@ -116,8 +119,7 @@ class MainWindow(QMainWindow):
         
         self.SALES_ITEM_NUM:int = 0 # contador para crear nombres de items en 
                                     # 'input_sales_data'.
-        self.DICT_ITEMS_VALUES:dict[str,ListItemValues] = {} # tiene los valores 
-                                                             # de cada 'ListItemWidget'.
+        self.DICT_ITEMS_VALUES:dict[str, dict] = {} # tiene los valores de cada 'ListItemWidget'.
         self.VALID_PAID_FIELD:bool = None # True si lineEdit_paid es válido, sino False.
         self.TOTAL_COST:float = None # guarda el costo total de 'label_total' como 
                                      # float, para no tener que buscarlo con regex
@@ -228,7 +230,7 @@ class MainWindow(QMainWindow):
         
         self.ui.lineEdit_paid.editingFinished.connect(self.onSalePaidEditingFinished)
         
-        self.ui.btn_end_sale.clicked.connect(self.handleFinishedSale)
+        self.ui.btn_end_sale.clicked.connect(self.onFinishedSale)
 
         #¡========= DEUDAS ====================================================
         # TODO PRINCIPAL: SEGUIR CON PARTE DE DEUDAS
@@ -1825,13 +1827,12 @@ class MainWindow(QMainWindow):
 
 
     #¡### VENTAS ######################################################
-    # TODO: continuar refactorizando parte de VENTAS
-    #* MÉTODOS DE 'lineEdit_paid'
+    # TODO: continuar refactorizando parte del formulario de VENTAS
+    #* métodos de lineEdit_paid
     @Slot()
     def onSalePaidEditingFinished(self) -> None:
         '''
-        Una vez emitida la señal 'editingFinished' de 'lineEdit_paid', formatea 
-        el campo del QLineEdit y muestra el cambio a devolver.
+        Formatea el campo del 'lineEdit_paid' y muestra el cambio a devolver.
         
         Retorna
         -------
@@ -1841,122 +1842,16 @@ class MainWindow(QMainWindow):
         
         field_text = field_text.replace(".",",")
         field_text = field_text.strip()
-        field_text = field_text.rstrip(",.") if field_text.endswith((",",".")) else field_text
-        field_text = field_text.lstrip("0") if field_text.startswith("0") else field_text
+        field_text = field_text.rstrip(",")
+        field_text = field_text.lstrip("0")
         
         self.ui.lineEdit_paid.setText(field_text)
         
-        self.setSaleChange()
+        self.__setSaleChange()
         return None
 
 
-    @Slot()
-    def onPaidValidationSucceded(self) -> None:
-        '''
-        Es llamado desde la señal 'validationSucceeded' de 'lineEdit_paid'.
-        
-        Cambia el estilo de 'lineEdit_paid' para representar la validez del campo y el valor de la variable 
-        'self.VALID_PAID_FIELD' a True.
-        
-        Retorna
-        -------
-        None
-        '''
-        # si el campo es válido y no está vacío lo pone de color verde, si está vacío le quita el estilo
-        self.ui.lineEdit_paid.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value if self.ui.lineEdit_paid.text().strip() else "")
-        self.VALID_PAID_FIELD = True
-        
-        return None
-    
-    
-    @Slot()
-    def onPaidValidationFailed(self) -> None:
-        '''
-        Es llamado desde la señal 'validationFailed' de 'lineEdit_paid'.
-        
-        Cambia el estilo de 'lineEdit_paid' para representar la invalidez del campo y el valor de la variable 
-        'self.VALID_PAID_FIELD' a False.
-        
-        Retorna
-        -------
-        None
-        '''
-        self.ui.lineEdit_paid.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
-        self.VALID_PAID_FIELD = False
-        
-        return None
-    
-    
-    def __updateItemsValues(self, list_item:ListItemValues=None, item_to_delete:str=None) -> None:
-        '''
-        Es llamado desde los métodos 'self.onSalesItemFieldValidation' | 'self.onSalesItemDeletion' | 
-        'self.addSalesInputListItem'.
-        
-        Actualiza el diccionario 'self.DICT_ITEMS_VALUES' a partir del valor de 
-        'list_item' ó elimina el item con nombre 'item_to_delete' del diccionario, 
-        y además si es necesario reinicia el contador 'self.SALES_ITEM_NUM' y 
-        desactiva el botón 'btn_end_sale'.
-        
-        Parámetros
-        ----------
-        list_item: ListItemValues
-            objeto con todos los valores actualizados del item, es enviado el 
-            parámetro cuando el método es llamado desde los métodos 
-            'self.onSalesItemFieldValidation' | 'self.addSalesInputListItem'
-        item_to_delete: str
-            determina cuál item debe ser borrado, es enviado el parámetro cuando 
-            el método es llamado desde el método 'self.onSalesItemDeletion'
-        
-        Retorna
-        -------
-        None
-        '''
-        if not item_to_delete:
-            self.DICT_ITEMS_VALUES[list_item.object_name] = list_item
-        
-        # llamada desde 'onSalesItemDeletion', borra el item
-        else:
-            self.DICT_ITEMS_VALUES.pop(item_to_delete)
-            
-            # reinicia el contador de nombres cuando no hay items en 'sales_input_list', 
-            # y desactiva 'btn_end_sale'
-            if self.ui.sales_input_list.count() == 0:
-                self.SALES_ITEM_NUM = 0
-                self.ui.btn_end_sale.setEnabled(False)
-        
-        return None
-
-
-    @Slot(ListItemValues)
-    def onSalesItemFieldValidation(self, list_item:ListItemValues) -> None:
-        '''
-        Es llamado desde la señal 'fieldsValidated' de 'classes.ListItemWidget'.
-        
-        Este método hace lo siguiente:
-        - Actualiza 'self.DICT_ITEMS_VALUES'. Para eso llama al método 'self.__updateItemsValues'.
-        - Verifica la validez de todos los items. Para eso llama al método 'self.validateSalesItemsFields'.
-        - Cambia el contenido de 'dateTimeEdit_sale' para mostrar la hora precisa de la venta.
-        
-        Parámetros
-        ----------
-        list_item: ListItemValues
-            objeto con todos los valores actualizados del item
-        
-        Retorna
-        -------
-        None
-        '''
-        # actualiza self.DICT_ITEMS_VALUES
-        self.__updateItemsValues(list_item)
-        
-        self.validateSalesItemsFields()
-        
-        # cambia la hora de la venta
-        self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
-        return None
-    
-
-    def setSaleChange(self) -> None:
+    def __setSaleChange(self) -> None:
         '''
         Es llamado desde el método 'self.onSalePaidEditingFinished'.
         
@@ -1985,99 +1880,57 @@ class MainWindow(QMainWindow):
                 self.ui.label_total_change.setText("")
             
         return None
+    
 
-
-    def validateSalesItemsFields(self) -> None:
+    @Slot()
+    def onPaidValidationSucceded(self) -> None:
         '''
-        Es llamado desde los métodos 'self.onSalesItemDeletion' | 'self.onSalesItemFieldValidation'.
+        Cambia el estilo de 'lineEdit_paid' para representar la validez del 
+        campo y el valor de la variable 'self.VALID_PAID_FIELD' a True.
         
-        Este método hace lo siguiente:
-        - Si todos los campos son válidos:
-            - Habilita el botón 'btn_end_sale'.
-            - Obtiene el precio total y lo coloca en 'self.label_total' y lo guarda en 'self.TOTAL_COST', si 
-            hay campos inválidos en items entonces 'self.TOTAL_COST' será None.
-            - Crea un QCompleter para 'self.lineEdit_paid' con el precio total y los subtotales.
-        - Si hay campos inválidos:
-            - Deshabilita el botón 'btn_end_sale'.
-            - Coloca el texto inicial en 'label_total'.
-            - Coloca el valor None en 'self.TOTAL_COST'.
-        
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
-        subtotals:list[float] = [] # lista con los subtotales de los items, es usado por 'completer_values' y
-                                   # y para calcular el costo total
-        total_cost:str # var. aux. que contiene el costo total
-        completer_values:list[str] = [] # lista con todos los valores ('subtotals') y costo total para colocar 
-                                        # en el completer
-        completer:QCompleter # completer para colocar en lineEdit_paid con el total
-        
-        # verifica si 'sales_input_list' no está vacía y si todos los items tienen 'ALL_VALID==True'
-        if self.ui.sales_input_list.count() > 0 and all( [item.ALL_VALID for item in self.DICT_ITEMS_VALUES.values()] ):
-            self.ui.btn_end_sale.setEnabled(True)
-            
-            # obtiene los subtotales (para obtener el total y para luego colocarlos en el completer)
-            subtotals = [item.subtotal for item in self.DICT_ITEMS_VALUES.values()]
-            
-            # obtiene el costo total
-            self.TOTAL_COST = round(sum(subtotals), 2)
-            
-            # coloca el costo total en label_total
-            total_cost = str(self.TOTAL_COST).replace(".",",")
-            self.ui.label_total.setText(
-                f"<html><head/><body><p>TOTAL <span style=\" color: #22577a;\">{total_cost}</span></p></body></html>"
-                )
-            
-            # obtengo todos los valores para el completer (total y subtotales)
-            completer_values = [str(value).replace(".",",") for value in subtotals + [total_cost]] # concatena 'subtotals' y 
-                # el costo total, convierte los valores a str y le cambia los "." por ",".
-            
-            # crea el completer para los costos en 'lineEdit_paid'
-            completer = QCompleter(completer_values, parent=self.ui.lineEdit_paid)
-            completer.setCompletionMode(completer.CompletionMode.InlineCompletion)
-            completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
-            self.ui.lineEdit_paid.setCompleter(completer)
-
-            self.ui.lineEdit_paid.textChanged.connect(completer.setCompletionPrefix)
-
-        else:
-            self.ui.btn_end_sale.setEnabled(False)
-            self.ui.label_total.setText("TOTAL")
-            self.TOTAL_COST = None
+        # si el campo es válido y no está vacío lo pone de color verde, 
+        # si está vacío le quita el estilo
+        self.ui.lineEdit_paid.setStyleSheet(
+            WidgetStyle.FIELD_VALID_VAL.value if self.ui.lineEdit_paid.text().strip() else ""
+        )
+        self.VALID_PAID_FIELD = True
         
         return None
     
-
-    @Slot(QListWidgetItem, str)
-    def onSalesItemDeletion(self, list_widget_item:QListWidgetItem, list_item_name:str) -> None:
+    
+    @Slot()
+    def onPaidValidationFailed(self) -> None:
         '''
-        Es llamado desde la señal 'deletedItem' del item actual declarado en 'self.addSalesInputListItem'.
+        Cambia el estilo de 'lineEdit_paid' para representar la invalidez 
+        del campo y el valor de la variable 'self.VALID_PAID_FIELD' a False.
         
-        Elimina el item referido en 'item_list_widget' del QListWidget 'self.sales_input_list', y llama al método 
-        'self.__updateItemsValues' para borrar el item con nombre 'list_item_name' en 'self.DICT_ITEMS_VALUES', 
-        y llama al método 'self.validateSalesItemsFields' para validar los otros items.
-        
-        PARAMS:
-        - item_list_widget: el QListWidgetItem al que se referencia.
-        - list_item_name: el 'objectName' del objecto 'classes.ListItemWidget' interno de 'item_list_widget'.
-        
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
-        row:int = self.ui.sales_input_list.row(list_widget_item)
-        self.ui.sales_input_list.takeItem(row)
-        self.__updateItemsValues(item_to_delete=list_item_name)
-        self.validateSalesItemsFields()
+        self.ui.lineEdit_paid.setStyleSheet(
+            WidgetStyle.FIELD_INVALID_VAL.value
+        )
+        self.VALID_PAID_FIELD = False
+        
         return None
-
-
+    
+    
+    #* métodos de widgets de items de lista
     @Slot()
     def addSalesInputListItem(self) -> None:
         '''
-        Es llamado desde la señal 'clicked' de 'btn_add_product'.
+        Crea un item de tipo 'classes.ListItemWidget' que se colocará dentro 
+        de 'sales_input_list', y que representa la venta de un producto, y 
+        conecta sus señales.
         
-        Crea un item de tipo 'classes.ListItemWidget' que se colocará dentro de 'sales_input_list', y que representa 
-        la venta de un producto, y conecta sus señales.
-        
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
         object_name:str = f"item_{self.SALES_ITEM_NUM}"
         list_widget_item:QListWidgetItem = QListWidgetItem()
@@ -2086,18 +1939,26 @@ class MainWindow(QMainWindow):
         # incremento self.SALES_ITEM_NUM
         self.SALES_ITEM_NUM += 1
         
-        #? agrego un elemento vacío a self.DICT_ITEMS_VALUES para evitar falsos positivos y activar el botón 
-        #? 'btn_end_sale' sin querer cuando un elemento es válido y hay otros que no fueron modificados aún...
-        #? de cualquier forma, este item temporal va a ser sobreescrito cuando se modifique/borre el item
-        self.__updateItemsValues(
-            list_item=ListItemValues(
-                object_name=object_name,
-                ALL_VALID=False)
-            )
+        #? agrego un elemento vacío a self.DICT_ITEMS_VALUES para evitar falsos 
+        #? positivos y activar el botón 'btn_end_sale' sin querer cuando un 
+        #? elemento es válido y hay otros que no fueron modificados aún... de 
+        #? cualquier forma, este item temporal va a ser sobreescrito cuando se 
+        #? modifique/borre el item
+        self.DICT_ITEMS_VALUES[object_name] = {}
         
         # conecto señales
-        item.fieldsValidated.connect(self.onSalesItemFieldValidation)
-        item.deleteItem.connect(lambda list_item_name: self.onSalesItemDeletion(list_widget_item, list_item_name))
+        item.deleteItem.connect(
+            lambda list_item_name: self.onSalesItemDeletion(
+                list_widget_item=list_widget_item,
+                list_item_name=list_item_name
+            )
+        )
+        item.fieldsValuesChanged.connect(
+            lambda values: self.onSalesItemFieldsValuesChanged(
+                values=values,
+                object_name=object_name
+            )
+        )
 
         # coloca el widget dentro del item
         list_widget_item.setSizeHint(item.size())
@@ -2112,23 +1973,232 @@ class MainWindow(QMainWindow):
         # desactiva btn_end_sale cuando se agrega un producto
         self.ui.btn_end_sale.setEnabled(False)
         return None
-
-
-    @Slot()
-    def handleFinishedSale(self) -> None:
+    
+    
+    @Slot(QListWidgetItem, str)
+    def onSalesItemDeletion(self, list_widget_item:QListWidgetItem, list_item_name:str) -> None:
         '''
-        Es llamado desde la señal 'clicked' de 'btn_end_sale'.
+        Elimina el item elegido de 'self.sales_input_list', actualiza la variable 
+        'self.DICT_ITEMS_VALUES', y llama al método 'self.validateSalesItemsFields' 
+        para validar los otros items.
         
+        Parámetros
+        ----------
+        item_list_widget : QListWidgetItem
+            el QListWidgetItem al que se referencia
+        list_item_name : str
+            el 'objectName' del objecto 'classes.ListItemWidget' interno de 
+            'item_list_widget', funciona como id único
+        
+        Retorna
+        -------
+        None
+        '''
+        # quita el item a partir de la fila donde está
+        self.ui.sales_input_list.takeItem(
+            self.ui.sales_input_list.row(list_widget_item)
+        )
+        
+        # actualiza el valor de la variable
+        self.DICT_ITEMS_VALUES.pop(list_item_name)
+            
+        # reinicia el contador de nombres cuando no hay items en 'sales_input_list', 
+        # y desactiva 'btn_end_sale'
+        if self.ui.sales_input_list.count() == 0:
+            self.SALES_ITEM_NUM = 0
+            self.ui.btn_end_sale.setEnabled(False)
+        
+        # valida los campos
+        self.validateSalesItemsFields()
+        return None
+    
+    
+    @Slot(object)
+    def onSalesItemFieldsValuesChanged(self, values:dict[str, Any], object_name:str) -> None:
+        '''
+        Al cambiar los valores actualiza el registro de los valores en 
+        'MainWindow' y valida que todos los demás sean válidos para poder 
+        mostrar el total de la venta.
+
+        Parámetros
+        ----------
+        values : dict[str, Any]
+            valores actuales del 'ListItemWidget'
+        object_name : str
+            nombre del 'ListItemWidget'
+
+        Retorna
+        -------
+        None
+        '''
+        self.DICT_ITEMS_VALUES[object_name] = values
+        
+        self.validateSalesItemsFields()
+        return None
+    
+    
+    def validateSalesItemsFields(self) -> None:
+        '''
         Este método hace lo siguiente:
-        - Si la cantidad abonada es < al costo total:
-            - Instancia y muestra un dialog de tipo 'DebtorDataDialog' con los datos del deudor, además conecta 
-            su señal 'debtorChosen' al método 'self.finishedSaleOnDebtorChosen'.
-        - Si la cantidad abonada es >= al costo total:
-            - Obtiene los datos de los campos de los items y hace las consultas INSERT a Ventas y Detalle_Ventas 
-            y la consulta UPDATE a Productos con el nuevo stock.
-            - Al finalizar, llama al método 'self.__resetFieldsOnFinishedSale' para realizar los reinicios necesarios.
+        - Si todos los campos son válidos:
+            - Habilita el botón 'btn_end_sale'.
+            - Obtiene el precio total y lo coloca en 'self.label_total' y lo guarda en 'self.TOTAL_COST'.
+            - Crea un QCompleter para 'self.lineEdit_paid' con el precio total y los subtotales.
+        - Si hay campos inválidos:
+            - Deshabilita el botón 'btn_end_sale'.
+            - Coloca el texto inicial en 'label_total'.
+            - Coloca el valor None en 'self.TOTAL_COST'.
         
         Retorna None.
+        '''
+        try:
+            # si 'sales_input_list' no está vacía y todos los valores son válidos...
+            if (self.ui.sales_input_list.count() > 0
+                and all([item[ListItemFields.IS_ALL_VALID.name] for item in self.DICT_ITEMS_VALUES.values()]) ):
+                self.__onValidSalesItemsFields()
+
+            else:
+                self.ui.btn_end_sale.setEnabled(False)
+                self.ui.label_total.setText("TOTAL")
+                self.TOTAL_COST = None
+        
+        except KeyError: # salta cuando no hay key 'IS_ALL_VALID', y pasa cuando se elimina 
+            # un item que fue creado y no ha sido modificado ninguno de sus valores
+            self.ui.btn_end_sale.setEnabled(False)
+            self.ui.label_total.setText("TOTAL")
+            self.TOTAL_COST = None
+        
+        return None
+    
+    
+    def __onValidSalesItemsFields(self) -> None:
+        '''
+        Habilita el botón 'btn_end_sale', obtiene el precio total y lo muestra, 
+        por último crea un QCompleter para 'self.lineEdit_paid' con el precio 
+        total y los subtotales.
+
+        Retorna
+        -------
+        None
+        '''
+        subtotals:list[float] = [] # lista con los subtotales de los items, es usado por 'completer_values' y
+                                   # y para calcular el costo total
+        _total_cost:str # var. aux. que contiene el costo total
+        
+        # obtiene los subtotales (para obtener el total y para luego colocarlos en el completer)
+        subtotals = [subtotal[ListItemFields.SUBTOTAL.name] for subtotal in self.DICT_ITEMS_VALUES.values()]
+        
+        # obtiene el costo total
+        try:
+            self.TOTAL_COST = round(sum(subtotals), 2)
+        
+        except TypeError: # salta cuando en subtotals hay un subtotal 'None' (esto pasa porque 
+                          # se emiten varias señales desde ListItemWidget, y las primeras son 
+                          # con subtotales nulos)
+            return None
+        
+        # coloca el costo total en label_total
+        _total_cost = str(self.TOTAL_COST).replace(".",",")
+        self.ui.label_total.setText(
+            f'''<html>
+                    <head/>
+                    <body>
+                        <p>
+                            TOTAL <span style=\" color: #22577a;\">{_total_cost}</span>
+                        </p>
+                    </body>
+                </html>'''
+            )
+        
+        # activa el botón btn_end_sale
+        self.ui.btn_end_sale.setEnabled(True)
+        
+        # crea y coloca el completer con los valores
+        self.__createSalesCompleter(subtotals=subtotals, total_cost=_total_cost)
+        return None
+    
+    
+    def __createSalesCompleter(self, subtotals:list[float], total_cost:str) -> None:
+        '''
+        Crea y coloca un QCompleter en 'lineEdit_paid' con los subtotales de los 
+        productos y el costo total.
+
+        Parámetros
+        ----------
+        subtotals : list[float]
+            subtotales de los productos
+        total_cost : str
+            costo total obtenido de la sumatoria de los subtotales
+        
+        Retorna
+        -------
+        None
+        '''
+        completer_values:list[str] = [] # lista con todos los valores ('subtotals') 
+                                        # y costo total para el completer.
+        completer:QCompleter # completer para poner en lineEdit_paid.
+        
+        # obtengo todos los valores para el completer (total y subtotales)
+        completer_values = [str(value).replace(".",",") for value in subtotals + [total_cost]] # concatena 'subtotals' y 
+            # el costo total, convierte los valores a str y le cambia los "." por ",".
+        
+        # crea el completer para los costos en 'lineEdit_paid'
+        completer = QCompleter(completer_values, parent=self.ui.lineEdit_paid)
+        completer.setCompletionMode(completer.CompletionMode.InlineCompletion)
+        completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        self.ui.lineEdit_paid.setCompleter(completer)
+
+        self.ui.lineEdit_paid.textChanged.connect(completer.setCompletionPrefix)
+
+        return None
+    
+    
+    @Slot(ListItemValues)
+    def onSalesItemFieldValidation(self, list_item:ListItemValues) -> None:
+        '''
+        Es llamado desde la señal 'fieldsValidated' de 'classes.ListItemWidget'.
+        
+        Este método hace lo siguiente:
+        - Actualiza 'self.DICT_ITEMS_VALUES'.
+        - Verifica la validez de todos los items. Para eso llama al método 'self.validateSalesItemsFields'.
+        - Cambia el contenido de 'dateTimeEdit_sale' para mostrar la hora precisa de la venta.
+        
+        Parámetros
+        ----------
+        list_item: ListItemValues
+            objeto con todos los valores actualizados del item
+        
+        Retorna
+        -------
+        None
+        '''
+        # actualiza self.DICT_ITEMS_VALUES
+        self.DICT_ITEMS_VALUES[list_item.object_name] = list_item
+        
+        self.validateSalesItemsFields()
+        
+        # cambia la hora de la venta
+        self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
+        return None
+    
+    
+    #* finalizando compra
+    @Slot()
+    def onFinishedSale(self) -> None:
+        '''
+        Este método hace lo siguiente:
+        - Si la cantidad abonada es < al costo total:
+            - Instancia y muestra un dialog de tipo 'DebtorDataDialog' con los 
+            datos del deudor y maneja su señal
+        - Si la cantidad abonada es >= al costo total:
+            - Obtiene los datos de los campos de los items y hace las consultas 
+            INSERT a Ventas y Detalle_Ventas y la consulta UPDATE a Productos 
+            con el nuevo stock
+            - Al finalizar, realiza los reinicios necesarios en variables
+        
+        Retorna
+        -------
+        None
         '''
         total_paid:float
         product_id:int # aux. necesaria porque, si hay más de 1 item en 'sales_input_list', falla al hacer la subconsulta 
@@ -2165,7 +2235,20 @@ class MainWindow(QMainWindow):
                     
                     # inserta a Detalle_Ventas
                     cursor.execute(
-                        "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, NULL);",
+                        '''INSERT INTO Detalle_Ventas(
+                            cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) 
+                           VALUES(
+                                ?, 
+                                ?, 
+                                (SELECT IDproducto 
+                                    FROM Productos 
+                                    WHERE nombre = ?), 
+                                (SELECT IDventa 
+                                    FROM Ventas 
+                                    WHERE fecha_hora = ? 
+                                        AND detalles_venta = ?), 
+                                ?, 
+                                NULL);''',
                         (item.quantity, item.subtotal, item.product_name, self.ui.dateTimeEdit_sale.text(), 
                          item.sale_details, item.subtotal,)
                         )
@@ -2173,7 +2256,9 @@ class MainWindow(QMainWindow):
                     
                     # actualiza en Productos
                     cursor.execute(
-                        "UPDATE Productos SET stock = stock - ? WHERE nombre = ?;",
+                        '''UPDATE Productos 
+                           SET stock = stock - ? 
+                           WHERE nombre = ?;''',
                         (item.quantity, item.product_name,)
                     )
                     conn.commit()
@@ -2193,7 +2278,7 @@ class MainWindow(QMainWindow):
     def finishedSaleOnDebtorChosen(self, debtor_id:int, total_paid:float) -> None:
         '''
         Es llamado desde la señal 'debtorChosen' del objeto de tipo 'DebtorDataDialog' instanciado en 
-        el método 'self.handleFinishedSale'.
+        el método 'self.onFinishedSale'.
         
         Este método hace lo siguiente:
         - Obtiene los datos de los campos de los items y hace las consultas INSERT a Ventas, Detalle_Ventas 
@@ -2283,7 +2368,7 @@ class MainWindow(QMainWindow):
     
     def __resetFieldsOnFinishedSale(self) -> None:
         '''
-        Es llamado desde el método 'self.handleFinishedSale'.
+        Es llamado desde el método 'self.onFinishedSale'.
         
         Luego de realizadas las consultas INSERT y UPDATE a base de datos, éste método se encarga de realizar 
         los reinicios finales para poder concretar otra venta.
