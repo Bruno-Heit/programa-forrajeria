@@ -13,7 +13,7 @@ from resources import (rc_icons)
 from utils.functionutils import *
 from utils.workerclasses import *
 from utils.dboperations import *
-from utils.enumclasses import (WidgetStyle, InventoryPriceType, ListItemValuesField)
+from utils.enumclasses import (WidgetStyle, InventoryPriceType, ListItemFields)
 
 from sqlite3 import (Error as sqlite3Error)
 from phonenumbers import (parse, format_number, is_valid_number, PhoneNumber, PhoneNumberFormat, NumberParseException)
@@ -1471,15 +1471,17 @@ class SaleDialog(QDialog):
 class ListItemValues(QObject):
     '''
     Clase que contiene los valores de los campos de ListItemWidget. El principal 
-    uso de la clase es para emitir de forma más sencilla los valores desde 
-    ListWidgetItem a MainWindow.
+    uso de la clase es para "simular" un MODELO DE DATOS, ya que no usa exactamente 
+    la misma metodología para guardar los datos, y al mismo tiempo maneja mediante 
+    señales los cambios en los datos más relevantes.
     '''
-    productNameChanged:Signal = Signal(str) # emite el nuevo nombre
-    quantityChanged:Signal = Signal(float) # emite la nueva cantidad
-    priceTypeChanged:Signal = Signal(object) # emite el nuevo tipo de precio como 'InventoryPriceType'
+    productNameChanged:Signal = Signal(str) # emite el nuevo nombre.
+    quantityChanged:Signal = Signal(float) # emite la nueva cantidad.
+    priceTypeChanged:Signal = Signal(object) # emite el nuevo tipo de precio como 'InventoryPriceType'.
     subtotalChanged:Signal = Signal(object) # emite el nuevo subtotal, que puede ser float 
-                                            # ó None (None si es inválido o no fue calculado)
-    saleDetailsChanged:Signal = Signal(str) # emite el nuevo detalle de la venta
+                                            # ó None (None si es inválido o no fue calculado).
+    saleDetailsChanged:Signal = Signal(str) # emite el nuevo detalle de la venta.
+    
     
     def __init__(self, object_name:str):
         super(ListItemValues, self).__init__()
@@ -1496,9 +1498,9 @@ class ListItemValues(QObject):
         
         # validez de los datos
         self.__FIELDS_VALIDITY:dict[str, bool | None] = { #? guarda valores True | False | None, siendo el valor de verdad 
-            ListItemValuesField.PRODUCT_NAME.value: None, #? en realidad triestado, True y False representan la validez del 
-            ListItemValuesField.QUANTITY.value: None      #? en realidad triestado, True y False representan la validez del 
-        }                                                 #? del valor en el campo, si es None es porque está vacío el campo.
+            ListItemFields.PRODUCT_NAME.value: None, #? en realidad triestado, True y False representan la validez del 
+            ListItemFields.QUANTITY.value: None      #? del valor en el campo, si es None es porque está vacío el campo.
+        }
         
         #* señales
         self.productNameChanged.connect(self.setSubtotal)
@@ -1529,8 +1531,8 @@ class ListItemValues(QObject):
     
     def setProductName(self, product_name:str=None) -> None:
         '''
-        Guarda el nombre del producto y emite la señal 'productNameChanged' si 
-        el nombre del producto cambió.
+        Guarda el nombre del producto, actualiza el IDproducto actual y emite 
+        la señal 'productNameChanged' si el nombre del producto cambió.
         
         Parámetros
         ----------
@@ -1542,8 +1544,38 @@ class ListItemValues(QObject):
         None
         '''
         self.__product_name = product_name
-        self.productNameChanged.emit(product_name)
+        self.__onProductNameChange(product_name)
         
+        return None
+    
+    
+    def __onProductNameChange(self, product_name:str=None) -> None:
+        '''
+        Actualiza el IDproducto actual y emite la señal 'productNameChanged' 
+        si el nombre del producto cambió.
+        
+        Parámetros
+        ----------
+        product_name : str, opcional
+            nombre del producto, por defecto es None
+        
+        Retorna
+        -------
+        None
+        '''
+        # actualiza el IDproducto
+        with DatabaseRepository() as db_repo:
+            self.setProductId(
+                db_repo.selectRegisters(
+                    data_sql='''SELECT IDproducto 
+                                FROM Productos 
+                                WHERE nombre = ?;''',
+                    data_params=(product_name,)
+                )[0][0]
+            )
+        
+        # emite el nombre de producto
+        self.productNameChanged.emit(product_name)
         return None
     
     
@@ -1684,14 +1716,15 @@ class ListItemValues(QObject):
         return None
     
     
-    def setFieldValidity(self, field:ListItemValuesField, validity:bool) -> None:
+    def setFieldValidity(self, field:ListItemFields, validity:bool) -> None:
         '''
         Guarda el valor de verdad del campo especificado.
         
         Parámetros
         ----------
-        field : ListItemValuesField
-            campo al que asignarle el nuevo valor de verdad
+        field : ListItemFields
+            campo al que asignarle el nuevo valor de verdad, debe ser 
+            'ListItemFields.PRODUCT_NAME' ó 'ListItemFields.QUANTITY'
         validity : bool | None
             nuevo valor de verdad del campo
         
@@ -1700,11 +1733,11 @@ class ListItemValues(QObject):
         None
         '''
         match field:
-            case ListItemValuesField.PRODUCT_NAME:
-                self.__FIELDS_VALIDITY[ListItemValuesField.PRODUCT_NAME.value] = validity
+            case ListItemFields.PRODUCT_NAME:
+                self.__FIELDS_VALIDITY[ListItemFields.PRODUCT_NAME.value] = validity
             
-            case ListItemValuesField.QUANTITY:
-                self.__FIELDS_VALIDITY[ListItemValuesField.QUANTITY.value] = validity
+            case ListItemFields.QUANTITY:
+                self.__FIELDS_VALIDITY[ListItemFields.QUANTITY.value] = validity
         
         return None
     
@@ -1793,7 +1826,7 @@ class ListItemValues(QObject):
             valor de verdad del campo de nombre del producto, si es None es 
             porque el nombre del producto aún no fue validado
         '''
-        return self.__FIELDS_VALIDITY[ListItemValuesField.PRODUCT_NAME.value]
+        return self.__FIELDS_VALIDITY[ListItemFields.PRODUCT_NAME.value]
     
     
     def isQuantityValid(self) -> bool | None:
@@ -1807,7 +1840,7 @@ class ListItemValues(QObject):
             valor de verdad del campo de cantidad, si es None es porque la 
             cantidad del producto aún no fue validada
         '''
-        return self.__FIELDS_VALIDITY[ListItemValuesField.QUANTITY.value]
+        return self.__FIELDS_VALIDITY[ListItemFields.QUANTITY.value]
     
     
     def isAllValid(self) -> bool:
@@ -1820,7 +1853,8 @@ class ListItemValues(QObject):
         bool
             será True sólo si ambos valores son válidos, sino False
         '''
-        return all(self.__FIELDS_VALIDITY.values())
+        all_valid:bool = all(self.__FIELDS_VALIDITY.values())
+        return all_valid
     
     
     def getValues(self) -> dict[str, Any]:
@@ -1834,12 +1868,13 @@ class ListItemValues(QObject):
             valores
         '''
         return {
-            ListItemValuesField.PRODUCT_ID.name: self.__product_id,
-            ListItemValuesField.PRODUCT_NAME.name: self.__product_name,
-            ListItemValuesField.QUANTITY.name: self.__quantity,
-            ListItemValuesField.SUBTOTAL.name: self.__subtotal,
-            ListItemValuesField.IS_COMERCIAL_PRICE.name: self.__is_comercial_price,
-            ListItemValuesField.SALE_DETAILS.name: self.__sale_details
+            ListItemFields.PRODUCT_ID.name: self.getProductId(),
+            ListItemFields.PRODUCT_NAME.name: self.getProductName(),
+            ListItemFields.QUANTITY.name: self.getQuantity(),
+            ListItemFields.SUBTOTAL.name: self.getSubtotal(),
+            ListItemFields.IS_COMERCIAL_PRICE.name: self.isComercialPrice(),
+            ListItemFields.SALE_DETAILS.name: self.getSaleDetails(),
+            ListItemFields.IS_ALL_VALID.name: self.isAllValid()
         }
     
     
@@ -1864,8 +1899,9 @@ class ListItemWidget(QWidget):
     la cantidad vendida, el tipo de precio (comercial o normal) y darle 
     alguna descripción a la venta.
     '''
-    fieldsValidated = Signal(object) # emite un objeto tipo 'ListItemValues' con todos los valores de los campos
-    deleteItem = Signal(str) # emite el 'objectName' del item
+    fieldsValuesChanged = Signal(object) # emite un dict[ListItemFields, Any] 
+                                         # con todos los valores de los campos.
+    deleteItem = Signal(str) # emite el 'objectName' del item.
     
     def __init__(self, obj_name:str):
         super(ListItemWidget, self).__init__()
@@ -1963,6 +1999,9 @@ class ListItemWidget(QWidget):
         self.field_values.subtotalChanged.connect(self.onSubtotalChanged)
         self.field_values.saleDetailsChanged.connect(self.onSaleDetailsChange)
         
+        self.field_values.subtotalChanged.connect(self.onFieldValuesChanged)
+        self.field_values.saleDetailsChanged.connect(self.onFieldValuesChanged)
+        
         # botón borrar elemento
         self.listItem.btn_deleteCurrentProduct.clicked.connect(self.deleteCurrentItem)
         return None
@@ -2001,7 +2040,7 @@ class ListItemWidget(QWidget):
         _avail_stock:tuple[float, str] # stock disponible
         
         # actualiza la validez y la cantidad
-        self.field_values.setFieldValidity(ListItemValuesField.QUANTITY, True)
+        self.field_values.setFieldValidity(ListItemFields.QUANTITY, True)
             
         # cambia el estilo de los campos
         self.listItem.lineEdit_productQuantity.setStyleSheet(
@@ -2030,10 +2069,9 @@ class ListItemWidget(QWidget):
     @Slot(str)
     def validatorOnValidationFailed(self, error_message:str) -> None:
         '''
-        Cambia el valor del flag asociado al campo de cantidad a False, cambia 
-        el QSS del campo y muestra el mensaje de error en el QLabel asociado 
-        al campo con feedback. Desactiva 'checkBox_comercialPrice' si el campo 
-        de cantidad está vacío.
+        Actualiza la cantidad dentro de 'ListItemValues' y cambia el valor del 
+        flag asociado al campo de cantidad a False, muestra el mensaje de 
+        error en el QLabel asociado al campo con feedback y cambia su estilo.
         
         Parámetros
         ----------
@@ -2044,7 +2082,12 @@ class ListItemWidget(QWidget):
         -------
         None
         '''
-        self.field_values.setFieldValidity(ListItemValuesField.QUANTITY, False)
+        self.field_values.setFieldValidity(ListItemFields.QUANTITY, False)
+        
+        # actualiza la cantidad aunque sea el valor inválido
+        self.field_values.setQuantity(
+            self.listItem.lineEdit_productQuantity.text().replace(",",".")
+        )
         
         self.listItem.lineEdit_productQuantity.setStyleSheet(
             WidgetStyle.FIELD_INVALID_VAL.value
@@ -2074,7 +2117,7 @@ class ListItemWidget(QWidget):
         '''
         # si no hay un producto seleccionado...
         if self.listItem.comboBox_productName.currentIndex() == -1:
-            self.field_values.setFieldValidity(ListItemValuesField.PRODUCT_NAME, False)
+            self.field_values.setFieldValidity(ListItemFields.PRODUCT_NAME, False)
             
             self.listItem.label_nameFeedback.show()
             self.listItem.label_nameFeedback.setText("Se debe seleccionar un producto")
@@ -2084,7 +2127,7 @@ class ListItemWidget(QWidget):
         
         # si el campo es válido...
         else:
-            self.field_values.setFieldValidity(ListItemValuesField.PRODUCT_NAME, True)
+            self.field_values.setFieldValidity(ListItemFields.PRODUCT_NAME, True)
             
             self.listItem.label_nameFeedback.hide()
             self.listItem.comboBox_productName.setStyleSheet(
@@ -2136,9 +2179,6 @@ class ListItemWidget(QWidget):
         
         # actualiza 'self.field_values' con el nombre
         self.field_values.setProductName(product_name=curr_name)
-        
-        # emite señal con los valores de los campos
-        self.fieldsValidated.emit(self.field_values)
         
         return None
 
@@ -2280,7 +2320,7 @@ class ListItemWidget(QWidget):
     @Slot(object)
     def onSubtotalChanged(self, subtotal:float | None) -> None:
         '''
-        Muestra el costo en la interfaz.
+        Muestra el costo en la interfaz. Emite la señal 'subtotalChanged'.
         
         Parámetros
         ----------
@@ -2353,9 +2393,21 @@ class ListItemWidget(QWidget):
         None
         '''
         self.listItem.lineEdit_saleDetail.setText(text)
-        
         return None
 
+
+    @Slot()
+    def onFieldValuesChanged(self) -> None:
+        '''
+        Emite la señal 'fieldValuesChanged' con todos los valores de los campos 
+        cuando algún campo de 'ListItemValues' cambia.
+
+        Retorna
+        -------
+        None
+        '''
+        self.fieldsValuesChanged.emit(self.field_values.getValues())
+        return None
 
 
 # DEUDORES (VENTA FINALIZADA) ==================================================================================
