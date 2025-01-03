@@ -1,12 +1,11 @@
 # Programa de gestión "Forrajería Torres"
-El propósito de este proyecto es desarrollar un **programa de escritorio** adaptado a su ejecución en **Windows 10** para un **forraje local** y que permite al usuario realizar un *CRUD* a una base de datos que contiene los siguientes datos:
+El propósito de este proyecto es desarrollar un **programa de escritorio** adaptado a su ejecución en **Windows 10** o superior para un **forraje local** y que permite al usuario realizar un *CRUD* a una base de datos que contiene la siguiente información:
 
-  - nombre, stock, categoría y precio de productos disponibles para su venta.
-  - detalles sobre las ventas que se hacen durante las horas de atención.
-  - detalles sobre las cuentas corrientes de los clientes, incluyendo algunos datos personales -no sensibles-.
+  - detalles de inventario (productos disponibles, stock, precios, etc.)
+  - detalles de ventas realizadas.
+  - detalles de cuentas corrientes de los clientes.
 
-El principal objetivo del programa es serle útil al usuario -obviamente💢- y al mismo tiempo que sea sencillo en su uso, intuitivo y no agobiante.
-
+Éste programa de gestión fue diseñado teniendo en cuenta las necesidades específicas del usuario, además de que busca ser simple, eficiente y sencillo de usar, dado que "la simplicidad es la máxima sofisticación" (frase de Leonardo Da Vinci).
 
 ## TABLA DE CONTENIDOS
   - [INSTALACIÓN](#INSTALACIÓN)
@@ -22,7 +21,7 @@ El principal objetivo del programa es serle útil al usuario -obviamente💢- y 
 <br>
 
 ### <ins>INSTALACIÓN</ins>
-
+(a implementar)
 <hr>
 <br>
 
@@ -58,7 +57,7 @@ El software se divide en 3 partes principales:
   
   #### <ins>**VENTAS**</ins>  
   La sección de **VENTAS** será posiblemente la más utilizada, por lo que, ¡DEBE VERSE GENIAL!✨✨  
-  Esta parte se divide en 2: una parte contiene un *formulario de venta*, que consiste en una lista a la cual (dinámicamente) se le agregan los productos (que existan en INVENTARIO) que se van a vender por cliente; la otra parte es una tabla que contiene información sobre las ventas ya realizadas.
+  Esta parte se divide en 2: una parte contiene un *formulario de venta*, que consiste en una lista a la cual se le agregan los productos (que existan en INVENTARIO) que se van a vender por cliente; la otra parte es una tabla que contiene información sobre las ventas ya realizadas.
   <br>
   Ejemplo de una venta usando el *formulario de venta*:  
   ![venta formulario formulario-de-venta producto](images/sct_sales_form.png)  
@@ -67,7 +66,7 @@ El software se divide en 3 partes principales:
   Tabla de ventas:  
   ![tabla ventas datos-de-ventas productos deudores](images/sct_sales_table.png)
   Lo ideal es que el usuario utilice la sección del *formulario de venta* para concretar ventas a medida que se hacen, pero no es obligatorio, también se pueden realizar usando la tabla.
-  El principal uso de esta tabla es ver las ventas que se han concretado hasta el momento, pero también admite crear ventas nuevas (repito, lo ideal es usar la sección de *formulario de venta*), eliminar ventas o modificar ventas.  
+  El principal uso de esta tabla es ver las ventas que se han concretado hasta el momento, pero también admite crear ventas nuevas, eliminar ventas o modificar ventas.  
   <br>
     - <ins>*MUESTRA DE VENTAS*</ins>:  
     Las ventas nuevas se muestran automáticamente ni bien se cambia a la pestaña de *tabla de ventas*.  
@@ -87,7 +86,8 @@ El software se divide en 3 partes principales:
   <br>
   <br>
   
-  #### <ins>**CUENTAS CORRIENTES**</ins> (aún no en funcionamiento)
+  #### <ins>**CUENTAS CORRIENTES**</ins>
+  (a implementar)
 
 <hr>
 <br>
@@ -100,11 +100,9 @@ El manejo de bases de datos es llevado a cabo con ***SQLite*** para lograr una m
 <br>
 
 ### <ins>FUNCIONES A FUTURO</ins>
-- [ ] Las tablas aún no se pueden ordenar, por lo que antes de avanzar con las funciones de abajo pienso realizar esta.
 - [ ] Implementación del **sistema de gestión de cuentas corrientes** (¡las deudas no se pueden cobrar! :scream:)
-- [ ] Implementación de un **sistema de estadísticas** con respecto a los productos más vendidos -y menos vendidos- usando gráficos de barras (por ser valores discretos).
+- [ ] Implementación de un **sistema de estadísticas**.
 - [ ] Implementación de un **sistema de facturación** que permita crear facturas y distribuirlas a los clientes. **(a considerar)**
-- [ ] Implementación de un sistema de pedidos a proveedores y registro de pedidos. **(a considerar)**
 
 <hr>
 <br>
