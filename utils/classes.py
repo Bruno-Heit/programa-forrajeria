@@ -2437,11 +2437,8 @@ class DebtorDataValues(QObject):
         
         # validez de los datos
         self.__FIELDS_VALIDITY:dict[str, bool | None] = {
-            DebtsFields.NAME.value: None,
-            DebtsFields.SURNAME.value: None,
-            DebtsFields.PHONE_NUMB.name: None,
-            DebtsFields.DIRECTION.name: None,
-            DebtsFields.POSTAL_CODE.name: None
+            DebtsFields.NAME.name: None,
+            DebtsFields.SURNAME.name: None
         }
         
         # TODO: conectar señales
@@ -2561,19 +2558,19 @@ class DebtorDataValues(QObject):
         '''
         match field:
             case DebtsFields.NAME:
-                self.__FIELDS_VALIDITY[DebtsFields.NAME.value] = validity
+                self.__FIELDS_VALIDITY[DebtsFields.NAME.name] = validity
             
             case DebtsFields.SURNAME:
-                self.__FIELDS_VALIDITY[DebtsFields.SURNAME.value] = validity
+                self.__FIELDS_VALIDITY[DebtsFields.SURNAME.name] = validity
             
             case DebtsFields.PHONE_NUMB:
-                self.__FIELDS_VALIDITY[DebtsFields.PHONE_NUMB.value] = validity
+                self.__FIELDS_VALIDITY[DebtsFields.PHONE_NUMB.name] = validity
             
             case DebtsFields.DIRECTION:
-                self.__FIELDS_VALIDITY[DebtsFields.DIRECTION.value] = validity
+                self.__FIELDS_VALIDITY[DebtsFields.DIRECTION.name] = validity
             
             case DebtsFields.POSTAL_CODE:
-                self.__FIELDS_VALIDITY[DebtsFields.POSTAL_CODE.value] = validity
+                self.__FIELDS_VALIDITY[DebtsFields.POSTAL_CODE.name] = validity
         
         return None
 
@@ -2645,7 +2642,7 @@ class DebtorDataValues(QObject):
         bool
             será True sólo si el nombre es válido, sino False
         '''
-        return True if self.__FIELDS_VALIDITY[DebtsFields.NAME.value] else False
+        return True if self.__FIELDS_VALIDITY[DebtsFields.NAME.name] else False
     
     
     def isSurnameValid(self) -> bool:
@@ -2657,7 +2654,7 @@ class DebtorDataValues(QObject):
         bool
             será True sólo si el apellido es válido, sino False
         '''
-        return True if self.__FIELDS_VALIDITY[DebtsFields.SURNAME.value] else False
+        return True if self.__FIELDS_VALIDITY[DebtsFields.SURNAME.name] else False
     
     
     def isAllValid(self) -> bool:
@@ -2671,14 +2668,17 @@ class DebtorDataValues(QObject):
         bool
             será True sólo si los valores son válidos, sino False
         '''
-        # TODO: corregir esto, valida mal... si el nombre y/o apellido están vacíos marca como válido, y no debe ser así... si todos los valores están vacíos marca como inválidos
-        optional_keys:list[str] = [
-                DebtsFields.PHONE_NUMB.value,
-                DebtsFields.DIRECTION.value,
-                DebtsFields.POSTAL_CODE.value
-            ]
-        return all( [value for key, value in self.__FIELDS_VALIDITY.items() if (key not in optional_keys and value is not None)] )
+        return all(self.__FIELDS_VALIDITY.values())
 
+
+    # dunder methods
+    def __repr__(self) -> str:
+        return f'''nombre: {self.__debtor_name} (NAME_VALID={self.isNameValid()})\
+            \napellido: {self.__debtor_surname} (SURNAME_VALID={self.isSurnameValid()})\
+            \n\tnúm. tel.: {self.__debtor_phone_num}\
+            \n\tdirección: {self.__debtor_direction}\
+            \n\tcódigo postal: {self.__debtor_postal_code}\
+            \n\t\tALL_VALID= {self.isAllValid()}'''
 
 
 
@@ -2760,10 +2760,12 @@ class DebtorDataDialog(QDialog):
                 error_message=error_message
             )
         )
+        self.debtor_name_validator.validationSucceeded.connect(self.onFieldChanged)
         
         self.debtorData.lineEdit_debtorName.editingFinished.connect(
             self.onNameEditingFinished
         )
+        self.debtor_name_validator.validationFailed.connect(self.onFieldChanged)
         
         self.debtor_values.nameChanged.connect(
             lambda new_val: self.__updateFieldValue(
@@ -2777,11 +2779,13 @@ class DebtorDataDialog(QDialog):
         self.debtor_surname_validator.validationSucceeded.connect(
             lambda: self.validatorOnValidationSucceded(DebtsFields.SURNAME)
         )
+        self.debtor_surname_validator.validationSucceeded.connect(self.onFieldChanged)
         self.debtor_surname_validator.validationFailed.connect(
             lambda error_message: self.validatorOnValidationFailed(
                 field_validated=DebtsFields.SURNAME,
                 error_message=error_message)
         )
+        self.debtor_surname_validator.validationFailed.connect(self.onFieldChanged)
         
         self.debtorData.lineEdit_debtorSurname.editingFinished.connect(
             self.onSurnameEditingFinished
@@ -2845,6 +2849,9 @@ class DebtorDataDialog(QDialog):
         )
         self.debtor_values.postalCodeChanged.connect(self.onFieldChanged)
         
+        #* combinación de nombre y apellido verificada
+        self.debtor_values.fullNameChecked.connect(self.onFullNameChecked)
+        
         #* botón "Aceptar"
         self.debtorData.buttonBox.accepted.connect(self.handleOkClicked)
         return None
@@ -2858,8 +2865,6 @@ class DebtorDataDialog(QDialog):
         al campo.
         NOTA: en caso de que el nombre y el apellido existan, los demás datos no 
         serán validados.
-        Al finalizar, llama a 'self.verifyFieldsValidity' para comprobar si el 
-        resto de campos son válidos.
         
         Parámetros
         ----------
@@ -3126,16 +3131,20 @@ class DebtorDataDialog(QDialog):
         -------
         None
         '''
+        print(debtor_data)
+        
         if debtor_data:
             # deshabilita los campos
             self.debtorData.lineEdit_phoneNumber.setEnabled(False)
             self.debtorData.lineEdit_direction.setEnabled(False)
             self.debtorData.lineEdit_postalCode.setEnabled(False)
-            
+        
+            print([f"{value}, {type(value)}" for value in debtor_data.values()])
             # actualiza el modelo con los valores nuevos
-            self.debtor_values.setPhoneNumber(debtor_data[DebtsFields.PHONE_NUMB.value])
-            self.debtor_values.setDirection(debtor_data[DebtsFields.DIRECTION.value])
-            self.debtor_values.setPostalCode(debtor_data[DebtsFields.POSTAL_CODE.value])
+            self.debtor_values.setPhoneNumber(debtor_data[DebtsFields.PHONE_NUMB.name])
+            self.debtor_values.setDirection(debtor_data[DebtsFields.DIRECTION.name])
+            # TODO: arreglar código siguiente: cuando existe la combinación, al pasar el código postal dice que el tipo soportado es str, y ya se está pasando str...
+            self.debtor_values.setPostalCode(debtor_data[DebtsFields.POSTAL_CODE.name])
             
         else:
             # habilita los campos
