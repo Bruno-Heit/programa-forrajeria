@@ -5,11 +5,11 @@ CAMBIOS A HACER/IMPLEMENTACIONES NUEVAS:
 	☑ Permitir hacer un UPDATE de cualquier tabla.
 
 
-	☐ Mejorar muestra de mensajes de errores. Para eso, mostrar los QLabels de errores necesarios con el fallo 
+	☑ Mejorar muestra de mensajes de errores. Para eso, mostrar los QLabels de errores necesarios con el fallo 
 	 y colocarles tooltips con descripciones más detalladas y posibles soluciones.
 
-	☐ Validar con 'phonenumbers' los números de teléfono introducidos, y hacer mención del uso de ese módulo (
-	 tiene lincencia APACHE).
+	☑ Validar con 'phonenumbers' los números de teléfono introducidos.
+	☐ Hacer mención del uso del módulo 'phonenumbers' (tiene lincencia APACHE).
 
 	☐ Guardar datos de hasta 5 años de antigüedad (por seguridad).
 	☐ Mostrar datos en tablas principalmente de los últimos 2 días, con posibilidad de expandir a los días deseados.
@@ -22,13 +22,16 @@ CAMBIOS A HACER/IMPLEMENTACIONES NUEVAS:
 	  debe modificar el stock total en la tabla donde se encuentra ese objeto.
 	☐ Al efectuarse una venta, si el cliente paga demás, se debe agregar también a cuentas corrientes (las 
 	  deudas ya se agregan).
+	
 	☐ Implementar el sistema de deudas.
+
+	☐ Implementar sistema de búsqueda con search-bars para filtrar contenido de las tablas.
 
 	☐ Implementar copias de seguridad (idealmente 3 copias, 2 en disco, 1 en otro dispositivo (principio 321)).
 
 	☐ Crear constante con dirección de la base de datos, para acceder desde las funciones y clases 
 	  que lo necesiten.
-
+	
 ################################################################################################################
 
 ORDEN DE INTRODUCCIÓN DE DATOS A BASE DE DATOS:
