@@ -2274,7 +2274,6 @@ class MainWindow(QMainWindow):
         return None
 
 
-    # TODO: refactorizar este método
     @Slot(tuple)
     def finishedSaleOnDebtorChosen(self, debtor_id:int, total_paid:float) -> None:
         '''
@@ -2290,7 +2289,7 @@ class MainWindow(QMainWindow):
             
             - Al finalizar realiza los reinicios necesarios.
         
-        PARÁMETROS
+        Parámetros
         ----------
         debtor_id : int
             el 'IDdeudor' del deudor
@@ -2314,59 +2313,111 @@ class MainWindow(QMainWindow):
         #?     luego se agrega a Deudas los $1.000 que quedaron del 2do producto y también el 3er producto, pero 
         #?     no el 1ro que quedó pago.
         
-        conn = createConnection("database/inventario.db")
-        cursor = conn.cursor()
-        
-        # recorre cada producto y hace las consultas INSERT y UPDATE (a Productos)
-        for product in self.DICT_ITEMS_VALUES.values():
-            try:
-                cursor.execute(
-                    "INSERT INTO Ventas(fecha_hora, detalles_venta) VALUES(?,?);",
-                    (self.ui.dateTimeEdit_sale.text(), product.getSaleDetails(),)
-                    )
-                conn.commit()
+        with self._db_repo as db_repo:        
+            # recorre cada producto y hace las consultas INSERT y UPDATE (a Productos)
+            for product in self.DICT_ITEMS_VALUES.values():
+                db_repo.insertRegister(
+                    ins_sql= '''INSERT INTO Ventas(
+                                    fecha_hora,
+                                    detalles_venta) 
+                                VALUES(?,?);''',
+                    ins_params=(self.ui.dateTimeEdit_sale.text(),
+                                product["SALE_DETAILS"],)
+                )
                 
                 # actualiza el total debido
-                total_due -= product.subtotal # deuda = total abonado - subtotal
+                total_due -= product["SUBTOTAL"] # deuda = total abonado - subtotal
                 total_due = round(total_due, 2)
                 
                 # Deudas y Detalle_Ventas (con IDdeuda)
                 if total_due < 0: # el producto es deuda
-                    cursor.execute(
-                        "INSERT INTO Deudas(fecha_hora, total_adeudado, IDdeudor, eliminado) VALUES(?,?,?, 0);",
-                        (self.ui.dateTimeEdit_sale.text(), abs(total_due), debtor_id))
-                    conn.commit()
+                    db_repo.insertRegister(
+                        ins_sql= '''INSERT INTO Deudas(
+                                        fecha_hora,
+                                        total_adeudado,
+                                        IDdeudor,
+                                        eliminado) 
+                                    VALUES(?, ?, ?, 0);''',
+                        ins_params=(self.ui.dateTimeEdit_sale.text(),
+                                    abs(total_due),
+                                    debtor_id)
+                    )
                     
-                    cursor.execute(
-                        "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?),(SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, (SELECT IDdeuda FROM Deudas WHERE fecha_hora = ? AND IDdeudor = ? ORDER BY IDdeuda DESC LIMIT 1));",
-                        (product.quantity, product.subtotal, product.product_name, self.ui.dateTimeEdit_sale.text(),
-                        product.sale_details, round(product.subtotal - abs(total_due), 2), self.ui.dateTimeEdit_sale.text(),
-                        debtor_id, )
-                        )
-                    conn.commit()
+                    db_repo.insertRegister(
+                        ins_sql= '''INSERT INTO Detalle_Ventas(
+                                        cantidad,
+                                        costo_total,
+                                        IDproducto,
+                                        IDventa,
+                                        abonado,
+                                        IDdeuda) 
+                                    VALUES(
+                                        ?,
+                                        ?,
+                                        (SELECT IDproducto 
+                                         FROM Productos 
+                                         WHERE nombre = ?),
+                                        (SELECT IDventa 
+                                         FROM Ventas 
+                                         WHERE fecha_hora = ? 
+                                            AND detalles_venta = ?),
+                                        ?,
+                                        (SELECT IDdeuda 
+                                         FROM Deudas 
+                                         WHERE fecha_hora = ? 
+                                            AND IDdeudor = ? 
+                                         ORDER BY IDdeuda DESC LIMIT 1)
+                                    );''',
+                        ins_params=(product["QUANTITY"],
+                                    product["SUBTOTAL"],
+                                    product["PRODUCT_NAME"],
+                                    self.ui.dateTimeEdit_sale.text(),
+                                    product["SALE_DETAILS"],
+                                    round(product["SUBTOTAL"] - abs(total_due), 2),
+                                    self.ui.dateTimeEdit_sale.text(),
+                                    debtor_id,)
+                    )
                     
                     total_due = 0
                 
                 else: # el producto NO es deuda
-                    cursor.execute(
-                        "INSERT INTO Detalle_Ventas(cantidad, costo_total, IDproducto, IDventa, abonado, IDdeuda) VALUES(?, ?, (SELECT IDproducto FROM Productos WHERE nombre = ?), (SELECT IDventa FROM Ventas WHERE fecha_hora = ? AND detalles_venta = ?), ?, NULL);",
-                        (product.quantity, product.subtotal, product.product_name, self.ui.dateTimeEdit_sale.text(),
-                        product.sale_details, product.subtotal,)
-                        )
-                    conn.commit()
+                    db_repo.insertRegister(
+                        ins_sql= '''INSERT INTO Detalle_Ventas(
+                                        cantidad,
+                                        costo_total,
+                                        IDproducto,
+                                        IDventa,
+                                        abonado,
+                                        IDdeuda) 
+                                    VALUES(
+                                        ?,
+                                        ?,
+                                        (SELECT IDproducto 
+                                         FROM Productos 
+                                         WHERE nombre = ?),
+                                        (SELECT IDventa 
+                                         FROM Ventas 
+                                         WHERE fecha_hora = ? 
+                                            AND detalles_venta = ?),
+                                        ?,
+                                        NULL
+                                    );''',
+                        ins_params=(product["QUANTITY"],
+                                    product["SUBTOTAL"],
+                                    product["PRODUCT_NAME"],
+                                    self.ui.dateTimeEdit_sale.text(),
+                                    product["SALE_DETAILS"],
+                                    product["SUBTOTAL"],)
+                    )
                     
                 # como última consulta de cada producto, actualiza el stock
-                cursor.execute(
-                    "UPDATE Productos SET stock = stock - ? WHERE nombre = ?;",
-                    (product.quantity, product.product_name,)
-                    )
-                conn.commit()
-            
-            except sqlite3Error as err:
-                conn.rollback()
-                logging.critical(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
-            
-        conn.close()
+                db_repo.updateRegisters(
+                    upd_sql= '''UPDATE Productos 
+                                SET stock = stock - ? 
+                                WHERE nombre = ?;''',
+                    upd_params=(product["QUANTITY"],
+                                product["PRODUCT_NAME"],)
+                )
         
         # hace los reinicios necesarios para otras ventas
         self.__resetFieldsOnFinishedSale()
@@ -2374,6 +2425,7 @@ class MainWindow(QMainWindow):
         return None
     
     
+    # TODO: refactorizar este método
     def __resetFieldsOnFinishedSale(self) -> None:
         '''
         Realiza los reinicios finales para poder concretar otra venta.
