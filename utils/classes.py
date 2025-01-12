@@ -2423,7 +2423,7 @@ class DebtorDataValues(QObject):
     surnameChanged:Signal = Signal(str)
     phoneChanged:Signal = Signal(str)
     directionChanged:Signal = Signal(str)
-    postalCodeChanged:Signal = Signal(int)
+    postalCodeChanged:Signal = Signal(str)
     fullNameChecked:Signal = Signal(object)
     
     
@@ -2441,7 +2441,6 @@ class DebtorDataValues(QObject):
             DebtsFields.SURNAME.name: None
         }
         
-        # TODO: conectar señales
         #* señales
         self.nameChanged.connect(self.__checkFullNameCombination)
         self.surnameChanged.connect(self.__checkFullNameCombination)
@@ -2537,7 +2536,7 @@ class DebtorDataValues(QObject):
         None
         '''
         self.__debtor_postal_code = postal_code
-        self.postalCodeChanged.emit(self.__debtor_postal_code)
+        self.postalCodeChanged.emit(str(self.__debtor_postal_code))
         return None
 
 
@@ -2633,6 +2632,45 @@ class DebtorDataValues(QObject):
         return self.__debtor_surname
     
     
+    def getPhoneNumber(self) -> str:
+        '''
+        Devuelve el número de teléfono del deudor.
+
+        Retorna
+        -------
+        str
+            el número de teléfono del deudor
+        '''
+        return self.__debtor_phone_num if self.__debtor_phone_num else ''
+    
+    
+    def getDirection(self) -> str:
+        '''
+        Devuelve la dirección del deudor.
+
+        Retorna
+        -------
+        str
+            la dirección del deudor
+        '''
+        return self.__debtor_direction if self.__debtor_direction else ''
+    
+
+    def getPostalCode(self) -> int:
+        '''
+        Devuelve el código postal del deudor, si no fue especificado en algún 
+        momento devuelve 0, que es un valor inválido para el campo (admite valores 
+        entre 1 y 9.999).
+
+        Retorna
+        -------
+        int
+            el código postal del deudor, si no fue introducido devuelve 0 (es 
+            un valor inválido)
+        '''
+        return int(self.__debtor_postal_code) if self.__debtor_postal_code else 0
+
+    
     def isNameValid(self) -> bool:
         '''
         Devuelve un valor de verdad que determina si el nombre es válido.
@@ -2692,7 +2730,7 @@ class DebtorDataDialog(QDialog):
     Emite la señal 'debtorChosen' con el IDdeudor si se llenaron los datos necesarios 
     del deudor, sino emite -1.
     '''
-    debtorChosen = Signal(int) # emite el IDdeudor una vez elegido deudor, o -1 si no fue elegido
+    debtorChosen = Signal(int) # emite el IDdeudor una vez elegido deudor
     
     def __init__(self):
         super(DebtorDataDialog, self).__init__()
@@ -3131,8 +3169,6 @@ class DebtorDataDialog(QDialog):
         -------
         None
         '''
-        print(debtor_data)
-        
         if debtor_data:
             # deshabilita los campos
             self.debtorData.lineEdit_phoneNumber.setEnabled(False)
@@ -3143,7 +3179,6 @@ class DebtorDataDialog(QDialog):
             # actualiza el modelo con los valores nuevos
             self.debtor_values.setPhoneNumber(debtor_data[DebtsFields.PHONE_NUMB.name])
             self.debtor_values.setDirection(debtor_data[DebtsFields.DIRECTION.name])
-            # TODO: arreglar código siguiente: cuando existe la combinación, al pasar el código postal dice que el tipo soportado es str, y ya se está pasando str...
             self.debtor_values.setPostalCode(debtor_data[DebtsFields.POSTAL_CODE.name])
             
         else:
@@ -3175,79 +3210,127 @@ class DebtorDataDialog(QDialog):
     
     # TODO: seguir refactorizando métodos
     # botón Aceptar
-    def getFieldsData(self) -> dict[str, str]:
-        '''
-        Es llamado desde 'self.handleOkClicked'.
+    # @Slot()
+    # def handleOkClicked(self) -> None:
+    #     '''
+    #     Inserta los valores en la base de datos en las tablas de "Deudores" 
+    #     (si no existe el deudor). 
+    #     Al final emite la señal 'debtorChosen' con el "IDdeudor" del deudor 
+    #     confirmando que se eligió un deudor.
         
-        Obtiene todos los datos de los campos y los formatea de ser necesario.
-        
-        Retorna un dict[str,str] con los valores.
-        '''
-        # title() hace que cada palabra comience con mayúsculas...
-        values = {
-            'name':self.debtorData.lineEdit_debtorName.text().title(), # 0, nombre
-            'surname':self.debtorData.lineEdit_debtorSurname.text().title(), # 1, apellido
-            'phone_num':self.debtorData.lineEdit_phoneNumber.text(), # 2, número de teléfono
-            'direction':self.debtorData.lineEdit_direction.text().title(), # 3, dirección
-            'postal_code':self.debtorData.lineEdit_postalCode.text() # 4, código postal
-        }
-        return values
-    
+    #     Retorna
+    #     -------
+    #     None
+    #     '''
+    #     count_query:int
+    #     query:tuple # tiene una tupla con IDdeudor, nombre y apellido
+    #     query_to_dict:dict[str,str] # el tuple 'query' convertido a dict
 
-    @Slot()
+    #     # with DatabaseRepository() as db_repo:
+    #     # verifica si el deudor existe en Deudores
+    #     count_query = makeReadQuery(
+    #         sql='''SELECT COUNT(*) 
+    #                FROM Deudores 
+    #                WHERE nombre = ? 
+    #                    AND apellido = ?;''',
+    #         params=(self.debtor_values.getName(), self.debtor_values.getSurname(),)
+    #         )[0][0] # si el deudor no existe devuelve 0
+
+    #     try:
+    #         conn = createConnection("database/inventario.db")
+    #         cursor = conn.cursor()
+            
+    #         # si no existe ese deudor, lo agrega...
+    #         if not count_query:
+    #             # declara la consulta sql y params de Deudores y hace la consulta...
+    #             cursor.execute(
+    #                 "INSERT INTO Deudores(nombre, apellido, num_telefono, direccion, codigo_postal) VALUES(?, ?, ?, ?, ?);",
+    #                 (values['name'], values['surname'], values['phone_num'], values['direction'], values['postal_code'],)
+    #                 )
+                
+    #             conn.commit()
+    #             logging.debug(LoggingMessage.DEBUG_DB_SINGLE_INSERT_SUCCESS)
+
+    #         # trae (ID, el nombre y el apellido) del deudor para mandarlo a MainWindow en la señal 'debtorChosen'
+    #         query = makeReadQuery(
+    #             sql="SELECT IDdeudor FROM Deudores WHERE (nombre = ?) AND (apellido = ?);",
+    #             params=(values['name'], values['surname'],)
+    #             )[0][0]
+
+    #         # emite señal avisando que SÍ se eligió un deudor, con el IDdeudor
+    #         self.debtorChosen.emit(query)
+            
+    #     except sqlite3Error as err:
+    #         conn.rollback()
+            
+    #         logging.critical(LoggingMessage.ERROR_DB_INSERT, f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+        
+    #     finally:
+    #         conn.close()
+        
+    #     return None
+    
+    
     def handleOkClicked(self) -> None:
         '''
-        Es llamado desde la señal 'clicked' del botón "Aceptar".
+        Inserta los valores en la base de datos en las tablas de "Deudores" 
+        (si no existe el deudor). 
+        Al final emite la señal 'debtorChosen' con el "IDdeudor" del deudor 
+        confirmando que se eligió un deudor.
         
-        Obtiene los datos de los campos formateados e inserta los valores en la base de datos en las tablas de 
-        "Deudores" (si no existe el deudor). Al final emite la señal 'debtorChosen' con el "IDdeudor" del deudor 
-        al método 'MainWindow.handleFinishedSale' confirmando que se eligió un deudor.
-        
-        Retorna None.
+        Retorna
+        -------
+        None
         '''
-        # obtiene los valores formateados de los campos...
-        values:dict[str,str] = self.getFieldsData()
-        count_query:int
-        query:tuple # tiene una tupla con IDdeudor, nombre y apellido
-        query_to_dict:dict[str,str] # el tuple 'query' convertido a dict
+        count_query:int # consulta para ver si existe el Deudor
+        debtor_id:int # IDdeudor para emitir a MainWindow
+        _postal_code:int # var. aux., tiene el código postal del Deudor
 
-        # verifica si el deudor existe en Deudores
-        count_query = makeReadQuery(
-            sql="SELECT COUNT(*) FROM Deudores WHERE nombre = ? AND apellido = ?;",
-            params=(values['name'], values['surname'],)
-            )[0][0] # si el deudor no existe devuelve 0
-
-        try:
-            conn = createConnection("database/inventario.db")
-            cursor = conn.cursor()
-            
+        with DatabaseRepository() as db_repo:
+            # verifica si el deudor existe en Deudores
+            count_query = makeReadQuery(
+                sql= '''SELECT COUNT(*) 
+                        FROM Deudores 
+                        WHERE nombre = ? 
+                            AND apellido = ?;''',
+                params=(self.debtor_values.getName(),
+                        self.debtor_values.getSurname(),)
+                )[0][0] # si el deudor no existe devuelve 0
+    
             # si no existe ese deudor, lo agrega...
             if not count_query:
-                # declara la consulta sql y params de Deudores y hace la consulta...
-                cursor.execute(
-                    "INSERT INTO Deudores(nombre, apellido, num_telefono, direccion, codigo_postal) VALUES(?, ?, ?, ?, ?);",
-                    (values['name'], values['surname'], values['phone_num'], values['direction'], values['postal_code'],)
-                    )
+                # INSERT a Deudores
+                _postal_code:int = self.debtor_values.getPostalCode()
                 
-                conn.commit()
+                db_repo.insertRegister(
+                    ins_sql= '''INSERT INTO Deudores(
+                                    nombre,
+                                    apellido,
+                                    num_telefono,
+                                    direccion,
+                                    codigo_postal) 
+                                VALUES(?, ?, ?, ?, ?);''',
+                    ins_params=(self.debtor_values.getName(),
+                                self.debtor_values.getSurname(),
+                                self.debtor_values.getPhoneNumber(),
+                                self.debtor_values.getDirection(),
+                                _postal_code if _postal_code else None,)
+                )
+                
                 logging.debug(LoggingMessage.DEBUG_DB_SINGLE_INSERT_SUCCESS)
 
-            # trae (ID, el nombre y el apellido) del deudor para mandarlo a MainWindow en la señal 'debtorChosen'
-            query = makeReadQuery(
-                sql="SELECT IDdeudor FROM Deudores WHERE (nombre = ?) AND (apellido = ?);",
-                params=(values['name'], values['surname'],)
+            # manda a MainWindow el IDdeudor en la señal 'debtorChosen'
+            debtor_id = makeReadQuery(
+                    sql= '''SELECT IDdeudor 
+                            FROM Deudores 
+                            WHERE nombre = ? 
+                                AND apellido = ?;''',
+                    params=(self.debtor_values.getName(),
+                            self.debtor_values.getSurname(),)
                 )[0][0]
 
             # emite señal avisando que SÍ se eligió un deudor, con el IDdeudor
-            self.debtorChosen.emit(query)
-            
-        except sqlite3Error as err:
-            conn.rollback()
-            
-            logging.critical(LoggingMessage.ERROR_DB_INSERT, f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
-        
-        finally:
-            conn.close()
+            self.debtorChosen.emit(debtor_id)
         
         return None
 
