@@ -70,12 +70,3 @@ class InventoryProxyModel(QSortFilterProxyModel):
             source_model.removeSelectedModelRows(selected_rows=selected_source_rows)
         return None
     
-    
-    def removeRows(self, row:int, count:int, parent:QModelIndex=QModelIndex()) -> bool:
-        '''
-        Elimina las filas en el MODELO DE DATOS. Éste método sirve para 
-        extender la comunicación de la VISTA al MODELO.
-        '''
-        
-        return True
-    
