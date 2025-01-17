@@ -5,7 +5,7 @@ from typing import (Any, Iterable)
 from PySide6.QtWidgets import (QApplication, QMainWindow, QLineEdit, QTableView, 
                                QCheckBox, QAbstractItemView, QDateTimeEdit, QListWidgetItem, 
                                QLabel)
-from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot)
+from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot, QSortFilterProxyModel)
 from PySide6.QtGui import (QIcon)
 
 from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemValues, 
@@ -20,6 +20,7 @@ from utils.customvalidators import (SalePaidValidator)
 from utils.enumclasses import (LoggingMessage, DBQueries, ModelHeaders, TableViewId, 
                                LabelFeedbackStyle, InventoryPriceType, TypeSideBar, 
                                TableViewColumns)
+from utils.proxy_models import (InventoryProxyModel)
 
 from resources import (rc_icons)
 
@@ -39,9 +40,14 @@ class MainWindow(QMainWindow):
         # repositorio de base de datos
         self._db_repo:DatabaseRepository = DatabaseRepository()
         
-        #* modelo de datos de Inventario
+        #* modelo de datos y proxy model de Inventario
         self.inventory_data_model:InventoryTableModel = InventoryTableModel()
-        self.ui.tv_inventory_data.setModel(self.inventory_data_model)
+        # TODO: implementar ordenamiento en proxy model.
+        #? proxy model-modelo de datos: los DELETE e INSERT pasan por el proxy model, 
+        #? los UPDATE y READ se hacen directamente al modelo.
+        self.inventory_proxy_model:InventoryProxyModel = InventoryProxyModel()
+        self.inventory_proxy_model.setSourceModel(self.inventory_data_model)
+        self.ui.tv_inventory_data.setModel(self.inventory_proxy_model)
         
         #* modelo de datos de Ventas
         self.sales_data_model:SalesTableModel = SalesTableModel()
@@ -73,14 +79,20 @@ class MainWindow(QMainWindow):
         None
         '''
         self.setWindowTitle("herramienta de gestión - Forrajería Torres")
+        
         set_tables_ListWidgetItemsTooltip(self.ui.tables_ListWidget, getCategoriesDescription())
+        
         self.__hideWidgets() # esconde algunos widgets inicialmente
+        
         self.__initGeneralValidators() # inicializa validadores existentes
+        
         self.__addIconsToWidgets() # añade íconos a los widgets
+        
         # políticas de QTableViews
         setTableViewPolitics(self.ui.tv_inventory_data)
         setTableViewPolitics(self.ui.tv_sales_data)
         setTableViewPolitics(self.ui.tv_debts_data)
+        
         # las checkboxes de porcentajes son exclusivas
         self.ui.inventory_checkbuttons_buttonGroup.setExclusive(True)
         
@@ -100,9 +112,6 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
-        #¡ ======== variables de 'search bars' ================================
-        # TODO: reimplementar funcionalidad de search bars
-
         #¡ ======== variable de inventario ====================================
         #? Los acumuladores de datos sirven para hacer operaciones sobre los modelos de datos 
         #? y la base de datos en "batches" y mejorar el rendimiento de la aplicación en general
@@ -123,10 +132,7 @@ class MainWindow(QMainWindow):
 
         #¡ ======== variables de deudas =======================================
         
-        # TODO: mostrar deudas
-        # TODO: permitir agregar deuda
-        # TODO: permitir eliminar deuda
-        # TODO: permitir modificar deuda
+        # TODO: colocar acá variables de Deudas
         return None
 
 
@@ -164,15 +170,21 @@ class MainWindow(QMainWindow):
         )
 
         #* (CREATE) añadir nuevo producto a tabla 'tv_inventory_data'
-        self.ui.btn_add_product_inventory.clicked.connect(lambda: self.handleTableCreateRow(TableViewId.INVEN_TABLE_VIEW))
+        self.ui.btn_add_product_inventory.clicked.connect(
+            lambda: self.handleTableCreateRow(TableViewId.INVEN_TABLE_VIEW)
+        )
         
         #* (DELETE) eliminar un producto de 'tv_inventory_data'
-        self.ui.btn_delete_product_inventory.clicked.connect(lambda: self.handleTableDeleteRows(TableViewId.INVEN_TABLE_VIEW))
+        self.ui.btn_delete_product_inventory.clicked.connect(
+            lambda: self.handleTableDeleteRows(TableViewId.INVEN_TABLE_VIEW)
+        )
         
         #* (UPDATE) modificar celdas de 'tv_inventory_data' (sin porcentajes)
         self.inventory_data_model.dataToUpdate.connect(
-            lambda params: self.__onInventoryModelDataToUpdate(
-                column=params[0], IDproduct=params[1], new_val=params[2]))
+            lambda params: self.onInventoryModelDataToUpdate(
+                column=params[0], IDproduct=params[1], new_val=params[2]
+            )
+        )
         
         #* delegado de inventario
         self.inventory_delegate.fieldIsValid.connect(self.__onDelegateValidationSucceded)
@@ -192,6 +204,11 @@ class MainWindow(QMainWindow):
             self.__onPercentageValidatorSucceded)
         self.ui.lineEdit_percentage_change.validator().validationFailed.connect(
             self.__onPercentageValidatorFailed)
+        
+        #* search bar
+        self.ui.inventory_searchBar.returnPressed.connect(
+            lambda: self.filterInventoryTable(text=self.ui.inventory_searchBar.text())
+        )
 
         #¡========= VENTAS ====================================================
         #* (READ) cargar con ventas 'tv_sales_data'
@@ -228,7 +245,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_end_sale.clicked.connect(self.onFinishedSale)
 
         #¡========= DEUDAS ====================================================
-        # TODO PRINCIPAL: SEGUIR CON PARTE DE DEUDAS
+        # TODO: SEGUIR CON PARTE DE DEUDAS
         #* (READ) cargar con deudas 'tv_debts_data'
         self.ui.tabWidget.currentChanged.connect(lambda curr_index: self.fillTableView(
             table_viewID=TableViewId.DEBTS_TABLE_VIEW, SHOW_ALL=True) if curr_index == 2 else None)
@@ -820,7 +837,7 @@ class MainWindow(QMainWindow):
         '''
         match table_viewID.name:
             case 'INVEN_TABLE_VIEW':
-                self.inventory_data_model.insertRows(
+                self.inventory_proxy_model.insertRows(
                     row=self.inventory_data_model.rowCount(),
                     count=1,
                     data_to_insert=data_to_insert)
@@ -831,7 +848,7 @@ class MainWindow(QMainWindow):
                 # le paso los datos al modelo, excepto el flag 'THERE_IS_DEBT', 
                 # porque el modelo no lo necesita
                 self.sales_data_model.insertRows(
-                    row=self.inventory_data_model.rowCount(),
+                    row=self.inventory_proxy_model.rowCount(),
                     count=1,
                     data_to_insert={key: value for key, value in data_to_insert.items() if 'THERE_IS_DEBT' not in key}
                 )
@@ -945,7 +962,7 @@ class MainWindow(QMainWindow):
         None
         '''
         # obtiene las filas seleccionadas
-        selected_rows = getSelectedTableRows(self.ui.tv_inventory_data)
+        selected_rows:tuple[int] = getSelectedTableRows(self.ui.tv_inventory_data)
         
         if not selected_rows:
             return None
@@ -964,7 +981,7 @@ class MainWindow(QMainWindow):
         params_ids = self.__getDeleteData(table_viewID, selected_rows)
         
         # actualiza el MODELO de datos
-        self.inventory_data_model.removeSelectedModelRows(selected_rows)
+        self.inventory_proxy_model.removeSelectedRows(selected_rows)
         
         # # instancia y ejecuta WORKER y THREAD
         self.__instanciateDeleteWorkerAndThread(table_viewID, params_ids)
@@ -1162,7 +1179,7 @@ class MainWindow(QMainWindow):
     #¡ tablas (UPDATE)
     #¡¡ ....... inventario ........................................................................
     @Slot(int, int, object)
-    def __onInventoryModelDataToUpdate(self, column:int, IDproduct:int,
+    def onInventoryModelDataToUpdate(self, column:int, IDproduct:int,
                                        new_val:Any | list[str]) -> None:
         '''
         Actualiza la base de datos con el valor nuevo de Productos. En caso de 
@@ -1725,7 +1742,7 @@ class MainWindow(QMainWindow):
         datos.
         NOTA: la actualización de la base de datos se hace luego de la 
         actualización del modelo de datos, y no se hace en éste método, 
-        se hace en 'self.__onInventoryModelDataToUpdate'.
+        se hace en 'self.onInventoryModelDataToUpdate'.
         
         Retorna
         -------
@@ -1820,6 +1837,26 @@ class MainWindow(QMainWindow):
             
         return tuple(new_values.values())
 
+
+    @Slot()
+    def filterInventoryTable(self, text:str) -> None:
+        '''
+        Filtra la tabla de inventario de acuerdo al texto introducido.
+        
+        Parámetros
+        ----------
+        text : str
+            el texto introducido en la search-bar
+        
+        Retorna
+        -------
+        None
+        '''
+        # TODO: el filtro funciona bien, ahora tengo que testear si, luego de haber filtrado, se hacen bien los UPDATE, DELETE, READ e INSERT
+        self.inventory_proxy_model.setFilterKeyColumn(-1)
+        self.inventory_proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        self.inventory_proxy_model.setFilterRegularExpression(text)
+        return None
 
     #¡### VENTAS ######################################################
     #* métodos de lineEdit_paid
@@ -2178,9 +2215,6 @@ class MainWindow(QMainWindow):
         return None
     
     
-    # TODO: refactorizar parte del botón de finalizar venta, ya está terminada la parte de sales_input_list y también la de 
-    # todo: la tabla con las ventas realizadas. Luego de terminar acá, tengo 2 opciones: empezar con Deudas ó empezar con las 
-    # todo: search-bars.
     #* finalizando compra
     @Slot()
     def onFinishedSale(self) -> None:
@@ -2425,7 +2459,6 @@ class MainWindow(QMainWindow):
         return None
     
     
-    # TODO: refactorizar este método
     def __resetFieldsOnFinishedSale(self) -> None:
         '''
         Realiza los reinicios finales para poder concretar otra venta.
@@ -2454,9 +2487,6 @@ class MainWindow(QMainWindow):
         self.ui.lineEdit_paid.setText("")
         
         self.ui.btn_end_sale.setEnabled(False)
-        
-        self.debtor_chosen = None
-        self.ui.btn_end_sale.setEnabled(False)
         return None
     
     
@@ -2479,19 +2509,17 @@ class MainWindow(QMainWindow):
 
 
 
-
 def main():
     logging.basicConfig(
         format='%(asctime)s -- (%(levelname)s) %(module)s.%(funcName)s:%(message)s',
         level=logging.DEBUG,
         datefmt='%A %d/%m/%Y %H:%M:%S')
     
-    
     app = QApplication(sys.argv)
     mainWindow = MainWindow()
     mainWindow.show()
     sys.exit(app.exec())
-    
+
 
 
 # MAIN #########################################################################################################
