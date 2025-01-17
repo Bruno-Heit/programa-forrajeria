@@ -16,10 +16,6 @@ class InventoryProxyModel(QSortFilterProxyModel):
     '''
     PROXY MODEL editable de Inventario.
     '''
-    dataToUpdate:Signal = Signal(object) # señal para actualizar del MODELO 
-                                         # hacia MainWindow, para actualizar 
-                                         # en bd los valores
-    
     def __init__(self, parent=None) -> None:
         super(InventoryProxyModel, self).__init__()
     
