@@ -16,6 +16,11 @@ class InventoryProxyModel(QSortFilterProxyModel):
     '''
     PROXY MODEL editable de Inventario.
     '''
+    baseModelRowsSelected:Signal = Signal(object) # emite una tupla[int] con las filas seleccionadas 
+                                        # mapeadas del MODELO BASE a MainWindow para 
+                                        # actualizar la base de datos.
+    
+    
     def __init__(self, parent=None) -> None:
         super(InventoryProxyModel, self).__init__()
     
@@ -44,7 +49,11 @@ class InventoryProxyModel(QSortFilterProxyModel):
     
     def removeSelectedRows(self, selected_rows:tuple[int]) -> None:
         '''
-        Elimina las filas seleccionadas en la VISTA.
+        Elimina en el MODELO DE DATOS las filas seleccionadas en la VISTA.
+        
+        NOTA: la base de datos no es actualizada desde acá, eso se hace en 
+        MainWindow, éste método emite la señal 'baseModelRowsSelected' con los IDs de 
+        los productos para poder actualizarla.
 
         Parámetros
         ----------
@@ -55,14 +64,19 @@ class InventoryProxyModel(QSortFilterProxyModel):
         -------
         None
         '''
-        # obtiene el MODELO BASE
+        # obtiene el MODELO BASE (simplemente para type-hinting)
         source_model:InventoryTableModel = self.sourceModel()
         
-        selected_source_rows:tuple = tuple(
+        # mapea las filas seleccionadas para obtener las del MODELO BASE
+        selected_source_rows:tuple[int] = tuple(
             self.mapToSource(self.index(proxy_row, 0)).row() for proxy_row in selected_rows
         )
         
+        # elimina las filas seleccionadas en el MODELO BASE
         if selected_source_rows:
+            # emite señal a MainWindow con las filas seleccionadas en el MODELO BASE
+            self.baseModelRowsSelected.emit(selected_source_rows)
+            
             source_model.removeSelectedModelRows(selected_rows=selected_source_rows)
         return None
     

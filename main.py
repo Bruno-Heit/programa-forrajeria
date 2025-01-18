@@ -179,6 +179,10 @@ class MainWindow(QMainWindow):
             lambda: self.handleTableDeleteRows(TableViewId.INVEN_TABLE_VIEW)
         )
         
+        self.inventory_proxy_model.baseModelRowsSelected.connect(
+            self.__onInventoryBaseModelRowsSelected
+        )
+        
         #* (UPDATE) modificar celdas de 'tv_inventory_data' (sin porcentajes)
         self.inventory_data_model.dataToUpdate.connect(
             lambda params: self.onInventoryModelDataToUpdate(
@@ -947,15 +951,10 @@ class MainWindow(QMainWindow):
         return None
     
     
-    def __deleteInventoryRows(self, table_viewID:TableViewId=TableViewId.INVEN_TABLE_VIEW) -> None:
+    def __deleteInventoryRows(self) -> None:
         '''
         Elimina los productos seleccionados en el MODELO de inventario, actualiza 
         la VISTA y marca el producto en la base de datos como eliminado.
-
-        Parámetros
-        ----------
-        table_viewID : TableViewId, opcional
-            QTableView al que se refencia
 
         Retorna
         -------
@@ -977,15 +976,38 @@ class MainWindow(QMainWindow):
                                                   stop:0.59887 rgba(255, 161, 71, 255));
                 }''')
         
-        # obtiene los ids para las consultas
-        params_ids = self.__getDeleteData(table_viewID, selected_rows)
-        
-        # actualiza el MODELO de datos
+        # actualiza el MODELO de datos... el método siguiente emite la señal 
+        # 'baseModelRowsSelected' hacia acá para poder actualizar la base 
+        # de datos en el método 'self.__onInventoryBaseModelRowsSelected()'
         self.inventory_proxy_model.removeSelectedRows(selected_rows)
+        return None
+    
+    
+    @Slot(object)
+    def __onInventoryBaseModelRowsSelected(self, base_model_rows_selected:tuple[int]) -> None:
+        '''
+        Instancia un Worker y un QThread para actualizar la base de datos con 
+        los productos eliminados.
+
+        Parámetros
+        ----------
+        base_model_rows_selected : tuple[int]
+            las filas mapeadas del MODELO BASE seleccionadas para eliminar en 
+            la base de datos
+
+        Retorna
+        -------
+        None
+        '''
+        ids_params = self.__getDeleteData(
+                table_viewID=TableViewId.INVEN_TABLE_VIEW,
+                selected_rows=base_model_rows_selected
+            )
         
-        # # instancia y ejecuta WORKER y THREAD
-        self.__instanciateDeleteWorkerAndThread(table_viewID, params_ids)
-        
+        # instancia y ejecuta WORKER y THREAD
+        self.__instanciateDeleteWorkerAndThread(
+            table_viewID=TableViewId.INVEN_TABLE_VIEW, 
+            del_params=ids_params)
         return None
 
 
@@ -1852,7 +1874,10 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
-        # TODO: el filtro funciona bien, ahora tengo que testear si, luego de haber filtrado, se hacen bien los UPDATE, DELETE, READ e INSERT
+        # TODO: el filtro funciona perfecto, las operaciones READ, UPDATE e INSERT funcionan bien con la tabla filtrada, 
+        # TODO: el problema son las operaciones DELETE. Borra de la base de datos los primeros elementos elegidos (por ej.:
+        # todo: si filtré y selecciono los primeros 3 elementos en la base de datos borra los primeros 3 elementos, independientemente 
+        # todo: de qué productos sean; si selecciono el 2do y el 4to elimina el 2do y 4to en la base de datos; etc.)
         self.inventory_proxy_model.setFilterKeyColumn(-1)
         self.inventory_proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.inventory_proxy_model.setFilterRegularExpression(text)
