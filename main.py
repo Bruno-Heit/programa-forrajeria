@@ -40,26 +40,9 @@ class MainWindow(QMainWindow):
         # repositorio de base de datos
         self._db_repo:DatabaseRepository = DatabaseRepository()
         
-        #* modelo de datos y proxy model de Inventario
-        self.inventory_data_model:InventoryTableModel = InventoryTableModel()
-        # TODO: implementar ordenamiento en proxy model.
-        #? proxy model-modelo de datos: los DELETE e INSERT pasan por el proxy model, 
-        #? los UPDATE y READ se hacen directamente al modelo.
-        self.inventory_proxy_model:InventoryProxyModel = InventoryProxyModel()
-        self.inventory_proxy_model.setSourceModel(self.inventory_data_model)
-        self.ui.tv_inventory_data.setModel(self.inventory_proxy_model)
-        
-        #* modelo de datos de Ventas
-        self.sales_data_model:SalesTableModel = SalesTableModel()
-        self.ui.tv_sales_data.setModel(self.sales_data_model)
-        
-        #* delegado de inventario
-        self.inventory_delegate = InventoryDelegate()
-        self.ui.tv_inventory_data.setItemDelegate(self.inventory_delegate)
-        
-        #* delegado de ventas
-        self.sales_delegate = SalesDelegate(self.ui.dateTimeEdit_sale.displayFormat())
-        self.ui.tv_sales_data.setItemDelegate(self.sales_delegate)
+        self.setup_models()
+
+        self.setup_delegates()
         
         # declara e instancia variables
         self.setup_variables()
@@ -101,18 +84,69 @@ class MainWindow(QMainWindow):
         return None    
 
 
-    def setup_variables(self) -> None:
+    def setup_models(self) -> None:
         '''
-        Al igual que el método 'self.setup_ui' y 'self.setup_signals', este 
-        método tiene el objeto de simplificar la lectura del método 'self.__init__'.
-        Contiene las declaraciones de variables locales que se usan a lo largo de la 
-        ejecución del programa.
+        Este método tiene el objeto de simplificar la lectura del método 
+        'self.__init__'.
+        Contiene las declaraciones de MODELOS DE DATOS y PROXY MODELS de 
+        de VISTAS.
         
         Retorna
         -------
         None
         '''
-        #¡ ======== variable de inventario ====================================
+        #? proxy model-modelo de datos: los DELETE e INSERT pasan por el proxy 
+        #? model, los UPDATE y READ se hacen directamente al modelo.
+        
+        #* modelo de datos y proxy model de Inventario
+        self.inventory_data_model:InventoryTableModel = InventoryTableModel()
+        
+        # TODO: implementar ordenamiento en proxy model.
+        self.inventory_proxy_model:InventoryProxyModel = InventoryProxyModel()
+        self.inventory_proxy_model.setSourceModel(self.inventory_data_model)
+        
+        # self.ui.tv_inventory_data.setSortingEnabled(True) # activa el ordenamiento
+        self.ui.tv_inventory_data.setModel(self.inventory_proxy_model)
+        
+        #* modelo de datos de Ventas
+        self.sales_data_model:SalesTableModel = SalesTableModel()
+        self.ui.tv_sales_data.setModel(self.sales_data_model)
+        
+        return None
+
+
+    def setup_delegates(self) -> None:
+        '''
+        Este método tiene el objeto de simplificar la lectura del método 
+        'self.__init__'.
+        Contiene las declaraciones de los delegados usados en las VISTAS.
+        
+        Retorna
+        -------
+        None
+        '''
+        #* delegado de inventario
+        self.inventory_delegate = InventoryDelegate()
+        self.ui.tv_inventory_data.setItemDelegate(self.inventory_delegate)
+        
+        #* delegado de ventas
+        self.sales_delegate = SalesDelegate(self.ui.dateTimeEdit_sale.displayFormat())
+        self.ui.tv_sales_data.setItemDelegate(self.sales_delegate)
+        return None
+    
+
+    def setup_variables(self) -> None:
+        '''
+        Éste método tiene el objeto de simplificar la lectura del método 
+        'self.__init__'.
+        Contiene las declaraciones de variables locales que se usan a lo largo 
+        de la ejecución del programa.
+        
+        Retorna
+        -------
+        None
+        '''
+        #¡ variables de inventario
         #? Los acumuladores de datos sirven para hacer operaciones sobre los modelos de datos 
         #? y la base de datos en "batches" y mejorar el rendimiento de la aplicación en general
         self._inv_model_data_acc:ndarray[Any] = None #? acumulador temporal de datos para modelo de Inventario.
@@ -120,7 +154,7 @@ class MainWindow(QMainWindow):
         self.__upd_reg_count:int = 0 # se usa con 'self._UPD_BATCH_SIZE' y 'self._inv_model_data_acc', 
                                         # cuenta por qué registro va pasando desde el modelo a MainWindow.
         
-        #¡ ======== variables de ventas =======================================
+        #¡ variables de ventas
         self._sales_model_data_acc:ndarray[Any] = None #? acumulador temp. de datos para modelo de Ventas.
         
         self.SALES_ITEM_NUM:int = 0 # contador para crear nombres de items en 
@@ -130,7 +164,7 @@ class MainWindow(QMainWindow):
         self.TOTAL_COST:float = None # guarda el costo total de 'label_total' como 
                                      # float, para no tener que buscarlo con regex
 
-        #¡ ======== variables de deudas =======================================
+        #¡ variables de deudas
         
         # TODO: colocar acá variables de Deudas
         return None
@@ -138,8 +172,8 @@ class MainWindow(QMainWindow):
 
     def setup_signals(self) -> None:
         '''
-        Al igual que los métodos 'self.setup_ui' y 'self.setup_variables', este 
-        método tiene el objeto de simplificar la lectura del método 'self.__init__'.
+        Éste método tiene el objeto de simplificar la lectura del método 
+        'self.__init__'.
         Contiene las declaraciones de señales/slots de Widgets ya existentes 
         desde la instanciación de 'MainWindow'.
         
