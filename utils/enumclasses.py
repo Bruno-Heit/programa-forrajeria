@@ -190,6 +190,31 @@ class TableViewColumns(IntEnum):
     # TODO: poner acá los nombres de columnas de tabla de Deudas
 
 
+class TableModelDataColumns(IntEnum):
+    '''Clase de tipo 'IntEnum' con las columnas que maneja cada modelo de datos 
+    internamente en su respectivo atributo '_data', ya que los datos internos del 
+    MODELO DE DATOS son diferentes a los datos que muestra la VISTA.'''
+    INV_IDPRODUCT = 0
+    INV_CATEGORY_NAME = 1
+    INV_NAME = 2
+    INV_DESCRIPTION = 3
+    INV_STOCK = 4
+    INV_MEASUREMENT_UNIT = 5
+    INV_NORMAL_PRICE = 6
+    INV_COMERCIAL_PRICE = 7
+    
+    SAL_ID_SALES_DETAIL = 0
+    SAL_SALES_DETAIL = 1
+    SAL_QUANTITY = 2
+    SAL_MEASUREMENT_UNIT = 3
+    SAL_NAME = 4
+    SAL_TOTAL_COST = 5
+    SAL_PAID = 6
+    SAL_DATETIME = 7
+    
+    ...
+    # TODO: poner acá las columnas internas del modelo de tabla de Deudas
+
 
 
 
