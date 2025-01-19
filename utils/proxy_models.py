@@ -8,6 +8,7 @@ pasadas correctamente entre ellos sin errores.
 from PySide6.QtCore import (QSortFilterProxyModel, Qt, QModelIndex, Signal)
 
 from utils.model_classes import (InventoryTableModel)
+from utils.enumclasses import (TableModelDataColumns, TableViewColumns)
 from typing import (Any, Sequence)
 
 
@@ -25,6 +26,7 @@ class InventoryProxyModel(QSortFilterProxyModel):
         super(InventoryProxyModel, self).__init__()
     
     
+    # inserción de filas
     def insertRows(self, row:int, count:int, data_to_insert:dict[str, Any], 
                    parent:QModelIndex=QModelIndex()) -> bool:
         '''
@@ -47,6 +49,7 @@ class InventoryProxyModel(QSortFilterProxyModel):
         return True
     
     
+    # eliminación de filas
     def removeSelectedRows(self, selected_rows:tuple[int]) -> None:
         '''
         Elimina en el MODELO DE DATOS las filas seleccionadas en la VISTA.
@@ -80,3 +83,66 @@ class InventoryProxyModel(QSortFilterProxyModel):
             source_model.removeSelectedModelRows(selected_rows=selected_source_rows)
         return None
     
+    
+    # ordenamiento
+    def lessThan(self, source_left:QModelIndex, source_right:QModelIndex) -> bool:
+        _source_model:InventoryTableModel = self.sourceModel()
+        _left_value:float | str # intenta comparar primero los valores como float, 
+        _right_value:float | str # sino funciona los compara como str.
+        
+        # antes de obtener datos del modelo, verifica qué columna se está ordenando
+        match source_left.column():
+            case TableViewColumns.INV_CATEGORY.value: # cantidad
+                _left_value = _source_model._data[source_left.row(), TableModelDataColumns.INV_CATEGORY_NAME.value]
+                _right_value = _source_model._data[source_right.row(), TableModelDataColumns.INV_CATEGORY_NAME.value]
+            
+            case TableViewColumns.INV_PRODUCT_NAME.value: # nombre de producto
+                _left_value = _source_model._data[source_left.row(), TableModelDataColumns.INV_NAME.value]
+                _right_value = _source_model._data[source_right.row(), TableModelDataColumns.INV_NAME.value]
+            
+            case TableViewColumns.INV_DECRIPTION.value: # descripción (¿tiene sentido ordenar por descripción?)
+                _left_value = _source_model._data[source_left.row(), TableModelDataColumns.INV_DESCRIPTION.value]
+                _right_value = _source_model._data[source_right.row(), TableModelDataColumns.INV_DESCRIPTION.value]
+            
+            case TableViewColumns.INV_STOCK.value: # stock
+                _left_value = _source_model._data[source_left.row(), TableModelDataColumns.INV_STOCK.value]
+                _right_value = _source_model._data[source_right.row(), TableModelDataColumns.INV_STOCK.value]
+                
+                # hace la comparación como float
+                try:
+                    return float(_left_value) < float(_right_value)
+                
+                # si hay algún error, compara los valores como str
+                except (ValueError, IndexError):
+                    pass
+            
+            case TableViewColumns.INV_NORMAL_PRICE.value: # precio normal
+                _left_value = _source_model._data[source_left.row(), TableModelDataColumns.INV_NORMAL_PRICE.value]
+                _right_value = _source_model._data[source_right.row(), TableModelDataColumns.INV_NORMAL_PRICE.value]
+                
+                try:
+                    return float(_left_value) < float(_right_value)
+                
+                except (ValueError, IndexError):
+                    pass
+            
+            case TableViewColumns.INV_COMERCIAL_PRICE.value: # precio comercial
+                _left_value = _source_model._data[source_left.row(), TableModelDataColumns.INV_COMERCIAL_PRICE.value]
+                _right_value = _source_model._data[source_right.row(), TableModelDataColumns.INV_COMERCIAL_PRICE.value]
+                
+                # antes de comparar, verifica si hay valores nulos/ceros, si hay, los considera 
+                # como los valores más pequeños
+                if not _left_value and _right_value: # coloca valores nulos después de los datos
+                    return True
+                if _left_value and not _right_value: # coloca valores con datos antes de nulos
+                    return False
+                if not _left_value and not _right_value: # mantiene el orden si ambos son nulos
+                    return False
+                
+                try:
+                    return float(_left_value) < float(_right_value)
+                
+                except (ValueError, IndexError):
+                    pass
+        
+        return str(_left_value) < str(_right_value)

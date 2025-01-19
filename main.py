@@ -101,11 +101,11 @@ class MainWindow(QMainWindow):
         #* modelo de datos y proxy model de Inventario
         self.inventory_data_model:InventoryTableModel = InventoryTableModel()
         
-        # TODO: implementar ordenamiento en proxy model.
+        # TODO: implementar ordenamiento en proxy model, la forma común ordena mal, así que tengo que implementar el método 'lessThan'
         self.inventory_proxy_model:InventoryProxyModel = InventoryProxyModel()
         self.inventory_proxy_model.setSourceModel(self.inventory_data_model)
         
-        # self.ui.tv_inventory_data.setSortingEnabled(True) # activa el ordenamiento
+        self.ui.tv_inventory_data.setSortingEnabled(True) # activa el ordenamiento
         self.ui.tv_inventory_data.setModel(self.inventory_proxy_model)
         
         #* modelo de datos de Ventas
