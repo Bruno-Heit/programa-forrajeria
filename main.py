@@ -81,7 +81,6 @@ class MainWindow(QMainWindow):
         
         # en el formulario de Ventas coloca el tiempo en que se inició el programa
         self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
-        print(self.ui.dateTimeEdit_sale.displayFormat())
         return None    
 
 
@@ -109,7 +108,7 @@ class MainWindow(QMainWindow):
         self.ui.tv_inventory_data.setModel(self.inventory_proxy_model)
         
         #* modelo de datos de Ventas
-        # TODO: implementar proxy model acá
+        # TODO: implementar proxy model acá... solo falta la búsqueda (filtrar)
         self.sales_data_model:SalesTableModel = SalesTableModel()
         
         self.sales_proxy_model:SalesProxyModel = SalesProxyModel()
@@ -251,7 +250,10 @@ class MainWindow(QMainWindow):
         
         #* search bar
         self.ui.inventory_searchBar.returnPressed.connect(
-            lambda: self.filterInventoryTable(text=self.ui.inventory_searchBar.text())
+            lambda: self.filterTableView(
+                text=self.ui.inventory_searchBar.text(),
+                tableViewID=TableViewId.INVEN_TABLE_VIEW
+            )
         )
 
         #¡========= VENTAS ====================================================
@@ -284,6 +286,14 @@ class MainWindow(QMainWindow):
         #* delegado de ventas
         self.sales_delegate.fieldIsValid.connect(self.__onDelegateValidationSucceded)
         self.sales_delegate.fieldIsInvalid.connect(self.__onDelegateValidationFailed)
+        
+        #* search bar
+        self.ui.sales_searchBar.returnPressed.connect(
+            lambda: self.filterTableView(
+                text=self.ui.sales_searchBar.text(),
+                tableViewID=TableViewId.SALES_TABLE_VIEW
+            )
+        )
         
         #* formulario de ventas
         self.ui.btn_add_product.clicked.connect(self.addSalesInputListItem)
@@ -1055,19 +1065,10 @@ class MainWindow(QMainWindow):
         return None
 
 
-    def __deleteSalesRows(self, table_viewID:TableViewId=TableViewId.SALES_TABLE_VIEW) -> None:
+    def __deleteSalesRows(self) -> None:
         '''
         Elimina los productos seleccionados en el MODELO de ventas, actualiza 
         la VISTA y marca las deudas (si hay) en la base de datos como eliminadas.
-
-        Parámetros
-        ----------
-        table_viewID : TableViewId, opcional
-            QTableView al que se refencia
-
-        Retorna
-        -------
-        None
         '''
         # obtiene las filas seleccionadas
         selected_rows = getSelectedTableRows(self.ui.tv_sales_data)
@@ -1925,9 +1926,9 @@ class MainWindow(QMainWindow):
 
 
     @Slot()
-    def filterInventoryTable(self, text:str) -> None:
+    def filterTableView(self, text:str, tableViewID:TableViewId) -> None:
         '''
-        Filtra la tabla de inventario de acuerdo al texto introducido.
+        Filtra la tabla especificada de acuerdo al texto introducido.
         
         Parámetros
         ----------
@@ -1938,13 +1939,20 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
-        # TODO: el filtro funciona perfecto, las operaciones READ, UPDATE e INSERT funcionan bien con la tabla filtrada, 
-        # TODO: el problema son las operaciones DELETE. Borra de la base de datos los primeros elementos elegidos (por ej.:
-        # todo: si filtré y selecciono los primeros 3 elementos en la base de datos borra los primeros 3 elementos, independientemente 
-        # todo: de qué productos sean; si selecciono el 2do y el 4to elimina el 2do y 4to en la base de datos; etc.)
-        self.inventory_proxy_model.setFilterKeyColumn(-1)
-        self.inventory_proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
-        self.inventory_proxy_model.setFilterRegularExpression(text)
+        match tableViewID:
+            case TableViewId.INVEN_TABLE_VIEW:
+                self.inventory_proxy_model.setFilterKeyColumn(-1)
+                self.inventory_proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+                self.inventory_proxy_model.setFilterRegularExpression(text)
+            
+            case TableViewId.SALES_TABLE_VIEW:
+                self.sales_proxy_model.setFilterKeyColumn(-1)
+                self.sales_proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+                self.sales_proxy_model.setFilterRegularExpression(text)
+            
+            case TableViewId.DEBTS_TABLE_VIEW:
+                ...
+        
         return None
 
     #¡### VENTAS ######################################################
