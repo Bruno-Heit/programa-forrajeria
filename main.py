@@ -5,7 +5,7 @@ from typing import (Any, Iterable)
 from PySide6.QtWidgets import (QApplication, QMainWindow, QLineEdit, QTableView, 
                                QCheckBox, QAbstractItemView, QDateTimeEdit, QListWidgetItem, 
                                QLabel)
-from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot, QSortFilterProxyModel)
+from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot)
 from PySide6.QtGui import (QIcon)
 
 from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemValues, 
@@ -20,7 +20,7 @@ from utils.customvalidators import (SalePaidValidator)
 from utils.enumclasses import (LoggingMessage, DBQueries, ModelHeaders, TableViewId, 
                                LabelFeedbackStyle, InventoryPriceType, TypeSideBar, 
                                TableViewColumns)
-from utils.proxy_models import (InventoryProxyModel)
+from utils.proxy_models import (InventoryProxyModel, SalesProxyModel)
 
 from resources import (rc_icons)
 
@@ -81,6 +81,7 @@ class MainWindow(QMainWindow):
         
         # en el formulario de Ventas coloca el tiempo en que se inició el programa
         self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
+        print(self.ui.dateTimeEdit_sale.displayFormat())
         return None    
 
 
@@ -101,16 +102,21 @@ class MainWindow(QMainWindow):
         #* modelo de datos y proxy model de Inventario
         self.inventory_data_model:InventoryTableModel = InventoryTableModel()
         
-        # TODO: implementar ordenamiento en proxy model, la forma común ordena mal, así que tengo que implementar el método 'lessThan'
         self.inventory_proxy_model:InventoryProxyModel = InventoryProxyModel()
         self.inventory_proxy_model.setSourceModel(self.inventory_data_model)
         
-        self.ui.tv_inventory_data.setSortingEnabled(True) # activa el ordenamiento
+        self.ui.tv_inventory_data.setSortingEnabled(True)
         self.ui.tv_inventory_data.setModel(self.inventory_proxy_model)
         
         #* modelo de datos de Ventas
+        # TODO: implementar proxy model acá
         self.sales_data_model:SalesTableModel = SalesTableModel()
-        self.ui.tv_sales_data.setModel(self.sales_data_model)
+        
+        self.sales_proxy_model:SalesProxyModel = SalesProxyModel()
+        self.sales_proxy_model.setSourceModel(self.sales_data_model)
+        
+        self.ui.tv_sales_data.setSortingEnabled(True)
+        self.ui.tv_sales_data.setModel(self.sales_proxy_model)
         
         return None
 
@@ -260,6 +266,10 @@ class MainWindow(QMainWindow):
         
         #* (DELETE) eliminar ventas de 'tv_sales_data'
         self.ui.btn_delete_product_sales.clicked.connect(lambda: self.handleTableDeleteRows(TableViewId.SALES_TABLE_VIEW))
+        
+        self.sales_proxy_model.baseModelRowsSelected.connect(
+            self.__onSalesBaseModelRowsSelected
+        )
         
         #* (UPDATE) modificar celdas de 'tv_sales_data'
         self.sales_data_model.dataToUpdate.connect(
@@ -885,8 +895,8 @@ class MainWindow(QMainWindow):
                 
                 # le paso los datos al modelo, excepto el flag 'THERE_IS_DEBT', 
                 # porque el modelo no lo necesita
-                self.sales_data_model.insertRows(
-                    row=self.inventory_proxy_model.rowCount(),
+                self.sales_proxy_model.insertRows(
+                    row=self.sales_data_model.rowCount(),
                     count=1,
                     data_to_insert={key: value for key, value in data_to_insert.items() if 'THERE_IS_DEBT' not in key}
                 )
@@ -1074,15 +1084,35 @@ class MainWindow(QMainWindow):
                     stop:0.59887 rgba(255, 161, 71, 255));
                 }''')
         
-        # # obtiene ids de las filas seleccionadas
-        params_ids = self.__getDeleteData(table_viewID, selected_rows)
-        
-        # actualiza el modelo de ventas
-        self.sales_data_model.removeSelectedModelRows(selected_rows)
+        self.sales_proxy_model.removeSelectedRows(selected_rows=selected_rows)
+        return None
+
+
+    @Slot(object)
+    def __onSalesBaseModelRowsSelected(self, base_model_rows_selected:tuple[int]) -> None:
+        '''
+        Instancia un Worker y un QThread para actualizar la base de datos con 
+        los productos eliminados.
+
+        Parámetros
+        ----------
+        base_model_rows_selected : tuple[int]
+            las filas mapeadas del MODELO BASE seleccionadas para eliminar en 
+            la base de datos
+
+        Retorna
+        -------
+        None
+        '''
+        ids_params = self.__getDeleteData(
+                table_viewID=TableViewId.SALES_TABLE_VIEW,
+                selected_rows=base_model_rows_selected
+            )
         
         # instancia y ejecuta WORKER y THREAD
-        self.__instanciateDeleteWorkerAndThread(table_viewID, params_ids)
-        
+        self.__instanciateDeleteWorkerAndThread(
+            table_viewID=TableViewId.SALES_TABLE_VIEW, 
+            del_params=ids_params)
         return None
 
 
@@ -1118,7 +1148,7 @@ class MainWindow(QMainWindow):
             case "SALES_TABLE_VIEW":
                 # obtiene los IDs de detalle de venta y los convierte en tuple[ID]
                 for row in selected_rows:
-                    data.append(self.sales_data_model._data[row][0])
+                    data.append( self.sales_data_model._data[row][0] )
                 
                 with self._db_repo as db_repo:
                     # obtiene los IDs de ventas
