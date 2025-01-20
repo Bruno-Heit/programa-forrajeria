@@ -203,14 +203,14 @@ class TableModelDataColumns(IntEnum):
     INV_NORMAL_PRICE = 6
     INV_COMERCIAL_PRICE = 7
     
-    SAL_ID_SALES_DETAIL = 0
-    SAL_SALES_DETAIL = 1
-    SAL_QUANTITY = 2
-    SAL_MEASUREMENT_UNIT = 3
-    SAL_NAME = 4
-    SAL_TOTAL_COST = 5
-    SAL_PAID = 6
-    SAL_DATETIME = 7
+    SALES_ID_SALES_DETAIL = 0
+    SALES_DETAIL = 1
+    SALES_QUANTITY = 2
+    SALES_MEASUREMENT_UNIT = 3
+    SALES_PRODUCT_NAME = 4
+    SALES_TOTAL_COST = 5
+    SALES_TOTAL_PAID = 6
+    SALES_DATETIME = 7
     
     ...
     # TODO: poner acá las columnas internas del modelo de tabla de Deudas
