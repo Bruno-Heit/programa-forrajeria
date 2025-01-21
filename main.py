@@ -444,6 +444,21 @@ class MainWindow(QMainWindow):
     
     @Slot(int, object)
     def changeFilterColumn(self, column:int, tableViewID:TableViewId) -> None:
+        '''
+        Cambia la columna filtrada en el PROXY MODEL.
+
+        Parámetros
+        ----------
+        column : int
+            índice actual del QComboBox que representa la columna a filtrar en 
+            el PROXY MODEL
+        tableViewID : TableViewId
+            QTableView al que se referencia
+
+        Retorna
+        -------
+        None
+        '''
         _mapped_column:int = column - 1 # la columna elegida en el combobox 
             # convertida a la columna que representa en la tabla.
         
