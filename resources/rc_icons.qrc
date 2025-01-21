@@ -6,11 +6,14 @@
         <file alias="minus-circle-white.svg">../icons/minus-circleWhite.svg</file>
         <file alias="check-white.svg">../icons/checkWhite.svg</file>
         <file alias="chevron-down-black.svg">../icons/chevron-downBlack.svg</file>
+        <file alias="chevron-down-light-grey.svg">../icons/chevron-downLightGrey.svg</file>
         <file alias="chevron-up-black.svg">../icons/chevron-upBlack.svg</file>
         <file alias="x-white.svg">../icons/xWhite.svg</file>
         <file alias="arrow-left-white.svg">../icons/arrow-leftWhite.svg</file>
         <file alias="arrow-right-white.svg">../icons/arrow-rightWhite.svg</file>
         <file alias="chevron-left-white.svg">../icons/chevron-leftWhite.svg</file>
         <file alias="chevron-right-white.svg">../icons/chevron-rightWhite.svg</file>
+        <file alias="filter-white.svg">../icons/filterWhite.svg</file>
+        <file alias="filter-black.svg">../icons/filterBlack.svg</file>
     </qresource>
 </RCC>

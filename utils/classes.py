@@ -444,6 +444,8 @@ class ProductDialog(QDialog):
 
 # Dialog con datos de la venta -y del deudor si se debe algo/hay algo a favor-
 class SaleDialog(QDialog):
+    # TODO: corregir, cuando se eligen valores se deben ir actualizando los campos de costo y detalles de venta, 
+    # TODO: pero al alternar entre precio comercial o normal no se actualizan los campos.
     '''QDialog creado al presionar el botón 'MainWindow.btn_add_product_sales'. Sirve para crear un nuevo registro 
     de venta en la tabla "Ventas", de detalles de venta en "Detalle_Ventas", de deuda en "Deudas" (si hay diferencia 
     entre lo abonado y el costo total) y de deudor en "Deudores" (si hay deuda) en la base de datos.'''

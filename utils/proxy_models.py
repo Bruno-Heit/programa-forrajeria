@@ -24,6 +24,7 @@ class InventoryProxyModel(QSortFilterProxyModel):
     
     def __init__(self, parent=None) -> None:
         super(InventoryProxyModel, self).__init__()
+        self._filter_column:int = -1 # columna a ordenar por defecto
     
     
     # inserción de filas
@@ -148,6 +149,62 @@ class InventoryProxyModel(QSortFilterProxyModel):
         return str(_left_value) < str(_right_value)
 
 
+    # filtrado avanzado
+    def setFilterColumn(self, column:int) -> None:
+        '''
+        Al alternar el ordenamiento entre columnas, éste método se encarga de 
+        establecer la nueva columna que se debe ordenar en el PROXY MODEL.
+
+        Parámetros
+        ----------
+        column : int
+            columna a ordenar
+
+        Retorna
+        -------
+        None
+        '''
+        self._filter_column = column
+        self.invalidateFilter() # invalida el filtro existente, esto se hace para 
+            # implementar una lógica personalizada de ordenamiento sobre alguna 
+            # columna específica...
+        return None
+    
+    
+    def filterAcceptsRow(self, source_row:int, source_parent:QModelIndex) -> bool:
+        regex = self.filterRegularExpression()
+        
+        # si el patrón (o sea, el texto de la search bar) está vacío no filtra nada
+        if not regex.pattern():
+            return True
+        
+        _source_model:InventoryTableModel = self.sourceModel()
+        index_data:Any
+        
+        # si la columna de filtrado es -1 busca en todas
+        if self._filter_column == -1:
+            for col in range(_source_model.columnCount()):
+                index_data = _source_model.index(
+                    source_row,
+                    col,
+                    source_parent).data(Qt.ItemDataRole.DisplayRole)
+                
+                if index_data and regex.match(index_data).hasMatch():
+                    return True
+            return False
+        
+        # sino, busca en la columna especificada
+        else:
+            # obtengo el dato de índice en la columna a filtrar
+            index_data = _source_model.index(
+                source_row,
+                self._filter_column,
+                source_parent).data(Qt.ItemDataRole.DisplayRole)
+        
+        # devuelve True si hay coincidencia en el dato en el index actual, sino False
+        return regex.match(index_data).hasMatch() if index_data else False
+
+
 
 
 
@@ -161,7 +218,7 @@ class SalesProxyModel(QSortFilterProxyModel):
     
     def __init__(self, parent=None):
         super(SalesProxyModel, self).__init__()
-    
+        self._filter_column:int = -1 # columna qué filtrar por defecto
     
     # inserción de filas
     def insertRows(self, row:int, count:int, data_to_insert:dict[str, Any], 
@@ -254,7 +311,55 @@ class SalesProxyModel(QSortFilterProxyModel):
         return str(_left_value) < str(_right_value)
 
 
+    # filtrado avanzado
+    def setFilterColumn(self, column:int) -> None:
+        '''
+        Al alternar el ordenamiento entre columnas, éste método se encarga de 
+        establecer la nueva columna que se debe ordenar en el PROXY MODEL.
 
+        Parámetros
+        ----------
+        column : int
+            columna a ordenar
+
+        Retorna
+        -------
+        None
+        '''
+        self._filter_column = column
+        self.invalidateFilter()
+        return None
+    
+    
+    def filterAcceptsRow(self, source_row:int, source_parent:QModelIndex) -> bool:
+        regex = self.filterRegularExpression()
+        
+        if not regex.pattern():
+            return True
+        
+        _source_model:SalesTableModel = self.sourceModel()
+        index_data:Any
+        
+        # si la columna de filtrado es -1 busca en todas
+        if self._filter_column == -1:
+            for col in range(_source_model.columnCount()):
+                index_data = _source_model.index(
+                    source_row,
+                    col,
+                    source_parent).data(Qt.ItemDataRole.DisplayRole)
+                
+                if index_data and regex.match(index_data).hasMatch():
+                    return True
+            return False
+        
+        # sino, busca en la columna especificada
+        else:
+            index_data = _source_model.index(
+                source_row,
+                self._filter_column,
+                source_parent).data(Qt.ItemDataRole.DisplayRole)
+        
+        return regex.match(index_data).hasMatch() if index_data else False
 
 
 

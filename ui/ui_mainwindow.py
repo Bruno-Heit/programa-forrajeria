@@ -17,9 +17,9 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
 from PySide6.QtWidgets import (QAbstractItemView, QAbstractScrollArea, QAbstractSpinBox, QApplication,
-    QButtonGroup, QCheckBox, QDateTimeEdit, QFrame,
-    QGridLayout, QHBoxLayout, QHeaderView, QLabel,
-    QLayout, QLineEdit, QListView, QListWidget,
+    QButtonGroup, QCheckBox, QComboBox, QDateTimeEdit,
+    QFrame, QGridLayout, QHBoxLayout, QHeaderView,
+    QLabel, QLineEdit, QListView, QListWidget,
     QListWidgetItem, QMainWindow, QProgressBar, QPushButton,
     QSizePolicy, QSpacerItem, QTabWidget, QTableView,
     QToolBox, QVBoxLayout, QWidget)
@@ -551,49 +551,28 @@ class Ui_MainWindow(object):
 
         self.inventory_header_Hlayout.addWidget(self.inventory_searchBar, 0, Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
 
-        self.btn_group_inventory_header = QFrame(self.inventory_header)
-        self.btn_group_inventory_header.setObjectName(u"btn_group_inventory_header")
-        sizePolicy1.setHeightForWidth(self.btn_group_inventory_header.sizePolicy().hasHeightForWidth())
-        self.btn_group_inventory_header.setSizePolicy(sizePolicy1)
-        self.btn_group_inventory_header.setFrameShape(QFrame.Shape.NoFrame)
-        self.btn_group_inventory_header.setFrameShadow(QFrame.Shadow.Raised)
-        self.horizontalLayout = QHBoxLayout(self.btn_group_inventory_header)
-        self.horizontalLayout.setSpacing(4)
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalLayout.setSizeConstraint(QLayout.SizeConstraint.SetDefaultConstraint)
-        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        self.btn_inventory_prev_search_result = QPushButton(self.btn_group_inventory_header)
-        self.btn_inventory_prev_search_result.setObjectName(u"btn_inventory_prev_search_result")
-        self.btn_inventory_prev_search_result.setEnabled(False)
-        sizePolicy1.setHeightForWidth(self.btn_inventory_prev_search_result.sizePolicy().hasHeightForWidth())
-        self.btn_inventory_prev_search_result.setSizePolicy(sizePolicy1)
-        self.btn_inventory_prev_search_result.setMinimumSize(QSize(25, 25))
-        self.btn_inventory_prev_search_result.setMaximumSize(QSize(25, 25))
-        self.btn_inventory_prev_search_result.setIconSize(QSize(24, 24))
+        self.cb_inventory_colsFilter = QComboBox(self.inventory_header)
+        self.cb_inventory_colsFilter.addItem(u"Todas")
+        self.cb_inventory_colsFilter.addItem(u"Categor\u00eda")
+        self.cb_inventory_colsFilter.addItem(u"Nombre de producto")
+        self.cb_inventory_colsFilter.addItem(u"Descripci\u00f3n")
+        self.cb_inventory_colsFilter.addItem(u"Stock")
+        self.cb_inventory_colsFilter.addItem(u"Precio normal")
+        self.cb_inventory_colsFilter.addItem(u"Precio comercial")
+        self.cb_inventory_colsFilter.setObjectName(u"cb_inventory_colsFilter")
+        sizePolicy4.setHeightForWidth(self.cb_inventory_colsFilter.sizePolicy().hasHeightForWidth())
+        self.cb_inventory_colsFilter.setSizePolicy(sizePolicy4)
+        self.cb_inventory_colsFilter.setMinimumSize(QSize(60, 26))
+        self.cb_inventory_colsFilter.setMaximumSize(QSize(16777215, 26))
+#if QT_CONFIG(tooltip)
+        self.cb_inventory_colsFilter.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Permite seleccionar qu\u00e9 columna filtrar.</span></p></body></html>")
+#endif // QT_CONFIG(tooltip)
+        self.cb_inventory_colsFilter.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
+        self.cb_inventory_colsFilter.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToContents)
+        self.cb_inventory_colsFilter.setIconSize(QSize(24, 24))
+        self.cb_inventory_colsFilter.setFrame(False)
 
-        self.horizontalLayout.addWidget(self.btn_inventory_prev_search_result, 0, Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
-
-        self.btn_inventory_next_search_result = QPushButton(self.btn_group_inventory_header)
-        self.btn_inventory_next_search_result.setObjectName(u"btn_inventory_next_search_result")
-        self.btn_inventory_next_search_result.setEnabled(False)
-        sizePolicy1.setHeightForWidth(self.btn_inventory_next_search_result.sizePolicy().hasHeightForWidth())
-        self.btn_inventory_next_search_result.setSizePolicy(sizePolicy1)
-        self.btn_inventory_next_search_result.setMinimumSize(QSize(25, 25))
-        self.btn_inventory_next_search_result.setMaximumSize(QSize(25, 25))
-        self.btn_inventory_next_search_result.setIconSize(QSize(24, 24))
-
-        self.horizontalLayout.addWidget(self.btn_inventory_next_search_result, 0, Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
-
-
-        self.inventory_header_Hlayout.addWidget(self.btn_group_inventory_header, 0, Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
-
-        self.label_inventory_found_items = QLabel(self.inventory_header)
-        self.label_inventory_found_items.setObjectName(u"label_inventory_found_items")
-        self.label_inventory_found_items.setText(u"")
-        self.label_inventory_found_items.setTextFormat(Qt.TextFormat.PlainText)
-        self.label_inventory_found_items.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
-
-        self.inventory_header_Hlayout.addWidget(self.label_inventory_found_items)
+        self.inventory_header_Hlayout.addWidget(self.cb_inventory_colsFilter)
 
 
         self.inventory_display_Vlayout.addWidget(self.inventory_header)
@@ -1126,7 +1105,7 @@ class Ui_MainWindow(object):
         self.tab2_toolBox.addItem(self.box1_sales_form, u"Formulario de venta")
         self.box2_sales_table = QWidget()
         self.box2_sales_table.setObjectName(u"box2_sales_table")
-        self.box2_sales_table.setGeometry(QRect(0, 0, 364, 163))
+        self.box2_sales_table.setGeometry(QRect(0, 0, 756, 496))
         self.box2_sales_Vlayout = QVBoxLayout(self.box2_sales_table)
         self.box2_sales_Vlayout.setSpacing(4)
         self.box2_sales_Vlayout.setObjectName(u"box2_sales_Vlayout")
@@ -1161,48 +1140,26 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_2.addWidget(self.sales_searchBar)
 
-        self.btn_group_sales_header = QFrame(self.sales_table_header)
-        self.btn_group_sales_header.setObjectName(u"btn_group_sales_header")
-        sizePolicy1.setHeightForWidth(self.btn_group_sales_header.sizePolicy().hasHeightForWidth())
-        self.btn_group_sales_header.setSizePolicy(sizePolicy1)
-        self.btn_group_sales_header.setFrameShape(QFrame.Shape.NoFrame)
-        self.btn_group_sales_header.setFrameShadow(QFrame.Shadow.Raised)
-        self.horizontalLayout_3 = QHBoxLayout(self.btn_group_sales_header)
-        self.horizontalLayout_3.setSpacing(4)
-        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
-        self.btn_sales_prev_search_result = QPushButton(self.btn_group_sales_header)
-        self.btn_sales_prev_search_result.setObjectName(u"btn_sales_prev_search_result")
-        self.btn_sales_prev_search_result.setEnabled(False)
-        sizePolicy1.setHeightForWidth(self.btn_sales_prev_search_result.sizePolicy().hasHeightForWidth())
-        self.btn_sales_prev_search_result.setSizePolicy(sizePolicy1)
-        self.btn_sales_prev_search_result.setMinimumSize(QSize(25, 25))
-        self.btn_sales_prev_search_result.setMaximumSize(QSize(25, 25))
-        self.btn_sales_prev_search_result.setIconSize(QSize(24, 24))
+        self.cb_sales_colsFilter = QComboBox(self.sales_table_header)
+        self.cb_sales_colsFilter.addItem("")
+        self.cb_sales_colsFilter.addItem("")
+        self.cb_sales_colsFilter.addItem("")
+        self.cb_sales_colsFilter.addItem("")
+        self.cb_sales_colsFilter.addItem("")
+        self.cb_sales_colsFilter.addItem("")
+        self.cb_sales_colsFilter.addItem("")
+        self.cb_sales_colsFilter.setObjectName(u"cb_sales_colsFilter")
+        self.cb_sales_colsFilter.setMinimumSize(QSize(60, 26))
+        self.cb_sales_colsFilter.setMaximumSize(QSize(16777215, 26))
+#if QT_CONFIG(tooltip)
+        self.cb_sales_colsFilter.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Permite seleccionar qu\u00e9 columna filtrar.</span></p></body></html>")
+#endif // QT_CONFIG(tooltip)
+        self.cb_sales_colsFilter.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
+        self.cb_sales_colsFilter.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToContents)
+        self.cb_sales_colsFilter.setIconSize(QSize(24, 24))
+        self.cb_sales_colsFilter.setFrame(False)
 
-        self.horizontalLayout_3.addWidget(self.btn_sales_prev_search_result, 0, Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
-
-        self.btn_sales_next_search_result = QPushButton(self.btn_group_sales_header)
-        self.btn_sales_next_search_result.setObjectName(u"btn_sales_next_search_result")
-        self.btn_sales_next_search_result.setEnabled(False)
-        sizePolicy1.setHeightForWidth(self.btn_sales_next_search_result.sizePolicy().hasHeightForWidth())
-        self.btn_sales_next_search_result.setSizePolicy(sizePolicy1)
-        self.btn_sales_next_search_result.setMinimumSize(QSize(25, 25))
-        self.btn_sales_next_search_result.setMaximumSize(QSize(25, 25))
-        self.btn_sales_next_search_result.setIconSize(QSize(24, 24))
-
-        self.horizontalLayout_3.addWidget(self.btn_sales_next_search_result, 0, Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
-
-
-        self.horizontalLayout_2.addWidget(self.btn_group_sales_header)
-
-        self.label_sales_found_items = QLabel(self.sales_table_header)
-        self.label_sales_found_items.setObjectName(u"label_sales_found_items")
-        self.label_sales_found_items.setText(u"")
-        self.label_sales_found_items.setTextFormat(Qt.TextFormat.PlainText)
-        self.label_sales_found_items.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
-
-        self.horizontalLayout_2.addWidget(self.label_sales_found_items)
+        self.horizontalLayout_2.addWidget(self.cb_sales_colsFilter)
 
 
         self.box2_sales_Vlayout.addWidget(self.sales_table_header)
@@ -1361,47 +1318,19 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_4.addWidget(self.debts_searchBar)
 
-        self.btn_group_debts_header = QFrame(self.debts_header)
-        self.btn_group_debts_header.setObjectName(u"btn_group_debts_header")
-        sizePolicy1.setHeightForWidth(self.btn_group_debts_header.sizePolicy().hasHeightForWidth())
-        self.btn_group_debts_header.setSizePolicy(sizePolicy1)
-        self.btn_group_debts_header.setFrameShape(QFrame.Shape.NoFrame)
-        self.btn_group_debts_header.setFrameShadow(QFrame.Shadow.Raised)
-        self.horizontalLayout_5 = QHBoxLayout(self.btn_group_debts_header)
-        self.horizontalLayout_5.setSpacing(4)
-        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
-        self.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
-        self.btn_debts_prev_search_result = QPushButton(self.btn_group_debts_header)
-        self.btn_debts_prev_search_result.setObjectName(u"btn_debts_prev_search_result")
-        self.btn_debts_prev_search_result.setEnabled(False)
-        sizePolicy1.setHeightForWidth(self.btn_debts_prev_search_result.sizePolicy().hasHeightForWidth())
-        self.btn_debts_prev_search_result.setSizePolicy(sizePolicy1)
-        self.btn_debts_prev_search_result.setMinimumSize(QSize(25, 25))
-        self.btn_debts_prev_search_result.setMaximumSize(QSize(25, 25))
-        self.btn_debts_prev_search_result.setIconSize(QSize(24, 24))
+        self.cb_debts_colsFilter = QComboBox(self.debts_header)
+        self.cb_debts_colsFilter.setObjectName(u"cb_debts_colsFilter")
+        self.cb_debts_colsFilter.setMinimumSize(QSize(60, 26))
+        self.cb_debts_colsFilter.setMaximumSize(QSize(16777215, 26))
+#if QT_CONFIG(tooltip)
+        self.cb_debts_colsFilter.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Permite seleccionar qu\u00e9 columna filtrar.</span></p></body></html>")
+#endif // QT_CONFIG(tooltip)
+        self.cb_debts_colsFilter.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
+        self.cb_debts_colsFilter.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToContents)
+        self.cb_debts_colsFilter.setIconSize(QSize(24, 24))
+        self.cb_debts_colsFilter.setFrame(False)
 
-        self.horizontalLayout_5.addWidget(self.btn_debts_prev_search_result)
-
-        self.btn_debts_next_search_result = QPushButton(self.btn_group_debts_header)
-        self.btn_debts_next_search_result.setObjectName(u"btn_debts_next_search_result")
-        self.btn_debts_next_search_result.setEnabled(False)
-        sizePolicy1.setHeightForWidth(self.btn_debts_next_search_result.sizePolicy().hasHeightForWidth())
-        self.btn_debts_next_search_result.setSizePolicy(sizePolicy1)
-        self.btn_debts_next_search_result.setMinimumSize(QSize(25, 25))
-        self.btn_debts_next_search_result.setMaximumSize(QSize(25, 25))
-        self.btn_debts_next_search_result.setIconSize(QSize(24, 24))
-
-        self.horizontalLayout_5.addWidget(self.btn_debts_next_search_result)
-
-
-        self.horizontalLayout_4.addWidget(self.btn_group_debts_header)
-
-        self.label_debts_found_items = QLabel(self.debts_header)
-        self.label_debts_found_items.setObjectName(u"label_debts_found_items")
-        self.label_debts_found_items.setText(u"")
-        self.label_debts_found_items.setTextFormat(Qt.TextFormat.PlainText)
-
-        self.horizontalLayout_4.addWidget(self.label_debts_found_items)
+        self.horizontalLayout_4.addWidget(self.cb_debts_colsFilter)
 
 
         self.debts_info_Vlayout.addWidget(self.debts_header)
@@ -1550,7 +1479,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(2)
+        self.tabWidget.setCurrentIndex(1)
         self.tab2_toolBox.setCurrentIndex(0)
         self.tab2_toolBox.layout().setSpacing(4)
 
@@ -1573,8 +1502,7 @@ class Ui_MainWindow(object):
         self.tables_ListWidget.setSortingEnabled(False)
         self.tables_ListWidget.setSortingEnabled(__sortingEnabled)
 
-        self.btn_inventory_prev_search_result.setText("")
-        self.btn_inventory_next_search_result.setText("")
+
         self.btn_inventory_sideBarToggle.setText("")
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab1_inventory), QCoreApplication.translate("MainWindow", u"INVENTARIO", None))
         self.btn_add_product.setText(QCoreApplication.translate("MainWindow", u"Agregar producto", None))
@@ -1583,13 +1511,17 @@ class Ui_MainWindow(object):
         self.dateTimeEdit_sale.setDisplayFormat(QCoreApplication.translate("MainWindow", u"d/M/yyyy HH:mm:ss", None))
         self.btn_end_sale.setText(QCoreApplication.translate("MainWindow", u"Finalizar venta", None))
         self.tab2_toolBox.setItemText(self.tab2_toolBox.indexOf(self.box1_sales_form), QCoreApplication.translate("MainWindow", u"Formulario de venta", None))
-        self.btn_sales_prev_search_result.setText("")
-        self.btn_sales_next_search_result.setText("")
+        self.cb_sales_colsFilter.setItemText(0, QCoreApplication.translate("MainWindow", u"Todas", None))
+        self.cb_sales_colsFilter.setItemText(1, QCoreApplication.translate("MainWindow", u"Detalles de venta", None))
+        self.cb_sales_colsFilter.setItemText(2, QCoreApplication.translate("MainWindow", u"Cantidad", None))
+        self.cb_sales_colsFilter.setItemText(3, QCoreApplication.translate("MainWindow", u"Producto", None))
+        self.cb_sales_colsFilter.setItemText(4, QCoreApplication.translate("MainWindow", u"Costo total", None))
+        self.cb_sales_colsFilter.setItemText(5, QCoreApplication.translate("MainWindow", u"Abonado", None))
+        self.cb_sales_colsFilter.setItemText(6, QCoreApplication.translate("MainWindow", u"Fecha y hora", None))
+
         self.btn_delete_product_sales.setText(QCoreApplication.translate("MainWindow", u"Eliminar venta", None))
         self.tab2_toolBox.setItemText(self.tab2_toolBox.indexOf(self.box2_sales_table), QCoreApplication.translate("MainWindow", u"Tabla de ventas", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab2_sales), QCoreApplication.translate("MainWindow", u"VENTAS", None))
-        self.btn_debts_prev_search_result.setText("")
-        self.btn_debts_next_search_result.setText("")
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab3_debts), QCoreApplication.translate("MainWindow", u"CUENTAS CORRIENTES", None))
     # retranslateUi
 

@@ -98,24 +98,29 @@ class MainWindow(QMainWindow):
         #? proxy model-modelo de datos: los DELETE e INSERT pasan por el proxy 
         #? model, los UPDATE y READ se hacen directamente al modelo.
         
+        # TODO: usar los filtros de columnas, hacer que cada uno modifique la columna que referencia para poder filtrar por columnas específicas
+        
         #* modelo de datos y proxy model de Inventario
         self.inventory_data_model:InventoryTableModel = InventoryTableModel()
         
         self.inventory_proxy_model:InventoryProxyModel = InventoryProxyModel()
         self.inventory_proxy_model.setSourceModel(self.inventory_data_model)
         
+        self.inventory_proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.ui.tv_inventory_data.setSortingEnabled(True)
         self.ui.tv_inventory_data.setModel(self.inventory_proxy_model)
         
         #* modelo de datos de Ventas
-        # TODO: implementar proxy model acá... solo falta la búsqueda (filtrar)
         self.sales_data_model:SalesTableModel = SalesTableModel()
         
         self.sales_proxy_model:SalesProxyModel = SalesProxyModel()
         self.sales_proxy_model.setSourceModel(self.sales_data_model)
         
+        self.sales_proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.ui.tv_sales_data.setSortingEnabled(True)
         self.ui.tv_sales_data.setModel(self.sales_proxy_model)
+        
+        # TODO: implementar modelo de datos y proxy model de Deudas acá
         
         return None
 
@@ -255,6 +260,12 @@ class MainWindow(QMainWindow):
                 tableViewID=TableViewId.INVEN_TABLE_VIEW
             )
         )
+        self.ui.cb_inventory_colsFilter.currentIndexChanged.connect(
+            lambda index: self.changeFilterColumn(
+                column=index,
+                tableViewID=TableViewId.INVEN_TABLE_VIEW
+            )
+        )
 
         #¡========= VENTAS ====================================================
         #* (READ) cargar con ventas 'tv_sales_data'
@@ -291,6 +302,12 @@ class MainWindow(QMainWindow):
         self.ui.sales_searchBar.returnPressed.connect(
             lambda: self.filterTableView(
                 text=self.ui.sales_searchBar.text(),
+                tableViewID=TableViewId.SALES_TABLE_VIEW
+            )
+        )
+        self.ui.cb_sales_colsFilter.currentIndexChanged.connect(
+            lambda index: self.changeFilterColumn(
+                column=index,
                 tableViewID=TableViewId.SALES_TABLE_VIEW
             )
         )
@@ -342,17 +359,6 @@ class MainWindow(QMainWindow):
         # botón para terminar venta
         icon.addFile(":/icons/check-white.svg")
         self.ui.btn_end_sale.setIcon(icon)
-        
-        # botones de search bars
-        icon.addFile(":/icons/chevron-left-white.svg")
-        self.ui.btn_inventory_prev_search_result.setIcon(icon)
-        self.ui.btn_sales_prev_search_result.setIcon(icon)
-        self.ui.btn_debts_prev_search_result.setIcon(icon)
-        
-        icon.addFile(":/icons/chevron-right-white.svg")
-        self.ui.btn_inventory_next_search_result.setIcon(icon)
-        self.ui.btn_sales_next_search_result.setIcon(icon)
-        self.ui.btn_debts_next_search_result.setIcon(icon)
         
         return None
 
@@ -408,7 +414,53 @@ class MainWindow(QMainWindow):
         return None
 
 
-    #¡ método de sidebars
+    #¡ método de search-bars
+    @Slot(str, object)
+    def filterTableView(self, text:str, tableViewID:TableViewId) -> None:
+        '''
+        Filtra la tabla especificada de acuerdo al texto introducido.
+        
+        Parámetros
+        ----------
+        text : str
+            el texto introducido en la search-bar
+        
+        Retorna
+        -------
+        None
+        '''
+        match tableViewID:
+            case TableViewId.INVEN_TABLE_VIEW:
+                self.inventory_proxy_model.setFilterRegularExpression(text)
+            
+            case TableViewId.SALES_TABLE_VIEW:
+                self.sales_proxy_model.setFilterRegularExpression(text)
+            
+            case TableViewId.DEBTS_TABLE_VIEW:
+                ...
+        
+        return None
+    
+    
+    @Slot(int, object)
+    def changeFilterColumn(self, column:int, tableViewID:TableViewId) -> None:
+        _mapped_column:int = column - 1 # la columna elegida en el combobox 
+            # convertida a la columna que representa en la tabla.
+        
+        match tableViewID:
+            case TableViewId.INVEN_TABLE_VIEW:
+                self.inventory_proxy_model.setFilterColumn(column=_mapped_column)
+            
+            case TableViewId.SALES_TABLE_VIEW:
+                self.sales_proxy_model.setFilterColumn(column=_mapped_column)
+            
+            case TableViewId.DEBTS_TABLE_VIEW:
+                ... # TODO: colocar acá la actualización de la columna para buscar en Deudas
+            
+        return None
+
+
+    #¡ métodos de sidebars
     @Slot(object)
     def toggleSideBar(self, sidebar_type:TypeSideBar) -> None:
         '''
@@ -1924,36 +1976,6 @@ class MainWindow(QMainWindow):
             
         return tuple(new_values.values())
 
-
-    @Slot()
-    def filterTableView(self, text:str, tableViewID:TableViewId) -> None:
-        '''
-        Filtra la tabla especificada de acuerdo al texto introducido.
-        
-        Parámetros
-        ----------
-        text : str
-            el texto introducido en la search-bar
-        
-        Retorna
-        -------
-        None
-        '''
-        match tableViewID:
-            case TableViewId.INVEN_TABLE_VIEW:
-                self.inventory_proxy_model.setFilterKeyColumn(-1)
-                self.inventory_proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
-                self.inventory_proxy_model.setFilterRegularExpression(text)
-            
-            case TableViewId.SALES_TABLE_VIEW:
-                self.sales_proxy_model.setFilterKeyColumn(-1)
-                self.sales_proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
-                self.sales_proxy_model.setFilterRegularExpression(text)
-            
-            case TableViewId.DEBTS_TABLE_VIEW:
-                ...
-        
-        return None
 
     #¡### VENTAS ######################################################
     #* métodos de lineEdit_paid
