@@ -2788,24 +2788,30 @@ QPushButton:hover {
   </action>
  </widget>
  <tabstops>
-  <tabstop>btn_add_product</tabstop>
-  <tabstop>sales_input_list</tabstop>
-  <tabstop>lineEdit_paid</tabstop>
-  <tabstop>btn_end_sale</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>inventory_searchBar</tabstop>
+  <tabstop>cb_inventory_colsFilter</tabstop>
+  <tabstop>tv_inventory_data</tabstop>
+  <tabstop>btn_add_product_inventory</tabstop>
+  <tabstop>btn_delete_product_inventory</tabstop>
   <tabstop>btn_side_barToggle</tabstop>
   <tabstop>tables_ListWidget</tabstop>
-  <tabstop>tabWidget</tabstop>
+  <tabstop>btn_inventory_sideBarToggle</tabstop>
   <tabstop>checkbox_unit_prices</tabstop>
   <tabstop>checkbox_comercial_prices</tabstop>
   <tabstop>lineEdit_percentage_change</tabstop>
-  <tabstop>tv_inventory_data</tabstop>
-  <tabstop>btn_add_product_inventory</tabstop>
-  <tabstop>btn_inventory_sideBarToggle</tabstop>
-  <tabstop>btn_delete_product_inventory</tabstop>
-  <tabstop>inventory_searchBar</tabstop>
+  <tabstop>btn_add_product</tabstop>
+  <tabstop>sales_input_list</tabstop>
+  <tabstop>dateTimeEdit_sale</tabstop>
+  <tabstop>lineEdit_paid</tabstop>
+  <tabstop>btn_end_sale</tabstop>
+  <tabstop>sales_searchBar</tabstop>
+  <tabstop>cb_sales_colsFilter</tabstop>
   <tabstop>tv_sales_data</tabstop>
   <tabstop>btn_add_product_sales</tabstop>
   <tabstop>btn_delete_product_sales</tabstop>
+  <tabstop>debts_searchBar</tabstop>
+  <tabstop>cb_debts_colsFilter</tabstop>
   <tabstop>tv_debts_data</tabstop>
   <tabstop>btn_add_debt</tabstop>
   <tabstop>btn_delete_debt</tabstop>
