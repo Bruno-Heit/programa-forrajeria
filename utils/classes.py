@@ -6,7 +6,6 @@ from ui.ui_productDialog import Ui_Dialog
 from ui.ui_saleDialog import Ui_saleDialog
 from ui.ui_listproduct import Ui_listProduct
 from ui.ui_debtorDataDialog import Ui_debtorDataDialog
-from ui.ui_debtsTable_debtorDetails import Ui_debtorDetails
 
 from resources import (rc_icons)
 
@@ -3210,69 +3209,7 @@ class DebtorDataDialog(QDialog):
         return None
     
     
-    # TODO: seguir refactorizando métodos
-    # botón Aceptar
-    # @Slot()
-    # def handleOkClicked(self) -> None:
-    #     '''
-    #     Inserta los valores en la base de datos en las tablas de "Deudores" 
-    #     (si no existe el deudor). 
-    #     Al final emite la señal 'debtorChosen' con el "IDdeudor" del deudor 
-    #     confirmando que se eligió un deudor.
-        
-    #     Retorna
-    #     -------
-    #     None
-    #     '''
-    #     count_query:int
-    #     query:tuple # tiene una tupla con IDdeudor, nombre y apellido
-    #     query_to_dict:dict[str,str] # el tuple 'query' convertido a dict
-
-    #     # with DatabaseRepository() as db_repo:
-    #     # verifica si el deudor existe en Deudores
-    #     count_query = makeReadQuery(
-    #         sql='''SELECT COUNT(*) 
-    #                FROM Deudores 
-    #                WHERE nombre = ? 
-    #                    AND apellido = ?;''',
-    #         params=(self.debtor_values.getName(), self.debtor_values.getSurname(),)
-    #         )[0][0] # si el deudor no existe devuelve 0
-
-    #     try:
-    #         conn = createConnection("database/inventario.db")
-    #         cursor = conn.cursor()
-            
-    #         # si no existe ese deudor, lo agrega...
-    #         if not count_query:
-    #             # declara la consulta sql y params de Deudores y hace la consulta...
-    #             cursor.execute(
-    #                 "INSERT INTO Deudores(nombre, apellido, num_telefono, direccion, codigo_postal) VALUES(?, ?, ?, ?, ?);",
-    #                 (values['name'], values['surname'], values['phone_num'], values['direction'], values['postal_code'],)
-    #                 )
-                
-    #             conn.commit()
-    #             logging.debug(LoggingMessage.DEBUG_DB_SINGLE_INSERT_SUCCESS)
-
-    #         # trae (ID, el nombre y el apellido) del deudor para mandarlo a MainWindow en la señal 'debtorChosen'
-    #         query = makeReadQuery(
-    #             sql="SELECT IDdeudor FROM Deudores WHERE (nombre = ?) AND (apellido = ?);",
-    #             params=(values['name'], values['surname'],)
-    #             )[0][0]
-
-    #         # emite señal avisando que SÍ se eligió un deudor, con el IDdeudor
-    #         self.debtorChosen.emit(query)
-            
-    #     except sqlite3Error as err:
-    #         conn.rollback()
-            
-    #         logging.critical(LoggingMessage.ERROR_DB_INSERT, f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
-        
-    #     finally:
-    #         conn.close()
-        
-    #     return None
-    
-    
+    @Slot()
     def handleOkClicked(self) -> None:
         '''
         Inserta los valores en la base de datos en las tablas de "Deudores" 
@@ -3341,60 +3278,191 @@ class DebtorDataDialog(QDialog):
 
 
 # item de lista de Deudas
-class DebtsTablePersonData(QWidget):
-    def __init__(self, tableWidget:QTableWidget, full_name:str):
-        super(DebtsTablePersonData, self).__init__()
-        self.mainDataWidget = Ui_debtorDetails()
-        self.mainDataWidget.setupUi(self)
+class DebtorFullNameWidget(QWidget):
+    '''
+    Clase que contiene el nombre completo de la persona con cuenta corriente 
+    en una fila de la tabla de deudas.
+    Esta clase admite modificaciones a los datos e incluso actualiza la base 
+    de datos también.
+    
+    NOTA: a lo largo del programa se verá que a las personas con cta. cte. 
+    se las llama "deudoras", ese no es necesariamente el caso, pero por una 
+    cuestión de simplicidad y evitar escribir en cada ocasión "poseedor de 
+    cuenta corriente" o términos similares simplemente decidí llamar a todos 
+    "deudores".
+    '''
+    nameChanged:Signal = Signal(str)
+    surnameChanged:Signal = Signal(str)
+    
+    
+    def __init__(self, parent:QWidget=None) -> None:
+        super(DebtorFullNameWidget, self).__init__()
+        self.parent = parent
+        self.__debtor_id:int = None
+        self.__name:str = ""
+        self.__surname:str = ""
+        
+        self.setup_signals()
+    
 
-        # TODO: preguntar a chatGPT cómo hacer que cuando se presione un botón aparezca un widget, y que dicho widget
-        # todo: desaparezca si se hace click fuera de él.
-
-        self.mainDataWidget.label_full_name.setText(full_name)
-
-        icon = QIcon()
-        icon.addFile(pyinstallerCompleteResourcePath("icons\chevron-downBlack.svg"))
-        self.mainDataWidget.btn_expand_info.setIcon(icon)
-        self.mainDataWidget.btn_expand_info.setIconSize(QSize(24, 24))
-
-        self.BTN_STATE:int = 0 # se usa para cambiar el ícono de btn_expand_info
-
-        # señales
-        self.mainDataWidget.btn_expand_info.clicked.connect(lambda: self.toggleShowDebtorData(tableWidget))
-
-
-    # Métodos
-    def __createExpandedDataWidget(self) -> None:
-        # TODO: preguntarle a chatGPT cómo crear un widget en ventana flotante cuando se presione btn_expand_info
-        pass
-
-
-
-    def __updateButtonIcon(self, tableWidget:QTableWidget) -> None:
-        '''Dependiendo del valor de 'BTN_STATE' (0 ó 1) actualiza el ícono de 'btn_expand_info' y muestra o no el \
-        widget 'expandedDetails' con los detalles del deudor.
-        \nRetorna 'None'.'''
-        if self.BTN_STATE:
-            icon = QIcon()
-            icon.addFile(pyinstallerCompleteResourcePath("icons\chevron-downBlack.svg"))
-            self.mainDataWidget.btn_expand_info.setIcon(icon)
-
-            self.BTN_STATE = 0
-        else:
-            icon = QIcon()
-            icon.addFile(pyinstallerCompleteResourcePath("icons\chevron-upBlack.svg"))
-            self.mainDataWidget.btn_expand_info.setIcon(icon)
-            self.__createExpandedDataWidget()
-
-            self.BTN_STATE = 1
-
-        self.mainDataWidget.btn_expand_info.setIconSize(QSize(24, 24))
-        tableWidget.resizeRowsToContents()
+    def setup_signals(self) -> None:
+        self.nameChanged.connect(self.updateDebtorName)
+        self.surnameChanged.connect(self.updateDebtorSurname)
         return None
 
 
-    def toggleShowDebtorData(self, tableWidget:QTableWidget) -> None:
-        '''Muestra los datos disponibles sobre el deudor. 
-        \nRetorna 'None'.'''
-        self.__updateButtonIcon(tableWidget)
+    # setters
+    def setDebtorID(self, debtorID:int) -> None:
+        '''
+        Guarda el nombre del deudor.
+        
+        Parámetros
+        ----------
+        debtorID : int
+            el IDdeudor del deudor en la base de datos
+            
+        Retorna
+        -------
+        None
+        '''
+        self.__debtor_id = debtorID
+        return None
+    
+    
+    def setDebtorName(self, name:str) -> None:
+        '''
+        Guarda el nombre del deudor.
+        NOTA: éste método emite la señal 'nameChanged'.
+        
+        Parámetros
+        ----------
+        name : str
+            el nombre del deudor
+            
+        Retorna
+        -------
+        None
+        '''
+        if self.__name != name:
+            self.__name = name
+            self.nameChanged.emit(name)
+        return None
+
+
+    def setDebtorSurname(self, surname:str) -> None:
+        '''
+        Guarda el apellido del deudor.
+        NOTA: éste método emite la señal 'surnameChanged'.
+        
+        Parámetros
+        ----------
+        name : str
+            el apellido del deudor
+            
+        Retorna
+        -------
+        None
+        '''
+        if self.__surname != surname:
+            self.__surname = surname
+            self.surnameChanged.emit(surname)
+        return None
+    
+    
+    # getters
+    def getDebtorID(self) -> int:
+        '''
+        Devuelve el IDdeudor del deudor.
+
+        Retorna
+        -------
+        int
+            el IDdeudor del deudor
+        '''
+        return int(self.__debtor_id)
+    
+    
+    def getDebtorName(self) -> str:
+        '''
+        Devuelve el nombre del deudor.
+
+        Retorna
+        -------
+        str
+            el nombre del deudor
+        '''
+        return str(self.__name)
+    
+    
+    def getDebtorSurname(self) -> str:
+        '''
+        Devuelve el apellido del deudor.
+
+        Retorna
+        -------
+        str
+            el apellido del deudor
+        '''
+        return str(self.__surname)
+
+
+    # actualizaciones a la base de datos
+    def updateDebtorName(self, new_name:str) -> None:
+        '''
+        Actualiza en la base de datos el nombre del deudor.
+
+        Parámetros
+        ----------
+        new_name : str
+            el nuevo nombre por el cual reemplazar al anterior en la base de 
+            datos
+        
+        Retorna
+        -------
+        None
+        '''
+        with DatabaseRepository() as db_repo:
+            db_repo.updateRegisters(
+                upd_sql= '''UPDATE Deudores 
+                            SET nombre = ? 
+                            WHERE IDdeudor = ?;''',
+                upd_params=(new_name, self.getDebtorID(),)
+            )
+        return None
+
+
+    def updateDebtorSurname(self, new_surname:str) -> None:
+        '''
+        Actualiza en la base de datos el apellido del deudor.
+
+        Parámetros
+        ----------
+        new_surname : str
+            el nuevo apellido por el cual reemplazar al anterior en la base 
+            de datos
+        
+        Retorna
+        -------
+        None
+        '''
+        with DatabaseRepository() as db_repo:
+            db_repo.updateRegisters(
+                upd_sql= '''UPDATE Deudores 
+                            SET apellido = ? 
+                            WHERE IDdeudor = ?;''',
+                upd_params=(new_surname, self.getDebtorID(),)
+            )
+        return None
+
+
+
+
+
+
+
+
+
+
+
+
 
