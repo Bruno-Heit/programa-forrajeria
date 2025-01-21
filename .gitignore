@@ -8,6 +8,7 @@ test.py
 py_to_exe_config.json
 *.drawio
 *.drawio.bkp
+ui/_debts_table_scheme.png
 
 # archivos de compilación
 *.o
