@@ -186,8 +186,12 @@ class TableViewColumns(IntEnum):
     SALES_TOTAL_PAID = 4
     SALES_DATETIME = 5
     
-    ...
-    # TODO: poner acá los nombres de columnas de tabla de Deudas
+    DEBTS_FULL_NAME = 0
+    DEBTS_CONTACT = 1
+    DEBTS_BALANCE = 2
+
+
+
 
 
 class TableModelDataColumns(IntEnum):
@@ -212,8 +216,13 @@ class TableModelDataColumns(IntEnum):
     SALES_TOTAL_PAID = 6
     SALES_DATETIME = 7
     
-    ...
-    # TODO: poner acá las columnas internas del modelo de tabla de Deudas
+    DEBTS_IDDEBTOR = 0
+    DEBTS_NAME = 1
+    DEBTS_SURNAME = 2
+    DEBTS_PHONE_NUMBER = 3
+    DEBTS_DIRECTION = 4
+    DEBTS_POSTAL_CODE = 5
+
 
 
 
