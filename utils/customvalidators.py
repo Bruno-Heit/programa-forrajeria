@@ -218,7 +218,6 @@ class PercentageValidator(QRegularExpressionValidator):
 
 
 #¡ tabla VENTAS ===================================================================================
-# TODO: reemplazar los patrones con las expresiones regulares de enumclasses.py
 class SaleDetailsValidator(QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar los detalles de una venta.'''
     validationSucceeded = Signal()
@@ -226,7 +225,7 @@ class SaleDetailsValidator(QRegularExpressionValidator):
     
     def __init__(self, parent=None):
         super(SaleDetailsValidator, self).__init__()
-        self.pattern:Pattern = compile("[^;\"']{0,256}")
+        self.pattern:Pattern = compile(Regex.SALES_DETAILS_EDITION.value)
     
     
     def validate(self, text: str, pos: int) -> object:
@@ -347,7 +346,7 @@ class SaleTotalCostValidator(QRegularExpressionValidator):
     
     def __init__(self, parent=None):
         super(SaleTotalCostValidator, self).__init__()
-        self.pattern:Pattern = compile("[0-9]{1,8}(\.|,)?[0-9]{0,2}")
+        self.pattern:Pattern = compile(Regex.SALES_TOTAL_COST.value)
     
     def fixup(self, text: str) -> str:
         while text.endswith((".", ",")):
@@ -384,7 +383,7 @@ class SalePaidValidator(QValidator):
     def __init__(self, parent=None, is_optional:bool=False):
         super(SalePaidValidator, self).__init__()
         self.is_optional = is_optional
-        self.pattern:Pattern = compile("[\d]{0,8}(\.|,)?[\d]{0,2}")
+        self.pattern:Pattern = compile(Regex.SALES_PAID.value)
     
     
     def validate(self, text: str, pos: int) -> object:
@@ -417,7 +416,7 @@ class DebtorNameValidator(QRegularExpressionValidator):
     
     def __init__(self, parent=None):
         super(DebtorNameValidator, self).__init__()
-        self.pattern:Pattern = compile("[^;\"']{1,40}")
+        self.pattern:Pattern = compile(Regex.DEBTS_NAME.value)
 
     def validate(self, text: str, pos: int) -> object:
     
@@ -444,7 +443,7 @@ class DebtorSurnameValidator(QRegularExpressionValidator):
     
     def __init__(self, parent=None):
         super(DebtorSurnameValidator, self).__init__()
-        self.pattern:Pattern = compile("[^;\"']{1,40}")
+        self.pattern:Pattern = compile(Regex.DEBTS_SURNAME.value)
     
     def validate(self, text: str, pos: int) -> object:
         
@@ -465,13 +464,14 @@ class DebtorSurnameValidator(QRegularExpressionValidator):
 
 
 class DebtorPhoneNumberValidator(QRegularExpressionValidator):
-    '''Validador para los campos donde el usuario pueda modificar el número de teléfono de una persona en cuenta corriente.'''
+    '''Validador para los campos donde el usuario pueda modificar el número de 
+    teléfono de una persona en cuenta corriente.'''
     validationSucceeded = Signal()
     validationFailed = Signal(str)
 
     def __init__(self, parent=None):
         super(DebtorPhoneNumberValidator, self).__init__()
-        self.pattern:Pattern = compile("\+?[0-9 -]{0,20}")
+        self.pattern:Pattern = compile(Regex.DEBTS_PHONE_NUMB.value)
         
     def validate(self, text: str, pos: int) -> object:
         
@@ -485,6 +485,34 @@ class DebtorPhoneNumberValidator(QRegularExpressionValidator):
         
         else:
             self.validationFailed.emit("El número de teléfono es inválido")
+            return QRegularExpressionValidator.State.Invalid, text, pos
+
+
+
+
+
+class DebtorDirectionValidator(QRegularExpressionValidator):
+    '''Validador para los campos donde el usuario pueda modificar la dirección 
+    de una persona en cuenta corriente.'''
+    validationSucceeded = Signal()
+    validationFailed = Signal(str)
+
+    def __init__(self, parent=None):
+        super(DebtorDirectionValidator, self).__init__()
+        self.pattern:Pattern = compile(Regex.DEBTS_DIRECTION.value)
+        
+    def validate(self, text: str, pos: int) -> object:
+        
+        if text.strip() == "": # si el texto está vacío devuelve Acceptable
+            self.validationSucceeded.emit()
+            return QRegularExpressionValidator.State.Acceptable, text, pos
+        
+        elif fullmatch(self.pattern, text):
+            self.validationSucceeded.emit()
+            return QRegularExpressionValidator.State.Acceptable, text, pos
+        
+        else:
+            self.validationFailed.emit("La dirección es inválida")
             return QRegularExpressionValidator.State.Invalid, text, pos
 
 
