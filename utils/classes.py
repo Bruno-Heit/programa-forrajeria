@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QLineEdit, QCompleter, QWidget)
+from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QLineEdit, QCompleter, QWidget,
+                               QVBoxLayout)
 from PySide6.QtCore import (Signal, QSize)
 from PySide6.QtGui import (QIntValidator, QIcon)
 
@@ -2409,7 +2410,7 @@ class ListItemWidget(QWidget):
         return None
 
 
-# DEUDORES (VENTA FINALIZADA) ==================================================================================
+# DEUDORES (VENTA FINALIZADA) | (SECCIÓN DE CUENTA CORRIENTE) ==================================================
 
 
 class DebtorFullName(QObject):
@@ -2593,6 +2594,7 @@ class DebtorFullName(QObject):
 
 
 
+
 class DebtorContact(QObject):
     '''
     Clase que contiene el número de teléfono, dirección y código postal en los 
@@ -2745,6 +2747,8 @@ class DebtorContact(QObject):
             un valor inválido)
         '''
         return int(self.__debtor_postal_code) if self.__debtor_postal_code else 0
+
+
 
 
 
@@ -3477,14 +3481,150 @@ class DebtorDataDialog(QDialog):
 # DEUDORES (SECCIÓN CUENTA CORRIENTE) ==========================================================================
 
 
+class DelegateNameWidget(QWidget):
+    '''
+    Clase que contiene los QLineEdits que permiten editar la columna de "nombre 
+    completo" desde el DELEGADO en la VISTA de Deudas.
+    '''
+    #? estas señales son emitidas al delegado, el delegado las emite a 
+    #? MainWindow y en MainWindow se muestra el feedback.
+    validName:Signal = Signal()
+    invalidName:Signal = Signal(str)
+    validSurname:Signal = Signal()
+    invalidSurname:Signal = Signal(str)
+    allValid:Signal = Signal()
+    
+    def __init__(self, parent:QWidget=None) -> None:
+        super(DelegateNameWidget, self).__init__()
+        self.le_name:QLineEdit = QLineEdit()
+        self.le_surname:QLineEdit = QLineEdit()
+        
+        self.__v_layout:QVBoxLayout = QVBoxLayout(self)
+        self.__v_layout.addWidget(self.le_name)
+        self.__v_layout.addWidget(self.le_surname)
+        
+        self.le_name.setFocus()
+        self.setTabOrder(self.le_name, self.le_surname)
+        
+        self.setup_validators()
+        self.setup_signals()
+        return None
+    
+    
+    def setup_validators(self) -> None:
+        self.name_validator:DebtorNameValidator = DebtorNameValidator(self.le_name)
+        self.le_name.setValidator(self.name_validator)
+        
+        self.surname_validator:DebtorSurnameValidator = DebtorSurnameValidator(self.le_surname)
+        self.le_surname.setValidator(self.surname_validator)
+        return None
+    
+
+    def setup_signals(self) -> None:
+        self.name_validator.validationSucceeded.connect(
+            lambda: self.onValidationSucceeded(field_validated=DebtsFields.NAME)
+        )
+        self.name_validator.validationFailed.connect(
+            lambda error_msg: self.onValidationFailed(
+                error_msg=error_msg,
+                field_validated=DebtsFields.SURNAME)
+        )
+        self.surname_validator.validationSucceeded.connect(
+            lambda: self.onValidationSucceeded(field_validated=DebtsFields.SURNAME)
+        )
+        self.surname_validator.validationFailed.connect(
+            lambda error_msg: self.onValidationFailed(
+                error_msg=error_msg,
+                field_validated=DebtsFields.SURNAME)
+        )
+        return None
 
 
+    @Slot()
+    def onValidationSucceeded(self, field_validated:DebtsFields) -> None:
+        '''
+        Cambia el QSS del campo validado para reflejar la validez y emite la 
+        señal 'validName' | 'validSurname'.
+
+        Parámetros
+        ----------
+        field_validated : DebtsFields
+            el campo validado, admite los valores 'NAME' y 'SURNAME'
+
+        Retorna
+        -------
+        None
+        '''
+        match field_validated:
+            case DebtsFields.NAME:
+                self.le_name.setStyleSheet(WidgetStyle.FIELD_VALID_VAL)
+                self.validName.emit()
+            
+            case DebtsFields.SURNAME:
+                self.le_surname.setStyleSheet(WidgetStyle.FIELD_VALID_VAL)
+                self.validSurname.emit()
+        return None
+    
+    
+    @Slot(str)
+    def onValidationFailed(self, error_msg:str, field_validated:DebtsFields) -> None:
+        '''
+        Cambia el QSS del campo validado para reflejar la invalidez y emite la 
+        señal 'invalidName' | 'invalidSurname' con el mensaje de error a 
+        mostrar como feedback en MainWindow.
+
+        Parámetros
+        ----------
+        error_msg : str
+            el mensaje de error para mostrar como feedback
+        field_validated : DebtsFields
+            el campo validado, admite los valores 'NAME' y 'SURNAME'
+
+        Retorna
+        -------
+        None
+        '''
+        match field_validated:
+            case DebtsFields.NAME:
+                self.le_name.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL)
+                self.validName.emit(error_msg)
+            
+            case DebtsFields.SURNAME:
+                self.le_surname.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL)
+                self.validSurname.emit(error_msg)
+        return None
 
 
+    def text(self) -> tuple[str, str]:
+        '''
+        Devuelve los strings del nombre y el apellido del deudor.
+        
+        Retorna
+        -------
+        tuple[str, str]
+            tupla con el nombre y el apellido del deudor como str
+        '''
+        return (self.le_name.text, self.le_surname.text)
 
 
+    def setText(self, name:str, surname:str) -> None:
+        '''
+        Asigna el texto de nombre y apellido a sus respectivos campos.
 
-
+        Parámetros
+        ----------
+        name : str
+            el nombre del deudor
+        surname : str
+            el apellido del deudor
+        
+        Retorna
+        -------
+        None
+        '''
+        self.le_name.setText(name)
+        self.le_surname.setText(surname)
+        return None
 
 
 
