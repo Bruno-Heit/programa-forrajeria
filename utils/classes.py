@@ -3488,10 +3488,10 @@ class DelegateNameWidget(QWidget):
     '''
     #? estas señales son emitidas al delegado, el delegado las emite a 
     #? MainWindow y en MainWindow se muestra el feedback.
-    validName:Signal = Signal()
-    invalidName:Signal = Signal(str)
-    validSurname:Signal = Signal()
-    invalidSurname:Signal = Signal(str)
+    validName:Signal = Signal(object) # emite el TableViewId de Deudas
+    invalidName:Signal = Signal(object) # emite tupla con (TableViewId, mensaje de error)
+    validSurname:Signal = Signal(object) # emite el TableViewId de Deudas
+    invalidSurname:Signal = Signal(object) # emite tupla con (TableViewId, mensaje de error)
     allValid:Signal = Signal()
     
     def __init__(self, parent:QWidget=None) -> None:
@@ -3558,11 +3558,11 @@ class DelegateNameWidget(QWidget):
         match field_validated:
             case DebtsFields.NAME:
                 self.le_name.setStyleSheet(WidgetStyle.FIELD_VALID_VAL)
-                self.validName.emit()
+                self.validName.emit(TableViewId.DEBTS_TABLE_VIEW)
             
             case DebtsFields.SURNAME:
                 self.le_surname.setStyleSheet(WidgetStyle.FIELD_VALID_VAL)
-                self.validSurname.emit()
+                self.validSurname.emit(TableViewId.DEBTS_TABLE_VIEW)
         return None
     
     
@@ -3587,11 +3587,11 @@ class DelegateNameWidget(QWidget):
         match field_validated:
             case DebtsFields.NAME:
                 self.le_name.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL)
-                self.validName.emit(error_msg)
+                self.validName.emit((TableViewId.DEBTS_TABLE_VIEW, error_msg))
             
             case DebtsFields.SURNAME:
                 self.le_surname.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL)
-                self.validSurname.emit(error_msg)
+                self.validSurname.emit((TableViewId.DEBTS_TABLE_VIEW, error_msg))
         return None
 
 
