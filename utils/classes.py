@@ -3488,10 +3488,10 @@ class DelegateNameWidget(QWidget):
     '''
     #? estas señales son emitidas al delegado, el delegado las emite a 
     #? MainWindow y en MainWindow se muestra el feedback.
-    validName:Signal = Signal(object) # emite el TableViewId de Deudas
-    invalidName:Signal = Signal(object) # emite tupla con (TableViewId, mensaje de error)
-    validSurname:Signal = Signal(object) # emite el TableViewId de Deudas
-    invalidSurname:Signal = Signal(object) # emite tupla con (TableViewId, mensaje de error)
+    validName:Signal = Signal()
+    invalidName:Signal = Signal(object) # emite el mensaje de error
+    validSurname:Signal = Signal(object)
+    invalidSurname:Signal = Signal(object) # emite el mensaje de error
     allValid:Signal = Signal()
     
     def __init__(self, parent:QWidget=None) -> None:
