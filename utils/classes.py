@@ -3496,6 +3496,7 @@ class DelegateNameWidget(QWidget):
     
     def __init__(self, parent:QWidget=None) -> None:
         super(DelegateNameWidget, self).__init__()
+        self.parent = parent
         self.le_name:QLineEdit = QLineEdit()
         self.le_surname:QLineEdit = QLineEdit()
         
