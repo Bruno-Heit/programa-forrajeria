@@ -2778,11 +2778,13 @@ class DebtorDataDialog(QDialog):
         self.debtor_name_validator = DebtorNameValidator(self.debtorData.lineEdit_debtorName)
         self.debtor_surname_validator = DebtorSurnameValidator(self.debtorData.lineEdit_debtorSurname)
         self.phone_number_validator = DebtorPhoneNumberValidator(self.debtorData.lineEdit_phoneNumber)
+        self.direction_validator = DebtorDirectionValidator(self.debtorData.lineEdit_direction)
         self.postal_code_validator = DebtorPostalCodeValidator(self.debtorData.lineEdit_postalCode)
         
         self.debtorData.lineEdit_debtorName.setValidator(self.debtor_name_validator)
         self.debtorData.lineEdit_debtorSurname.setValidator(self.debtor_surname_validator)
         self.debtorData.lineEdit_phoneNumber.setValidator(self.phone_number_validator)
+        self.debtorData.lineEdit_direction.setValidator(self.direction_validator)
         self.debtorData.lineEdit_postalCode.setValidator(self.postal_code_validator)
         
         return None
@@ -2861,6 +2863,15 @@ class DebtorDataDialog(QDialog):
         self.debtor_values.phoneChanged.connect(self.onFieldChanged)
         
         #* dirección
+        self.direction_validator.validationSucceeded.connect(
+            lambda: self.validatorOnValidationSucceded(DebtsFields.DIRECTION)
+        )
+        self.direction_validator.validationFailed.connect(
+            lambda error_message: self.validatorOnValidationFailed(
+                field_validated=DebtsFields.DIRECTION,
+                error_message=error_message)
+        )
+        
         self.debtorData.lineEdit_direction.editingFinished.connect(
             lambda: self.debtor_values.setDirection(
                 direction=self.debtorData.lineEdit_direction.text()
@@ -2875,10 +2886,21 @@ class DebtorDataDialog(QDialog):
         self.debtor_values.directionChanged.connect(self.onFieldChanged)
         
         #* código postal
-        self.postal_code_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('DEBTOR_POSTAL_CODE'))
-        self.postal_code_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
-            field_validated='DEBTOR_POSTAL_CODE',
-            error_message=error_message))
+        self.postal_code_validator.validationSucceeded.connect(
+            lambda: self.validatorOnValidationSucceded(DebtsFields.POSTAL_CODE)
+        )
+        self.postal_code_validator.validationFailed.connect(
+            lambda error_message: self.validatorOnValidationFailed(
+                field_validated=DebtsFields.POSTAL_CODE,
+                error_message=error_message
+            )
+        )
+        
+        self.debtorData.lineEdit_postalCode.editingFinished.connect(
+            lambda: self.debtor_values.setPostalCode(
+                postal_code=self.debtorData.lineEdit_postalCode.text()
+            )
+        )
         
         self.debtor_values.postalCodeChanged.connect(
             lambda new_val: self.__updateFieldValue(
@@ -3176,7 +3198,6 @@ class DebtorDataDialog(QDialog):
             self.debtorData.lineEdit_direction.setEnabled(False)
             self.debtorData.lineEdit_postalCode.setEnabled(False)
         
-            print([f"{value}, {type(value)}" for value in debtor_data.values()])
             # actualiza el modelo con los valores nuevos
             self.debtor_values.setPhoneNumber(debtor_data[DebtsFields.PHONE_NUMB.name])
             self.debtor_values.setDirection(debtor_data[DebtsFields.DIRECTION.name])
@@ -3206,6 +3227,7 @@ class DebtorDataDialog(QDialog):
         
         else:
             self.debtorData.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+        
         return None
     
     
@@ -3223,7 +3245,6 @@ class DebtorDataDialog(QDialog):
         '''
         count_query:int # consulta para ver si existe el Deudor
         debtor_id:int # IDdeudor para emitir a MainWindow
-        _postal_code:int # var. aux., tiene el código postal del Deudor
 
         with DatabaseRepository() as db_repo:
             # verifica si el deudor existe en Deudores
@@ -3239,8 +3260,6 @@ class DebtorDataDialog(QDialog):
             # si no existe ese deudor, lo agrega...
             if not count_query:
                 # INSERT a Deudores
-                _postal_code:int = self.debtor_values.getPostalCode()
-                
                 db_repo.insertRegister(
                     ins_sql= '''INSERT INTO Deudores(
                                     nombre,
@@ -3253,7 +3272,7 @@ class DebtorDataDialog(QDialog):
                                 self.debtor_values.getSurname(),
                                 self.debtor_values.getPhoneNumber(),
                                 self.debtor_values.getDirection(),
-                                _postal_code if _postal_code else None,)
+                                self.debtor_values.getPostalCode())
                 )
                 
                 logging.debug(LoggingMessage.DEBUG_DB_SINGLE_INSERT_SUCCESS)
