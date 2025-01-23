@@ -243,5 +243,12 @@ class Regex(StrEnum):
     
     SALES_DETAILS_PRICE_TYPE = "(\([\s]*P[\s]*\.[\s]*PÚBLICO[\s]*\)|\([\s]*P[\s]*\.[\s]*COMERCIAL[\s]*\))$"
     SALES_DETAILS_FULL = "[0-9]{1,8}(\.|,)?[0-9]{0,2}\sde .{1,}\s(\([\s]*P[\s]*\.[\s]*PÚBLICO[\s]*\)|\([\s]*P[\s]*\.[\s]*COMERCIAL[\s]*\))$"
+    SALES_DETAILS_EDITION = "[^;\"']{0,256}"
     SALES_QUANTITY = "[0-9]{1,8}(\.|,)?[0-9]{0,2}"
-    # TODO: seguir poniendo acá las expresiones de los validadores
+    SALES_TOTAL_COST = "[0-9]{1,8}(\.|,)?[0-9]{0,2}"
+    SALES_PAID = "[\d]{0,8}(\.|,)?[\d]{0,2}"
+    
+    DEBTS_NAME = "[^;\"']{1,40}"
+    DEBTS_SURNAME = "[^;\"']{1,40}"
+    DEBTS_PHONE_NUMB = "\+?[0-9 -]{0,20}"
+    DEBTS_DIRECTION = "[^;\"']{0,256}"
