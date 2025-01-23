@@ -2412,29 +2412,23 @@ class ListItemWidget(QWidget):
 # DEUDORES (VENTA FINALIZADA) ==================================================================================
 
 
-# valores de los campos de deudores (formulario de ventas cuando hay deuda, etc.)
-class DebtorDataValues(QObject):
+class DebtorFullName(QObject):
     '''
-    Clase que contiene los valores de los campos de DebtorDataDialog. El principal 
-    uso de la clase es para "simular" un MODELO DE DATOS, ya que no usa exactamente 
-    la misma metodología para guardar los datos, y al mismo tiempo maneja mediante 
-    señales los cambios en los datos más relevantes.
+    Clase que contiene el nombre y apellido en los campos de Deudas.
+    Mediante señales maneja los cambios que se realizan.
     '''
     nameChanged:Signal = Signal(str)
     surnameChanged:Signal = Signal(str)
-    phoneChanged:Signal = Signal(str)
-    directionChanged:Signal = Signal(str)
-    postalCodeChanged:Signal = Signal(str)
-    fullNameChecked:Signal = Signal(object)
+    fullNameChecked:Signal = Signal(bool) # si existe la combinación de nombre 
+        # y apellido emite True (no debe existir, no puede haber duplicados), 
+        # sino emite False.
     
     
     def __init__(self) -> None:
-        super(DebtorDataValues, self).__init__()
+        super(DebtorFullName, self).__init__()
+        
         self.__debtor_name:str = None
         self.__debtor_surname:str = None
-        self.__debtor_phone_num:str = None
-        self.__debtor_direction:str = None
-        self.__debtor_postal_code:str = None
         
         # validez de los datos
         self.__FIELDS_VALIDITY:dict[str, bool | None] = {
@@ -2442,10 +2436,13 @@ class DebtorDataValues(QObject):
             DebtsFields.SURNAME.name: None
         }
         
-        #* señales
+        self.setup_signals()
+        return None
+    
+    
+    def setup_signals(self) -> None:
         self.nameChanged.connect(self.__checkFullNameCombination)
         self.surnameChanged.connect(self.__checkFullNameCombination)
-        
         return None
     
     
@@ -2484,8 +2481,146 @@ class DebtorDataValues(QObject):
         self.__debtor_surname = surname
         self.surnameChanged.emit(self.__debtor_surname)
         return None
+
+
+    def setFieldValidity(self, field:DebtsFields, validity:bool) -> None:
+        '''
+        Guarda el valor de verdad del campo especificado.
+        
+        Parámetros
+        ----------
+        field : DebtsFields
+            campo al que asignarle el nuevo valor de verdad, admite los 
+            valores 'NAME' y 'SURNAME'
+        validity : bool
+            nuevo valor de verdad del campo
+        
+        Retorna
+        -------
+        None
+        '''
+        match field:
+            case DebtsFields.NAME:
+                self.__FIELDS_VALIDITY[DebtsFields.NAME.name] = validity
+            
+            case DebtsFields.SURNAME:
+                self.__FIELDS_VALIDITY[DebtsFields.SURNAME.name] = validity
+            
+            case _:
+                pass
+        return None
+
+
+    @Slot()
+    def __checkFullNameCombination(self) -> None:
+        '''
+        Verifica si en la base de datos ya existe una combinación así de nombre 
+        y apellido y emite la señal 'fullNameChecked' con un diccionario con el 
+        número de teléfono, dirección y código postal, sino existe emite None.
+
+        Retorna
+        -------
+        None
+        '''
+        data_count:list[tuple]
+        if self.isNameValid() and self.isSurnameValid():
+            data_count = makeReadQuery(
+                    sql='''SELECT COUNT(*) 
+                           FROM Deudores 
+                           WHERE nombre = ? AND 
+                                 apellido = ?;''',
+                    params=(self.getName(), self.getSurname(),)
+                )
+            
+            # si existe esa combinación de nombre y apellido...
+            if len(data_count) > 0:
+                self.fullNameChecked.emit(True)
+            
+            # si no existe esa combinación...
+            else:
+                self.fullNameChecked.emit(False)
+        return None
     
     
+    # getters
+    def getName(self) -> str | None:
+        '''
+        Devuelve el nombre del deudor.
+
+        Retorna
+        -------
+        str | None
+            el nombre del deudor si existe, sino None
+        '''
+        return self.__debtor_name
+    
+    
+    def getSurname(self) -> str | None:
+        '''
+        Devuelve el apellido del deudor.
+
+        Retorna
+        -------
+        str | None
+            el apellido del deudor si existe, sino None
+        '''
+        return self.__debtor_surname
+
+
+    def isNameValid(self) -> bool:
+        '''
+        Devuelve un valor de verdad que determina si el nombre es válido.
+
+        Retorna
+        -------
+        bool
+            será True sólo si el nombre es válido, sino False
+        '''
+        return True if self.__FIELDS_VALIDITY[DebtsFields.NAME.name] else False
+    
+    
+    def isSurnameValid(self) -> bool:
+        '''
+        Devuelve un valor de verdad que determina si el apellido es válido.
+
+        Retorna
+        -------
+        bool
+            será True sólo si el apellido es válido, sino False
+        '''
+        return True if self.__FIELDS_VALIDITY[DebtsFields.SURNAME.name] else False
+
+
+
+
+class DebtorContact(QObject):
+    '''
+    Clase que contiene el número de teléfono, dirección y código postal en los 
+    campos de Deudas.
+    Mediante señales maneja los cambios que se realizan.
+    '''
+    phoneChanged:Signal = Signal(str)
+    directionChanged:Signal = Signal(str)
+    postalCodeChanged:Signal = Signal(str)
+    
+    def __init__(self) -> None:
+        super(DebtorContact, self).__init__()
+        
+        self.__debtor_phone_num:str = None
+        self.__debtor_direction:str = None
+        self.__debtor_postal_code:str = None
+        
+        # validez de los datos
+        self.__FIELDS_VALIDITY:dict[str, bool | None] = {
+            DebtsFields.PHONE_NUMB.name: None,
+            DebtsFields.DIRECTION.name: None,
+            DebtsFields.POSTAL_CODE.name: None
+        }
+        
+        return None
+    
+    
+    # setters
     def setPhoneNumber(self, phone_numb:str = None) -> None:
         '''
         Guarda el número de teléfono. Emite la señal 'phoneChanged'.
@@ -2539,8 +2674,8 @@ class DebtorDataValues(QObject):
         self.__debtor_postal_code = postal_code
         self.postalCodeChanged.emit(str(self.__debtor_postal_code))
         return None
-
-
+    
+    
     def setFieldValidity(self, field:DebtsFields, validity:bool) -> None:
         '''
         Guarda el valor de verdad del campo especificado.
@@ -2548,7 +2683,8 @@ class DebtorDataValues(QObject):
         Parámetros
         ----------
         field : DebtsFields
-            campo al que asignarle el nuevo valor de verdad
+            campo al que asignarle el nuevo valor de verdad, admite los 
+            valores 'PHONE_NUMB', 'DIRECTION' Y 'POSTAL_CODE'
         validity : bool
             nuevo valor de verdad del campo
         
@@ -2557,12 +2693,6 @@ class DebtorDataValues(QObject):
         None
         '''
         match field:
-            case DebtsFields.NAME:
-                self.__FIELDS_VALIDITY[DebtsFields.NAME.name] = validity
-            
-            case DebtsFields.SURNAME:
-                self.__FIELDS_VALIDITY[DebtsFields.SURNAME.name] = validity
-            
             case DebtsFields.PHONE_NUMB:
                 self.__FIELDS_VALIDITY[DebtsFields.PHONE_NUMB.name] = validity
             
@@ -2571,68 +2701,13 @@ class DebtorDataValues(QObject):
             
             case DebtsFields.POSTAL_CODE:
                 self.__FIELDS_VALIDITY[DebtsFields.POSTAL_CODE.name] = validity
-        
-        return None
-
-
-    def __checkFullNameCombination(self) -> None:
-        '''
-        Verifica si en la base de datos ya existe una combinación así de nombre 
-        y apellido y emite la señal 'fullNameChecked' con un diccionario con el 
-        número de teléfono, dirección y código postal, sino existe emite None.
-
-        Retorna
-        -------
-        None
-        '''
-        if self.isNameValid() and self.isSurnameValid():
-            debtor_data = makeReadQuery(
-                    sql='''SELECT num_telefono, direccion, codigo_postal 
-                           FROM Deudores 
-                           WHERE nombre = ? AND 
-                                 apellido = ?;''',
-                    params=(self.getName(), self.getSurname(),)
-                )
             
-            # si existe esa combinación de nombre y apellido...
-            if len(debtor_data) > 0:
-                self.fullNameChecked.emit(
-                    {DebtsFields.PHONE_NUMB.name: str(debtor_data[0][0]),
-                     DebtsFields.DIRECTION.name: str(debtor_data[0][1]),
-                     DebtsFields.POSTAL_CODE.name: str(debtor_data[0][2])}
-                )
-            
-            # si no existe esa combinación...
-            else:
-                self.fullNameChecked.emit(None)
+            case _:
+                pass
         return None
 
 
     # getters
-    def getName(self) -> str | None:
-        '''
-        Devuelve el nombre del deudor.
-
-        Retorna
-        -------
-        str | None
-            el nombre del deudor si existe, sino None
-        '''
-        return self.__debtor_name
-    
-    
-    def getSurname(self) -> str | None:
-        '''
-        Devuelve el apellido del deudor.
-
-        Retorna
-        -------
-        str | None
-            el apellido del deudor si existe, sino None
-        '''
-        return self.__debtor_surname
-    
-    
     def getPhoneNumber(self) -> str:
         '''
         Devuelve el número de teléfono del deudor.
@@ -2671,7 +2746,112 @@ class DebtorDataValues(QObject):
         '''
         return int(self.__debtor_postal_code) if self.__debtor_postal_code else 0
 
+
+
+# valores de los campos de deudores (formulario de ventas cuando hay deuda)
+# class DebtorDataValues(QObject):
+class DebtorDataValues(DebtorFullName, DebtorContact):
+    '''
+    Clase que contiene los valores de los campos de DebtorDataDialog. El principal 
+    uso de la clase es para "simular" un MODELO DE DATOS, ya que no usa exactamente 
+    la misma metodología para guardar los datos, y al mismo tiempo maneja mediante 
+    señales los cambios en los datos más relevantes.
+    '''
+    fullNameChecked:Signal = Signal(object) # sobreescribe la señal original, si 
+        # la combinación de nombre y apellido existe devuelve un dict[str, str] 
+        # con tel., dirección y cód. postal del deudor, sino emite None.
     
+    
+    def __init__(self) -> None:
+        super(DebtorDataValues, self).__init__()
+        
+        # validez de los datos
+        self.__FIELDS_VALIDITY:dict[str, bool | None] = {
+            DebtsFields.NAME.name: None,
+            DebtsFields.SURNAME.name: None
+        }
+        
+        return None
+    
+    
+    # método reimplementado de DebtorFullName
+    def setup_signals(self) -> None:
+        self.nameChanged.connect(self.__checkFullNameCombination)
+        self.surnameChanged.connect(self.__checkFullNameCombination)
+        return None
+    
+    
+    # método reimplementado de DebtorFullName | DebtorContact
+    def setFieldValidity(self, field:DebtsFields, validity:bool) -> None:
+        '''
+        Guarda el valor de verdad del campo especificado.
+        
+        Parámetros
+        ----------
+        field : DebtsFields
+            campo al que asignarle el nuevo valor de verdad
+        validity : bool
+            nuevo valor de verdad del campo
+        
+        Retorna
+        -------
+        None
+        '''
+        match field:
+            case DebtsFields.NAME:
+                self.__FIELDS_VALIDITY[DebtsFields.NAME.name] = validity
+            
+            case DebtsFields.SURNAME:
+                self.__FIELDS_VALIDITY[DebtsFields.SURNAME.name] = validity
+            
+            case DebtsFields.PHONE_NUMB:
+                self.__FIELDS_VALIDITY[DebtsFields.PHONE_NUMB.name] = validity
+            
+            case DebtsFields.DIRECTION:
+                self.__FIELDS_VALIDITY[DebtsFields.DIRECTION.name] = validity
+            
+            case DebtsFields.POSTAL_CODE:
+                self.__FIELDS_VALIDITY[DebtsFields.POSTAL_CODE.name] = validity
+        
+        return None
+
+
+    # método reimplementado de DebtorFullName
+    @Slot()
+    def __checkFullNameCombination(self) -> None:
+        '''
+        Verifica si en la base de datos ya existe una combinación así de nombre 
+        y apellido y emite la señal 'fullNameChecked' con un diccionario con el 
+        número de teléfono, dirección y código postal, sino existe emite None.
+
+        Retorna
+        -------
+        None
+        '''
+        if self.isNameValid() and self.isSurnameValid():
+            debtor_data = makeReadQuery(
+                    sql='''SELECT num_telefono, direccion, codigo_postal 
+                           FROM Deudores 
+                           WHERE nombre = ? AND 
+                                 apellido = ?;''',
+                    params=(self.getName(), self.getSurname(),)
+                )
+            
+            # si existe esa combinación de nombre y apellido...
+            if len(debtor_data) > 0:
+                self.fullNameChecked.emit(
+                    {DebtsFields.PHONE_NUMB.name: str(debtor_data[0][0]),
+                     DebtsFields.DIRECTION.name: str(debtor_data[0][1]),
+                     DebtsFields.POSTAL_CODE.name: str(debtor_data[0][2])}
+                )
+            
+            # si no existe esa combinación...
+            else:
+                self.fullNameChecked.emit(None)
+        return None
+
+
+    # método reimplementado de DebtorFullName
     def isNameValid(self) -> bool:
         '''
         Devuelve un valor de verdad que determina si el nombre es válido.
@@ -2684,6 +2864,7 @@ class DebtorDataValues(QObject):
         return True if self.__FIELDS_VALIDITY[DebtsFields.NAME.name] else False
     
     
+    # método reimplementado de DebtorFullName
     def isSurnameValid(self) -> bool:
         '''
         Devuelve un valor de verdad que determina si el apellido es válido.
@@ -2694,7 +2875,7 @@ class DebtorDataValues(QObject):
             será True sólo si el apellido es válido, sino False
         '''
         return True if self.__FIELDS_VALIDITY[DebtsFields.SURNAME.name] else False
-    
+        
     
     def isAllValid(self) -> bool:
         '''
@@ -2712,11 +2893,11 @@ class DebtorDataValues(QObject):
 
     # dunder methods
     def __repr__(self) -> str:
-        return f'''nombre: {self.__debtor_name} (NAME_VALID={self.isNameValid()})\
-            \napellido: {self.__debtor_surname} (SURNAME_VALID={self.isSurnameValid()})\
-            \n\tnúm. tel.: {self.__debtor_phone_num}\
-            \n\tdirección: {self.__debtor_direction}\
-            \n\tcódigo postal: {self.__debtor_postal_code}\
+        return f'''nombre: {self.getName()} (NAME_VALID={self.isNameValid()})\
+            \napellido: {self.getSurname()} (SURNAME_VALID={self.isSurnameValid()})\
+            \n\tnúm. tel.: {self.getPhoneNumber()}\
+            \n\tdirección: {self.getDirection()}\
+            \n\tcódigo postal: {self.getPostalCode()}\
             \n\t\tALL_VALID= {self.isAllValid()}'''
 
 
