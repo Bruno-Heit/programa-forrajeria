@@ -53,6 +53,7 @@ class TableFontColor(Enum):
     '''Enum con QColors para la tipografía de QTableViews.'''
     DEF_COLOR = QColor(17, 17, 17, 255)
     CONTRAST_RED = QColor(218, 17, 17, 255)
+    CONTRAST_GREEN = QColor(13, 180, 13, 255)
     CONTRAST_WHITE = QColor(238, 238, 238, 255)
 
 
@@ -65,7 +66,12 @@ class TableBgColors(Enum):
     LOW_STOCK_ROW = QColor(245, 165, 165, 255)
     UNIT_PRICE_ROW = QColor(253, 214, 118, 200)
     COMERC_PRICE_ROW = QColor(251, 189, 173, 200)
+    
     SALES_LOWER_PAID = QColor(226, 180, 177, 255)
+    
+    DEBTS_NEGATIVE_BALANCE = QColor(226, 180, 177, 255)
+    DEBTS_POSITIVE_BALANCE = QColor(180, 226, 177, 255)
+    DEBTS_CERO_BALANCE = QColor(230, 230, 230, 255)
 
 
 
