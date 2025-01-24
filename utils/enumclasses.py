@@ -83,7 +83,7 @@ class ModelHeaders(Enum):
                          "Stock", "Precio normal", "Precio comercial")
     SALES_HEADERS = ("Detalle de venta", "Cantidad", "Producto", "Costo total", 
                      "Abonado", "Fecha y hora")
-    DEBTS_HEADERS = ("Nombre completo", "Contacto", "Balance")
+    DEBTS_HEADERS = ("Nombre", "Apellido", "Teléfono", "Dirección", "Código postal", "Balance")
 
 
 
@@ -192,9 +192,12 @@ class TableViewColumns(IntEnum):
     SALES_TOTAL_PAID = 4
     SALES_DATETIME = 5
     
-    DEBTS_FULL_NAME = 0
-    DEBTS_CONTACT = 1
-    DEBTS_BALANCE = 2
+    DEBTS_NAME = 0
+    DEBTS_SURNAME = 1
+    DEBTS_PHONE_NUMBER = 2
+    DEBTS_DIRECTION = 3
+    DEBTS_POSTAL_CODE = 4
+    DEBTS_BALANCE = 5
 
 
 
