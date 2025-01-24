@@ -77,7 +77,7 @@ class ModelHeaders(Enum):
                          "Stock", "Precio normal", "Precio comercial")
     SALES_HEADERS = ("Detalle de venta", "Cantidad", "Producto", "Costo total", 
                      "Abonado", "Fecha y hora")
-    DEBTS_HEADERS = ("Datos de la persona", "productos", "Saldo")
+    DEBTS_HEADERS = ("Nombre completo", "Contacto", "Balance")
 
 
 
