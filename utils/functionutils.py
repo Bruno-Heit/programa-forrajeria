@@ -16,7 +16,8 @@ from re import (Match, sub, match, findall)
 
 
 # consultas sql
-def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=False, SHOW_ALL:bool=False) -> tuple[str, str]:
+def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=False, 
+                            SHOW_ALL:bool=False) -> tuple[str, str]:
     '''
     Dependiendo de la tabla, devuelve las consultas sql en formato 'str' para 
     obtener dimensiones y registros.
@@ -76,10 +77,19 @@ def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=Fals
                 )
 
         case "DEBTS_TABLE_VIEW":
-            # TODO: declarar consultas sql para también traer los datos necesarios
-            if SHOW_ALL:
-                count_sql = "SELECT COUNT(DISTINCT IDdeudor) FROM Deudas;"
-                sql = 'SELECT Detalle_Ventas.*, Deudores.* F'
+            return (
+                str( '''SELECT COUNT(DISTINCT IDdeudor) 
+                        FROM Deudores;'''),
+                str( '''SELECT de.IDdeudor, de.nombre, de.apellido,
+                               de.num_telefono, de.direccion, de.codigo_postal, 
+                               COALESCE(SUM(d.total_adeudado), 0) AS total_balance
+                        FROM Deudores AS de
+                            LEFT JOIN Deudas AS d ON de.IDdeudor = d.IDdeudor
+                        WHERE d.eliminado = 0
+                        GROUP BY de.IDdeudor,
+                                de.nombre
+                        ORDER BY de.nombre;''')
+                )
 
 
 # side bars
