@@ -222,6 +222,7 @@ class TableModelDataColumns(IntEnum):
     DEBTS_PHONE_NUMBER = 3
     DEBTS_DIRECTION = 4
     DEBTS_POSTAL_CODE = 5
+    DEBTS_TOTAL_BALANCE = 6
 
 
 
