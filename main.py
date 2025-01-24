@@ -9,18 +9,18 @@ from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot)
 from PySide6.QtGui import (QIcon)
 
 from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemValues, 
-                           DebtorDataDialog, DebtsTablePersonData, WidgetStyle, ListItemFields)
+                           DebtorDataDialog, WidgetStyle, ListItemFields)
 from ui.ui_mainwindow import (Ui_MainWindow)
 from utils.functionutils import *
-from utils.model_classes import (InventoryTableModel, SalesTableModel)
-from utils.delegates import (InventoryDelegate, SalesDelegate)
+from utils.model_classes import (InventoryTableModel, SalesTableModel, DebtsTableModel)
+from utils.delegates import (InventoryDelegate, SalesDelegate, DebtsDelegate)
 from utils.workerclasses import (WorkerSelect, WorkerUpdate, WorkerDelete)
 from utils.dboperations import (DatabaseRepository)
 from utils.customvalidators import (SalePaidValidator)
 from utils.enumclasses import (LoggingMessage, DBQueries, ModelHeaders, TableViewId, 
                                LabelFeedbackStyle, InventoryPriceType, TypeSideBar, 
                                TableViewColumns)
-from utils.proxy_models import (InventoryProxyModel, SalesProxyModel)
+from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxyModel)
 
 from resources import (rc_icons)
 
@@ -98,8 +98,6 @@ class MainWindow(QMainWindow):
         #? proxy model-modelo de datos: los DELETE e INSERT pasan por el proxy 
         #? model, los UPDATE y READ se hacen directamente al modelo.
         
-        # TODO: usar los filtros de columnas, hacer que cada uno modifique la columna que referencia para poder filtrar por columnas específicas
-        
         #* modelo de datos y proxy model de Inventario
         self.inventory_data_model:InventoryTableModel = InventoryTableModel()
         
@@ -120,8 +118,15 @@ class MainWindow(QMainWindow):
         self.ui.tv_sales_data.setSortingEnabled(True)
         self.ui.tv_sales_data.setModel(self.sales_proxy_model)
         
-        # TODO: implementar modelo de datos y proxy model de Deudas acá
+        #* modelo de datos de Deudas
+        self.debts_data_model:DebtsTableModel = DebtsTableModel()
         
+        self.debts_proxy_model:DebtsProxyModel = DebtsProxyModel()
+        self.debts_proxy_model.setSourceModel(self.debts_data_model)
+        
+        self.debts_proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        # self.ui.tv_debts_data.setSortingEnabled(True)
+        self.ui.tv_debts_data.setModel(self.debts_proxy_model)
         return None
 
 
@@ -142,6 +147,10 @@ class MainWindow(QMainWindow):
         #* delegado de ventas
         self.sales_delegate = SalesDelegate(self.ui.dateTimeEdit_sale.displayFormat())
         self.ui.tv_sales_data.setItemDelegate(self.sales_delegate)
+        
+        #* delegado de deudas
+        self.debts_delegate = DebtsDelegate()
+        self.ui.tv_debts_data.setItemDelegate(self.debts_delegate)
         return None
     
 
@@ -175,8 +184,8 @@ class MainWindow(QMainWindow):
                                      # float, para no tener que buscarlo con regex
 
         #¡ variables de deudas
+        self._debts_model_data_acc:ndarray[Any] = None #? acumulador temp. de datos para modelo de Deudas.
         
-        # TODO: colocar acá variables de Deudas
         return None
 
 
@@ -584,15 +593,20 @@ class MainWindow(QMainWindow):
             case "INVEN_TABLE_VIEW": # Productos
                 self._inv_model_data_acc = empty(
                     shape=model_shape,
-                    dtype=object)
+                    dtype=object
+                )
             
             case "SALES_TABLE_VIEW": # Ventas
                 self._sales_model_data_acc = empty(
                     shape=model_shape,
-                    dtype=object)
+                    dtype=object
+                )
             
             case "DEBTS_TABLE_VIEW": # Ctas. Ctes.
-                ...
+                self._debts_model_data_acc = empty(
+                    shape=model_shape,
+                    dtype=object
+                )
         return None
 
 
@@ -653,8 +667,10 @@ class MainWindow(QMainWindow):
 
 
             case "DEBTS_TABLE_VIEW":
-                # TODO: declarar consultas sql para también traer los datos necesarios
-                ...
+                count_sql, data_sql = getTableViewsSqlQueries(
+                    table_viewID=TableViewId.DEBTS_TABLE_VIEW
+                )
+                self.ui.label_feedbackDebts.hide()
         
         self.__instanciateSelectWorkerAndThread(
             table_viewID=table_viewID,
@@ -795,8 +811,13 @@ class MainWindow(QMainWindow):
                 self._sales_model_data_acc[register[0]] = register[1]
             
             case "DEBTS_TABLE_VIEW":
-                ...
-        
+                self.__updateProgressBar(
+                    table_viewID=table_viewID,
+                    max_val=None,
+                    value=register[0]
+                )
+                
+                self._debts_model_data_acc[register[0]] = register[1]
         
         return None
     
@@ -863,7 +884,8 @@ class MainWindow(QMainWindow):
                 if READ_OPERATION:
                     self.inventory_data_model.setModelData(
                         data=self._inv_model_data_acc,
-                        headers=ModelHeaders.INVENTORY_HEADERS.value)
+                        headers=ModelHeaders.INVENTORY_HEADERS.value
+                    )
             
                 # borra el acumulador temporal de datos
                 self._inv_model_data_acc = None
@@ -876,7 +898,8 @@ class MainWindow(QMainWindow):
                 if READ_OPERATION:
                     self.sales_data_model.setModelData(
                         data=self._sales_model_data_acc,
-                        headers=ModelHeaders.SALES_HEADERS.value)
+                        headers=ModelHeaders.SALES_HEADERS.value
+                    )
                 
                 # borra el acumulador temp. de datos
                 self._sales_model_data_acc = None
@@ -884,7 +907,14 @@ class MainWindow(QMainWindow):
             case "DEBTS_TABLE_VIEW":
                 self.ui.debts_progressbar.setStyleSheet("")
                 self.ui.debts_progressbar.hide()
-                ...
+                
+                if READ_OPERATION:
+                    self.debts_data_model.setModelData(
+                        data=self._debts_model_data_acc,
+                        headers=ModelHeaders.DEBTS_HEADERS.value
+                    )
+                
+                self._debts_model_data_acc = None
             
         logging.debug(LoggingMessage.WORKER_SUCCESS)
         return None
@@ -2367,10 +2397,6 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
-        # TODO: probar si se hacen las consultas a bd cuando hay: 
-        # todo: 1.deuda con deudor existente
-        # todo: 2.deuda con deudor nuevo
-        # todo: 3.sin deuda
         total_paid:float
         
         # obtengo el total pagado
@@ -2625,20 +2651,7 @@ class MainWindow(QMainWindow):
     
     
     #¡### DEUDAS ######################################################
-    def __fillDebtsTable(self) -> None:
-        '''
-        Es llamada desde 'fillTableView'.
-        
-        Recorre cada item y, dependiendo de la columna en la que esté, crea instancias de las siguientes clases:
-        - columna 0 (nombre completo): instancia de 'DebtsTablePersonData'.
-        - columna 1 (productos): ...
-        Si la columna es la 2 (total adeudado) coloca el total que se adeuda.
-        
-        Retorna None.
-        '''
-        for row in range(self.ui.tv_debts_data.rowCount()):
-            widget = DebtsTablePersonData(tableWidget=self.ui.tv_debts_data, full_name="nombre completo")
-            self.ui.tv_debts_data.setCellWidget(row, 0, widget)
+
 
 
 
