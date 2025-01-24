@@ -204,7 +204,7 @@ class TableViewColumns(IntEnum):
 
 
 
-class TableModelDataColumns(IntEnum):
+class ModelDataCols(IntEnum):
     '''Clase de tipo 'IntEnum' con las columnas que maneja cada modelo de datos 
     internamente en su respectivo atributo '_data', ya que los datos internos del 
     MODELO DE DATOS son diferentes a los datos que muestra la VISTA.'''
