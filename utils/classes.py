@@ -2911,7 +2911,8 @@ class DebtorDataValues(DebtorFullName, DebtorContact):
 class DebtorDataDialog(QDialog):
     '''
     QDialog con datos de deudores. Se usa en 'MainWindow' cuando se presiona 
-    'MainWindow.btn_end_sale' y el total abonado es menor al costo total.
+    'MainWindow.btn_end_sale' y el total abonado es menor al costo total, y
+    también en Deudas para agregar una nueva deuda.
     
     Emite la señal 'debtorChosen' con el IDdeudor si se llenaron los datos necesarios 
     del deudor, sino emite -1.
