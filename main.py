@@ -24,8 +24,6 @@ from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxy
 
 from resources import (rc_icons)
 
-# TODO principal: CORREGIR CONSULTAS QUE LLENAN BASES DE DATOS, USAR SENTENCIA 'COALESCE' PARA TRAER 
-# TODO principal: VALORES QUE PUEDAN SER NULOS, PARA EVITAR PROBLEMAS Y QUE NO SE VEA FEO EN LA APLICACIÓN.
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -1729,7 +1727,7 @@ class MainWindow(QMainWindow):
                     self.sales_data_model.updateMeasurementUnit(
                         quantity_index=quantity_index,
                         new_value=self._db_repo.selectRegisters(
-                            data_sql='''SELECT unidad_medida 
+                            data_sql='''SELECT COALESCE(unidad_medida, '') 
                                         FROM Productos 
                                         WHERE nombre = ?;''',
                             data_params=(self.sales_data_model._data[quantity_index.row(), 4],)
