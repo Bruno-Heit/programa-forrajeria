@@ -97,22 +97,18 @@ def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=Fals
 
         case "DEBTS_TABLE_VIEW":
             return (
-                str( '''SELECT COUNT(DISTINCT de.IDdeudor) 
-                        FROM Deudores AS de, Deudas AS d
-                        WHERE de.IDdeudor = d.IDdeudor AND 
-                              d.eliminado = 0;'''),
+                str( '''SELECT COUNT(*) 
+                        FROM Deudores;'''),
                 str( '''SELECT de.IDdeudor,
                                de.nombre,
                                de.apellido,
                                COALESCE(de.num_telefono, ''),
                                COALESCE(de.direccion, ''),
                                COALESCE(de.codigo_postal, ''),
-                               COALESCE(SUM(d.total_adeudado), 0)
+                               COALESCE(SUM(CASE WHEN d.eliminado = 0 THEN d.total_adeudado ELSE 0 END), 0)
                         FROM Deudores AS de
-                            LEFT JOIN Deudas AS d ON de.IDdeudor = d.IDdeudor
-                        WHERE d.eliminado = 0
-                        GROUP BY de.IDdeudor,
-                                de.nombre
+                        LEFT JOIN Deudas AS d ON de.IDdeudor = d.IDdeudor
+                        GROUP BY de.IDdeudor, de.nombre
                         ORDER BY de.nombre;''')
                 )
 
