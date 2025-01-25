@@ -24,6 +24,8 @@ from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxy
 
 from resources import (rc_icons)
 
+# TODO principal: CORREGIR CONSULTAS QUE LLENAN BASES DE DATOS, USAR SENTENCIA 'COALESCE' PARA TRAER 
+# TODO principal: VALORES QUE PUEDAN SER NULOS, PARA EVITAR PROBLEMAS Y QUE NO SE VEA FEO EN LA APLICACIÓN.
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -125,7 +127,7 @@ class MainWindow(QMainWindow):
         self.debts_proxy_model.setSourceModel(self.debts_data_model)
         
         self.debts_proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
-        # self.ui.tv_debts_data.setSortingEnabled(True)
+        self.ui.tv_debts_data.setSortingEnabled(True)
         self.ui.tv_debts_data.setModel(self.debts_proxy_model)
         return None
 
@@ -334,6 +336,20 @@ class MainWindow(QMainWindow):
         self.ui.tabWidget.currentChanged.connect(lambda curr_index: self.fillTableView(
             table_viewID=TableViewId.DEBTS_TABLE_VIEW, SHOW_ALL=True) if curr_index == 2 else None)
         
+        
+        #* search bar
+        self.ui.debts_searchBar.returnPressed.connect(
+            lambda: self.filterTableView(
+                text=self.ui.debts_searchBar.text(),
+                tableViewID=TableViewId.DEBTS_TABLE_VIEW
+            )
+        )
+        self.ui.cb_debts_colsFilter.currentIndexChanged.connect(
+            lambda index: self.changeFilterColumn(
+                column=index,
+                tableViewID=TableViewId.DEBTS_TABLE_VIEW
+            )
+        )
         return None
     
     
@@ -446,7 +462,7 @@ class MainWindow(QMainWindow):
                 self.sales_proxy_model.setFilterRegularExpression(text)
             
             case TableViewId.DEBTS_TABLE_VIEW:
-                ...
+                self.debts_proxy_model.setFilterRegularExpression(text)
         
         return None
     
@@ -479,7 +495,7 @@ class MainWindow(QMainWindow):
                 self.sales_proxy_model.setFilterColumn(column=_mapped_column)
             
             case TableViewId.DEBTS_TABLE_VIEW:
-                ... # TODO: colocar acá la actualización de la columna para buscar en Deudas
+                self.debts_proxy_model.setFilterColumn(column=_mapped_column)
             
         return None
 

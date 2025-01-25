@@ -1319,6 +1319,13 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4.addWidget(self.debts_searchBar)
 
         self.cb_debts_colsFilter = QComboBox(self.debts_header)
+        self.cb_debts_colsFilter.addItem("")
+        self.cb_debts_colsFilter.addItem("")
+        self.cb_debts_colsFilter.addItem("")
+        self.cb_debts_colsFilter.addItem("")
+        self.cb_debts_colsFilter.addItem("")
+        self.cb_debts_colsFilter.addItem("")
+        self.cb_debts_colsFilter.addItem("")
         self.cb_debts_colsFilter.setObjectName(u"cb_debts_colsFilter")
         self.cb_debts_colsFilter.setMinimumSize(QSize(60, 26))
         self.cb_debts_colsFilter.setMaximumSize(QSize(16777215, 26))
@@ -1528,6 +1535,14 @@ class Ui_MainWindow(object):
         self.btn_delete_product_sales.setText(QCoreApplication.translate("MainWindow", u"Eliminar venta", None))
         self.tab2_toolBox.setItemText(self.tab2_toolBox.indexOf(self.box2_sales_table), QCoreApplication.translate("MainWindow", u"Tabla de ventas", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab2_sales), QCoreApplication.translate("MainWindow", u"VENTAS", None))
+        self.cb_debts_colsFilter.setItemText(0, QCoreApplication.translate("MainWindow", u"Todas", None))
+        self.cb_debts_colsFilter.setItemText(1, QCoreApplication.translate("MainWindow", u"Nombre", None))
+        self.cb_debts_colsFilter.setItemText(2, QCoreApplication.translate("MainWindow", u"Apellido", None))
+        self.cb_debts_colsFilter.setItemText(3, QCoreApplication.translate("MainWindow", u"N\u00famero de tel\u00e9fono", None))
+        self.cb_debts_colsFilter.setItemText(4, QCoreApplication.translate("MainWindow", u"Direcci\u00f3n", None))
+        self.cb_debts_colsFilter.setItemText(5, QCoreApplication.translate("MainWindow", u"C\u00f3digo postal", None))
+        self.cb_debts_colsFilter.setItemText(6, QCoreApplication.translate("MainWindow", u"Balance", None))
+
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab3_debts), QCoreApplication.translate("MainWindow", u"CUENTAS CORRIENTES", None))
     # retranslateUi
 

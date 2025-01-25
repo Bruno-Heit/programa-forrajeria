@@ -7,8 +7,8 @@ pasadas correctamente entre ellos sin errores.
 
 from PySide6.QtCore import (QSortFilterProxyModel, Qt, QModelIndex, Signal, QDateTime)
 
-from utils.model_classes import (InventoryTableModel, SalesTableModel)
-from utils.enumclasses import (TableModelDataColumns, TableViewColumns)
+from utils.model_classes import (InventoryTableModel, SalesTableModel, DebtsTableModel)
+from utils.enumclasses import (ModelDataCols, TableViewColumns)
 from typing import (Any, Sequence)
 
 
@@ -94,20 +94,20 @@ class InventoryProxyModel(QSortFilterProxyModel):
         # antes de obtener datos del modelo, verifica qué columna se está ordenando
         match source_left.column():
             case TableViewColumns.INV_CATEGORY.value: # cantidad
-                _left_value = _source_model._data[source_left.row(), TableModelDataColumns.INV_CATEGORY_NAME.value]
-                _right_value = _source_model._data[source_right.row(), TableModelDataColumns.INV_CATEGORY_NAME.value]
+                _left_value = _source_model._data[source_left.row(), ModelDataCols.INV_CATEGORY_NAME.value]
+                _right_value = _source_model._data[source_right.row(), ModelDataCols.INV_CATEGORY_NAME.value]
             
             case TableViewColumns.INV_PRODUCT_NAME.value: # nombre de producto
-                _left_value = _source_model._data[source_left.row(), TableModelDataColumns.INV_NAME.value]
-                _right_value = _source_model._data[source_right.row(), TableModelDataColumns.INV_NAME.value]
+                _left_value = _source_model._data[source_left.row(), ModelDataCols.INV_NAME.value]
+                _right_value = _source_model._data[source_right.row(), ModelDataCols.INV_NAME.value]
             
             case TableViewColumns.INV_DECRIPTION.value: # descripción (¿tiene sentido ordenar por descripción?)
-                _left_value = _source_model._data[source_left.row(), TableModelDataColumns.INV_DESCRIPTION.value]
-                _right_value = _source_model._data[source_right.row(), TableModelDataColumns.INV_DESCRIPTION.value]
+                _left_value = _source_model._data[source_left.row(), ModelDataCols.INV_DESCRIPTION.value]
+                _right_value = _source_model._data[source_right.row(), ModelDataCols.INV_DESCRIPTION.value]
             
             case TableViewColumns.INV_STOCK.value: # stock
-                _left_value = _source_model._data[source_left.row(), TableModelDataColumns.INV_STOCK.value]
-                _right_value = _source_model._data[source_right.row(), TableModelDataColumns.INV_STOCK.value]
+                _left_value = _source_model._data[source_left.row(), ModelDataCols.INV_STOCK.value]
+                _right_value = _source_model._data[source_right.row(), ModelDataCols.INV_STOCK.value]
                 
                 # hace la comparación como float
                 try:
@@ -118,8 +118,8 @@ class InventoryProxyModel(QSortFilterProxyModel):
                     pass
             
             case TableViewColumns.INV_NORMAL_PRICE.value: # precio normal
-                _left_value = _source_model._data[source_left.row(), TableModelDataColumns.INV_NORMAL_PRICE.value]
-                _right_value = _source_model._data[source_right.row(), TableModelDataColumns.INV_NORMAL_PRICE.value]
+                _left_value = _source_model._data[source_left.row(), ModelDataCols.INV_NORMAL_PRICE.value]
+                _right_value = _source_model._data[source_right.row(), ModelDataCols.INV_NORMAL_PRICE.value]
                 
                 try:
                     return float(_left_value) < float(_right_value)
@@ -128,8 +128,8 @@ class InventoryProxyModel(QSortFilterProxyModel):
                     pass
             
             case TableViewColumns.INV_COMERCIAL_PRICE.value: # precio comercial
-                _left_value = _source_model._data[source_left.row(), TableModelDataColumns.INV_COMERCIAL_PRICE.value]
-                _right_value = _source_model._data[source_right.row(), TableModelDataColumns.INV_COMERCIAL_PRICE.value]
+                _left_value = _source_model._data[source_left.row(), ModelDataCols.INV_COMERCIAL_PRICE.value]
+                _right_value = _source_model._data[source_right.row(), ModelDataCols.INV_COMERCIAL_PRICE.value]
                 
                 # antes de comparar, verifica si hay valores nulos/ceros, si hay, los considera 
                 # como los valores más pequeños
@@ -262,12 +262,12 @@ class SalesProxyModel(QSortFilterProxyModel):
         # antes de obtener datos del modelo, verifica qué columna se está ordenando
         match source_left.column():
             case TableViewColumns.SALES_DETAIL.value: # detalle de venta
-                _left_value = _source_model._data[source_left.row(), TableModelDataColumns.SALES_DETAIL.value]
-                _right_value = _source_model._data[source_right.row(), TableModelDataColumns.SALES_DETAIL.value]
+                _left_value = _source_model._data[source_left.row(), ModelDataCols.SALES_DETAIL.value]
+                _right_value = _source_model._data[source_right.row(), ModelDataCols.SALES_DETAIL.value]
             
             case TableViewColumns.SALES_QUANTITY.value: # cantidad
-                _left_value = _source_model._data[source_left.row(), TableModelDataColumns.SALES_QUANTITY.value]
-                _right_value = _source_model._data[source_right.row(), TableModelDataColumns.SALES_QUANTITY.value]
+                _left_value = _source_model._data[source_left.row(), ModelDataCols.SALES_QUANTITY.value]
+                _right_value = _source_model._data[source_right.row(), ModelDataCols.SALES_QUANTITY.value]
                 
                 try:
                     return float(_left_value) < float(_right_value)
@@ -276,12 +276,12 @@ class SalesProxyModel(QSortFilterProxyModel):
                     pass
                 
             case TableViewColumns.SALES_PRODUCT_NAME.value: # producto
-                _left_value = _source_model._data[source_left.row(), TableModelDataColumns.SALES_PRODUCT_NAME.value]
-                _right_value = _source_model._data[source_right.row(), TableModelDataColumns.SALES_PRODUCT_NAME.value]
+                _left_value = _source_model._data[source_left.row(), ModelDataCols.SALES_PRODUCT_NAME.value]
+                _right_value = _source_model._data[source_right.row(), ModelDataCols.SALES_PRODUCT_NAME.value]
             
             case TableViewColumns.SALES_TOTAL_COST.value: # costo total
-                _left_value = _source_model._data[source_left.row(), TableModelDataColumns.SALES_TOTAL_COST.value]
-                _right_value = _source_model._data[source_right.row(), TableModelDataColumns.SALES_TOTAL_COST.value]
+                _left_value = _source_model._data[source_left.row(), ModelDataCols.SALES_TOTAL_COST.value]
+                _right_value = _source_model._data[source_right.row(), ModelDataCols.SALES_TOTAL_COST.value]
                 
                 try:
                     return float(_left_value) < float(_right_value)
@@ -290,8 +290,8 @@ class SalesProxyModel(QSortFilterProxyModel):
                     pass
             
             case TableViewColumns.SALES_TOTAL_PAID.value: # abonado
-                _left_value = _source_model._data[source_left.row(), TableModelDataColumns.SALES_TOTAL_PAID.value]
-                _right_value = _source_model._data[source_right.row(), TableModelDataColumns.SALES_TOTAL_PAID.value]
+                _left_value = _source_model._data[source_left.row(), ModelDataCols.SALES_TOTAL_PAID.value]
+                _right_value = _source_model._data[source_right.row(), ModelDataCols.SALES_TOTAL_PAID.value]
                 
                 try:
                     return float(_left_value) < float(_right_value)
@@ -300,8 +300,8 @@ class SalesProxyModel(QSortFilterProxyModel):
                     pass
             
             case TableViewColumns.SALES_DATETIME.value: # fecha y hora
-                _left_value = str(_source_model._data[source_left.row(), TableModelDataColumns.SALES_DATETIME.value])
-                _right_value = str(_source_model._data[source_right.row(), TableModelDataColumns.SALES_DATETIME.value])
+                _left_value = str(_source_model._data[source_left.row(), ModelDataCols.SALES_DATETIME.value])
+                _right_value = str(_source_model._data[source_right.row(), ModelDataCols.SALES_DATETIME.value])
                 
                 _left_value = QDateTime.fromString(_left_value, "d/M/yyyy HH:mm:ss")
                 _right_value = QDateTime.fromString(_right_value, "d/M/yyyy HH:mm:ss")
@@ -360,6 +360,147 @@ class SalesProxyModel(QSortFilterProxyModel):
                 source_parent).data(Qt.ItemDataRole.DisplayRole)
         
         return regex.match(index_data).hasMatch() if index_data else False
+
+
+
+
+
+class DebtsProxyModel(QSortFilterProxyModel):
+    '''
+    PROXY MODEL editable de Deudas.
+    '''
+    baseModelRowsSelected:Signal = Signal(object) # emite una tupla[int] con las filas seleccionadas 
+                                        # mapeadas del MODELO BASE a MainWindow para 
+                                        # actualizar la base de datos.
+    
+    def __init__(self, parent=None):
+        super(DebtsProxyModel, self).__init__()
+        self._filter_column:int = -1 # columna qué filtrar por defecto
+    
+    # inserción de filas
+    def insertRows(self, row:int, count:int, data_to_insert:dict[str, Any], 
+                   parent:QModelIndex=QModelIndex()) -> bool:
+        source_model:DebtsTableModel = self.sourceModel()
+        
+        source_parent = self.mapToSource(parent)
+        
+        # notifica a la VISTA que se insertarán filas
+        if not source_model.insertRows(row, count, data_to_insert, source_parent):
+            return False
+        
+        # emite señales para confirmar cambios
+        self.beginInsertRows(parent, row, row + count - 1)
+        self.endInsertRows()
+        return True
+    
+    
+    # eliminación de filas
+    def removeSelectedRows(self, selected_rows:tuple[int]) -> None:
+        source_model:SalesTableModel = self.sourceModel()
+        
+        selected_source_rows:tuple[int] = tuple(
+            self.mapToSource(self.index(proxy_row, 0)).row() for proxy_row in selected_rows
+        )
+        
+        if selected_source_rows:
+            # emite señal a MainWindow con las filas seleccionadas en el MODELO BASE
+            self.baseModelRowsSelected.emit(selected_source_rows)
+            
+            source_model.removeSelectedModelRows(selected_rows=selected_source_rows)
+        return None
+    
+    
+    # ordenamiento
+    def lessThan(self, source_left:QModelIndex, source_right:QModelIndex) -> bool:
+        _source_model:DebtsTableModel = self.sourceModel()
+        _left_value:int | float | str # intenta comparar primero los valores como sus tipos de 
+        _right_value:int | float | str # datos correspondientes, sino puede lo hace como str.
+        
+        # antes de obtener datos del modelo, verifica qué columna se está ordenando
+        match source_left.column():
+            case TableViewColumns.DEBTS_POSTAL_CODE.value: # código postal
+                _left_value = _source_model._data[source_left.row(), ModelDataCols.DEBTS_POSTAL_CODE.value]
+                _right_value = _source_model._data[source_right.row(), ModelDataCols.DEBTS_POSTAL_CODE.value]
+                try:
+                    return int(_left_value) < int(_right_value)
+                except (ValueError, IndexError):
+                    pass
+            
+            case TableViewColumns.DEBTS_BALANCE.value: # balance total
+                _left_value = _source_model.data(source_left, Qt.ItemDataRole.DisplayRole)
+                _right_value = _source_model.data(source_right, Qt.ItemDataRole.DisplayRole)
+                
+                _left_value = _left_value.lstrip("$ ")
+                _right_value = _right_value.lstrip("$ ")
+                try:
+                    return float(_left_value) < float(_right_value)
+                except (ValueError, IndexError):
+                    pass
+            
+            case _: # nombre | apellido | número de teléfono | dirección
+                _left_value = _source_model.data(source_left, Qt.ItemDataRole.DisplayRole)
+                _right_value = _source_model.data(source_right, Qt.ItemDataRole.DisplayRole)
+            
+        return str(_left_value) < str(_right_value)
+
+
+    # filtrado avanzado
+    def setFilterColumn(self, column:int) -> None:
+        '''
+        Al alternar el ordenamiento entre columnas, éste método se encarga de 
+        establecer la nueva columna que se debe ordenar en el PROXY MODEL.
+
+        Parámetros
+        ----------
+        column : int
+            columna a ordenar
+
+        Retorna
+        -------
+        None
+        '''
+        self._filter_column = column
+        self.invalidateFilter()
+        return None
+    
+    
+    def filterAcceptsRow(self, source_row:int, source_parent:QModelIndex) -> bool:
+        regex = self.filterRegularExpression()
+        
+        if not regex.pattern():
+            return True
+        
+        _source_model:DebtsTableModel = self.sourceModel()
+        index_data:Any
+        
+        # si la columna de filtrado es -1 busca en todas
+        if self._filter_column == -1:
+            for col in range(_source_model.columnCount()):
+                index_data = _source_model.index(
+                    source_row,
+                    col,
+                    source_parent).data(Qt.ItemDataRole.DisplayRole)
+                
+                if index_data and regex.match(index_data).hasMatch():
+                    return True
+            return False
+        
+        # sino, busca en la columna especificada
+        else:
+            index_data = _source_model.index(
+                source_row,
+                self._filter_column,
+                source_parent).data(Qt.ItemDataRole.DisplayRole)
+        
+        return regex.match(index_data).hasMatch() if index_data else False
+
+
+
+
+
+
+
+
 
 
 

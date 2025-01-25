@@ -2522,6 +2522,41 @@ QPushButton:hover {
                    <property name="frame">
                     <bool>false</bool>
                    </property>
+                   <item>
+                    <property name="text">
+                     <string>Todas</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Nombre</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Apellido</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Número de teléfono</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Dirección</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Código postal</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Balance</string>
+                    </property>
+                   </item>
                   </widget>
                  </item>
                 </layout>

@@ -7,12 +7,15 @@ from PySide6.QtWidgets import (QWidget, QStyledItemDelegate, QStyleOptionViewIte
 from PySide6.QtCore import (Qt, QModelIndex, QSize, QPersistentModelIndex, 
                             QAbstractItemModel, Signal, Slot, QDateTime)
 
-from utils.enumclasses import (TableViewId, Regex)
+from utils.enumclasses import (TableViewId, TableViewColumns, ModelDataCols, 
+                               DebtsFields, Regex)
 from utils.functionutils import (getProductsCategories, createCompleter, getProductNames)
 from utils.customvalidators import (ProductNameValidator, ProductStockValidator, 
                                     ProductUnitPriceValidator, ProductComercPriceValidator,
                                     SaleDetailsValidator, SaleQuantityValidator, 
-                                    SaleTotalCostValidator, SalePaidValidator)
+                                    SaleTotalCostValidator, SalePaidValidator,
+                                    DebtorNameValidator, DebtorSurnameValidator, DebtorPhoneNumberValidator, 
+                                    DebtorDirectionValidator, DebtorPostalCodeValidator)
 
 from re import (compile, IGNORECASE, search, sub)
 
@@ -350,3 +353,132 @@ class SalesDelegate(QStyledItemDelegate):
         return super().sizeHint(option, index)
 
 
+
+#¡ == DELEGADO DE DEUDAS ==========================================================================
+
+
+class DebtsDelegate(QStyledItemDelegate):
+    '''Clase DELEGADO que se encarga de personalizar/editar celdas del QTableView de ventas, 
+    además, normalmente, el método 'setModelData' se encarga de validar datos, pero en este 
+    caso no es necesario ya que cada editor (dependiendo de la columna) tiene un validador.'''
+    fieldIsValid:Signal = Signal(object) # extensión de 'validator.validationSucceeded', 
+                                   # emite hacia MainWindow un TableViewId.
+    fieldIsInvalid:Signal = Signal(object) # extensión de 'validator.validationFailed',
+                                        # emite hacia MainWindow tuple(TableViewId, 
+                                        # feedback como str).
+    
+    #* columnas: 0: nombre completo (nombre + apellido)
+    #*           1: contacto (tel. + dirección + código postal)
+    #*           2: balance (suma total + botón p/mostrar productos)
+    
+    
+    def createEditor(self, parent:QWidget, option: QStyleOptionViewItem, 
+                     index:QModelIndex | QPersistentModelIndex) -> QWidget:
+        editor:QWidget
+        validator = None
+        match index.column():
+            case TableViewColumns.DEBTS_NAME.value:
+                editor = QLineEdit(parent)
+                validator = DebtorNameValidator(editor)
+                validator.validationSucceeded.connect(self.__onValidField)
+                validator.validationFailed.connect(self.__onInvalidField)
+                editor.setValidator(validator)
+            
+            case TableViewColumns.DEBTS_SURNAME.value:
+                editor = QLineEdit(parent)
+                validator = DebtorSurnameValidator(editor)
+                validator.validationSucceeded.connect(self.__onValidField)
+                validator.validationFailed.connect(self.__onInvalidField)
+                editor.setValidator(validator)
+            
+            case TableViewColumns.DEBTS_PHONE_NUMBER.value:
+                editor = QLineEdit(parent)
+                validator = DebtorPhoneNumberValidator(editor)
+                validator.validationSucceeded.connect(self.__onValidField)
+                validator.validationFailed.connect(self.__onInvalidField)
+                editor.setValidator(validator)
+            
+            case TableViewColumns.DEBTS_DIRECTION.value:
+                editor = QLineEdit(parent)
+                validator = DebtorDirectionValidator(editor)
+                validator.validationSucceeded.connect(self.__onValidField)
+                validator.validationFailed.connect(self.__onInvalidField)
+                editor.setValidator(validator)
+            
+            case TableViewColumns.DEBTS_POSTAL_CODE.value:
+                editor = QLineEdit(parent)
+                validator = DebtorPostalCodeValidator(editor)
+                validator.validationSucceeded.connect(self.__onValidField)
+                validator.validationFailed.connect(self.__onInvalidField)
+                editor.setValidator(validator)
+            
+            case TableViewColumns.DEBTS_BALANCE.value:
+                editor = ...
+                # TODO: crear widget personalizado acá para poder editar los productos
+            
+        return editor
+    
+    
+    @Slot()
+    def __onValidField(self):
+        '''
+        Emite la señal 'fieldIsValid' hacia MainWindow. Funciona principalmente 
+        como una extensión de la señal 'validator.validationSucceeded'.
+
+        Retorna
+        -------
+        None
+        '''
+        self.fieldIsValid.emit(TableViewId.DEBTS_TABLE_VIEW)
+        return None
+    
+    
+    @Slot(str)
+    def __onInvalidField(self, feedback_text:str):
+        '''
+        Emite la señal 'fieldIsValid' hacia MainWindow. Funciona principalmente 
+        como una extensión de la señal 'validator.validationSucceeded'.
+
+        Parámetros
+        ----------
+        feedback_text: str
+            Texto con feedback para mostrar al usuario
+
+        Retorna
+        -------
+        None
+        '''
+        self.fieldIsInvalid.emit((TableViewId.DEBTS_TABLE_VIEW, feedback_text))
+        return None
+
+
+    def setEditorData(self, editor: QLineEdit,
+                      index: QModelIndex | QPersistentModelIndex) -> None:
+        editor.setText(index.model().data(index, Qt.ItemDataRole.DisplayRole))
+        return None
+
+
+    def setModelData(self, editor: QLineEdit, 
+                     model: QAbstractItemModel, 
+                     index: QModelIndex | QPersistentModelIndex) -> None:
+        
+        #* formateo de datos
+        match index.column():
+            case TableViewColumns.DEBTS_POSTAL_CODE.value:
+                value = editor.text().replace(",","").replace(".","").strip()
+            
+            case _:
+                value:str = editor.text().strip()
+        
+        model.setData(index, value, Qt.ItemDataRole.EditRole)
+        return None
+
+
+    def updateEditorGeometry(self, editor: QComboBox | QLineEdit, option: QStyleOptionViewItem, 
+                             index: QModelIndex | QPersistentModelIndex) -> None:
+        editor.setGeometry(option.rect)
+        return None
+
+
+    def sizeHint(self, option: QStyleOptionViewItem, index: QModelIndex) -> QSize:
+        return super().sizeHint(option, index)
