@@ -44,34 +44,53 @@ def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=Fals
             if SHOW_ALL:
                 return (
                     str("SELECT COUNT(*) FROM Productos WHERE eliminado = 0;"),
-                    str('''SELECT IDproducto,nombre_categoria,nombre,p.descripcion,
-                        stock,unidad_medida,precio_unit,precio_comerc 
-                        FROM Productos AS p INNER JOIN Categorias AS c 
+                    str( '''SELECT IDproducto,
+                                   nombre_categoria,
+                                   nombre,
+                                   COALESCE(p.descripcion, ''),
+                                   stock,
+                                   COALESCE(unidad_medida, ''),
+                                   precio_unit,
+                                   COALESCE(precio_comerc, 0)
+                            FROM Productos AS p INNER JOIN Categorias AS c 
                             WHERE (p.IDcategoria=c.IDcategoria AND p.eliminado = 0);'''))
             
             elif not SHOW_ALL and ACCESSED_BY_LIST:
                 # cols.: detalle venta, cantidad, producto, costo total, abonado, fecha y hora
                 return (
-                    str('''SELECT COUNT(*) 
-                        FROM Productos 
-                            WHERE IDcategoria = (SELECT IDcategoria FROM Categorias 
-                                WHERE nombre_categoria = ?) AND eliminado = 0;'''),
-                    str('''SELECT IDproducto,nombre_categoria,nombre,p.descripcion,
-                        stock,unidad_medida,precio_unit,precio_comerc 
-                        FROM Productos AS p INNER JOIN Categorias AS c 
-                            ON p.IDcategoria=c.IDcategoria 
-                                WHERE c.nombre_categoria=? AND eliminado = 0;''')
+                    str( '''SELECT COUNT(*) 
+                            FROM Productos 
+                            WHERE IDcategoria = (SELECT IDcategoria 
+                                FROM Categorias 
+                                WHERE nombre_categoria = ?) AND 
+                                eliminado = 0;'''),
+                    str( '''SELECT IDproducto,
+                                   nombre_categoria,
+                                   nombre,
+                                   COALESCE(p.descripcion, ''),
+                                   stock,
+                                   COALESCE(unidad_medida, ''),
+                                   precio_unit,
+                                   COALESCE(precio_comerc, 0)
+                            FROM Productos AS p INNER JOIN Categorias AS c ON p.IDcategoria=c.IDcategoria 
+                            WHERE c.nombre_categoria=? AND eliminado = 0;''')
                     )
                     
         case "SALES_TABLE_VIEW":
             return (
-                str('''SELECT COUNT(*) 
-                    FROM Detalle_Ventas as dv 
+                str( '''SELECT COUNT(*) 
+                        FROM Detalle_Ventas as dv 
                         LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto 
                         LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa;'''),
-                str('''SELECT dv.ID_detalle_venta, v.detalles_venta, dv.cantidad, 
-                    p.unidad_medida, p.nombre, dv.costo_total, dv.abonado, v.fecha_hora 
-                    FROM Detalle_Ventas as dv 
+                str( '''SELECT dv.ID_detalle_venta,
+                               v.detalles_venta,
+                               dv.cantidad,
+                               COALESCE(p.unidad_medida, ''),
+                               p.nombre,
+                               dv.costo_total,
+                               dv.abonado,
+                               v.fecha_hora 
+                        FROM Detalle_Ventas as dv 
                         LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto 
                         LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa;''')
                 )
@@ -82,9 +101,13 @@ def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=Fals
                         FROM Deudores AS de, Deudas AS d
                         WHERE de.IDdeudor = d.IDdeudor AND 
                               d.eliminado = 0;'''),
-                str( '''SELECT de.IDdeudor, de.nombre, de.apellido,
-                               de.num_telefono, de.direccion, de.codigo_postal, 
-                               COALESCE(SUM(d.total_adeudado), 0) AS total_balance
+                str( '''SELECT de.IDdeudor,
+                               de.nombre,
+                               de.apellido,
+                               COALESCE(de.num_telefono, ''),
+                               COALESCE(de.direccion, ''),
+                               COALESCE(de.codigo_postal, ''),
+                               COALESCE(SUM(d.total_adeudado), 0)
                         FROM Deudores AS de
                             LEFT JOIN Deudas AS d ON de.IDdeudor = d.IDdeudor
                         WHERE d.eliminado = 0
@@ -342,7 +365,13 @@ def getCurrentProductStock(product_name:str) -> tuple[float,str]:
         if not conn:
             return None
         cursor = conn.cursor()
-        query = cursor.execute("SELECT stock, unidad_medida FROM Productos WHERE nombre = ?;", (product_name,)).fetchone()
+        query = cursor.execute(
+                '''SELECT stock,
+                        COALESCE(unidad_medida, '') 
+                        FROM Productos 
+                        WHERE nombre = ?;''',
+                (product_name,)
+            ).fetchone()
         if len(query) == 2:
             stock, measurement_unit = [q for q in query]
         else:
@@ -354,165 +383,6 @@ def getCurrentProductStock(product_name:str) -> tuple[float,str]:
         except:
             pass
         return stock, measurement_unit
-
-
-#========================================================================================================================
-def removeTableCellsWidgets(table_widget:QTableWidget) -> None:
-    '''
-    Recorre 'table_widget' y borra todos los widgets creados en las celdas. 
-    
-    Retorna None.
-    '''
-    # si cell_widget es un QComboBox|QLineEdit|QDateTimeEdit lo elimina...
-    for row in range(table_widget.rowCount()):
-        for col in range(table_widget.columnCount()):
-            if isinstance(table_widget.cellWidget(row, col), (QComboBox, QLineEdit, QDateTimeEdit)):
-                table_widget.removeCellWidget(row, col)
-    return None
-
-
-def createTableColumnComboBox(table_widget:QTableWidget, curr_index:QModelIndex, curr_text:str) -> QComboBox:
-    '''
-    Crea el combobox que se encontrará dentro de la celda de la columna especificada por 'curr_index' en la tabla 
-    'table_widget'.
-    
-    PARAMS:
-    - table_widget: el QTableWidget donde se colocará el QComboBox.
-    - curr_index: índice seleccionado de la celda de 'table_widget'.
-    - curr_text: el elemento que está seleccionado inicialmente en el QComboBox.
-    
-    Retorna un QComboBox.
-    '''
-    combobox = QComboBox(table_widget)
-    combobox.setEditable(False)
-    combobox.setFrame(False)
-
-    match table_widget.objectName():
-        case "tv_inventory_data":
-            combobox.addItems(getProductsCategories())
-            combobox.setPlaceholderText("Elegir categoría")
-        
-        case "tv_sales_data":
-            combobox.addItems(getProductNames())
-            combobox.setPlaceholderText("Elegir producto")
-        
-    # coloca como índice actual el que tenga el string 'curr_text', sino hay el índice actual es -1
-    combobox.setCurrentIndex(combobox.findText(curr_text))
-    table_widget.setCellWidget(curr_index.row(), curr_index.column(), combobox)
-    return combobox
-
-
-def createTableColumnLineEdit(table_widget:QTableWidget, curr_index:QModelIndex) -> QLineEdit:
-    '''
-    Crea un QLineEdit para ser colocado en la celda de 'table_widget' seleccionada con índice 'curr_index', y 
-    dependiendo de la columna donde esté la celda le aplica un validador al QLineEdit y/o un QCompleter.
-    
-    Retorna un QLineEdit.
-    '''
-    lineedit:QLineEdit = QLineEdit(table_widget)
-
-    lineedit.setText(table_widget.item(curr_index.row(), curr_index.column()).text())
-    
-    # a continuación coloca validators y completers dependiendo de la columna...
-    match table_widget.objectName():
-        case "tv_inventory_data":
-            match curr_index.column():
-                case 1: # nombre
-                    lineedit.setCompleter(createCompleter(type=3))
-                    lineedit.setValidator(ProductNameValidator(lineedit))
-                
-                case 3: # stock
-                    lineedit.setValidator(ProductStockValidator(lineedit))
-                
-                case 4: # precio unitario
-                    lineedit.setValidator(ProductUnitPriceValidator(lineedit))
-                
-                case 5: # precio comercial
-                    lineedit.setValidator(ProductComercPriceValidator(lineedit))
-        
-        
-        case "tv_sales_data":
-            match curr_index.column():
-                case 0: # detalle de venta
-                    lineedit.setValidator(SaleDetailsValidator(lineedit))
-                
-                case 1: # cantidad
-                    lineedit.setValidator(SaleQuantityValidator(lineedit))
-                    # sólo permite editar la cantidad, no la unidad
-                    lineedit.setText(table_widget.item(curr_index.row(), curr_index.column()).text().split(" ")[0].strip())
-                
-                case 3: # costo total
-                    lineedit.setValidator(SaleTotalCostValidator(lineedit))
-                
-                case 4: # abonado
-                    # completer con costo total (misma fila, columna 3)
-                    lineedit.setCompleter( QCompleter( [table_widget.item(curr_index.row(), 3).text()] ) )
-                    lineedit.setValidator(SalePaidValidator(lineedit))
-
-    table_widget.setCellWidget(curr_index.row(), curr_index.column(), lineedit)
-    
-    return lineedit
-
-
-def createTableColumnDateTimeEdit(table_widget:QTableWidget, curr_index:QModelIndex) -> QDateTimeEdit:
-    '''
-    Crea un QDateTimeEdit en 'table_widget' y en la celda indicada por 'curr_index'. Además le asigna un estilo 
-    QSS.
-    
-    Retorna un QDateTimeEdit.
-    '''
-    datetimeedit = QDateTimeEdit(parent=table_widget)
-    curr_datetime:QDateTime = QDateTime()
-    date:QDate
-    time:QTime
-
-    datetimeedit.setMinimumDateTime(QDateTime().fromString("1/1/2022 00:00", "d/M/yyyy HH:mm"))
-    datetimeedit.setCalendarPopup(True)
-    
-    # por alguna razón, QDateTime().fromString() no me funcionó, así que obtengo la fecha y la hora separadas...
-    cell_datetime = table_widget.item(curr_index.row(), curr_index.column()).text()
-    date = QDate().fromString(cell_datetime.split(" ")[0].strip(), "d/M/yyyy")
-    time = QTime().fromString(cell_datetime.split(" ")[1].strip(), "HH:mm")
-    
-    # y las junto en el curr_datetime...
-    curr_datetime.setDate(date)
-    curr_datetime.setTime(time)
-    
-    # al final asigno la fecha y la hora al datetimeedit
-    datetimeedit.setDateTime(curr_datetime)
-    
-    # le asigno un estilo
-    datetimeedit.setStyleSheet(
-            "QDateTimeEdit {\
-                background-color: #fff;\
-            }\
-            \
-            \
-            QCalendarWidget QAbstractItemView {\
-                background-color: #fff;\
-                selection-background-color: #38a3a5;\
-            }\
-            QCalendarWidget QToolButton {\
-                background-color: #22577a;\
-                color: #fff;\
-            }\
-            QCalendarWidget QToolButton:hover,\
-            QCalendarWidget QToolButton:pressed {\
-                background-color: #38a3a5;\
-                color: #111;\
-            }\
-            \
-            \
-            QCalendarWidget QWidget#qt_calendar_prevmonth{\
-                qproperty-icon: url(':/icons/arrow-left-white.svg')\
-            }\
-            QCalendarWidget QWidget#qt_calendar_nextmonth{\
-                qproperty-icon: url(':/icons/arrow-right-white.svg')\
-            }")
-    
-    table_widget.setCellWidget(curr_index.row(), curr_index.column(), datetimeedit)
-
-    return datetimeedit
 
 
 #========================================================================================================================
@@ -567,53 +437,6 @@ def createCompleter(sql:str=None, params:tuple[Any]=None, type:int=None) -> QCom
     completer.setMaxVisibleItems(10)
 
     return completer
-
-
-#========================================================================================================================
-def getPercentageMultipFactor(new_value:float, prev_value:float) -> float:
-    '''
-    Obtiene el factor de multiplicación que representa el cambio porcentual entre 
-    un valor nuevo y un valor anterior. Por ejemplo: si el valor anterior es 100 y el 
-    valor nuevo es 200 hubo un incremento del 100%, o lo que es lo mismo, su factor de 
-    multiplicación es 2.
-    Si el valor anterior es 0 y el nuevo valor es diferente de 0, en su lugar retorna 
-    el nuevo valor, porque el cambio porcentual -matemáticamente hablando- en ese caso 
-    es tendiente a infinito.
-
-    Parámetros
-    ----------
-    new_value : float
-        El valor nuevo de la expresión
-    prev_value : float
-        El valor anterior de la expresión
-
-    Retorna
-    -------
-    float
-        - Retorna 1 cuando el valor anterior es igual al nuevo valor.
-        - Retorna 'new_value' cuando el valor anterior es 0.
-        - Retorna el factor de multiplicación por el que multiplicar al valor anterior para obtener 
-        el cambio porcentual.
-    '''
-    percentage_diff:float = 0 # cambio porcentual entre el valor anterior al valor nuevo
-    
-    try:
-        # no tiene sentido calcular el cambio porcentual si ambos valores son iguales...
-        if prev_value == new_value:
-            return 1
-        # ni tampoco cuando cambia de 0 a otro valor, porque tiende a infinito...
-        elif prev_value == 0 and new_value != 0:
-            return new_value
-        
-        percentage_diff = (float(new_value) - float(prev_value)) * 100 / float(prev_value)
-        
-    except ValueError:
-        pass
-        
-    return 1 + percentage_diff / 100
-
-
-
 
 
 
