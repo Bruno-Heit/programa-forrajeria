@@ -179,6 +179,9 @@ class DebtsFields(IntEnum):
     POSTAL_CODE = 4
 
 
+
+
+
 # nombres predeterminados de columnas de tablas
 class TableViewColumns(IntEnum):
     '''Clase de tipo 'IntEnum' con los nombres predeterminados de las columnas de las 
