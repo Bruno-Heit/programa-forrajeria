@@ -19,7 +19,7 @@ from utils.dboperations import (DatabaseRepository)
 from utils.customvalidators import (SalePaidValidator)
 from utils.enumclasses import (LoggingMessage, DBQueries, ModelHeaders, TableViewId, 
                                LabelFeedbackStyle, InventoryPriceType, TypeSideBar, 
-                               TableViewColumns)
+                               TableViewColumns, ModelDataCols)
 from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxyModel)
 
 from resources import (rc_icons)
@@ -2010,11 +2010,13 @@ class MainWindow(QMainWindow):
                 table_viewID=TableViewId.INVEN_TABLE_VIEW,
                 model_shape=(self._UPD_BATCH_SIZE, 2) # array[nuevo valor][IDproducto]
             )
+            
             # paso al modelo los nuevos valores
             for (key, value) in selected_rows.items():
-                self.ui.tv_inventory_data.model().setData(
+                self.inventory_data_model.setData(
                     index=value[0],
-                    value=value[1])
+                    value=value[1]
+                )
             
         return None
 
@@ -2044,7 +2046,10 @@ class MainWindow(QMainWindow):
         if self.ui.checkbox_unit_prices.isChecked():
             for row in selected_rows:
                 # obtengo el precio unitario de cada celda
-                col_value = float(self.ui.tv_inventory_data.model()._data[row][6])
+                col_value = float(self.inventory_data_model.data(
+                        self.inventory_data_model.index(row, TableViewColumns.INV_NORMAL_PRICE.value)
+                    ).replace(",",".")
+                )
                     
                 # asigna el valor nuevo
                 new_values[row] = round(col_value + (col_value * percentage / 100), 2)
@@ -2052,8 +2057,11 @@ class MainWindow(QMainWindow):
         # sino, si está activada la checkbox de precios comerciales...
         else:
             for row in selected_rows:
-                if self.ui.tv_inventory_data.model()._data[row][7]:
-                    col_value = float(self.ui.tv_inventory_data.model()._data[row][7])
+                col_value = self.inventory_data_model.data(
+                    self.inventory_data_model.index(row, TableViewColumns.INV_COMERCIAL_PRICE.value)
+                    ).replace(",",".")
+                if col_value:
+                    col_value = float(col_value)
                    
                     # asigna el valor nuevo
                     new_values[row] = round(col_value + (col_value * percentage / 100), 2)
