@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'listproduct.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.3
+## Created by: Qt User Interface Compiler version 6.7.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -23,8 +23,8 @@ class Ui_listProduct(object):
     def setupUi(self, listProduct):
         if not listProduct.objectName():
             listProduct.setObjectName(u"listProduct")
-        listProduct.resize(768, 110)
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        listProduct.resize(798, 110)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(listProduct.sizePolicy().hasHeightForWidth())
@@ -53,6 +53,7 @@ class Ui_listProduct(object):
 "\n"
 "\n"
 "QLineEdit {\n"
+"	background-color: rgba(241, 241, 241, 0.4);\n"
 "	border: none;\n"
 "	border-top: 1px solid;\n"
 "	border-bottom: 1px solid;\n"
@@ -79,10 +80,10 @@ class Ui_listProduct(object):
 "	border-radius: 2px;\n"
 "}\n"
 "QPushButton:hover,\n"
-"QPushButton:pressed {\n"
+"QPushBu"
+                        "tton:pressed {\n"
 "	background-color: #faa;\n"
-"	"
-                        "color: #111;\n"
+"	color: #111;\n"
 "	border: 1px inset;\n"
 "	border-color: rgb(231, 66, 66);\n"
 "}\n"
@@ -113,7 +114,7 @@ class Ui_listProduct(object):
         self.gridLayout.setContentsMargins(9, 4, 4, 4)
         self.comboBox_productName = QComboBox(listProduct)
         self.comboBox_productName.setObjectName(u"comboBox_productName")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.comboBox_productName.sizePolicy().hasHeightForWidth())
@@ -125,7 +126,7 @@ class Ui_listProduct(object):
 #endif // QT_CONFIG(tooltip)
         self.comboBox_productName.setEditable(True)
         self.comboBox_productName.setCurrentText(u"")
-        self.comboBox_productName.setSizeAdjustPolicy(QComboBox.AdjustToContents)
+        self.comboBox_productName.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToContents)
         self.comboBox_productName.setFrame(False)
 
         self.gridLayout.addWidget(self.comboBox_productName, 0, 0, 1, 1)
@@ -136,8 +137,8 @@ class Ui_listProduct(object):
         self.frame_productQuantity.setSizePolicy(sizePolicy)
         self.frame_productQuantity.setMinimumSize(QSize(0, 0))
         self.frame_productQuantity.setMaximumSize(QSize(450, 16777215))
-        self.frame_productQuantity.setFrameShape(QFrame.NoFrame)
-        self.frame_productQuantity.setFrameShadow(QFrame.Raised)
+        self.frame_productQuantity.setFrameShape(QFrame.Shape.NoFrame)
+        self.frame_productQuantity.setFrameShadow(QFrame.Shadow.Raised)
         self.frame_productQuantity_Hlayout = QHBoxLayout(self.frame_productQuantity)
         self.frame_productQuantity_Hlayout.setSpacing(4)
         self.frame_productQuantity_Hlayout.setObjectName(u"frame_productQuantity_Hlayout")
@@ -163,9 +164,9 @@ class Ui_listProduct(object):
         self.label_productMeasurementUnit.setMinimumSize(QSize(0, 0))
         self.label_productMeasurementUnit.setMaximumSize(QSize(16777215, 16777215))
         self.label_productMeasurementUnit.setText(u"")
-        self.label_productMeasurementUnit.setTextFormat(Qt.PlainText)
+        self.label_productMeasurementUnit.setTextFormat(Qt.TextFormat.PlainText)
         self.label_productMeasurementUnit.setWordWrap(False)
-        self.label_productMeasurementUnit.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_productMeasurementUnit.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.frame_productQuantity_Hlayout.addWidget(self.label_productMeasurementUnit)
 
@@ -178,8 +179,8 @@ class Ui_listProduct(object):
         self.checkBox_comercialPrice.setObjectName(u"checkBox_comercialPrice")
         sizePolicy1.setHeightForWidth(self.checkBox_comercialPrice.sizePolicy().hasHeightForWidth())
         self.checkBox_comercialPrice.setSizePolicy(sizePolicy1)
-        self.checkBox_comercialPrice.setMinimumSize(QSize(80, 25))
-        self.checkBox_comercialPrice.setMaximumSize(QSize(140, 25))
+        self.checkBox_comercialPrice.setMinimumSize(QSize(145, 25))
+        self.checkBox_comercialPrice.setMaximumSize(QSize(150, 25))
 #if QT_CONFIG(tooltip)
         self.checkBox_comercialPrice.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Aplica el costo comercial al producto.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
@@ -201,20 +202,20 @@ class Ui_listProduct(object):
 "border-top: 1px solid #111;\n"
 "border-right: 1px solid #111;")
         self.label_subtotal.setText(u"SUBTOTAL")
-        self.label_subtotal.setAlignment(Qt.AlignCenter)
-        self.label_subtotal.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.label_subtotal.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_subtotal.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
 
         self.gridLayout.addWidget(self.label_subtotal, 0, 3, 1, 1)
 
         self.btn_deleteCurrentProduct = QPushButton(listProduct)
         self.btn_deleteCurrentProduct.setObjectName(u"btn_deleteCurrentProduct")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.btn_deleteCurrentProduct.sizePolicy().hasHeightForWidth())
         self.btn_deleteCurrentProduct.setSizePolicy(sizePolicy2)
         self.btn_deleteCurrentProduct.setMinimumSize(QSize(30, 30))
-        self.btn_deleteCurrentProduct.setMaximumSize(QSize(30, 30))
+        self.btn_deleteCurrentProduct.setMaximumSize(QSize(35, 30))
 #if QT_CONFIG(tooltip)
         self.btn_deleteCurrentProduct.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Borra el producto de la venta actual (</span><span style=\" font-size:12pt; font-style:italic;\">Supr.</span><span style=\" font-size:12pt;\">)</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
@@ -230,13 +231,13 @@ class Ui_listProduct(object):
         self.label_nameFeedback.setObjectName(u"label_nameFeedback")
         sizePolicy.setHeightForWidth(self.label_nameFeedback.sizePolicy().hasHeightForWidth())
         self.label_nameFeedback.setSizePolicy(sizePolicy)
-        self.label_nameFeedback.setMinimumSize(QSize(100, 20))
+        self.label_nameFeedback.setMinimumSize(QSize(110, 20))
         self.label_nameFeedback.setMaximumSize(QSize(350, 16777215))
         self.label_nameFeedback.setText(u"")
-        self.label_nameFeedback.setTextFormat(Qt.PlainText)
-        self.label_nameFeedback.setAlignment(Qt.AlignCenter)
+        self.label_nameFeedback.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_nameFeedback.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_nameFeedback.setWordWrap(True)
-        self.label_nameFeedback.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_nameFeedback.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.gridLayout.addWidget(self.label_nameFeedback, 1, 0, 1, 1)
 
@@ -244,13 +245,13 @@ class Ui_listProduct(object):
         self.label_quantityFeedback.setObjectName(u"label_quantityFeedback")
         sizePolicy.setHeightForWidth(self.label_quantityFeedback.sizePolicy().hasHeightForWidth())
         self.label_quantityFeedback.setSizePolicy(sizePolicy)
-        self.label_quantityFeedback.setMinimumSize(QSize(100, 20))
+        self.label_quantityFeedback.setMinimumSize(QSize(110, 20))
         self.label_quantityFeedback.setMaximumSize(QSize(450, 16777215))
         self.label_quantityFeedback.setText(u"")
-        self.label_quantityFeedback.setTextFormat(Qt.PlainText)
-        self.label_quantityFeedback.setAlignment(Qt.AlignCenter)
+        self.label_quantityFeedback.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_quantityFeedback.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_quantityFeedback.setWordWrap(True)
-        self.label_quantityFeedback.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_quantityFeedback.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.gridLayout.addWidget(self.label_quantityFeedback, 1, 1, 1, 1)
 
