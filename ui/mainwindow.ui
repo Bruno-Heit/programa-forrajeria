@@ -677,7 +677,7 @@ QProgressBar::chunk {
           <enum>QTabWidget::TabShape::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>0</number>
          </property>
          <property name="elideMode">
           <enum>Qt::TextElideMode::ElideMiddle</enum>
@@ -1351,7 +1351,7 @@ margin-bottom: 5px;</string>
                           <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#000000;&quot;&gt;Cambia el &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline; color:#000000;&quot;&gt;precio normal&lt;/span&gt;&lt;span style=&quot; font-size:12pt; color:#000000;&quot;&gt; de los productos seleccionados.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                          </property>
                          <property name="text">
-                          <string notr="true">Precios unitarios</string>
+                          <string notr="true">Precios normales</string>
                          </property>
                          <property name="iconSize">
                           <size>
@@ -1536,8 +1536,8 @@ color: #111;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>756</width>
-                <height>496</height>
+                <width>722</width>
+                <height>223</height>
                </rect>
               </property>
               <attribute name="label">
