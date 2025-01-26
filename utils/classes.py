@@ -2144,7 +2144,8 @@ class ListItemWidget(QWidget):
     def __onValidProductName(self, curr_name:str) -> None:
         '''
         si el nombre del producto elegido es válido actualiza el stock en el 
-        validador de cantidad y lo muestra.
+        validador de cantidad y lo muestra y también coloca la unidad de medida
+        en el label de cantidad.
         Si ambos campos (nombre de producto y cantidad) son válidos, actualiza 
         el detalle de venta o el precio dependiendo del tipo de precio 
         seleccionado, y también actualiza 'field_values' con el nombre.
@@ -2162,6 +2163,15 @@ class ListItemWidget(QWidget):
         self.__updateAvailableStock()
         # ...y muestra el stock disponible
         self.__showAvailableStock()
+        
+        # muestra también la unidad de medida al lado del lineedit de cantidad
+        self.listItem.label_productMeasurementUnit.setText(
+            getCurrentProductStock(
+                product_name=self.listItem.comboBox_productName.itemText(
+                    self.listItem.comboBox_productName.currentIndex()
+                )
+            )[1]
+        )
         
         #? llama a validar la cantidad porque, si se modificó primero la 
         #? cantidad y es válida, y luego se elige un nombre de producto 
