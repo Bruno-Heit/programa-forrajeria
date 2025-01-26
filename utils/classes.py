@@ -13,7 +13,7 @@ from resources import (rc_icons)
 from utils.functionutils import *
 from utils.workerclasses import *
 from utils.dboperations import *
-from utils.enumclasses import (WidgetStyle, InventoryPriceType, ListItemFields, DebtsFields)
+from utils.enumclasses import (WidgetStyle, InventoryPriceType, ListItemFields, DebtsFields, ModelDataCols)
 
 from sqlite3 import (Error as sqlite3Error)
 from phonenumbers import (parse, format_number, is_valid_number, PhoneNumber, PhoneNumberFormat, NumberParseException)
@@ -1442,7 +1442,6 @@ class SaleDialog(QDialog):
                 'total_cost': values[4],
                 'total_paid': values[5],
                 'datetime': values[6],
-                'THERE_IS_DEBT': False
             }
             
             # si el largo de la tupla es de 12 es porque hay deuda
@@ -1458,7 +1457,6 @@ class SaleDialog(QDialog):
                     'debtor_phone_number': values[9],
                     'debtor_direction': values[10],
                     'debtor_postal_code': values[11],
-                    'THERE_IS_DEBT': True
                 })
                 
             self.dataFilled.emit(values_to_dict)
@@ -2673,7 +2671,7 @@ class DebtorContact(QObject):
         -------
         None
         '''
-        self.__debtor_postal_code = postal_code
+        self.__debtor_postal_code = postal_code if postal_code else ''
         self.postalCodeChanged.emit(str(self.__debtor_postal_code))
         return None
     
@@ -2916,13 +2914,23 @@ class DebtorDataDialog(QDialog):
     
     Emite la señal 'debtorChosen' con el IDdeudor si se llenaron los datos necesarios 
     del deudor, sino emite -1.
+    
+    Parámetros
+    ----------
+    return_model_data : bool, opcional
+        determina si al hacer click en el botón 'Ok' el QDialog debe emitir la 
+        señal 'dataToInsert' con los datos para actualizar el MODELO de Deudas; 
+        se usa para poder actualizar automáticamente el MODELO de Deudas
     '''
     debtorChosen = Signal(int) # emite el IDdeudor una vez elegido deudor
+    dataToInsert = Signal(object)
     
-    def __init__(self):
+    def __init__(self, return_model_data:bool=False):
         super(DebtorDataDialog, self).__init__()
         self.debtorData = Ui_debtorDataDialog()
         self.debtorData.setupUi(self)
+        
+        self.__return_model_data:bool = return_model_data
         
         # instancia de DebtorDataValues, un "pseudomodelo de datos" para 
         # guardar los datos
@@ -3472,9 +3480,23 @@ class DebtorDataDialog(QDialog):
                     params=(self.debtor_values.getName(),
                             self.debtor_values.getSurname(),)
                 )[0][0]
-
-            # emite señal avisando que SÍ se eligió un deudor, con el IDdeudor
-            self.debtorChosen.emit(debtor_id)
+            
+            # si se llamó desde Ventas, sólo emite el IDdeudor
+            if not self.__return_model_data:
+                # emite señal avisando que SÍ se eligió un deudor, con el IDdeudor
+                self.debtorChosen.emit(debtor_id)
+            
+            # si se llamó desde Deudas emite los datos para actualizar el MODELO
+            else:
+                self.dataToInsert.emit(
+                    {ModelDataCols.DEBTS_IDDEBTOR.name: debtor_id,
+                     ModelDataCols.DEBTS_NAME.name: self.debtor_values.getName(),
+                     ModelDataCols.DEBTS_SURNAME.name: self.debtor_values.getSurname(),
+                     ModelDataCols.DEBTS_PHONE_NUMBER.name: self.debtor_values.getPhoneNumber(),
+                     ModelDataCols.DEBTS_DIRECTION.name: self.debtor_values.getDirection(),
+                     ModelDataCols.DEBTS_POSTAL_CODE.name: self.debtor_values.getPostalCode(),
+                     ModelDataCols.DEBTS_TOTAL_BALANCE.name: 0.0}
+                )
         
         return None
 
