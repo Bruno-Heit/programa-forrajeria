@@ -24,6 +24,13 @@ from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxy
 
 from resources import (rc_icons)
 
+# TODO1: darle funcionalidad a los botones de Deudas
+# TODO1: falta hacer los UPDATE, DELETE e INSERT de Deudas
+
+# TODO2: luego, hay que crear un widget personalizado (texto + botón) para mostrar productos 
+# TODO2: que tiene anotados el deudor junto con sus precios
+
+# TODO3: en algún lugar se debe obtener la suma de las ventas del día y mostrarla.
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -334,7 +341,19 @@ class MainWindow(QMainWindow):
         self.ui.tabWidget.currentChanged.connect(lambda curr_index: self.fillTableView(
             table_viewID=TableViewId.DEBTS_TABLE_VIEW, SHOW_ALL=True) if curr_index == 2 else None)
         
+        #* (CREATE) añadir una venta a 'tv_sales_data'
+        self.ui.btn_add_debt.clicked.connect(
+            lambda: self.handleTableCreateRow(
+                table_viewID=TableViewId.DEBTS_TABLE_VIEW
+            )
+        )
         
+        #* (DELETE) eliminar ventas de 'tv_sales_data'
+        ...
+        #* (UPDATE) modificar celdas de 'tv_sales_data'
+        ...
+        #* delegado de deudas
+        ...
         #* search bar
         self.ui.debts_searchBar.returnPressed.connect(
             lambda: self.filterTableView(
@@ -982,10 +1001,20 @@ class MainWindow(QMainWindow):
                 saleDialog.exec()
             
             case "DEBTS_TABLE_VIEW":
-                ...
+                debtorDialog = DebtorDataDialog(return_model_data=True)
+                debtorDialog.setAttribute(Qt.WA_DeleteOnClose, True)
+                
+                debtorDialog.dataToInsert.connect(
+                    lambda data_to_insert: self.insertDataIntoModel(
+                        table_viewID=TableViewId.DEBTS_TABLE_VIEW,
+                        data_to_insert=data_to_insert
+                    )
+                )
+
+                debtorDialog.exec()
         
         return None
-
+    
 
     @Slot(object, dict)
     def insertDataIntoModel(self, table_viewID:TableViewId, data_to_insert:dict[Any]) -> None:
@@ -1014,20 +1043,18 @@ class MainWindow(QMainWindow):
             case 'SALES_TABLE_VIEW':
                 self.__updateStockOnSaleCreation(data_to_insert=data_to_insert)
                 
-                # le paso los datos al modelo, excepto el flag 'THERE_IS_DEBT', 
-                # porque el modelo no lo necesita
                 self.sales_proxy_model.insertRows(
                     row=self.sales_data_model.rowCount(),
                     count=1,
-                    data_to_insert={key: value for key, value in data_to_insert.items() if 'THERE_IS_DEBT' not in key}
+                    data_to_insert=data_to_insert
                 )
-                
-                # si hay deuda también actualiza el MODELO de deudas
-                if data_to_insert['THERE_IS_DEBT']:
-                    ...
             
             case 'DEBTS_TABLE_VIEW':
-                ...
+                self.debts_proxy_model.insertRows(
+                    row=self.debts_data_model.rowCount(),
+                    count=1,
+                    data_to_insert=data_to_insert
+                )
         
         return None
     
