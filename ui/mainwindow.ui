@@ -677,7 +677,7 @@ QProgressBar::chunk {
           <enum>QTabWidget::TabShape::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>2</number>
          </property>
          <property name="elideMode">
           <enum>Qt::TextElideMode::ElideMiddle</enum>
@@ -1972,8 +1972,8 @@ border-right: 1px solid #111;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>756</width>
-                <height>496</height>
+                <width>364</width>
+                <height>164</height>
                </rect>
               </property>
               <attribute name="label">
@@ -2701,7 +2701,7 @@ color: #111;</string>
                   <number>0</number>
                  </property>
                  <item>
-                  <widget class="QPushButton" name="btn_add_debt">
+                  <widget class="QPushButton" name="btn_add_debtor">
                    <property name="minimumSize">
                     <size>
                      <width>180</width>
@@ -2718,7 +2718,7 @@ color: #111;</string>
                     <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Agrega una deuda nueva a la tabla (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
                    <property name="text">
-                    <string notr="true">Nueva deuda</string>
+                    <string notr="true">Nueva cuenta corriente</string>
                    </property>
                    <property name="iconSize">
                     <size>
@@ -2732,7 +2732,7 @@ color: #111;</string>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="btn_delete_debt">
+                  <widget class="QPushButton" name="btn_delete_debtor">
                    <property name="minimumSize">
                     <size>
                      <width>180</width>
@@ -2758,7 +2758,7 @@ QPushButton:hover {
 </string>
                    </property>
                    <property name="text">
-                    <string notr="true">Eliminar deuda</string>
+                    <string notr="true">Eliminar cuenta corriente</string>
                    </property>
                    <property name="iconSize">
                     <size>
@@ -2848,8 +2848,8 @@ QPushButton:hover {
   <tabstop>debts_searchBar</tabstop>
   <tabstop>cb_debts_colsFilter</tabstop>
   <tabstop>tv_debts_data</tabstop>
-  <tabstop>btn_add_debt</tabstop>
-  <tabstop>btn_delete_debt</tabstop>
+  <tabstop>btn_add_debtor</tabstop>
+  <tabstop>btn_delete_debtor</tabstop>
  </tabstops>
  <resources/>
  <connections/>

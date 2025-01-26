@@ -1105,7 +1105,7 @@ class Ui_MainWindow(object):
         self.tab2_toolBox.addItem(self.box1_sales_form, u"Formulario de venta")
         self.box2_sales_table = QWidget()
         self.box2_sales_table.setObjectName(u"box2_sales_table")
-        self.box2_sales_table.setGeometry(QRect(0, 0, 756, 496))
+        self.box2_sales_table.setGeometry(QRect(0, 0, 364, 164))
         self.box2_sales_Vlayout = QVBoxLayout(self.box2_sales_table)
         self.box2_sales_Vlayout.setSpacing(4)
         self.box2_sales_Vlayout.setObjectName(u"box2_sales_Vlayout")
@@ -1409,42 +1409,42 @@ class Ui_MainWindow(object):
         self.debts_buttons_Hlayout.setSpacing(4)
         self.debts_buttons_Hlayout.setObjectName(u"debts_buttons_Hlayout")
         self.debts_buttons_Hlayout.setContentsMargins(0, 0, 0, 0)
-        self.btn_add_debt = QPushButton(self.debts_buttons)
-        self.btn_add_debt.setObjectName(u"btn_add_debt")
-        self.btn_add_debt.setMinimumSize(QSize(180, 25))
-        self.btn_add_debt.setMaximumSize(QSize(250, 25))
+        self.btn_add_debtor = QPushButton(self.debts_buttons)
+        self.btn_add_debtor.setObjectName(u"btn_add_debtor")
+        self.btn_add_debtor.setMinimumSize(QSize(180, 25))
+        self.btn_add_debtor.setMaximumSize(QSize(250, 25))
 #if QT_CONFIG(tooltip)
-        self.btn_add_debt.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Agrega una deuda nueva a la tabla (</span><span style=\" font-size:12pt; font-style:italic;\">+</span><span style=\" font-size:12pt;\">).</span></p></body></html>")
+        self.btn_add_debtor.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Agrega una deuda nueva a la tabla (</span><span style=\" font-size:12pt; font-style:italic;\">+</span><span style=\" font-size:12pt;\">).</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        self.btn_add_debt.setText(u"Nueva deuda")
-        self.btn_add_debt.setIconSize(QSize(24, 24))
+        self.btn_add_debtor.setText(u"Nueva cuenta corriente")
+        self.btn_add_debtor.setIconSize(QSize(24, 24))
 #if QT_CONFIG(shortcut)
-        self.btn_add_debt.setShortcut(u"+")
+        self.btn_add_debtor.setShortcut(u"+")
 #endif // QT_CONFIG(shortcut)
 
-        self.debts_buttons_Hlayout.addWidget(self.btn_add_debt)
+        self.debts_buttons_Hlayout.addWidget(self.btn_add_debtor)
 
-        self.btn_delete_debt = QPushButton(self.debts_buttons)
-        self.btn_delete_debt.setObjectName(u"btn_delete_debt")
-        self.btn_delete_debt.setMinimumSize(QSize(180, 25))
-        self.btn_delete_debt.setMaximumSize(QSize(250, 25))
+        self.btn_delete_debtor = QPushButton(self.debts_buttons)
+        self.btn_delete_debtor.setObjectName(u"btn_delete_debtor")
+        self.btn_delete_debtor.setMinimumSize(QSize(180, 25))
+        self.btn_delete_debtor.setMaximumSize(QSize(250, 25))
 #if QT_CONFIG(tooltip)
-        self.btn_delete_debt.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Elimina la deuda actualmente seleccionada en la tabla (</span><span style=\" font-size:12pt; font-style:italic;\">supr</span><span style=\" font-size:12pt;\">).</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:12pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer borrar una deuda.</span></p></body></html>")
+        self.btn_delete_debtor.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Elimina la deuda actualmente seleccionada en la tabla (</span><span style=\" font-size:12pt; font-style:italic;\">supr</span><span style=\" font-size:12pt;\">).</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:12pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer borrar una deuda.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        self.btn_delete_debt.setStyleSheet(u"QPushButton {\n"
+        self.btn_delete_debtor.setStyleSheet(u"QPushButton {\n"
 "	background-color: #ff4949;\n"
 "}\n"
 "QPushButton:hover {\n"
 "	background-color: #faa;\n"
 "}\n"
 "")
-        self.btn_delete_debt.setText(u"Eliminar deuda")
-        self.btn_delete_debt.setIconSize(QSize(24, 24))
+        self.btn_delete_debtor.setText(u"Eliminar cuenta corriente")
+        self.btn_delete_debtor.setIconSize(QSize(24, 24))
 #if QT_CONFIG(shortcut)
-        self.btn_delete_debt.setShortcut(u"Del")
+        self.btn_delete_debtor.setShortcut(u"Del")
 #endif // QT_CONFIG(shortcut)
 
-        self.debts_buttons_Hlayout.addWidget(self.btn_delete_debt)
+        self.debts_buttons_Hlayout.addWidget(self.btn_delete_debtor)
 
 
         self.debts_info_Vlayout.addWidget(self.debts_buttons)
@@ -1487,12 +1487,12 @@ class Ui_MainWindow(object):
         QWidget.setTabOrder(self.btn_delete_product_sales, self.debts_searchBar)
         QWidget.setTabOrder(self.debts_searchBar, self.cb_debts_colsFilter)
         QWidget.setTabOrder(self.cb_debts_colsFilter, self.tv_debts_data)
-        QWidget.setTabOrder(self.tv_debts_data, self.btn_add_debt)
-        QWidget.setTabOrder(self.btn_add_debt, self.btn_delete_debt)
+        QWidget.setTabOrder(self.tv_debts_data, self.btn_add_debtor)
+        QWidget.setTabOrder(self.btn_add_debtor, self.btn_delete_debtor)
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(2)
         self.tab2_toolBox.setCurrentIndex(0)
         self.tab2_toolBox.layout().setSpacing(4)
 

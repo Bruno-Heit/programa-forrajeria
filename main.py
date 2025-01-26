@@ -342,7 +342,7 @@ class MainWindow(QMainWindow):
             table_viewID=TableViewId.DEBTS_TABLE_VIEW, SHOW_ALL=True) if curr_index == 2 else None)
         
         #* (CREATE) añadir una venta a 'tv_sales_data'
-        self.ui.btn_add_debt.clicked.connect(
+        self.ui.btn_add_debtor.clicked.connect(
             lambda: self.handleTableCreateRow(
                 table_viewID=TableViewId.DEBTS_TABLE_VIEW
             )
@@ -350,6 +350,7 @@ class MainWindow(QMainWindow):
         
         #* (DELETE) eliminar ventas de 'tv_sales_data'
         ...
+        
         #* (UPDATE) modificar celdas de 'tv_sales_data'
         ...
         #* delegado de deudas
@@ -390,13 +391,13 @@ class MainWindow(QMainWindow):
         self.ui.btn_add_product_inventory.setIcon(icon)
         self.ui.btn_add_product.setIcon(icon)
         self.ui.btn_add_product_sales.setIcon(icon)
-        self.ui.btn_add_debt.setIcon(icon)
+        self.ui.btn_add_debtor.setIcon(icon)
 
         # botones para eliminar registros
         icon.addFile(":/icons/minus-circle-white.svg")
         self.ui.btn_delete_product_inventory.setIcon(icon)
         self.ui.btn_delete_product_sales.setIcon(icon)
-        self.ui.btn_delete_debt.setIcon(icon)
+        self.ui.btn_delete_debtor.setIcon(icon)
 
         # botón para terminar venta
         icon.addFile(":/icons/check-white.svg")
