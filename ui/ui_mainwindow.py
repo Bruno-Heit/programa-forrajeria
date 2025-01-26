@@ -784,7 +784,7 @@ class Ui_MainWindow(object):
 #if QT_CONFIG(tooltip)
         self.checkbox_unit_prices.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt; color:#000000;\">Cambia el </span><span style=\" font-size:12pt; text-decoration: underline; color:#000000;\">precio normal</span><span style=\" font-size:12pt; color:#000000;\"> de los productos seleccionados.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        self.checkbox_unit_prices.setText(u"Precios unitarios")
+        self.checkbox_unit_prices.setText(u"Precios normales")
         self.checkbox_unit_prices.setIconSize(QSize(24, 24))
 
         self.change_percentage_frame_Vlayout.addWidget(self.checkbox_unit_prices)
@@ -894,7 +894,7 @@ class Ui_MainWindow(object):
 "}")
         self.box1_sales_form = QWidget()
         self.box1_sales_form.setObjectName(u"box1_sales_form")
-        self.box1_sales_form.setGeometry(QRect(0, 0, 756, 496))
+        self.box1_sales_form.setGeometry(QRect(0, 0, 722, 223))
         self.box1_sales_form_Vlayout = QVBoxLayout(self.box1_sales_form)
         self.box1_sales_form_Vlayout.setSpacing(4)
         self.box1_sales_form_Vlayout.setObjectName(u"box1_sales_form_Vlayout")
@@ -1492,7 +1492,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(2)
+        self.tabWidget.setCurrentIndex(0)
         self.tab2_toolBox.setCurrentIndex(0)
         self.tab2_toolBox.layout().setSpacing(4)
 
