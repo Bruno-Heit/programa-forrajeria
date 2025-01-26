@@ -2671,7 +2671,7 @@ class DebtorContact(QObject):
         -------
         None
         '''
-        self.__debtor_postal_code = postal_code if postal_code else ''
+        self.__debtor_postal_code = postal_code
         self.postalCodeChanged.emit(str(self.__debtor_postal_code))
         return None
     
@@ -2744,7 +2744,7 @@ class DebtorContact(QObject):
             el código postal del deudor, si no fue introducido devuelve 0 (es 
             un valor inválido)
         '''
-        return int(self.__debtor_postal_code) if self.__debtor_postal_code else 0
+        return int(self.__debtor_postal_code) if self.__debtor_postal_code else ''
 
 
 
