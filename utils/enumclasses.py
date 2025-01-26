@@ -82,9 +82,13 @@ class ModelHeaders(Enum):
     '''Enum con tuples[headers] para las QTableViews que usan los MODELOS DE DATOS.'''
     INVENTORY_HEADERS = ("Categoría", "Nombre del producto", "Descripción", 
                          "Stock", "Precio normal", "Precio comercial")
+    
     SALES_HEADERS = ("Detalle de venta", "Cantidad", "Producto", "Costo total", 
                      "Abonado", "Fecha y hora")
+    
     DEBTS_HEADERS = ("Nombre", "Apellido", "Teléfono", "Dirección", "Código postal", "Balance")
+    
+    DEBTS_BALANCE_HEADERS = ("Producto", "Saldo")
 
 
 
