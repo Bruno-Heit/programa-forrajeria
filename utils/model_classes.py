@@ -940,11 +940,11 @@ class DebtsTableModel(QAbstractTableModel):
                 match col:
                     case TableViewColumns.DEBTS_BALANCE.value:
                         # si el balance es negativo le da una font rojiza
-                        if float(self._data[row, ModelDataCols.DEBTS_TOTAL_BALANCE.value]) < 0:
+                        if float(self._data[row, ModelDataCols.DEBTS_TOTAL_BALANCE.value]) > 0:
                             return TableFontColor.CONTRAST_RED.value
                         
                         # sino le da una font verdosa
-                        elif float(self._data[row, ModelDataCols.DEBTS_TOTAL_BALANCE.value]) > 0:
+                        elif float(self._data[row, ModelDataCols.DEBTS_TOTAL_BALANCE.value]) < 0:
                             return TableFontColor.CONTRAST_GREEN.value
                         
                         # si es 0, devuelve una font gris claro
