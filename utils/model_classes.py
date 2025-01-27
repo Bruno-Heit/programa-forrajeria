@@ -63,11 +63,7 @@ class InventoryTableModel(QAbstractTableModel):
     
     #¡ flags
     def flags(self, index: QModelIndex | QPersistentModelIndex) -> Qt.ItemFlag:
-        # si la columna es la de balance no permite editarla directamente
-        if index.column() != TableViewColumns.DEBTS_BALANCE.value:
-            return Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsEditable
-        else:
-            return Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled
+        return Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsEditable
     
     
     def modelHasData(self) -> bool:
@@ -779,7 +775,11 @@ class DebtsTableModel(QAbstractTableModel):
     
     #¡ flags
     def flags(self, index:QModelIndex | QPersistentModelIndex) -> Qt.ItemFlag:
-        return Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsEditable
+        # si la columna es "balance" sólo es interactiva, no se puede editar directamente
+        if index.column() != TableViewColumns.DEBTS_BALANCE.value:
+            return Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsEditable
+        else:
+            return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
     
     
     def modelHasData(self) -> bool:
@@ -886,6 +886,9 @@ class DebtsTableModel(QAbstractTableModel):
                             
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
                     return True
+                
+                case TableViewColumns.DEBTS_BALANCE.value: # balance
+                    ...
         
         return False
     
@@ -1078,6 +1081,7 @@ class DebtsTableModel(QAbstractTableModel):
         self.endInsertRows()
                 
         return True
+
 
 
 
