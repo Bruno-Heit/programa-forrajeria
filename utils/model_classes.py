@@ -63,7 +63,11 @@ class InventoryTableModel(QAbstractTableModel):
     
     #¡ flags
     def flags(self, index: QModelIndex | QPersistentModelIndex) -> Qt.ItemFlag:
-        return Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsEditable
+        # si la columna es la de balance no permite editarla directamente
+        if index.column() != TableViewColumns.DEBTS_BALANCE.value:
+            return Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsEditable
+        else:
+            return Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled
     
     
     def modelHasData(self) -> bool:
