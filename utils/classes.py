@@ -1,7 +1,7 @@
-from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QLineEdit, QCompleter, QWidget,
-                               QVBoxLayout)
-from PySide6.QtCore import (Signal, QSize)
-from PySide6.QtGui import (QIntValidator, QIcon)
+from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QLineEdit, QCompleter, 
+                               QWidget)
+from PySide6.QtCore import (Signal, QSize, QRect, QPropertyAnimation, QEasingCurve)
+from PySide6.QtGui import (QIcon, QShowEvent, QCursor, QKeyEvent)
 
 from ui.ui_productDialog import Ui_Dialog
 from ui.ui_saleDialog import Ui_saleDialog
@@ -14,10 +14,14 @@ from resources import (rc_icons)
 from utils.functionutils import *
 from utils.workerclasses import *
 from utils.dboperations import *
-from utils.enumclasses import (WidgetStyle, InventoryPriceType, ListItemFields, DebtsFields, ModelDataCols)
+from utils.enumclasses import (WidgetStyle, InventoryPriceType, 
+                               ListItemFields, DebtsFields, 
+                               ModelDataCols)
 
 from sqlite3 import (Error as sqlite3Error)
-from phonenumbers import (parse, format_number, is_valid_number, PhoneNumber, PhoneNumberFormat, NumberParseException)
+from phonenumbers import (parse, format_number, is_valid_number, 
+                          PhoneNumber, PhoneNumberFormat, 
+                          NumberParseException)
 
 
 # PRODUCTOS ====================================================================================================
@@ -3524,8 +3528,28 @@ class ProductsBalanceDialog(QDialog):
         
         self.debtor_id:int = debtor_id
         
-        self.__products_balance_list:list = self.__getDebtorProducts()
-        print(self.__products_balance_list)
+        self.__products_balance_data:list = self.__getDebtorProducts()
+        
+        self.setup_ui()
+        self.setup_validators()
+        self.setup_signals()
+        return None
+    
+    
+    def setup_ui(self) -> None:
+        # crea el dialog como ventana sin frame
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | 
+                            Qt.WindowType.Popup)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        
+        # crea animación para mostrar el dialog
+        self.fade_in_anim = QPropertyAnimation(self, b"windowOpacity")
+        self.fade_in_anim.setDuration(100)
+        self.fade_in_anim.setStartValue(0)
+        self.fade_in_anim.setEndValue(0.95)
+        self.fade_in_anim.setEasingCurve(QEasingCurve.Type.InCubic)
+        return None
+    
     
     def setup_validators(self) -> None:
         ...
@@ -3561,6 +3585,34 @@ class ProductsBalanceDialog(QDialog):
         return {d[0]: d[1:] for d in data}
 
 
+    def showEvent(self, event:QShowEvent):
+        '''
+        Reimplementación de 'showEvent'. 
+        Lo uso en este caso para poder colocar el dialog cerca del cursor 
+        cuando se crea y para mostrar el dialog con una animación.
+        '''
+        geometry:QRect = self.geometry()
+        geometry.moveTopRight(QCursor().pos())
+        self.setGeometry(geometry)
+        
+        # muestra el dialog con una animación
+        self.fade_in_anim.start()
+        return super(ProductsBalanceDialog, self).showEvent(event)
+
+
+    def keyPressEvent(self, event:QKeyEvent):
+        '''
+        Reimplementación de 'keyPressEvent'.
+        Lo uso para hacer que al presionar la tecla "esc" se cierre el 
+        dialog, y se rechaza el input.
+        '''
+        match event.key():
+            case Qt.Key.Key_Escape:
+                self.hide()
+                self.reject()
+            
+            case _:
+                return super(ProductsBalanceDialog, self).keyPressEvent(event)
 
 
 
