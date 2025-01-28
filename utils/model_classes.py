@@ -743,11 +743,12 @@ class DebtsTableModel(QAbstractTableModel):
         4 ┇ de.direccion
         5 ┇ de.codigo_postal
         6 ┇ total_balance
+        7 ┇ productos_adeudados
     
     ### columnas:
         0: nombre completo (nombre + apellido)
         1: contacto (núm. tel. + dirección + código postal)
-        2: balance (total + botón con productos en cta. cte.)
+        2: balance (balance total)
     '''
     # señal para actualizar datos en MainWindow
     dataToUpdate:Signal = Signal(object)
@@ -894,7 +895,23 @@ class DebtsTableModel(QAbstractTableModel):
     
     
     def data(self, index:QModelIndex | QPersistentModelIndex, 
-             role:Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole) -> Any:
+             role:Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole,
+             return_debtor_id:bool = False) -> Any:
+        '''
+        Devuelve el valor para la columna especificada.
+        
+        Parámetros
+        ----------
+        index : QModelIndex | QPersistentModelIndex
+            el índice actual
+        role : Qt.ItemDataRole, opcional
+            el rol que usar para obtener el dato
+        return_debtor_ids : bool, opcional
+            flag que se usa sólo cuando el método es llamado desde el QDialog 
+            personalizado de la columna "balance", sirve para retornar el ID 
+            del deudor
+        
+        '''
         if not index.isValid():
             return None
         
@@ -920,7 +937,11 @@ class DebtsTableModel(QAbstractTableModel):
                         return f"{self._data[row, ModelDataCols.DEBTS_POSTAL_CODE.value]}"
                     
                     case TableViewColumns.DEBTS_BALANCE.value:
-                        return f"$ {self._data[row, ModelDataCols.DEBTS_TOTAL_BALANCE.value]}"
+                        if not return_debtor_id:
+                            return f"$ {self._data[row, ModelDataCols.DEBTS_TOTAL_BALANCE.value]}"
+                        else:
+                            return self._data[row, ModelDataCols.DEBTS_IDDEBTOR.value]
+                            
             
             case Qt.ItemDataRole.BackgroundRole:
                 match col:
@@ -1081,7 +1102,6 @@ class DebtsTableModel(QAbstractTableModel):
         self.endInsertRows()
                 
         return True
-
 
 
 
