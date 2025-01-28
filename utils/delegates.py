@@ -5,17 +5,20 @@
 from PySide6.QtWidgets import (QWidget, QStyledItemDelegate, QStyleOptionViewItem, 
                                QComboBox, QLineEdit, QDateTimeEdit)
 from PySide6.QtCore import (Qt, QModelIndex, QSize, QPersistentModelIndex, 
-                            QAbstractItemModel, Signal, Slot, QDateTime)
+                            QAbstractItemModel, Signal, Slot, QDateTime, QEvent, 
+                            QObject)
 
 from utils.enumclasses import (TableViewId, TableViewColumns, ModelDataCols, 
                                DebtsFields, Regex)
 from utils.functionutils import (getProductsCategories, createCompleter, getProductNames)
 from utils.customvalidators import (ProductNameValidator, ProductStockValidator, 
-                                    ProductUnitPriceValidator, ProductComercPriceValidator,
+                                    ProductUnitPriceValidator, ProductComercPriceValidator, 
                                     SaleDetailsValidator, SaleQuantityValidator, 
                                     SaleTotalCostValidator, SalePaidValidator,
                                     DebtorNameValidator, DebtorSurnameValidator, DebtorPhoneNumberValidator, 
                                     DebtorDirectionValidator, DebtorPostalCodeValidator)
+from utils.classes import (ProductsBalanceDialog)
+from utils.proxy_models import (DebtsProxyModel)
 
 from re import (compile, IGNORECASE, search, sub)
 
@@ -366,6 +369,9 @@ class DebtsDelegate(QStyledItemDelegate):
     fieldIsInvalid:Signal = Signal(object) # extensión de 'validator.validationFailed',
                                         # emite hacia MainWindow tuple(TableViewId, 
                                         # feedback como str).
+    balanceDialogCreated:Signal = Signal(QObject) # cuando se edita la columna de balance 
+                            # se emite la referencia al dialog a MainWindow, sino se cierra
+                            # el dialog porque lo captura el garbage collector.
     
     #* columnas: 0: nombre completo (nombre + apellido)
     #*           1: contacto (tel. + dirección + código postal)
@@ -411,10 +417,6 @@ class DebtsDelegate(QStyledItemDelegate):
                 validator.validationSucceeded.connect(self.__onValidField)
                 validator.validationFailed.connect(self.__onInvalidField)
                 editor.setValidator(validator)
-            
-            case TableViewColumns.DEBTS_BALANCE.value:
-                editor = ...
-                # TODO: crear widget personalizado acá para poder editar los productos
             
         return editor
     
@@ -482,3 +484,34 @@ class DebtsDelegate(QStyledItemDelegate):
 
     def sizeHint(self, option: QStyleOptionViewItem, index: QModelIndex) -> QSize:
         return super().sizeHint(option, index)
+
+    
+    def editorEvent(self, event:QEvent, model:DebtsProxyModel, 
+                    option:QStyleOptionViewItem, index:QModelIndex):
+        '''
+        Capta los eventos cuando se crea un editor en alguna columna. Se usa 
+        acá para inicializar el Dialog personalizado que creé para mostrar 
+        los productos con sus saldos.
+        '''
+        balance_dialog:ProductsBalanceDialog
+        
+        if index.column() == TableViewColumns.DEBTS_BALANCE.value:
+            if event.type() == QEvent.Type.MouseButtonDblClick:
+                # TODO: quitar el frame al dialog y hacer que se cree al lado de la celda de la cual se crea
+                debtor_id = model.getDebtorID(index)
+                balance_dialog = ProductsBalanceDialog(debtor_id=debtor_id)
+                
+                #? emite el dialog a MainWindow para que se tenga una referencia, sino se cierra
+                self.balanceDialogCreated.emit(balance_dialog)
+                
+                balance_dialog.show()
+                return True
+        
+        return False
+            
+
+
+
+
+
+
