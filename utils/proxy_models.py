@@ -495,7 +495,31 @@ class DebtsProxyModel(QSortFilterProxyModel):
         return regex.match(index_data).hasMatch() if index_data else False
 
 
+    # data
+    def getDebtorID(self, index:QModelIndex) -> int:
+        '''
+        Obtiene y devuelve el IDdeudor desde el MODELO DE DATOS base.
+        Éste método es usado desde el DELEGADO de la VISTA de Deudas para poder 
+        acceder al IDdeudor del MODELO.
 
+        Parámetros
+        ----------
+        index : QModelIndex
+            el índice actual
+
+        Retorna
+        -------
+        int
+            el IDdeudor del índice actual
+        '''
+        model:DebtsTableModel = self.sourceModel()
+        debtor_id:int = model.data(
+            index=index,
+            role=Qt.ItemDataRole.DisplayRole,
+            return_debtor_id=True
+        )
+        
+        return int(debtor_id)
 
 
 
