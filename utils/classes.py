@@ -7,6 +7,7 @@ from ui.ui_productDialog import Ui_Dialog
 from ui.ui_saleDialog import Ui_saleDialog
 from ui.ui_listproduct import Ui_listProduct
 from ui.ui_debtorDataDialog import Ui_debtorDataDialog
+from ui.ui_debts_balanceProductsList import Ui_ProductsBalance
 
 from resources import (rc_icons)
 
@@ -3514,12 +3515,50 @@ class DebtorDataDialog(QDialog):
 # DEUDORES (SECCIÓN CUENTA CORRIENTE) ==========================================================================
 
 
+class ProductsBalanceDialog(QDialog):
+    
+    def __init__(self, debtor_id:int) -> None:
+        super(ProductsBalanceDialog, self).__init__()
+        self.products_balance_dialog = Ui_ProductsBalance()
+        self.products_balance_dialog.setupUi(self)
+        
+        self.debtor_id:int = debtor_id
+        
+        self.__products_balance_list:list = self.__getDebtorProducts()
+    
+    
+    def setup_validators(self) -> None:
+        ...
+        return None
+    
+    def setup_signals(self) -> None:
+        ...
+        return None
 
 
+    def __getDebtorProducts(self) -> dict[str, tuple[str, float]]:
+        '''
+        Retorna los productos que el deudor tiene en su cuenta corriente junto 
+        con la fecha y hora en la que se realizó la venta y el saldo.
 
-
-
-
+        Retorna
+        -------
+        dict[str, tuple[str, float]]
+            diccionario con el producto como key y una tupla con la fecha y 
+            hora y el saldo como value
+        '''
+        with DatabaseRepository() as db_repo:
+            data = db_repo.selectRegisters(
+                data_sql='''SELECT p.nombre, d.total_adeudado, d.fecha_hora
+                            FROM Productos AS p, Detalle_Ventas AS dv, Deudas AS d, Deudores AS de
+                            WHERE de.IDdeudor = ? AND 
+                                dv.IDproducto = p.IDproducto AND 
+                                dv.IDdeuda = d.IDdeuda AND 
+                                d.IDdeudor = de.IDdeudor AND 
+                                d.eliminado = 0;''',
+                data_params=(self.debtor_id,)
+            )
+            print(data)
 
 
 
