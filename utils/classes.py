@@ -3525,7 +3525,7 @@ class ProductsBalanceDialog(QDialog):
         self.debtor_id:int = debtor_id
         
         self.__products_balance_list:list = self.__getDebtorProducts()
-    
+        print(self.__products_balance_list)
     
     def setup_validators(self) -> None:
         ...
@@ -3544,12 +3544,12 @@ class ProductsBalanceDialog(QDialog):
         Retorna
         -------
         dict[str, tuple[str, float]]
-            diccionario con el producto como key y una tupla con la fecha y 
-            hora y el saldo como value
+            diccionario con la fecha y hora como 'key' y una tupla con el nombre 
+            del producto y el saldo como 'value'
         '''
         with DatabaseRepository() as db_repo:
             data = db_repo.selectRegisters(
-                data_sql='''SELECT p.nombre, d.total_adeudado, d.fecha_hora
+                data_sql='''SELECT d.fecha_hora, p.nombre, d.total_adeudado
                             FROM Productos AS p, Detalle_Ventas AS dv, Deudas AS d, Deudores AS de
                             WHERE de.IDdeudor = ? AND 
                                 dv.IDproducto = p.IDproducto AND 
@@ -3558,7 +3558,7 @@ class ProductsBalanceDialog(QDialog):
                                 d.eliminado = 0;''',
                 data_params=(self.debtor_id,)
             )
-            print(data)
+        return {d[0]: d[1:] for d in data}
 
 
 
