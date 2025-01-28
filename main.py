@@ -160,10 +160,6 @@ class MainWindow(QMainWindow):
         #* delegado de deudas
         self.debts_delegate = DebtsDelegate()
         self.ui.tv_debts_data.setItemDelegate(self.debts_delegate)
-        
-        #? dialog creado con el delegado de deudas, de esta forma se mantiene la 
-        #? referencia al objeto y no lo borra el garbage collector
-        self.__debtor_products_balance:ProductsBalanceDialog = None
         return None
     
 
@@ -199,9 +195,17 @@ class MainWindow(QMainWindow):
         #¡ variables de deudas
         self._debts_model_data_acc:ndarray[Any] = None #? acumulador temp. de datos para modelo de Deudas.
         
+        #? dialog creado con el delegado de deudas, de esta forma se mantiene la 
+        #? referencia al objeto y no lo borra el garbage collector. Eso sucede 
+        #? porque el dialog es no-modal, o sea es creado con show() no con exec(), 
+        #? y porque no tiene un parent asociado, por lo que no tiene una referencia 
+        #? directa.
+        self.__debtor_products_balance_dialog:ProductsBalanceDialog = None
+        
         return None
 
 
+    #¡ === SEÑALES ================================================================================
     def setup_inventory_signals(self) -> None:
         #* abrir/cerrar side bars
         self.ui.btn_side_barToggle.clicked.connect(lambda: self.toggleSideBar(
@@ -353,7 +357,10 @@ class MainWindow(QMainWindow):
         #* (UPDATE) modificar celdas de 'tv_sales_data'
         ...
         #* delegado de deudas
-        ...
+        self.debts_delegate.balanceDialogCreated.connect(
+            self.__saveProductBalanceDialogReference
+        )
+        
         #* search bar
         self.ui.debts_searchBar.returnPressed.connect(
             lambda: self.filterTableView(
@@ -369,6 +376,8 @@ class MainWindow(QMainWindow):
         )
         return None
     
+    
+    #¡ === FIN SEÑALES ============================================================================
     
     def __addIconsToWidgets(self) -> None:
         '''
@@ -2700,7 +2709,24 @@ class MainWindow(QMainWindow):
     
     
     #¡### DEUDAS ######################################################
+    def __saveProductBalanceDialogReference(self, balance_dialog:ProductsBalanceDialog) -> None:
+        '''
+        Guarda la referencia al QDialog personalizado creado para permitir 
+        modificar la columna de "balance" en Deudas. La referencia se debe 
+        guardar porque el QDialog es no-modal y no tiene un 'parent', por lo 
+        que el 'garbage collector' lo identifica y lo elimina inmediatamente.
 
+        Parámetros
+        ----------
+        balance_dialog : ProductsBalanceDialog
+            el dialog con la tabla de productos de la columna "balance"
+        
+        Retorna
+        -------
+        None
+        '''
+        self.__debtor_products_balance_dialog = balance_dialog
+        return None
 
 
 
