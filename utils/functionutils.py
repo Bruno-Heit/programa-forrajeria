@@ -105,7 +105,7 @@ def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=Fals
                                COALESCE(de.num_telefono, ''),
                                COALESCE(de.direccion, ''),
                                COALESCE(de.codigo_postal, ''),
-                               COALESCE(SUM(CASE WHEN d.eliminado = 0 THEN d.total_adeudado ELSE 0 END), 0)
+                               COALESCE(ROUND(SUM(CASE WHEN d.eliminado = 0 THEN d.total_adeudado ELSE 0 END), 2), 0)
                         FROM Deudores AS de
                         LEFT JOIN Deudas AS d ON de.IDdeudor = d.IDdeudor
                         GROUP BY de.IDdeudor, de.nombre
