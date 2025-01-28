@@ -9,7 +9,7 @@ from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot)
 from PySide6.QtGui import (QIcon)
 
 from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemValues, 
-                           DebtorDataDialog, WidgetStyle, ListItemFields)
+                           DebtorDataDialog, WidgetStyle, ListItemFields, ProductsBalanceDialog)
 from ui.ui_mainwindow import (Ui_MainWindow)
 from utils.functionutils import *
 from utils.model_classes import (InventoryTableModel, SalesTableModel, DebtsTableModel)
@@ -55,7 +55,9 @@ class MainWindow(QMainWindow):
         self.setup_variables()
         
         #! la declaración de señales se hace al final
-        self.setup_signals()
+        self.setup_inventory_signals()
+        self.setup_sales_signals()
+        self.setup_debts_signals()
         return None
 
 
@@ -158,6 +160,10 @@ class MainWindow(QMainWindow):
         #* delegado de deudas
         self.debts_delegate = DebtsDelegate()
         self.ui.tv_debts_data.setItemDelegate(self.debts_delegate)
+        
+        #? dialog creado con el delegado de deudas, de esta forma se mantiene la 
+        #? referencia al objeto y no lo borra el garbage collector
+        self.__debtor_products_balance:ProductsBalanceDialog = None
         return None
     
 
@@ -196,18 +202,7 @@ class MainWindow(QMainWindow):
         return None
 
 
-    def setup_signals(self) -> None:
-        '''
-        Éste método tiene el objeto de simplificar la lectura del método 
-        'self.__init__'.
-        Contiene las declaraciones de señales/slots de Widgets ya existentes 
-        desde la instanciación de 'MainWindow'.
-        
-        Retorna
-        -------
-        None
-        '''
-        #¡========= INVENTARIO ================================================
+    def setup_inventory_signals(self) -> None:
         #* abrir/cerrar side bars
         self.ui.btn_side_barToggle.clicked.connect(lambda: self.toggleSideBar(
             TypeSideBar.CATEGORIES_SIDEBAR))
@@ -282,8 +277,10 @@ class MainWindow(QMainWindow):
                 tableViewID=TableViewId.INVEN_TABLE_VIEW
             )
         )
-
-        #¡========= VENTAS ====================================================
+        return None
+    
+    
+    def setup_sales_signals(self) -> None:
         #* (READ) cargar con ventas 'tv_sales_data'
         self.ui.tab2_toolBox.currentChanged.connect(lambda curr_index: self.fillTableView(
             table_viewID=TableViewId.SALES_TABLE_VIEW, SHOW_ALL=True) if curr_index == 1 else None)
@@ -334,8 +331,10 @@ class MainWindow(QMainWindow):
         self.ui.lineEdit_paid.editingFinished.connect(self.onSalePaidEditingFinished)
         
         self.ui.btn_end_sale.clicked.connect(self.onFinishedSale)
-
-        #¡========= DEUDAS ====================================================
+        return None
+    
+    
+    def setup_debts_signals(self) -> None:
         # TODO: SEGUIR CON PARTE DE DEUDAS
         #* (READ) cargar con deudas 'tv_debts_data'
         self.ui.tabWidget.currentChanged.connect(lambda curr_index: self.fillTableView(
