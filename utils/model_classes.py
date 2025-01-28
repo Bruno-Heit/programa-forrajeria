@@ -743,7 +743,6 @@ class DebtsTableModel(QAbstractTableModel):
         4 ┇ de.direccion
         5 ┇ de.codigo_postal
         6 ┇ total_balance
-        7 ┇ productos_adeudados
     
     ### columnas:
         0: nombre completo (nombre + apellido)
