@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QLineEdit, QCompleter, 
-                               QWidget)
+                               QWidget, QGraphicsDropShadowEffect)
 from PySide6.QtCore import (Signal, QSize, QRect, QPropertyAnimation, QEasingCurve)
-from PySide6.QtGui import (QIcon, QShowEvent, QCursor, QKeyEvent)
+from PySide6.QtGui import (QIcon, QShowEvent, QCursor, QKeyEvent, QColor)
 
 from ui.ui_productDialog import Ui_Dialog
 from ui.ui_saleDialog import Ui_saleDialog
@@ -17,6 +17,8 @@ from utils.dboperations import *
 from utils.enumclasses import (WidgetStyle, InventoryPriceType, 
                                ListItemFields, DebtsFields, 
                                ModelDataCols)
+from utils.model_classes import (ProductsBalanceModel)
+from utils.proxy_models import (ProductsBalanceProxyModel)
 
 from sqlite3 import (Error as sqlite3Error)
 from phonenumbers import (parse, format_number, is_valid_number, 
@@ -3542,11 +3544,18 @@ class ProductsBalanceDialog(QDialog):
                             Qt.WindowType.Popup)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         
+        # aplica efecto drop-shadow al central widget
+        self.shadow_effect = QGraphicsDropShadowEffect()
+        self.shadow_effect.setBlurRadius(20)
+        self.shadow_effect.setOffset(7, 7)
+        self.shadow_effect.setColor(QColor(34, 87, 122, 220))
+        self.products_balance_dialog.central_widget.setGraphicsEffect(self.shadow_effect)
+        
         # crea animación para mostrar el dialog
         self.fade_in_anim = QPropertyAnimation(self, b"windowOpacity")
         self.fade_in_anim.setDuration(100)
         self.fade_in_anim.setStartValue(0)
-        self.fade_in_anim.setEndValue(0.95)
+        self.fade_in_anim.setEndValue(1)
         self.fade_in_anim.setEasingCurve(QEasingCurve.Type.InCubic)
         return None
     
@@ -3554,6 +3563,18 @@ class ProductsBalanceDialog(QDialog):
     def setup_validators(self) -> None:
         ...
         return None
+    
+    
+    def setup_model(self) -> None:
+        self.products_balance_model = ProductsBalanceModel()
+        
+        self.products_balance_proxy_model = ProductsBalanceProxyModel()
+        self.products_balance_proxy_model.setSourceModel(self.products_balance_model)
+        
+        self.products_balance_dialog.tv_balance_products.setModel(self.products_balance_proxy_model)
+        self.products_balance_dialog.tv_balance_products.setSortingEnabled(False)
+        return None
+    
     
     def setup_signals(self) -> None:
         ...
@@ -3567,14 +3588,20 @@ class ProductsBalanceDialog(QDialog):
 
         Retorna
         -------
-        dict[str, tuple[str, float]]
-            diccionario con la fecha y hora como 'key' y una tupla con el nombre 
-            del producto y el saldo como 'value'
+        dict[int, tuple[str, str, float]]
+            diccionario con el ID_detalle_venta como 'key' y una tupla con la 
+            fecha y hora, nombre del producto y el saldo como 'value'
         '''
         with DatabaseRepository() as db_repo:
             data = db_repo.selectRegisters(
-                data_sql='''SELECT d.fecha_hora, p.nombre, d.total_adeudado
-                            FROM Productos AS p, Detalle_Ventas AS dv, Deudas AS d, Deudores AS de
+                data_sql='''SELECT dv.ID_detalle_venta,
+                                   p.nombre,
+                                   d.total_adeudado,
+                                   d.fecha_hora
+                            FROM Productos AS p,
+                                 Detalle_Ventas AS dv,
+                                 Deudas AS d,
+                                 Deudores AS de
                             WHERE de.IDdeudor = ? AND 
                                 dv.IDproducto = p.IDproducto AND 
                                 dv.IDdeuda = d.IDdeuda AND 
