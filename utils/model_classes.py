@@ -1106,6 +1106,315 @@ class DebtsTableModel(QAbstractTableModel):
         return True
 
 
+#¡ == MODELO DE DEUDAS (Dialog de productos adeudados ) ===========================================
 
+
+class ProductsBalanceModel(QAbstractTableModel):
+    '''
+    Clase MODELO que contiene los datos de los productos en cuenta corriente 
+    de la persona en la fila seleccionada.
+    Esta clase no maneja operaciones a bases de datos.
+    Los datos son guardados en la variable 'self._data'.
+    
+    ### datos en self._data:
+        (posición ┇ dato de base de datos)
+        0 ┇ dv.ID_detalle_venta
+        1 ┇ d.fecha_hora
+        2 ┇ v.descripcion
+        3 ┇ d.total_adeudado
+    
+    ### columnas:
+        0: fecha y hora
+        1: descripción
+        2: saldo
+    '''
+    # señal para actualizar datos en MainWindow
+    dataToUpdate:Signal = Signal(object)
+
+    def __init__(self, data:tuple[tuple[int, str, str, float]]=None, headers:Sequence[str]=None, 
+                 parent:QObject = ...) -> None:
+        super(ProductsBalanceModel, self).__init__()
+        
+        self._data:tuple[tuple[int, str, str, float]] = data
+        self._headers = headers
+        self._parent = parent
+    
+    # TODO: implementar los métodos setData, removeSelectedModelRows, removeRows e insertRows
+    
+    #¡ dimensiones
+    def rowCount(self, parent:QObject = ...) -> int:
+        if self._data is not None:
+            return len(self._data)
+    
+    
+    def columnCount(self, parent:QObject = ...):
+        if self._headers is not None:
+            return len(self._headers)
+    
+    
+    #¡ flags
+    def flags(self, index:QModelIndex | QPersistentModelIndex) -> Qt.ItemFlag:
+        return Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsEditable
+    
+    
+    def modelHasData(self) -> bool:
+        '''
+        Devuelve un flag que determina si el modelo de datos tiene datos 
+        o si está vacío.
+
+        Retorna
+        -------
+        bool
+            flag que determina la existencia de datos en el modelo
+        '''
+        try:
+            if len(self._data):
+                return True
+        
+        except (NameError, AttributeError):
+            return False
+        
+        return True
+    
+    
+    #¡ datos    
+    # def setData(self, index:QModelIndex | QPersistentModelIndex, value:Any, 
+    #             role:Qt.ItemDataRole = Qt.ItemDataRole.EditRole) -> bool:
+    #     '''
+    #     Realiza la actualización de datos dentro del modelo y además emite la 
+    #     señal 'dataToUpdate' con el índice, el IDdeudor y el valor nuevo para 
+    #     poder actualizar la base de datos a partir de esos datos.
+    #     '''
+    #     if role == Qt.ItemDataRole.EditRole:
+    #         match index.column():
+    #             case TableViewColumns.DEBTS_NAME.value: # nombre
+    #                 if value == self.data(index):
+    #                     return False
+    #                 self._data[index.row(), ModelDataCols.DEBTS_NAME.value] = value
+                    
+    #                 # actualiza nombre en MainWindow
+    #                 self.dataToUpdate.emit(
+    #                     {'column': index.column(),
+    #                      'IDdebtor': self._data[index.row(), ModelDataCols.DEBTS_IDDEBTOR.value],
+    #                      'new_value': value}
+    #                     )
+                    
+    #                 self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
+    #                 return True
+        
+    #             case TableViewColumns.DEBTS_SURNAME.value: # apellido
+    #                 if value == self.data(index):
+    #                     return False
+    #                 self._data[index.row(), ModelDataCols.DEBTS_SURNAME.value] = value
+                    
+    #                 # actualiza apellido en MainWindow
+    #                 self.dataToUpdate.emit(
+    #                     {'column': index.column(),
+    #                      'IDdebtor': self._data[index.row(), ModelDataCols.DEBTS_IDDEBTOR.value],
+    #                      'new_value': value}
+    #                 )
+                    
+    #                 self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
+    #                 return True
+                    
+    #             case TableViewColumns.DEBTS_PHONE_NUMBER.value: # número de teléfono
+    #                 if value == self.data(index):
+    #                     return False
+    #                 self._data[index.row()][index.column() + 2] = value
+
+    #                 # actualiza el número de teléfono en MainWindow
+    #                 self.dataToUpdate.emit(
+    #                     {'column': index.column(),
+    #                      'IDdebtor': self._data[index.row(), ModelDataCols.DEBTS_IDDEBTOR.value],
+    #                      'new_value': value}
+    #                 )
+                    
+    #                 self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
+    #                 return True
+                
+    #             case TableViewColumns.DEBTS_DIRECTION.value: # dirección
+    #                 if value == self.data(index):
+    #                     return False
+    #                 self._data[index.row(), ModelDataCols.DEBTS_DIRECTION.value] = value
+
+    #                 # actualiza la dirección en MainWindow
+    #                 self.dataToUpdate.emit(
+    #                     {'column': index.column(),
+    #                      'IDdebtor': self._data[index.row(), ModelDataCols.DEBTS_IDDEBTOR.value],
+    #                      'new_value': value}
+    #                 )
+                    
+    #                 self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
+    #                 return True
+
+    #             case TableViewColumns.DEBTS_POSTAL_CODE.value: # código postal
+    #                 if value == self.data(index):
+    #                     return False
+    #                 self._data[index.row(), ModelDataCols.DEBTS_POSTAL_CODE.value] = value
+
+    #                 # actualiza el código postal en MainWindow
+    #                 self.dataToUpdate.emit(
+    #                     {'column': index.column(),
+    #                         'IDdebtor': self._data[index.row(), ModelDataCols.DEBTS_IDDEBTOR.value],
+    #                         'new_value': value}
+    #                 )
+                            
+    #                 self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
+    #                 return True
+                
+    #             case TableViewColumns.DEBTS_BALANCE.value: # balance
+    #                 ...
+        
+    #     return False
+    
+    
+    def data(self, index:QModelIndex | QPersistentModelIndex, 
+             role:Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole) -> Any:
+        if not index.isValid():
+            return None
+        
+        row:int = index.row()
+        col:int = index.column()
+        
+        match role:
+            case Qt.ItemDataRole.DisplayRole:
+                match col:
+                    case TableViewColumns.PRODS_BAL_DATETIME.value:
+                        return self._data[row][ModelDataCols.PRODS_BAL_DATETIME.value]
+                    
+                    case TableViewColumns.PRODS_BAL_DESCRIPTION.value:
+                        return f"{self._data[row][ModelDataCols.PRODS_BAL_DESCRIPTION.value]}"
+                    
+                    case TableViewColumns.PRODS_BAL_BALANCE.value:
+                        return self._data[row][ModelDataCols.PRODS_BAL_BALANCE.value]
+            
+            case Qt.ItemDataRole.BackgroundRole:
+                if col == TableViewColumns.PRODS_BAL_BALANCE.value: 
+                    # si el balance es negativo le da un fondo rojizo
+                    if float(self._data[row][ModelDataCols.PRODS_BAL_BALANCE.value]) < 0:
+                        return TableBgColors.DEBTS_NEGATIVE_BALANCE.value
+                    
+                    # sino le da un fondo verdoso
+                    elif float(self._data[row][ModelDataCols.PRODS_BAL_BALANCE.value]) > 0:
+                        return TableBgColors.DEBTS_POSITIVE_BALANCE.value
+                    
+                    # si es 0, devuelve un fondo gris claro
+                    else:
+                        return TableBgColors.DEBTS_CERO_BALANCE.value
+            
+            case Qt.ItemDataRole.ForegroundRole:
+                if col == TableViewColumns.PRODS_BAL_BALANCE.value:
+                    # si el balance es negativo le da una font rojiza
+                    if float(self._data[row][ModelDataCols.PRODS_BAL_BALANCE.value]) > 0:
+                        return TableFontColor.CONTRAST_RED.value
+                    
+                    # sino le da una font verdosa
+                    elif float(self._data[row][ModelDataCols.PRODS_BAL_BALANCE.value]) < 0:
+                        return TableFontColor.CONTRAST_GREEN.value
+                    
+                    # si es 0, devuelve una font gris claro
+                    else:
+                        return TableFontColor.DEF_COLOR.value
+            
+            case Qt.ItemDataRole.TextAlignmentRole:
+                match col:
+                    case TableViewColumns.PRODS_BAL_DATETIME.value:
+                        return Qt.AlignmentFlag.AlignLeft
+                    
+                    case TableViewColumns.PRODS_BAL_DESCRIPTION.value:
+                        return Qt.AlignmentFlag.AlignCenter
+                    
+                    case TableViewColumns.PRODS_BAL_BALANCE.value:
+                        return Qt.AlignmentFlag.AlignRight
+        return None
+    
+    
+    def headerData(self, section:int, orientation:Qt.Orientation, 
+                   role:Qt.ItemDataRole=Qt.ItemDataRole.DisplayRole) -> str|None:
+        if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
+            return str(self._headers[section])
+        return None
+    
+    
+    #¡ actualización del modelo
+    def removeSelectedModelRows(self, selected_rows:Sequence) -> None:
+        '''
+        Actualiza el MODELO de datos eliminando los datos de las filas seleccionadas 
+        en bloques de filas, ya que es más eficiente que hacerlo de a una.
+
+        Parámetros
+        ----------
+        selected_rows : Sequence
+            secuencia con las filas seleccionadas
+        
+        Retorna
+        -------
+        None
+        '''
+        blocks:list[tuple[int, int]] = []
+        start_block:int = selected_rows[0] # puntero al primer elemento del bloque
+        end_block:int = start_block # puntero al último elemento del bloque
+        
+        # ordeno las filas para trabajar con bloques de filas continuas
+        selected_rows = sorted(selected_rows)
+        
+        # agrupo filas continuas
+        for row in selected_rows[1:]:
+            # verifica si el elemento actual es 1 mayor al anterior, básicamente
+            if row == end_block + 1:
+                end_block = row
+        
+            # sino, es porque las filas no son continuas, así que guardamos el bloque 
+            # anterior y empezamos con otro nuevo
+            else:
+                blocks.append( (start_block, end_block) )
+                start_block = row
+                end_block = row
+        
+        # guardo el último bloque
+        blocks.append( (start_block, end_block) )
+        
+        # elimina los datos en orden inverso para evitar problemas de índices
+        for start, end in reversed(blocks):
+            self.removeRows(start, end - start + 1)
+        
+        return None
+    
+    
+    def removeRows(self, row:int, count:int, parent:QModelIndex=QModelIndex()) -> bool:
+        # verifica que las filas estén dentro del rango válido
+        if row < 0 or (row + count) > self.rowCount():
+            return False
+
+        # elimina las filas seleccionadas del modelo        
+        self.beginRemoveRows(parent, row, row + count - 1)
+        # s_[inicio:final] es la forma simple que tiene numpy de hacer 'slicing'
+        self._data = delete(self._data, s_[row:row + count], axis=0)
+        self.endRemoveRows()
+        
+        return True
+    
+    
+    def insertRows(self, row, count, data_to_insert:dict[str, Any], 
+                   parent:QModelIndex = QModelIndex()):
+        if row < 0 or row > self.rowCount():
+            return False
+        
+        self.beginInsertRows(parent, row, row + count - 1)
+        # actualiza el atributo '_data'
+        dict_to_ndarray:ndarray = array( # convierte el dict a un array de Numpy
+            object=[data_to_insert[ModelDataCols.DEBTS_IDDEBTOR.name],
+                    data_to_insert[ModelDataCols.DEBTS_NAME.name],
+                    data_to_insert[ModelDataCols.DEBTS_SURNAME.name],
+                    data_to_insert[ModelDataCols.DEBTS_PHONE_NUMBER.name],
+                    data_to_insert[ModelDataCols.DEBTS_DIRECTION.name],
+                    data_to_insert[ModelDataCols.DEBTS_POSTAL_CODE.name],
+                    data_to_insert[ModelDataCols.DEBTS_TOTAL_BALANCE.name]]
+            )
+        # 'numpy.vstack' concatena ambos arrays de forma vertical, es decir, por filas
+        self._data = vstack((self._data, dict_to_ndarray))
+        self.endInsertRows()
+                
+        return True
 
 
