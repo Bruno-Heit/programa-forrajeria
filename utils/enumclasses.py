@@ -188,7 +188,7 @@ class TableViewColumns(IntEnum):
     VISTAS.'''
     INV_CATEGORY = 0
     INV_PRODUCT_NAME = 1
-    INV_DECRIPTION = 2
+    INV_DESCRIPTION = 2
     INV_STOCK = 3
     INV_NORMAL_PRICE = 4
     INV_COMERCIAL_PRICE = 5
