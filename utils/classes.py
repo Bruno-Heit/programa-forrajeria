@@ -3536,6 +3536,8 @@ class ProductsBalanceDialog(QDialog):
         self.setup_validators()
         self.setup_model()
         self.setup_signals()
+        
+        self.adjustSize()
         return None
     
     
@@ -3591,23 +3593,24 @@ class ProductsBalanceDialog(QDialog):
         return None
 
 
-    def __getDebtorProducts(self) -> tuple[tuple[int, str, float, str]]:
+    def __getDebtorProducts(self) -> tuple[tuple[int, str, float, str, float]]:
         '''
         Retorna los productos que el deudor tiene en su cuenta corriente junto 
         con la fecha y hora en la que se realizó la venta y el saldo.
 
         Retorna
         -------
-        tuple[tuple[int, str, float, str]]
-            tupla con tuplas de ID_detalle_venta, el nombre del producto, el 
-            saldo y la fecha y hora
+        tuple[tuple[int, str, float, str, float]]
+            tupla con tuplas de ID_detalle_venta, la fecha y hora, la cantidad, 
+            el nombre del producto y el saldo
         '''
         with DatabaseRepository() as db_repo:
             data = db_repo.selectRegisters(
                 data_sql='''SELECT dv.ID_detalle_venta,
+                                   d.fecha_hora,
+                                   dv.cantidad,
                                    p.nombre,
-                                   d.total_adeudado,
-                                   d.fecha_hora
+                                   d.total_adeudado
                             FROM Productos AS p,
                                  Detalle_Ventas AS dv,
                                  Deudas AS d,
