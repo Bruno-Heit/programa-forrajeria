@@ -1460,7 +1460,7 @@ class MainWindow(QMainWindow):
                         upd_params=(new_val, IDproduct,)
                         )
             
-            case TableViewColumns.INV_DECRIPTION.value:
+            case TableViewColumns.INV_DESCRIPTION.value:
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Productos 
