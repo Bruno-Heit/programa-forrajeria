@@ -16,7 +16,7 @@ from utils.workerclasses import *
 from utils.dboperations import *
 from utils.enumclasses import (WidgetStyle, InventoryPriceType, 
                                ListItemFields, DebtsFields, 
-                               ModelDataCols)
+                               ModelDataCols, ModelHeaders)
 from utils.model_classes import (ProductsBalanceModel)
 from utils.proxy_models import (ProductsBalanceProxyModel)
 
@@ -3530,10 +3530,11 @@ class ProductsBalanceDialog(QDialog):
         
         self.debtor_id:int = debtor_id
         
-        self.__products_balance_data:list = self.__getDebtorProducts()
+        self.__products_balance_data = self.__getDebtorProducts()
         
         self.setup_ui()
         self.setup_validators()
+        self.setup_model()
         self.setup_signals()
         return None
     
@@ -3566,13 +3567,22 @@ class ProductsBalanceDialog(QDialog):
     
     
     def setup_model(self) -> None:
-        self.products_balance_model = ProductsBalanceModel()
+        # modelo de datos
+        self.products_balance_model = ProductsBalanceModel(
+            data=self.__products_balance_data,
+            headers=ModelHeaders.PRODS_BAL_HEADERS.value
+        )
         
+        # proxy model
         self.products_balance_proxy_model = ProductsBalanceProxyModel()
+        self.products_balance_proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.products_balance_proxy_model.setSourceModel(self.products_balance_model)
         
+        # table view
         self.products_balance_dialog.tv_balance_products.setModel(self.products_balance_proxy_model)
         self.products_balance_dialog.tv_balance_products.setSortingEnabled(True)
+        
+        setTableViewPolitics(self.products_balance_dialog.tv_balance_products)
         return None
     
     
@@ -3581,16 +3591,16 @@ class ProductsBalanceDialog(QDialog):
         return None
 
 
-    def __getDebtorProducts(self) -> dict[int, tuple[str, float, str]]:
+    def __getDebtorProducts(self) -> tuple[tuple[int, str, float, str]]:
         '''
         Retorna los productos que el deudor tiene en su cuenta corriente junto 
         con la fecha y hora en la que se realizó la venta y el saldo.
 
         Retorna
         -------
-        dict[int, tuple[str, float, str]]
-            diccionario con el ID_detalle_venta como 'key' y una tupla con el 
-            nombre del producto, el saldo y la fecha y hora como 'value'
+        tuple[tuple[int, str, float, str]]
+            tupla con tuplas de ID_detalle_venta, el nombre del producto, el 
+            saldo y la fecha y hora
         '''
         with DatabaseRepository() as db_repo:
             data = db_repo.selectRegisters(
@@ -3609,7 +3619,7 @@ class ProductsBalanceDialog(QDialog):
                                 d.eliminado = 0;''',
                 data_params=(self.debtor_id,)
             )
-        return {d[0]: d[1:] for d in data}
+        return tuple(data)
 
 
     def showEvent(self, event:QShowEvent):
