@@ -88,7 +88,7 @@ class ModelHeaders(Enum):
     
     DEBTS_HEADERS = ("Nombre", "Apellido", "Teléfono", "Dirección", "Código postal", "Balance")
     
-    PRODS_BAL_HEADERS = ("Fecha y hora", "Producto", "Saldo")
+    PRODS_BAL_HEADERS = ("Fecha y hora", "Descripción", "Saldo")
 
 
 
@@ -208,7 +208,7 @@ class TableViewColumns(IntEnum):
     DEBTS_BALANCE = 5
     
     PRODS_BAL_DATETIME = 0
-    PRODS_BAL_PRODUCT_NAME = 1
+    PRODS_BAL_DESCRIPTION = 1
     PRODS_BAL_BALANCE = 2
 
 
@@ -247,9 +247,8 @@ class ModelDataCols(IntEnum):
     
     PRODS_BAL_ID_SALES_DETAIL = 0
     PRODS_BAL_DATETIME = 1
-    PRODS_BAL_QUANTITY = 2
-    PRODS_BAL_PRODUCT_NAME = 3
-    PRODS_BAL_BALANCE = 4
+    PRODS_BAL_DESCRIPTION = 2
+    PRODS_BAL_BALANCE = 3
 
 
 

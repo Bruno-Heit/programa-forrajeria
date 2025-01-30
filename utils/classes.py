@@ -3593,33 +3593,34 @@ class ProductsBalanceDialog(QDialog):
         return None
 
 
-    def __getDebtorProducts(self) -> tuple[tuple[int, str, float, str, float]]:
+    def __getDebtorProducts(self) -> tuple[tuple[int, str, str, float]]:
         '''
         Retorna los productos que el deudor tiene en su cuenta corriente junto 
         con la fecha y hora en la que se realizó la venta y el saldo.
 
         Retorna
         -------
-        tuple[tuple[int, str, float, str, float]]
-            tupla con tuplas de ID_detalle_venta, la fecha y hora, la cantidad, 
-            el nombre del producto y el saldo
+        tuple[tuple[int, str, str, float]]
+            tupla con tuplas de ID_detalle_venta, la fecha y hora, la 
+            descripción y el saldo
         '''
         with DatabaseRepository() as db_repo:
             data = db_repo.selectRegisters(
                 data_sql='''SELECT dv.ID_detalle_venta,
                                    d.fecha_hora,
-                                   dv.cantidad,
-                                   p.nombre,
+                                   v.detalles_venta,
                                    d.total_adeudado
                             FROM Productos AS p,
                                  Detalle_Ventas AS dv,
+                                 Ventas AS v,
                                  Deudas AS d,
                                  Deudores AS de
                             WHERE de.IDdeudor = ? AND 
-                                dv.IDproducto = p.IDproducto AND 
-                                dv.IDdeuda = d.IDdeuda AND 
-                                d.IDdeudor = de.IDdeudor AND 
-                                d.eliminado = 0;''',
+                                  dv.IDproducto = p.IDproducto AND 
+                                  dv.IDdeuda = d.IDdeuda AND 
+                                  dv.IDventa = v.IDventa AND 
+                                  d.IDdeudor = de.IDdeudor AND 
+                                  d.eliminado = 0;''',
                 data_params=(self.debtor_id,)
             )
         return tuple(data)
