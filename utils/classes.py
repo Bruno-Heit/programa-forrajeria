@@ -150,9 +150,7 @@ class ProductDialog(QDialog):
         Método simple que esconde los widgets iniciales al instanciarse 
         el QDialog.
         
-        Retorna
-        -------
-        None
+        
         '''
         # esconde widgets
         self.productDialog_ui.label_nameWarning.hide()
@@ -180,9 +178,7 @@ class ProductDialog(QDialog):
             - unit_price: se validó el campo de precio unitario del producto
             - comerc_price: se validó el campo de precio comercial del producto
         
-        Retorna
-        -------
-        None
+        
         '''
         match field_validated:
             case 'name':
@@ -227,9 +223,7 @@ class ProductDialog(QDialog):
         error_message: str
             El mensaje de error emitido por el validador
         
-        Retorna
-        -------
-        None
+        
         '''
         match field_validated:
             case 'name':
@@ -273,9 +267,7 @@ class ProductDialog(QDialog):
             - unit_price: formatea el campo de precio unitario del producto
             - comerc_price: formatea el campo de precio comercial del producto
         
-        Retorna
-        -------
-        None
+        
         '''
         text:str
         
@@ -311,9 +303,7 @@ class ProductDialog(QDialog):
         Al finalizar, si el campo es válido comprueba si el resto de campos 
         son válidos.
         
-        Retorna
-        -------
-        None
+        
         '''
         # reinicio la validez de la categoría
         self.VALID_CATEGORY = True
@@ -341,9 +331,7 @@ class ProductDialog(QDialog):
         Verifica que todos los campos tengan valores válidos. Compara si todos 
         son válidos y activa o desactiva el botón "Aceptar" dependiendo del caso.
         
-        Retorna
-        -------
-        None
+        
         '''
         valid:tuple[bool] = (
             self.VALID_NAME,
@@ -392,9 +380,7 @@ class ProductDialog(QDialog):
         base de datos, y emite la señal 'dataFilled' con los datos 
         introducidos a MainWindow para poder actualizar el MODELO DE DATOS.
         
-        Retorna
-        -------
-        None
+        
         '''
         data:tuple[str]
         data_as_dict:dict[str]
@@ -478,9 +464,7 @@ class SaleDialog(QDialog):
         Método que sirve para simplificar la lectura del método 'self.__init__'.
         Contiene inicializaciones y ajustes de algunos Widgets.
         
-        Retorna
-        -------
-        None
+        
         '''
         self.setWindowTitle("Nueva venta")
 
@@ -568,9 +552,7 @@ class SaleDialog(QDialog):
         Contiene las declaraciones de variables locales que se usan a lo largo de la 
         ejecución del QDialog.
         
-        Retorna
-        -------
-        None
+        
         '''
         # flags de validación
         self.VALID_FIELDS:dict[str,bool|None] = {
@@ -595,9 +577,7 @@ class SaleDialog(QDialog):
         Contiene las declaraciones de señales/slots de Widgets ya existentes 
         desde la instanciación de 'MainWindow'.
         
-        Retorna
-        -------
-        None
+        
         '''
         #--- SEÑALES --------------------------------------------------
         # combobox nombre de producto (venta)
@@ -1284,9 +1264,7 @@ class SaleDialog(QDialog):
         MULTITHREADING, esto es es así para garantizar la atomicidad e integridad de los 
         datos.
         
-        Retorna
-        -------
-        None
+        
         '''
         #? siempre se insertan datos en Ventas y Detalle_Ventas, pero si el "total abonado" no es igual 
         #? al "costo total" entonces se insertan datos también en Deudas y Deudores.
@@ -1426,9 +1404,7 @@ class SaleDialog(QDialog):
         values : tuple[Any]
             datos a emitir a MainWindow
 
-        Retorna
-        -------
-        None
+        
         '''
         values_to_dict:dict[str, Any] = {}
         
@@ -1528,9 +1504,7 @@ class ListItemValues(QObject):
         product_id : int, opcional
             IDproducto del producto, por defecto es None
         
-        Retorna
-        -------
-        None
+        
         '''
         self.__product_id = product_id
         return None
@@ -1546,9 +1520,7 @@ class ListItemValues(QObject):
         product_name : str, opcional
             nombre del producto, por defecto es None
         
-        Retorna
-        -------
-        None
+        
         '''
         self.__product_name = product_name
         self.__onProductNameChange(product_name)
@@ -1566,9 +1538,7 @@ class ListItemValues(QObject):
         product_name : str, opcional
             nombre del producto, por defecto es None
         
-        Retorna
-        -------
-        None
+        
         '''
         # actualiza el IDproducto
         with DatabaseRepository() as db_repo:
@@ -1596,9 +1566,7 @@ class ListItemValues(QObject):
         quantity : float, opcional
             cantidad del producto, por defecto es None
         
-        Retorna
-        -------
-        None
+        
         '''
         self.__quantity = quantity
         self.quantityChanged.emit(quantity)
@@ -1612,9 +1580,7 @@ class ListItemValues(QObject):
         emite la señal 'subtotalChanged'.
         Nota: El precio es obtenido desde la base de datos en este método.
         
-        Retorna
-        -------
-        None
+        
         '''
         self.__subtotal = None if not self.isAllValid() else self.__getPrice()
         
@@ -1672,9 +1638,7 @@ class ListItemValues(QObject):
         price_type : InventoryPriceType, opcional
             tipo de precio del producto, por defecto es NORMAL
         
-        Retorna
-        -------
-        None
+        
         '''
         self.__is_comercial_price = False if price_type == InventoryPriceType.NORMAL else True
         self.priceTypeChanged.emit(price_type)
@@ -1692,9 +1656,7 @@ class ListItemValues(QObject):
             el detalle de la venta actual, sobre el que se hacen cambios si no 
             fue modificado por el usuario
         
-        Retorna
-        -------
-        None
+        
         '''
         pattern:Pattern = compile(pattern=Regex.SALES_DETAILS_FULL.value, flags=IGNORECASE)
         new_text:str
@@ -1735,9 +1697,7 @@ class ListItemValues(QObject):
         validity : bool | None
             nuevo valor de verdad del campo
         
-        Retorna
-        -------
-        None
+        
         '''
         match field:
             case ListItemFields.PRODUCT_NAME:
@@ -1935,9 +1895,7 @@ class ListItemWidget(QWidget):
         obj_name : str
             nombre único del objecto actual, a modo de identificador
         
-        Retorna
-        -------
-        None
+        
         '''
         # desactiva checkBox_comercialPrice
         self.listItem.checkBox_comercialPrice.setEnabled(False)
@@ -1977,9 +1935,7 @@ class ListItemWidget(QWidget):
         Contiene las declaraciones de señales/slots de Widgets ya existentes 
         desde la instanciación de 'MainWindow'.
         
-        Retorna
-        -------
-        None
+        
         '''
         #--- SEÑALES --------------------------------------------------
         # nombre de producto
@@ -2021,9 +1977,7 @@ class ListItemWidget(QWidget):
         Emite la señal 'deletedItem' al QListWidget 'MainWindow.sales_input_list' 
         para eliminar éste item de la lista.
         
-        Retorna
-        -------
-        None
+        
         '''
         self.deleteItem.emit(self.objectName())
         self.deleteLater()
@@ -2039,9 +1993,7 @@ class ListItemWidget(QWidget):
         NOTA: redimensiona 'ListItemWidget' para que se pueda mostrar el mensaje 
         correctamente.
         
-        Retorna
-        -------
-        None
+        
         '''
         _avail_stock:tuple[float, str] # stock disponible
         
@@ -2084,9 +2036,7 @@ class ListItemWidget(QWidget):
         error_message : str
             mensaje de error para mostrar al usuario
         
-        Retorna
-        -------
-        None
+        
         '''
         self.field_values.setFieldValidity(ListItemFields.QUANTITY, False)
         
@@ -2117,9 +2067,7 @@ class ListItemWidget(QWidget):
         el detalle de venta o el precio dependiendo del tipo de precio 
         seleccionado, y también actualiza 'field_values' con el nombre.
         
-        Retorna
-        -------
-        None
+        
         '''
         # si no hay un producto seleccionado...
         if self.listItem.comboBox_productName.currentIndex() == -1:
@@ -2163,9 +2111,7 @@ class ListItemWidget(QWidget):
         curr_name : str
             nombre actual del combobox
         
-        Retorna
-        -------
-        None
+        
         '''
         # actualiza el stock disponible en el validador de cantidad...
         self.__updateAvailableStock()
@@ -2204,9 +2150,7 @@ class ListItemWidget(QWidget):
         Actualiza el stock disponible en el validador de cantidad a partir del 
         producto seleccionado.
 
-        Retorna
-        -------
-        None
+        
         '''
         self.quantity_validator.setAvailableStock(
                 getCurrentProductStock(
@@ -2222,9 +2166,7 @@ class ListItemWidget(QWidget):
         '''
         Muestra el stock disponible en un label debajo de la cantidad vendida.
 
-        Retorna
-        -------
-        None
+        
         '''
         # coloca el stock en 'label_quantityFeedback'
         self.listItem.label_quantityFeedback.show()
@@ -2250,9 +2192,7 @@ class ListItemWidget(QWidget):
         curr_name : str
             nombre de producto seleccionado
 
-        Retorna
-        -------
-        None
+        
         '''
         registers:Any
         
@@ -2291,9 +2231,7 @@ class ListItemWidget(QWidget):
         state : Qt.CheckState
             estado actual del checkbox
 
-        Retorna
-        -------
-        None
+        
         '''
         match state:
             case state.Unchecked:
@@ -2313,9 +2251,7 @@ class ListItemWidget(QWidget):
         Formatea el texto del campo y lo vuelve a asignar al campo de cantidad 
         y actualiza 'self.field_values'.
         
-        Retorna
-        -------
-        None
+        
         '''
         # cambia puntos por comas, si termina con "." ó "," lo saca
         field_text = self.listItem.lineEdit_productQuantity.text()
@@ -2344,9 +2280,7 @@ class ListItemWidget(QWidget):
             el subtotal de la venta actual, será float si existe y es válido 
             sino None
         
-        Retorna
-        -------
-        None
+        
         '''
         # si el valor es None devuelve TypeError
         try:
@@ -2385,9 +2319,7 @@ class ListItemWidget(QWidget):
         text : str
             el detalle de la venta introducido
 
-        Retorna
-        -------
-        None
+        
             _description_
         '''
         self.field_values.setSaleDetails(curr_sale_detail=text)
@@ -2404,9 +2336,7 @@ class ListItemWidget(QWidget):
         text : str
             el detalle de la venta a mostrar
         
-        Retorna
-        -------
-        None
+        
         '''
         self.listItem.lineEdit_saleDetail.setText(text)
         return None
@@ -2418,9 +2348,7 @@ class ListItemWidget(QWidget):
         Emite la señal 'fieldValuesChanged' con todos los valores de los campos 
         cuando algún campo de 'ListItemValues' cambia.
 
-        Retorna
-        -------
-        None
+        
         '''
         self.fieldsValuesChanged.emit(self.field_values.getValues())
         return None
@@ -2473,9 +2401,7 @@ class DebtorFullName(QObject):
         name : str
             nombre del titular de la cuenta corriente
 
-        Retorna
-        -------
-        None
+        
         '''
         self.__debtor_name = name
         self.nameChanged.emit(self.__debtor_name)
@@ -2491,9 +2417,7 @@ class DebtorFullName(QObject):
         surname : str
             apellido del titular de la cuenta corriente
 
-        Retorna
-        -------
-        None
+        
         '''
         self.__debtor_surname = surname
         self.surnameChanged.emit(self.__debtor_surname)
@@ -2512,9 +2436,7 @@ class DebtorFullName(QObject):
         validity : bool
             nuevo valor de verdad del campo
         
-        Retorna
-        -------
-        None
+        
         '''
         match field:
             case DebtsFields.NAME:
@@ -2535,9 +2457,7 @@ class DebtorFullName(QObject):
         y apellido y emite la señal 'fullNameChecked' con un diccionario con el 
         número de teléfono, dirección y código postal, sino existe emite None.
 
-        Retorna
-        -------
-        None
+        
         '''
         data_count:list[tuple]
         if self.isNameValid() and self.isSurnameValid():
@@ -2649,9 +2569,7 @@ class DebtorContact(QObject):
             número de teléfono del titular de la cuenta corriente, por defecto 
             es None
 
-        Retorna
-        -------
-        None
+        
         '''
         self.__debtor_phone_num = phone_numb
         self.phoneChanged.emit(self.__debtor_phone_num)
@@ -2667,9 +2585,7 @@ class DebtorContact(QObject):
         direction : str, opcional
             dirección del titular de la cuenta corriente, por defecto es None
 
-        Retorna
-        -------
-        None
+        
         '''
         self.__debtor_direction = direction
         self.directionChanged.emit(self.__debtor_direction)
@@ -2685,9 +2601,7 @@ class DebtorContact(QObject):
         postal_code : str, opcional
             código postal del titular de la cuenta corriente, por defecto es None
 
-        Retorna
-        -------
-        None
+        
         '''
         self.__debtor_postal_code = postal_code
         self.postalCodeChanged.emit(str(self.__debtor_postal_code))
@@ -2706,9 +2620,7 @@ class DebtorContact(QObject):
         validity : bool
             nuevo valor de verdad del campo
         
-        Retorna
-        -------
-        None
+        
         '''
         match field:
             case DebtsFields.PHONE_NUMB:
@@ -2813,9 +2725,7 @@ class DebtorDataValues(DebtorFullName, DebtorContact):
         validity : bool
             nuevo valor de verdad del campo
         
-        Retorna
-        -------
-        None
+        
         '''
         match field:
             case DebtsFields.NAME:
@@ -2844,9 +2754,7 @@ class DebtorDataValues(DebtorFullName, DebtorContact):
         y apellido y emite la señal 'fullNameChecked' con un diccionario con el 
         número de teléfono, dirección y código postal, sino existe emite None.
 
-        Retorna
-        -------
-        None
+        
         '''
         if self.isNameValid() and self.isSurnameValid():
             debtor_data = makeReadQuery(
@@ -3144,9 +3052,7 @@ class DebtorDataDialog(QDialog):
         field_validated : DebtsFields
             el campo que se valida
         
-        Retorna
-        -------
-        None
+        
         '''
         
         self.debtor_values.setFieldValidity(
@@ -3213,9 +3119,7 @@ class DebtorDataDialog(QDialog):
         error_message : str
             el mensaje de error a mostrar al usuario
         
-        Retorna
-        -------
-        None
+        
         '''
         self.debtor_values.setFieldValidity(
             field=field_validated,
@@ -3268,9 +3172,7 @@ class DebtorDataDialog(QDialog):
             - SURNAME: formatea el campo de apellido del deudor
             - PHONE_NUMB: formatea el campo de teléfono del deudor
 
-        Retorna
-        -------
-        None
+        
         '''
         field_text:str
         phone_number:PhoneNumber # se usa cuando el campo a formatear es el de núm. de teléfono
@@ -3317,9 +3219,7 @@ class DebtorDataDialog(QDialog):
         new_val : str
             nuevo valor para el campo
 
-        Retorna
-        -------
-        None
+        
         '''
         match field_to_update:
             case DebtsFields.NAME:
@@ -3346,9 +3246,7 @@ class DebtorDataDialog(QDialog):
         Formatea el campo de nombre y crea un QCompleter para el campo de 
         apellido.
         
-        Retorna
-        -------
-        None
+        
         '''
         self.formatField(field_to_format=DebtsFields.NAME)
         
@@ -3369,9 +3267,7 @@ class DebtorDataDialog(QDialog):
         Formatea el campo de apellido y crea un QCompleter para el campo de 
         nombre.
         
-        Retorna
-        -------
-        None
+        
         '''
         self.formatField(field_to_format=DebtsFields.SURNAME)
         
@@ -3400,9 +3296,7 @@ class DebtorDataDialog(QDialog):
             del deudor si existe la combinación de nombre y apellido, sino 
             existe es None
 
-        Retorna
-        -------
-        None
+        
         '''
         if debtor_data:
             # deshabilita los campos
@@ -3429,9 +3323,7 @@ class DebtorDataDialog(QDialog):
         Verifica si todos los valores son válidos y habilita o deshabilita el 
         botón "Aceptar".
 
-        Retorna
-        -------
-        None
+        
         '''
         # activa o desactiva el botón "Aceptar" si todos los campos son válidos
         if self.debtor_values.isAllValid():
@@ -3451,9 +3343,7 @@ class DebtorDataDialog(QDialog):
         Al final emite la señal 'debtorChosen' con el "IDdeudor" del deudor 
         confirmando que se eligió un deudor.
         
-        Retorna
-        -------
-        None
+        
         '''
         count_query:int # consulta para ver si existe el Deudor
         debtor_id:int # IDdeudor para emitir a MainWindow
@@ -3628,6 +3518,15 @@ class ProductsBalanceDialog(QDialog):
         return tuple(data)
 
 
+    def deleteDebts(self) -> None:
+        '''
+        Elimina de deudas los productos seleccionados.
+
+        
+        '''
+        return None
+
+    # eventos
     def showEvent(self, event:QShowEvent):
         '''
         Reimplementación de 'showEvent'. 
@@ -3671,15 +3570,13 @@ class ProductsBalanceDialog(QDialog):
 
 
     def keyPressEvent(self, event:QKeyEvent):
-        '''
-        Reimplementación de 'keyPressEvent'.
-        Lo uso para hacer que al presionar la tecla "esc" se cierre el 
-        dialog, y se rechaza el input.
-        '''
         match event.key():
-            case Qt.Key.Key_Escape:
-                self.hide()
+            case Qt.Key.Key_Escape: # si se presiona "esc" se cierra 
+                self.hide()         #el dialog y se rechaza el input
                 self.reject()
+            
+            case Qt.Key.Key_Delete: # si se presiona "delete" se borran los 
+                self.deleteDebts()  # productos seleccionados
             
             case _:
                 return super(ProductsBalanceDialog, self).keyPressEvent(event)

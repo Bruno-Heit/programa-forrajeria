@@ -244,9 +244,7 @@ class InventoryTableModel(QAbstractTableModel):
         headers : Sequence[str]
             Headers del modelo
         
-        Retorna
-        -------
-        None
+        
         '''
         self.beginResetModel()
         self._data = data
@@ -265,9 +263,7 @@ class InventoryTableModel(QAbstractTableModel):
         selected_rows : Sequence
             secuencia con las filas seleccionadas
         
-        Retorna
-        -------
-        None
+        
         '''
         blocks:list[tuple[int, int]] = []
         start_block:int = selected_rows[0] # puntero al primer elemento del bloque
@@ -324,9 +320,7 @@ class InventoryTableModel(QAbstractTableModel):
         data_to_insert: dict[Any]
             datos con los que actualizar el MODELO
         
-        Retorna
-        -------
-        None
+        
         '''
         if row < 0 or row > self.rowCount():
             return False
@@ -608,9 +602,7 @@ class SalesTableModel(QAbstractTableModel):
         headers : Sequence[str]
             Headers del modelo
         
-        Retorna
-        -------
-        None
+        
         '''
         self.beginResetModel()
         self._data = data
@@ -632,9 +624,7 @@ class SalesTableModel(QAbstractTableModel):
         new_value : str
             la nueva unidad de medida correspondiente al producto
         
-        Retorna
-        -------
-        None
+        
         '''
         self._data[quantity_index.row(), quantity_index.column() + 2] = new_value
         
@@ -652,9 +642,7 @@ class SalesTableModel(QAbstractTableModel):
         selected_rows : Sequence
             secuencia con las filas seleccionadas
         
-        Retorna
-        -------
-        None
+        
         '''
         blocks:list[tuple[int, int]] = []
         start_block:int = selected_rows[0] # puntero al primer elemento del bloque
@@ -1014,9 +1002,7 @@ class DebtsTableModel(QAbstractTableModel):
         headers : Sequence[str]
             Headers del modelo
         
-        Retorna
-        -------
-        None
+        
         '''
         self.beginResetModel()
         self._data = data
@@ -1035,9 +1021,7 @@ class DebtsTableModel(QAbstractTableModel):
         selected_rows : Sequence
             secuencia con las filas seleccionadas
         
-        Retorna
-        -------
-        None
+        
         '''
         blocks:list[tuple[int, int]] = []
         start_block:int = selected_rows[0] # puntero al primer elemento del bloque
@@ -1347,9 +1331,7 @@ class ProductsBalanceModel(QAbstractTableModel):
         selected_rows : Sequence
             secuencia con las filas seleccionadas
         
-        Retorna
-        -------
-        None
+        
         '''
         blocks:list[tuple[int, int]] = []
         start_block:int = selected_rows[0] # puntero al primer elemento del bloque

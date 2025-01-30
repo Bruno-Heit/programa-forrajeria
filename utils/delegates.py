@@ -96,9 +96,7 @@ class InventoryDelegate(QStyledItemDelegate):
         Emite la señal 'fieldIsValid' hacia MainWindow. Funciona principalmente 
         como una extensión de la señal 'validator.validationSucceeded'.
 
-        Retorna
-        -------
-        None
+        
         '''
         self.fieldIsValid.emit(TableViewId.INVEN_TABLE_VIEW)
         return None
@@ -115,9 +113,7 @@ class InventoryDelegate(QStyledItemDelegate):
         feedback_text: str
             Texto con feedback para mostrar al usuario
 
-        Retorna
-        -------
-        None
+        
         '''
         self.fieldIsInvalid.emit((TableViewId.INVEN_TABLE_VIEW, feedback_text))
         return None
@@ -249,9 +245,7 @@ class SalesDelegate(QStyledItemDelegate):
         Emite la señal 'fieldIsValid' hacia MainWindow. Funciona principalmente 
         como una extensión de la señal 'validator.validationSucceeded'.
 
-        Retorna
-        -------
-        None
+        
         '''
         self.fieldIsValid.emit(TableViewId.SALES_TABLE_VIEW)
         return None
@@ -268,9 +262,7 @@ class SalesDelegate(QStyledItemDelegate):
         feedback_text: str
             Texto con feedback para mostrar al usuario
 
-        Retorna
-        -------
-        None
+        
         '''
         self.fieldIsInvalid.emit((TableViewId.SALES_TABLE_VIEW, feedback_text))
         return None
@@ -427,9 +419,7 @@ class DebtsDelegate(QStyledItemDelegate):
         Emite la señal 'fieldIsValid' hacia MainWindow. Funciona principalmente 
         como una extensión de la señal 'validator.validationSucceeded'.
 
-        Retorna
-        -------
-        None
+        
         '''
         self.fieldIsValid.emit(TableViewId.DEBTS_TABLE_VIEW)
         return None
@@ -446,9 +436,7 @@ class DebtsDelegate(QStyledItemDelegate):
         feedback_text: str
             Texto con feedback para mostrar al usuario
 
-        Retorna
-        -------
-        None
+        
         '''
         self.fieldIsInvalid.emit((TableViewId.DEBTS_TABLE_VIEW, feedback_text))
         return None
