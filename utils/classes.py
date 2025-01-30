@@ -3634,20 +3634,18 @@ class ProductsBalanceDialog(QDialog):
         Lo uso en este caso para poder colocar el dialog cerca del cursor 
         cuando se crea y para mostrar el dialog con una animación.
         '''
-        geometry:QRect
-        table_rect:QRect
-        table_top_left:QPoint
-        table_bottom_right:QPoint
+        geometry:QRect = self.geometry()
+        table_rect:QRect = self.__table_view.rect()
+        table_top_left:QPoint = self.__table_view.mapToGlobal(table_rect.topLeft())
+        table_bottom_right:QPoint = self.__table_view.mapToGlobal(table_rect.bottomRight())
         
-        geometry = self.geometry()
         geometry.moveTopRight(QCursor().pos())
         
-        # corrijo la posición para que no se salga del table view
-        table_rect = self.__table_view.rect()
-        table_top_left = self.__table_view.mapToGlobal(table_rect.topLeft())
-        table_bottom_right = self.__table_view.mapToGlobal(table_rect.bottomRight())
+        self.setMaximumHeight(table_rect.height())
         
-        x, y, width, height = geometry.x(), geometry.y(), geometry.width(), geometry.height()
+        # corrijo la posición para que no se salga del table view
+        x, y = geometry.x(), geometry.y()
+        width, height = geometry.width(), geometry.height()
         
         # si se sale por la derecha...
         if x + width > table_bottom_right.x():
