@@ -498,7 +498,11 @@ class DebtsDelegate(QStyledItemDelegate):
         if index.column() == TableViewColumns.DEBTS_BALANCE.value:
             if event.type() == QEvent.Type.MouseButtonDblClick:
                 debtor_id = model.getDebtorID(index)
-                balance_dialog = ProductsBalanceDialog(debtor_id=debtor_id)
+                balance_dialog = ProductsBalanceDialog(
+                    debtor_id=debtor_id,
+                    table_view=self.parent() # le paso el table view para poder redimensionar 
+                )                            # el dialog cuando se crea y no se salga del 
+                                             # rectángulo del table view.
                 
                 #? emite el dialog a MainWindow para que se tenga una referencia, sino se cierra
                 self.balanceDialogCreated.emit(balance_dialog)
