@@ -15,6 +15,10 @@ from utils.enumclasses import (TableViewId)
 from re import (Match, sub, match, findall)
 
 
+# VARIABLES GLOBALES
+DATETIME_FORMAT:str = "d/M/yyyy HH:mm:ss"
+
+
 # consultas sql
 def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=False, 
                             SHOW_ALL:bool=False) -> tuple[str, str]:
