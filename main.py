@@ -158,7 +158,7 @@ class MainWindow(QMainWindow):
         self.ui.tv_sales_data.setItemDelegate(self.sales_delegate)
         
         #* delegado de deudas
-        self.debts_delegate = DebtsDelegate()
+        self.debts_delegate = DebtsDelegate(parent=self.ui.tv_debts_data)
         self.ui.tv_debts_data.setItemDelegate(self.debts_delegate)
         return None
     
