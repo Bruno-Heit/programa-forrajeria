@@ -3572,7 +3572,7 @@ class ProductsBalanceDialog(QDialog):
         self.products_balance_proxy_model.setSourceModel(self.products_balance_model)
         
         self.products_balance_dialog.tv_balance_products.setModel(self.products_balance_proxy_model)
-        self.products_balance_dialog.tv_balance_products.setSortingEnabled(False)
+        self.products_balance_dialog.tv_balance_products.setSortingEnabled(True)
         return None
     
     
@@ -3581,16 +3581,16 @@ class ProductsBalanceDialog(QDialog):
         return None
 
 
-    def __getDebtorProducts(self) -> dict[str, tuple[str, float]]:
+    def __getDebtorProducts(self) -> dict[int, tuple[str, float, str]]:
         '''
         Retorna los productos que el deudor tiene en su cuenta corriente junto 
         con la fecha y hora en la que se realizó la venta y el saldo.
 
         Retorna
         -------
-        dict[int, tuple[str, str, float]]
-            diccionario con el ID_detalle_venta como 'key' y una tupla con la 
-            fecha y hora, nombre del producto y el saldo como 'value'
+        dict[int, tuple[str, float, str]]
+            diccionario con el ID_detalle_venta como 'key' y una tupla con el 
+            nombre del producto, el saldo y la fecha y hora como 'value'
         '''
         with DatabaseRepository() as db_repo:
             data = db_repo.selectRegisters(
