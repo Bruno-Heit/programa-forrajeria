@@ -497,7 +497,6 @@ class DebtsDelegate(QStyledItemDelegate):
         
         if index.column() == TableViewColumns.DEBTS_BALANCE.value:
             if event.type() == QEvent.Type.MouseButtonDblClick:
-                # TODO: quitar el frame al dialog y hacer que se cree al lado de la celda de la cual se crea
                 debtor_id = model.getDebtorID(index)
                 balance_dialog = ProductsBalanceDialog(debtor_id=debtor_id)
                 
@@ -505,6 +504,7 @@ class DebtsDelegate(QStyledItemDelegate):
                 self.balanceDialogCreated.emit(balance_dialog)
                 
                 balance_dialog.show()
+                balance_dialog.raise_()
                 return True
         
         return False
