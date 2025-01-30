@@ -1645,15 +1645,15 @@ class MainWindow(QMainWindow):
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql= '''UPDATE Deudas 
-                                    SET total_adeudado = CASE Detalle_Ventas.abonado
-                                        WHEN 0 THEN Productos.precio_unit
-                                        ELSE ROUND(Productos.precio_unit - Detalle_Ventas.abonado, 2)
-                                    END
-                                    FROM Detalle_Ventas, Ventas, Productos
+                                    SET total_adeudado = CASE 
+                                        WHEN Detalle_Ventas.abonado = 0 THEN Productos.precio_unit * Detalle_Ventas.cantidad
+                                        ELSE ROUND(Productos.precio_unit * Detalle_Ventas.cantidad - Detalle_Ventas.abonado, 2) 
+                                    END 
+                                    FROM Detalle_Ventas, Productos, Ventas 
                                     WHERE 
-                                        Productos.IDproducto = ? AND
-                                        Detalle_Ventas.IDproducto = Productos.IDproducto AND
                                         Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
+                                        Productos.IDproducto = ? AND 
+                                        Detalle_Ventas.IDproducto = Productos.IDproducto AND 
                                         Detalle_Ventas.IDventa = Ventas.IDventa AND 
                                         Ventas.detalles_venta LIKE "%(P. PÚBLICO)%";''',
                         upd_params=self._inv_model_data_acc[:, 1:] if not params else params,
@@ -1665,15 +1665,15 @@ class MainWindow(QMainWindow):
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql= '''UPDATE Deudas 
-                                    SET total_adeudado = CASE Detalle_Ventas.abonado
-                                        WHEN 0 THEN Productos.precio_comerc
-                                        ELSE ROUND(Productos.precio_comerc - Detalle_Ventas.abonado, 2)
-                                    END
-                                    FROM Detalle_Ventas, Ventas, Productos
+                                    SET total_adeudado = CASE 
+                                        WHEN Detalle_Ventas.abonado = 0 THEN Productos.precio_comerc * Detalle_Ventas.cantidad
+                                        ELSE ROUND(Productos.precio_comerc * Detalle_Ventas.cantidad - Detalle_Ventas.abonado, 2) 
+                                    END 
+                                    FROM Detalle_Ventas, Productos, Ventas 
                                     WHERE 
-                                        Productos.IDproducto = ? AND
-                                        Detalle_Ventas.IDproducto = Productos.IDproducto AND
                                         Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
+                                        Productos.IDproducto = ? AND 
+                                        Detalle_Ventas.IDproducto = Productos.IDproducto AND 
                                         Detalle_Ventas.IDventa = Ventas.IDventa AND 
                                         Ventas.detalles_venta LIKE "%(P. COMERCIAL)%";''',
                         upd_params=self._inv_model_data_acc[:, 1:] if not params else params,
