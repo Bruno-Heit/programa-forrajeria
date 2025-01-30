@@ -1440,7 +1440,7 @@ class MainWindow(QMainWindow):
                                # el acumulador
         
         match column:
-            case 0: # categoría
+            case TableViewColumns.INV_CATEGORY.value:
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Productos 
@@ -1451,7 +1451,7 @@ class MainWindow(QMainWindow):
                         upd_params=(new_val, IDproduct,)
                         )
             
-            case 1: # nombre del producto
+            case TableViewColumns.INV_PRODUCT_NAME.value:
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Productos 
@@ -1460,7 +1460,7 @@ class MainWindow(QMainWindow):
                         upd_params=(new_val, IDproduct,)
                         )
             
-            case 2: # descripción
+            case TableViewColumns.INV_DECRIPTION.value:
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Productos 
@@ -1469,7 +1469,7 @@ class MainWindow(QMainWindow):
                         upd_params=(new_val, IDproduct,)
                         )
             
-            case 3: # stock
+            case TableViewColumns.INV_STOCK.value:
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Productos 
@@ -1478,7 +1478,7 @@ class MainWindow(QMainWindow):
                         upd_params=(new_val[0], new_val[1], IDproduct,)
                         )
             
-            case 4: # precio normal
+            case TableViewColumns.INV_NORMAL_PRICE.value:
                 # si el sidebar de porcentajes está abierto se modifican porcentajes
                 if not self.ui.inventory_side_bar_body.isHidden():
                     # actualiza contador de registros y acumulador
@@ -1523,7 +1523,7 @@ class MainWindow(QMainWindow):
                         params=(IDproduct,)
                     )
             
-            case 5: # precio comercial
+            case TableViewColumns.INV_COMERCIAL_PRICE.value:
                 # si el sidebar de porcentajes está abierto se modifican porcentajes
                 if not self.ui.inventory_side_bar_body.isHidden():
                     var_loaded = self.__updateInventoryPricesBatchVar(
@@ -1617,7 +1617,9 @@ class MainWindow(QMainWindow):
         return has_finished
 
  
-    def __updateDebtsOnPriceChange(self, price_type:InventoryPriceType, params:tuple[int]=None, executemany:bool=False) -> None:
+    def __updateDebtsOnPriceChange(self, price_type:InventoryPriceType, 
+                                   params:tuple[int]=None, 
+                                   executemany:bool=False) -> None:
         '''
         Actualiza el precio normal / comercial de un producto en Deudas cuando 
         se actualiza en la tabla Productos.
@@ -1637,45 +1639,43 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
-        match price_type.name:
-            case "NORMAL":
+        match price_type:
+            case InventoryPriceType.NORMAL:
                 # actualiza en Deudas
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
-                        upd_sql='''
-                            UPDATE Deudas 
-                            SET total_adeudado = CASE Detalle_Ventas.abonado
-                                WHEN 0 THEN Productos.precio_unit
-                                ELSE ROUND(Productos.precio_unit - Detalle_Ventas.abonado, 2)
-                            END
-                            FROM Detalle_Ventas, Ventas, Productos
-                            WHERE 
-                                Productos.IDproducto = ? AND
-                                Detalle_Ventas.IDproducto = Productos.IDproducto AND
-                                Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
-                                Detalle_Ventas.IDventa = Ventas.IDventa AND 
-                                Ventas.detalles_venta LIKE "%(P. NORMAL)%";''',
-                            upd_params=self._inv_model_data_acc[:, 1:] if not params else params,
-                            executemany=executemany
-                            )
+                        upd_sql= '''UPDATE Deudas 
+                                    SET total_adeudado = CASE Detalle_Ventas.abonado
+                                        WHEN 0 THEN Productos.precio_unit
+                                        ELSE ROUND(Productos.precio_unit - Detalle_Ventas.abonado, 2)
+                                    END
+                                    FROM Detalle_Ventas, Ventas, Productos
+                                    WHERE 
+                                        Productos.IDproducto = ? AND
+                                        Detalle_Ventas.IDproducto = Productos.IDproducto AND
+                                        Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
+                                        Detalle_Ventas.IDventa = Ventas.IDventa AND 
+                                        Ventas.detalles_venta LIKE "%(P. PÚBLICO)%";''',
+                        upd_params=self._inv_model_data_acc[:, 1:] if not params else params,
+                        executemany=executemany
+                    )
         
-            case "COMERCIAL":
+            case InventoryPriceType.COMERCIAL:
                 # actualiza en Deudas
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
-                        upd_sql='''
-                            UPDATE Deudas 
-                            SET total_adeudado = CASE Detalle_Ventas.abonado
-                                WHEN 0 THEN Productos.precio_comerc
-                                ELSE ROUND(Productos.precio_comerc - Detalle_Ventas.abonado, 2)
-                            END
-                            FROM Detalle_Ventas, Ventas, Productos
-                            WHERE 
-                                Productos.IDproducto = ? AND
-                                Detalle_Ventas.IDproducto = Productos.IDproducto AND
-                                Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
-                                Detalle_Ventas.IDventa = Ventas.IDventa AND 
-                                Ventas.detalles_venta LIKE "%(P. COMERCIAL)%";''',
+                        upd_sql= '''UPDATE Deudas 
+                                    SET total_adeudado = CASE Detalle_Ventas.abonado
+                                        WHEN 0 THEN Productos.precio_comerc
+                                        ELSE ROUND(Productos.precio_comerc - Detalle_Ventas.abonado, 2)
+                                    END
+                                    FROM Detalle_Ventas, Ventas, Productos
+                                    WHERE 
+                                        Productos.IDproducto = ? AND
+                                        Detalle_Ventas.IDproducto = Productos.IDproducto AND
+                                        Deudas.IDdeuda = Detalle_Ventas.IDdeuda AND 
+                                        Detalle_Ventas.IDventa = Ventas.IDventa AND 
+                                        Ventas.detalles_venta LIKE "%(P. COMERCIAL)%";''',
                         upd_params=self._inv_model_data_acc[:, 1:] if not params else params,
                         executemany=executemany
                     )
