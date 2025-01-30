@@ -41,7 +41,7 @@ class InventoryDelegate(QStyledItemDelegate):
         validator = None
         
         match index.column():
-            case 0: # categoría
+            case TableViewColumns.INV_CATEGORY.value: # categoría
                 editor = QComboBox(parent)
                 editor.setEditable(False)
                 editor.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
@@ -49,7 +49,7 @@ class InventoryDelegate(QStyledItemDelegate):
                 editor.addItems(getProductsCategories())
                 editor.setPlaceholderText("Seleccionar una categoría")
             
-            case 1: # nombre
+            case TableViewColumns.INV_PRODUCT_NAME.value: # nombre
                 editor = QLineEdit(parent)
                 editor.setCompleter(createCompleter(type=3))
                 editor.setMaxLength(50)
@@ -60,11 +60,11 @@ class InventoryDelegate(QStyledItemDelegate):
                 validator.validationFailed.connect(self.__onInvalidField)
                 editor.setValidator(validator)
             
-            case 2: # descripción
+            case TableViewColumns.INV_DESCRIPTION.value: # descripción
                 editor = QLineEdit(parent)
                 editor.setMaxLength(200)
             
-            case 3: # stock
+            case TableViewColumns.INV_STOCK.value: # stock
                 editor = QLineEdit(parent)
                 editor.setMaxLength(31)
                 validator = ProductStockValidator(parent=editor)
@@ -72,7 +72,7 @@ class InventoryDelegate(QStyledItemDelegate):
                 validator.validationFailed.connect(self.__onInvalidField)
                 editor.setValidator(validator)
                 
-            case 4: # precio unitario
+            case TableViewColumns.INV_NORMAL_PRICE.value: # precio unitario
                 editor = QLineEdit(parent)
                 editor.setMaxLength(10)
                 validator = ProductUnitPriceValidator(editor)
@@ -80,7 +80,7 @@ class InventoryDelegate(QStyledItemDelegate):
                 validator.validationFailed.connect(self.__onInvalidField)
                 editor.setValidator(validator)
             
-            case 5: # precio comercial
+            case TableViewColumns.INV_COMERCIAL_PRICE.value: # precio comercial
                 editor = QLineEdit(parent)
                 editor.setMaxLength(10)
                 validator = ProductComercPriceValidator(editor)
@@ -197,21 +197,21 @@ class SalesDelegate(QStyledItemDelegate):
         validator = None
         
         match index.column():
-            case 0: # detalle de venta
+            case TableViewColumns.SALES_DETAIL.value: # detalle de venta
                 editor = QLineEdit(parent)
                 validator = SaleDetailsValidator(parent)
                 validator.validationSucceeded.connect(self.__onValidField)
                 validator.validationFailed.connect(self.__onInvalidField)
                 editor.setValidator(validator)
             
-            case 1: # cantidad
+            case TableViewColumns.SALES_QUANTITY.value: # cantidad
                 editor = QLineEdit(parent)
                 validator = SaleQuantityValidator(parent)
                 validator.validationSucceeded.connect(self.__onValidField)
                 validator.validationFailed.connect(self.__onInvalidField)
                 editor.setValidator(validator)
             
-            case 2: # producto
+            case TableViewColumns.SALES_PRODUCT_NAME.value: # producto
                 editor = QComboBox(parent)
                 editor.setEditable(False)
                 editor.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
@@ -219,20 +219,20 @@ class SalesDelegate(QStyledItemDelegate):
                 editor.addItems(getProductNames())
                 editor.setPlaceholderText("Seleccionar un producto...")
             
-            case 3: # costo total
+            case TableViewColumns.SALES_TOTAL_COST.value: # costo total
                 editor = QLineEdit(parent)
                 validator = SaleTotalCostValidator(parent)
                 validator.validationSucceeded.connect(self.__onValidField)
                 validator.validationFailed.connect(self.__onInvalidField)
                 editor.setValidator(validator)
             
-            case 4: # abonado
+            case TableViewColumns.SALES_TOTAL_PAID.value: # abonado
                 editor = QLineEdit(parent)
                 validator = SalePaidValidator(parent)
                 validator.validationSucceeded.connect(self.__onValidField)
                 validator.validationFailed.connect(self.__onInvalidField)
 
-            case 5: # fecha y hora
+            case TableViewColumns.SALES_DATETIME.value: # fecha y hora
                 editor = QDateTimeEdit(parent)
                 editor.setDisplayFormat(self._datetime_format)
                 editor.setCalendarPopup(True)
@@ -372,43 +372,11 @@ class DebtsDelegate(QStyledItemDelegate):
     
     def createEditor(self, parent:QWidget, option: QStyleOptionViewItem, 
                      index:QModelIndex | QPersistentModelIndex) -> QWidget:
-        editor:QWidget
+        editor:QWidget | QDateTimeEdit
         validator = None
         match index.column():
-            case TableViewColumns.DEBTS_NAME.value:
-                editor = QLineEdit(parent)
-                validator = DebtorNameValidator(editor)
-                validator.validationSucceeded.connect(self.__onValidField)
-                validator.validationFailed.connect(self.__onInvalidField)
-                editor.setValidator(validator)
-            
-            case TableViewColumns.DEBTS_SURNAME.value:
-                editor = QLineEdit(parent)
-                validator = DebtorSurnameValidator(editor)
-                validator.validationSucceeded.connect(self.__onValidField)
-                validator.validationFailed.connect(self.__onInvalidField)
-                editor.setValidator(validator)
-            
-            case TableViewColumns.DEBTS_PHONE_NUMBER.value:
-                editor = QLineEdit(parent)
-                validator = DebtorPhoneNumberValidator(editor)
-                validator.validationSucceeded.connect(self.__onValidField)
-                validator.validationFailed.connect(self.__onInvalidField)
-                editor.setValidator(validator)
-            
-            case TableViewColumns.DEBTS_DIRECTION.value:
-                editor = QLineEdit(parent)
-                validator = DebtorDirectionValidator(editor)
-                validator.validationSucceeded.connect(self.__onValidField)
-                validator.validationFailed.connect(self.__onInvalidField)
-                editor.setValidator(validator)
-            
-            case TableViewColumns.DEBTS_POSTAL_CODE.value:
-                editor = QLineEdit(parent)
-                validator = DebtorPostalCodeValidator(editor)
-                validator.validationSucceeded.connect(self.__onValidField)
-                validator.validationFailed.connect(self.__onInvalidField)
-                editor.setValidator(validator)
+            case TableViewColumns.PRODS_BAL_DATETIME.value:
+                
             
         return editor
     
