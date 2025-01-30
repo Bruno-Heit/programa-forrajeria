@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QLineEdit, QCompleter, 
                                QWidget, QGraphicsDropShadowEffect)
-from PySide6.QtCore import (Signal, QSize, QRect, QPropertyAnimation, QEasingCurve)
+from PySide6.QtCore import (Signal, QSize, QRect, QPropertyAnimation, QEasingCurve, 
+                            QPoint)
 from PySide6.QtGui import (QIcon, QShowEvent, QCursor, QKeyEvent, QColor)
 
 from ui.ui_productDialog import Ui_Dialog
@@ -3523,12 +3524,13 @@ class DebtorDataDialog(QDialog):
 
 class ProductsBalanceDialog(QDialog):
     
-    def __init__(self, debtor_id:int) -> None:
+    def __init__(self, debtor_id:int, table_view:QTableView) -> None:
         super(ProductsBalanceDialog, self).__init__()
         self.products_balance_dialog = Ui_ProductsBalance()
         self.products_balance_dialog.setupUi(self)
         
         self.debtor_id:int = debtor_id
+        self.__table_view:QTableView = table_view
         
         self.__products_balance_data = self.__getDebtorProducts()
         
@@ -3632,9 +3634,38 @@ class ProductsBalanceDialog(QDialog):
         Lo uso en este caso para poder colocar el dialog cerca del cursor 
         cuando se crea y para mostrar el dialog con una animación.
         '''
-        geometry:QRect = self.geometry()
+        geometry:QRect
+        table_rect:QRect
+        table_top_left:QPoint
+        table_bottom_right:QPoint
+        
+        geometry = self.geometry()
         geometry.moveTopRight(QCursor().pos())
-        self.setGeometry(geometry)
+        
+        # corrijo la posición para que no se salga del table view
+        table_rect = self.__table_view.rect()
+        table_top_left = self.__table_view.mapToGlobal(table_rect.topLeft())
+        table_bottom_right = self.__table_view.mapToGlobal(table_rect.bottomRight())
+        
+        x, y, width, height = geometry.x(), geometry.y(), geometry.width(), geometry.height()
+        
+        # si se sale por la derecha...
+        if x + width > table_bottom_right.x():
+            x = table_bottom_right.x() - width
+        
+        # si se sale por la izquierda...
+        if x < table_top_left.x():
+            x = table_top_left.x()
+        
+        # si se sale por abajo...
+        if y + height > table_bottom_right.y():
+            y = table_bottom_right.y() - height
+        
+        # si se sale por arriba...
+        if y < table_top_left.y():
+            y = table_top_left.y()
+            
+        self.setGeometry(x, y, width, height)
         
         # muestra el dialog con una animación
         self.fade_in_anim.start()
