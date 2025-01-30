@@ -745,9 +745,12 @@ class DebtsTableModel(QAbstractTableModel):
         6 ┇ total_balance
     
     ### columnas:
-        0: nombre completo (nombre + apellido)
-        1: contacto (núm. tel. + dirección + código postal)
-        2: balance (balance total)
+        0: nombre
+        1: apellido
+        2: núm. tel.
+        3: dirección
+        4: código postal
+        5: balance (balance total)
     '''
     # señal para actualizar datos en MainWindow
     dataToUpdate:Signal = Signal(object)
