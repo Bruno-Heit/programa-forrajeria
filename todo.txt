@@ -26,6 +26,10 @@ CAMBIOS A HACER/IMPLEMENTACIONES NUEVAS:
 	☐ Implementar el sistema de deudas.
 
 	☑ Implementar sistema de búsqueda con search-bars para filtrar contenido de las tablas.
+	☐ Implementar en el sistema de búsqueda la opción de una búsqueda más "tolerante" usando el módulo 
+	  'unicodedata' para convertir variaciones ortográficas de caracteres (ej.: u, ú, ü ...) como un solo 
+	  caracter.
+	☐ Aplicar la distancia de Levenshtein para tolerar errores ortográficos pequeños.
 	☐ Expandir la capacidad de búsqueda con search-bars para lograr filtros avanzados usando operadores 
 	  matemáticos (> < >= <= = !=) y operadores lógicos (AND OR NOT).
 
