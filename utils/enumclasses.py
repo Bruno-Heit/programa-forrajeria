@@ -280,4 +280,4 @@ class Regex(StrEnum):
     DEBTS_PHONE_NUMB = "\+?[0-9 -]{0,20}"
     DEBTS_DIRECTION = "[^;\"']{0,256}"
     
-    PRODS_BAL_BALANCE = "[+-]?(\d*(.|,)\d+|\d+(.|,)\d*|\d+)"
+    PRODS_BAL_BALANCE = "[+-]?[\d]{0,8}(\.|,)?[\d]{0,2}"
