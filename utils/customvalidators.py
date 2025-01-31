@@ -551,9 +551,30 @@ class DebtorPostalCodeValidator(QIntValidator):
 
 
 
-
-
-
+#¡ tabla PRODUCTOS ADEUDADOS =======================================================================================
+class ProductBalanceValidator(QRegularExpressionValidator):
+    '''Validador para los campos donde el usuario pueda modificar el balance de un producto.'''
+    validationFailed:Signal = Signal()
+    validationSucceeded:Signal = Signal()
+    
+    def __init__(self, parent=None):
+        super(ProductBalanceValidator, self).__init__()
+        self.pattern:Pattern = compile(Regex.PRODS_BAL_BALANCE.value, IGNORECASE)
+    
+    
+    def validate(self, text: str, pos: int) -> object:
+        if text.strip() == "":
+            self.validationFailed.emit()
+            return self.State.Intermediate, text, pos
+        
+        elif fullmatch(self.pattern, text):
+            self.validationSucceeded.emit()
+            return self.State.Acceptable, text, pos
+        
+        else:
+            self.validationFailed.emit()
+            return self.State.Invalid, text, pos
+        
 
 
 
