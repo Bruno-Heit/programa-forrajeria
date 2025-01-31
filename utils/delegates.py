@@ -364,20 +364,47 @@ class DebtsDelegate(QStyledItemDelegate):
     balanceDialogCreated:Signal = Signal(QObject) # cuando se edita la columna de balance 
                             # se emite la referencia al dialog a MainWindow, sino se cierra
                             # el dialog porque lo captura el garbage collector.
-    
-    #* columnas: 0: nombre completo (nombre + apellido)
-    #*           1: contacto (tel. + dirección + código postal)
-    #*           2: balance (suma total + botón p/mostrar productos)
-    
+
     
     def createEditor(self, parent:QWidget, option: QStyleOptionViewItem, 
                      index:QModelIndex | QPersistentModelIndex) -> QWidget:
-        editor:QWidget | QDateTimeEdit
+        editor:QWidget
         validator = None
         match index.column():
-            case TableViewColumns.PRODS_BAL_DATETIME.value:
-                
+            case TableViewColumns.DEBTS_NAME.value:
+                editor = QLineEdit(parent)
+                validator = DebtorNameValidator(editor)
+                validator.validationSucceeded.connect(self.__onValidField)
+                validator.validationFailed.connect(self.__onInvalidField)
+                editor.setValidator(validator)
             
+            case TableViewColumns.DEBTS_SURNAME.value:
+                editor = QLineEdit(parent)
+                validator = DebtorSurnameValidator(editor)
+                validator.validationSucceeded.connect(self.__onValidField)
+                validator.validationFailed.connect(self.__onInvalidField)
+                editor.setValidator(validator)
+            
+            case TableViewColumns.DEBTS_PHONE_NUMBER.value:
+                editor = QLineEdit(parent)
+                validator = DebtorPhoneNumberValidator(editor)
+                validator.validationSucceeded.connect(self.__onValidField)
+                validator.validationFailed.connect(self.__onInvalidField)
+                editor.setValidator(validator)
+            
+            case TableViewColumns.DEBTS_DIRECTION.value:
+                editor = QLineEdit(parent)
+                validator = DebtorDirectionValidator(editor)
+                validator.validationSucceeded.connect(self.__onValidField)
+                validator.validationFailed.connect(self.__onInvalidField)
+                editor.setValidator(validator)
+            
+            case TableViewColumns.DEBTS_POSTAL_CODE.value:
+                editor = QLineEdit(parent)
+                validator = DebtorPostalCodeValidator(editor)
+                validator.validationSucceeded.connect(self.__onValidField)
+                validator.validationFailed.connect(self.__onInvalidField)
+                editor.setValidator(validator)
         return editor
     
     
