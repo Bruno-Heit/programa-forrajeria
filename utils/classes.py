@@ -20,6 +20,7 @@ from utils.enumclasses import (WidgetStyle, InventoryPriceType,
                                ModelDataCols, ModelHeaders)
 from utils.model_classes import (ProductsBalanceModel)
 from utils.proxy_models import (ProductsBalanceProxyModel)
+from utils.productbalancedelegate import (ProductsBalanceDelegate)
 
 from sqlite3 import (Error as sqlite3Error)
 from phonenumbers import (parse, format_number, is_valid_number, 
@@ -3427,6 +3428,7 @@ class ProductsBalanceDialog(QDialog):
         self.setup_ui()
         self.setup_validators()
         self.setup_model()
+        self.setup_delegate()
         self.setup_signals()
         
         self.adjustSize()
@@ -3480,6 +3482,16 @@ class ProductsBalanceDialog(QDialog):
         return None
     
     
+    def setup_delegate(self) -> None:
+        self.products_balance_delegate = ProductsBalanceDelegate(
+            self.products_balance_dialog.tv_balance_products
+        )
+        self.products_balance_dialog.tv_balance_products.setItemDelegate(
+            self.products_balance_delegate
+        )
+        return None
+    
+    
     def setup_signals(self) -> None:
         ...
         return None
@@ -3521,9 +3533,8 @@ class ProductsBalanceDialog(QDialog):
     def deleteDebts(self) -> None:
         '''
         Elimina de deudas los productos seleccionados.
-
-        
         '''
+        ...
         return None
 
     # eventos
