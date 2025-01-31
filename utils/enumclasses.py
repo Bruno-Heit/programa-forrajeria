@@ -279,3 +279,5 @@ class Regex(StrEnum):
     DEBTS_SURNAME = "[^;\"']{1,40}"
     DEBTS_PHONE_NUMB = "\+?[0-9 -]{0,20}"
     DEBTS_DIRECTION = "[^;\"']{0,256}"
+    
+    PRODS_BAL_BALANCE = "[+-]?(\d*(.|,)\d+|\d+(.|,)\d*|\d+)"
