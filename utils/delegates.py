@@ -8,8 +8,7 @@ from PySide6.QtCore import (Qt, QModelIndex, QSize, QPersistentModelIndex,
                             QAbstractItemModel, Signal, Slot, QDateTime, QEvent, 
                             QObject)
 
-from utils.enumclasses import (TableViewId, TableViewColumns, ModelDataCols, 
-                               DebtsFields, Regex)
+from utils.enumclasses import (TableViewId, TableViewColumns, Regex)
 from utils.functionutils import (getProductsCategories, createCompleter, getProductNames)
 from utils.customvalidators import (ProductNameValidator, ProductStockValidator, 
                                     ProductUnitPriceValidator, ProductComercPriceValidator, 
@@ -353,7 +352,7 @@ class SalesDelegate(QStyledItemDelegate):
 
 
 class DebtsDelegate(QStyledItemDelegate):
-    '''Clase DELEGADO que se encarga de personalizar/editar celdas del QTableView de ventas, 
+    '''Clase DELEGADO que se encarga de personalizar/editar celdas del QTableView de deudas, 
     además, normalmente, el método 'setModelData' se encarga de validar datos, pero en este 
     caso no es necesario ya que cada editor (dependiendo de la columna) tiene un validador.'''
     fieldIsValid:Signal = Signal(object) # extensión de 'validator.validationSucceeded', 
@@ -365,6 +364,7 @@ class DebtsDelegate(QStyledItemDelegate):
                             # se emite la referencia al dialog a MainWindow, sino se cierra
                             # el dialog porque lo captura el garbage collector.
 
+    # TODO: reimplementar setModelData
     
     def createEditor(self, parent:QWidget, option: QStyleOptionViewItem, 
                      index:QModelIndex | QPersistentModelIndex) -> QWidget:
@@ -496,7 +496,6 @@ class DebtsDelegate(QStyledItemDelegate):
         
         return False
             
-
 
 
 
