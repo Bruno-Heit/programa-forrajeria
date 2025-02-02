@@ -364,8 +364,6 @@ class DebtsDelegate(QStyledItemDelegate):
                             # se emite la referencia al dialog a MainWindow, sino se cierra
                             # el dialog porque lo captura el garbage collector.
 
-    # TODO: reimplementar setModelData
-    
     def createEditor(self, parent:QWidget, option: QStyleOptionViewItem, 
                      index:QModelIndex | QPersistentModelIndex) -> QWidget:
         editor:QWidget
