@@ -195,13 +195,6 @@ class MainWindow(QMainWindow):
         #¡ variables de deudas
         self._debts_model_data_acc:ndarray[Any] = None #? acumulador temp. de datos para modelo de Deudas.
         
-        #? dialog creado con el delegado de deudas, de esta forma se mantiene la 
-        #? referencia al objeto y no lo borra el garbage collector. Eso sucede 
-        #? porque el dialog es no-modal, o sea es creado con show() no con exec(), 
-        #? y porque no tiene un parent asociado, por lo que no tiene una referencia 
-        #? directa.
-        self.__debtor_products_balance_dialog:ProductsBalanceDialog = None
-        
         return None
 
 
