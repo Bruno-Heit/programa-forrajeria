@@ -1115,20 +1115,20 @@ class ProductsBalanceModel(QAbstractTableModel):
     # señal para actualizar datos en MainWindow
     dataToUpdate:Signal = Signal(object)
 
-    def __init__(self, data:tuple[tuple[int, str, str, float]]=None, headers:Sequence[str]=None, 
+    def __init__(self, data:ndarray=None, headers:Sequence[str]=None, 
                  parent:QObject = ...) -> None:
         super(ProductsBalanceModel, self).__init__()
         
-        self._data:tuple[tuple[int, str, str, float]] = data
+        self._data:ndarray = data
         self._headers = headers
         self._parent = parent
     
-    # TODO: implementar los métodos setData, removeSelectedModelRows, removeRows e insertRows
+    # TODO: implementar los métodos removeSelectedModelRows, removeRows e insertRows
     
     #¡ dimensiones
     def rowCount(self, parent:QObject = ...) -> int:
         if self._data is not None:
-            return len(self._data)
+            return self._data.shape[0]
     
     
     def columnCount(self, parent:QObject = ...):
@@ -1152,7 +1152,7 @@ class ProductsBalanceModel(QAbstractTableModel):
             flag que determina la existencia de datos en el modelo
         '''
         try:
-            if len(self._data):
+            if self._data.shape:
                 return True
         
         except (NameError, AttributeError):
@@ -1162,94 +1162,60 @@ class ProductsBalanceModel(QAbstractTableModel):
     
     
     #¡ datos    
-    # def setData(self, index:QModelIndex | QPersistentModelIndex, value:Any, 
-    #             role:Qt.ItemDataRole = Qt.ItemDataRole.EditRole) -> bool:
-    #     '''
-    #     Realiza la actualización de datos dentro del modelo y además emite la 
-    #     señal 'dataToUpdate' con el índice, el IDdeudor y el valor nuevo para 
-    #     poder actualizar la base de datos a partir de esos datos.
-    #     '''
-    #     if role == Qt.ItemDataRole.EditRole:
-    #         match index.column():
-    #             case TableViewColumns.DEBTS_NAME.value: # nombre
-    #                 if value == self.data(index):
-    #                     return False
-    #                 self._data[index.row(), ModelDataCols.DEBTS_NAME.value] = value
+    def setData(self, index:QModelIndex | QPersistentModelIndex, value:Any, 
+                role:Qt.ItemDataRole = Qt.ItemDataRole.EditRole) -> bool:
+        '''
+        Realiza la actualización de datos dentro del modelo y además emite la 
+        señal 'dataToUpdate' con el índice, el IDdeudor y el valor nuevo para 
+        poder actualizar la base de datos a partir de esos datos.
+        '''
+        if role == Qt.ItemDataRole.EditRole:
+            match index.column():
+                case TableViewColumns.PRODS_BAL_DATETIME.value:
+                    if value == self.data(index):
+                        return False
+                    self._data[index.row(), ModelDataCols.PRODS_BAL_DATETIME.value] = value
                     
-    #                 # actualiza nombre en MainWindow
-    #                 self.dataToUpdate.emit(
-    #                     {'column': index.column(),
-    #                      'IDdebtor': self._data[index.row(), ModelDataCols.DEBTS_IDDEBTOR.value],
-    #                      'new_value': value}
-    #                     )
+                    # actualiza la fecha y la hora en el dialog
+                    self.dataToUpdate.emit(
+                        {'column': index.column(),
+                         'ID_sales_detail': self._data[index.row(), ModelDataCols.PRODS_BAL_ID_SALES_DETAIL.value],
+                         'new_value': value}
+                        )
                     
-    #                 self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
-    #                 return True
+                    self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
+                    return True
         
-    #             case TableViewColumns.DEBTS_SURNAME.value: # apellido
-    #                 if value == self.data(index):
-    #                     return False
-    #                 self._data[index.row(), ModelDataCols.DEBTS_SURNAME.value] = value
+                case TableViewColumns.PRODS_BAL_DESCRIPTION.value:
+                    if value == self.data(index):
+                        return False
+                    self._data[index.row(), ModelDataCols.PRODS_BAL_DESCRIPTION.value] = value
                     
-    #                 # actualiza apellido en MainWindow
-    #                 self.dataToUpdate.emit(
-    #                     {'column': index.column(),
-    #                      'IDdebtor': self._data[index.row(), ModelDataCols.DEBTS_IDDEBTOR.value],
-    #                      'new_value': value}
-    #                 )
+                    # actualiza la descripción en el dialog
+                    self.dataToUpdate.emit(
+                        {'column': index.column(),
+                         'ID_sales_detail': self._data[index.row(), ModelDataCols.PRODS_BAL_ID_SALES_DETAIL.value],
+                         'new_value': value}
+                    )
                     
-    #                 self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
-    #                 return True
+                    self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
+                    return True
                     
-    #             case TableViewColumns.DEBTS_PHONE_NUMBER.value: # número de teléfono
-    #                 if value == self.data(index):
-    #                     return False
-    #                 self._data[index.row()][index.column() + 2] = value
+                case TableViewColumns.PRODS_BAL_BALANCE.value:
+                    if value == self.data(index):
+                        return False
+                    self._data[index.row(), ModelDataCols.PRODS_BAL_BALANCE.value] = value
 
-    #                 # actualiza el número de teléfono en MainWindow
-    #                 self.dataToUpdate.emit(
-    #                     {'column': index.column(),
-    #                      'IDdebtor': self._data[index.row(), ModelDataCols.DEBTS_IDDEBTOR.value],
-    #                      'new_value': value}
-    #                 )
+                    # actualiza el balance en el dialog
+                    self.dataToUpdate.emit(
+                        {'column': index.column(),
+                         'ID_sales_detail': self._data[index.row(), ModelDataCols.PRODS_BAL_ID_SALES_DETAIL.value],
+                         'new_value': float(value)}
+                    )
                     
-    #                 self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
-    #                 return True
-                
-    #             case TableViewColumns.DEBTS_DIRECTION.value: # dirección
-    #                 if value == self.data(index):
-    #                     return False
-    #                 self._data[index.row(), ModelDataCols.DEBTS_DIRECTION.value] = value
-
-    #                 # actualiza la dirección en MainWindow
-    #                 self.dataToUpdate.emit(
-    #                     {'column': index.column(),
-    #                      'IDdebtor': self._data[index.row(), ModelDataCols.DEBTS_IDDEBTOR.value],
-    #                      'new_value': value}
-    #                 )
-                    
-    #                 self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
-    #                 return True
-
-    #             case TableViewColumns.DEBTS_POSTAL_CODE.value: # código postal
-    #                 if value == self.data(index):
-    #                     return False
-    #                 self._data[index.row(), ModelDataCols.DEBTS_POSTAL_CODE.value] = value
-
-    #                 # actualiza el código postal en MainWindow
-    #                 self.dataToUpdate.emit(
-    #                     {'column': index.column(),
-    #                         'IDdebtor': self._data[index.row(), ModelDataCols.DEBTS_IDDEBTOR.value],
-    #                         'new_value': value}
-    #                 )
-                            
-    #                 self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
-    #                 return True
-                
-    #             case TableViewColumns.DEBTS_BALANCE.value: # balance
-    #                 ...
-        
-    #     return False
+                    self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
+                    return True
+        return False
     
     
     def data(self, index:QModelIndex | QPersistentModelIndex, 
@@ -1264,22 +1230,22 @@ class ProductsBalanceModel(QAbstractTableModel):
             case Qt.ItemDataRole.DisplayRole:
                 match col:
                     case TableViewColumns.PRODS_BAL_DATETIME.value:
-                        return self._data[row][ModelDataCols.PRODS_BAL_DATETIME.value]
+                        return self._data[row, ModelDataCols.PRODS_BAL_DATETIME.value]
                     
                     case TableViewColumns.PRODS_BAL_DESCRIPTION.value:
-                        return f"{self._data[row][ModelDataCols.PRODS_BAL_DESCRIPTION.value]}"
+                        return f"{self._data[row, ModelDataCols.PRODS_BAL_DESCRIPTION.value]}"
                     
                     case TableViewColumns.PRODS_BAL_BALANCE.value:
-                        return self._data[row][ModelDataCols.PRODS_BAL_BALANCE.value]
+                        return self._data[row, ModelDataCols.PRODS_BAL_BALANCE.value]
             
             case Qt.ItemDataRole.BackgroundRole:
-                if col == TableViewColumns.PRODS_BAL_BALANCE.value: 
+                if col == TableViewColumns.PRODS_BAL_BALANCE.value:
                     # si el balance es negativo le da un fondo rojizo
-                    if float(self._data[row][ModelDataCols.PRODS_BAL_BALANCE.value]) < 0:
+                    if float(self._data[row, ModelDataCols.PRODS_BAL_BALANCE.value]) < 0:
                         return TableBgColors.DEBTS_NEGATIVE_BALANCE.value
                     
                     # sino le da un fondo verdoso
-                    elif float(self._data[row][ModelDataCols.PRODS_BAL_BALANCE.value]) > 0:
+                    elif float(self._data[row, ModelDataCols.PRODS_BAL_BALANCE.value]) > 0:
                         return TableBgColors.DEBTS_POSITIVE_BALANCE.value
                     
                     # si es 0, devuelve un fondo gris claro
@@ -1289,11 +1255,11 @@ class ProductsBalanceModel(QAbstractTableModel):
             case Qt.ItemDataRole.ForegroundRole:
                 if col == TableViewColumns.PRODS_BAL_BALANCE.value:
                     # si el balance es negativo le da una font rojiza
-                    if float(self._data[row][ModelDataCols.PRODS_BAL_BALANCE.value]) > 0:
+                    if float(self._data[row, ModelDataCols.PRODS_BAL_BALANCE.value]) > 0:
                         return TableFontColor.CONTRAST_RED.value
                     
                     # sino le da una font verdosa
-                    elif float(self._data[row][ModelDataCols.PRODS_BAL_BALANCE.value]) < 0:
+                    elif float(self._data[row, ModelDataCols.PRODS_BAL_BALANCE.value]) < 0:
                         return TableFontColor.CONTRAST_GREEN.value
                     
                     # si es 0, devuelve una font gris claro
