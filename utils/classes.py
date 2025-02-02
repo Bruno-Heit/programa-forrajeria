@@ -1,3 +1,6 @@
+
+from numpy import (ndarray, array)
+
 from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QLineEdit, QCompleter, 
                                QWidget, QGraphicsDropShadowEffect)
 from PySide6.QtCore import (Signal, QSize, QRect, QPropertyAnimation, QEasingCurve, 
@@ -17,10 +20,12 @@ from utils.workerclasses import *
 from utils.dboperations import *
 from utils.enumclasses import (WidgetStyle, InventoryPriceType, 
                                ListItemFields, DebtsFields, 
-                               ModelDataCols, ModelHeaders)
+                               ModelDataCols, ModelHeaders, 
+                               LabelFeedbackStyle, TableViewColumns)
 from utils.model_classes import (ProductsBalanceModel)
 from utils.proxy_models import (ProductsBalanceProxyModel)
 from utils.productbalancedelegate import (ProductsBalanceDelegate)
+from utils.customvalidators import (SearchBarValidator)
 
 from sqlite3 import (Error as sqlite3Error)
 from phonenumbers import (parse, format_number, is_valid_number, 
@@ -3423,7 +3428,7 @@ class ProductsBalanceDialog(QDialog):
         self.debtor_id:int = debtor_id
         self.__table_view:QTableView = table_view
         
-        self.__products_balance_data = self.__getDebtorProducts()
+        self.__products_balance_data:ndarray = self.__getDebtorProducts()
         
         self.setup_ui()
         self.setup_validators()
@@ -3458,7 +3463,13 @@ class ProductsBalanceDialog(QDialog):
     
     
     def setup_validators(self) -> None:
-        ...
+        self.search_bar_validator = SearchBarValidator(
+            self.products_balance_dialog.search_bar
+        )
+        
+        self.products_balance_dialog.search_bar.setValidator(
+            self.search_bar_validator
+        )
         return None
     
     
@@ -3493,20 +3504,39 @@ class ProductsBalanceDialog(QDialog):
     
     
     def setup_signals(self) -> None:
-        ...
+        self.products_balance_model.dataToUpdate.connect(
+            lambda data: self.onProductsBalanceModelDataToUpdate(
+                column=data['column'],
+                IDsales_detail=data['ID_sales_detail'],
+                new_val=data['new_value']
+            )
+        )
+        
+        self.products_balance_dialog.search_bar.textChanged.connect(
+            self.products_balance_proxy_model.setFilterRegularExpression
+        )
+        self.products_balance_dialog.search_bar.textChanged.connect(
+            lambda: self.products_balance_dialog.search_bar.setStyleSheet(
+                LabelFeedbackStyle.VALID.value
+            )
+        )
+        self.products_balance_dialog.search_bar.inputRejected.connect(
+            lambda: self.products_balance_dialog.search_bar.setStyleSheet(
+                LabelFeedbackStyle.INVALID.value
+            )
+        )
         return None
 
 
-    def __getDebtorProducts(self) -> tuple[tuple[int, str, str, float]]:
+    def __getDebtorProducts(self) -> ndarray:
         '''
         Retorna los productos que el deudor tiene en su cuenta corriente junto 
         con la fecha y hora en la que se realizó la venta y el saldo.
 
         Retorna
         -------
-        tuple[tuple[int, str, str, float]]
-            tupla con tuplas de ID_detalle_venta, la fecha y hora, la 
-            descripción y el saldo
+        ndarray
+            ndarray[[ID_detalle_venta, fecha y hora, descripción, saldo]]
         '''
         with DatabaseRepository() as db_repo:
             data = db_repo.selectRegisters(
@@ -3527,7 +3557,8 @@ class ProductsBalanceDialog(QDialog):
                                   d.eliminado = 0;''',
                 data_params=(self.debtor_id,)
             )
-        return tuple(data)
+        
+        return array(data, dtype=object)
 
 
     def deleteDebts(self) -> None:
@@ -3536,6 +3567,78 @@ class ProductsBalanceDialog(QDialog):
         '''
         ...
         return None
+
+
+    def onProductsBalanceModelDataToUpdate(self, column:int, IDsales_detail:int,
+                                       new_val:Any) -> None:
+        '''
+        Actualiza la base de datos con el valor nuevo de la sección de Deudas. 
+        Además, en caso de que la columna modificada sea la de "fecha y hora" 
+        actualiza el nuevo horario en la tabla "Ventas" y en "Deudas".
+        
+        Parámetros
+        ----------
+        column : int
+            Columna del item modificado
+        IDsales_detail : int
+            IDproducto en la base de datos del item modificado
+        new_val : Any
+            Valor nuevo del item
+        
+        Retorna
+        -------
+        None
+        '''
+        with DatabaseRepository() as db_repo:
+            match column:
+                case TableViewColumns.PRODS_BAL_DATETIME.value:
+                    db_repo.updateRegisters(
+                        upd_sql= '''UPDATE Ventas 
+                                    SET fecha_hora = ? 
+                                    WHERE IDventa = (
+                                        SELECT IDventa 
+                                        FROM Detalle_Ventas 
+                                        WHERE ID_detalle_venta = ?);''',
+                        upd_params=(new_val, IDsales_detail)
+                    )
+                    
+                    db_repo.updateRegisters(
+                        upd_sql= '''UPDATE Deudas 
+                                    SET fecha_hora = ? 
+                                    WHERE IDdeuda = (
+                                        SELECT IDdeuda 
+                                        FROM Detalle_Ventas 
+                                        WHERE ID_detalle_venta = ?);''',
+                        upd_params=(new_val, IDsales_detail)
+                    )
+                
+                case TableViewColumns.PRODS_BAL_DESCRIPTION.value:
+                    db_repo.updateRegisters(
+                        upd_sql= '''UPDATE Ventas 
+                                    SET detalles_venta = ? 
+                                    WHERE IDventa = (
+                                        SELECT IDventa 
+                                        FROM Detalle_Ventas 
+                                        WHERE ID_detalle_venta = ?);''',
+                        upd_params=(new_val, IDsales_detail,)
+                    )
+                
+                case TableViewColumns.PRODS_BAL_BALANCE.value:
+                    db_repo.updateRegisters(
+                        upd_sql= '''UPDATE Deudas
+                                    SET 
+                                        total_adeudado = CASE WHEN ? <> 0 THEN ? ELSE total_adeudado END,
+                                        eliminado = CASE WHEN ? = 0 THEN 1 ELSE eliminado END
+                                    WHERE IDdeuda = (
+                                        SELECT IDdeuda 
+                                        FROM Detalle_Ventas 
+                                        WHERE ID_detalle_venta = ?
+                                    );''',
+                        upd_params=(new_val, new_val, new_val, IDsales_detail)
+                    )
+        
+        return None
+
 
     # eventos
     def showEvent(self, event:QShowEvent):
