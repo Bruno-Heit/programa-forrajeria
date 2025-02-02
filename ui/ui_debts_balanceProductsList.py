@@ -15,9 +15,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractItemView, QAbstractScrollArea, QApplication, QDialog,
-    QFrame, QHeaderView, QLineEdit, QSizePolicy,
-    QTableView, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractItemView, QAbstractScrollArea, QApplication, QCheckBox,
+    QDialog, QFrame, QHeaderView, QLineEdit,
+    QSizePolicy, QTableView, QVBoxLayout, QWidget)
 
 class Ui_ProductsBalance(object):
     def setupUi(self, ProductsBalance):
@@ -50,6 +50,12 @@ class Ui_ProductsBalance(object):
 "}\n"
 "\n"
 "\n"
+"QCheckBox {\n"
+"	spacing: 5px;\n"
+"	color: #fff;\n"
+"}\n"
+"\n"
+"\n"
 "QTableView {\n"
 "	background-color: rgba(34, 87, 122, 240);\n"
 "	color: #fff;\n"
@@ -79,14 +85,14 @@ class Ui_ProductsBalance(object):
 "QLineEdit:focus {\n"
 "	background-color: rgba(197, 255, 252, 255);\n"
 "	border: 1px solid;\n"
-"	border-color: #0b7e7f;\n"
+"	border-color: #0b7e"
+                        "7f;\n"
 "}\n"
 "\n"
 "\n"
 "#search_bar {\n"
 "	border-bottom: 1px solid;\n"
-""
-                        "	border-bottom-color: #555;\n"
+"	border-bottom-color: #555;\n"
 "	border-bottom-color: #111;\n"
 "	margin-left: 30px;\n"
 "	margin-right: 30px;\n"
@@ -146,6 +152,7 @@ class Ui_ProductsBalance(object):
         self.search_bar.setMaximumSize(QSize(16777215, 24))
         self.search_bar.setFrame(False)
         self.search_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.search_bar.setClearButtonEnabled(True)
 
         self.verticalLayout_2.addWidget(self.search_bar)
 
@@ -171,6 +178,17 @@ class Ui_ProductsBalance(object):
         self.tv_balance_products.verticalHeader().setVisible(False)
 
         self.verticalLayout_2.addWidget(self.tv_balance_products)
+
+        self.checkbox_show_all_products = QCheckBox(self.central_widget)
+        self.checkbox_show_all_products.setObjectName(u"checkbox_show_all_products")
+        self.checkbox_show_all_products.setMinimumSize(QSize(0, 24))
+        self.checkbox_show_all_products.setMaximumSize(QSize(16777215, 24))
+#if QT_CONFIG(tooltip)
+        self.checkbox_show_all_products.setToolTip(u"<html><head/><body><p>Muestra <span style=\" font-weight:700;\">todos los productos</span> que el cliente haya tenido en su cuenta corriente.</p><p><br/>\u00c9sto es \u00fatil para, por ejemplo, realizar correcciones sobre cambios hechos en detalles de alg\u00fan producto que no se debieron haber realizado, como eliminar una deuda incorrecta o ingresar mal una fecha.</p></body></html>")
+#endif // QT_CONFIG(tooltip)
+        self.checkbox_show_all_products.setIconSize(QSize(24, 24))
+
+        self.verticalLayout_2.addWidget(self.checkbox_show_all_products)
 
         self.le_reduce_debt = QLineEdit(self.central_widget)
         self.le_reduce_debt.setObjectName(u"le_reduce_debt")
@@ -203,7 +221,11 @@ class Ui_ProductsBalance(object):
 #if QT_CONFIG(tooltip)
         ProductsBalance.setToolTip("")
 #endif // QT_CONFIG(tooltip)
+#if QT_CONFIG(tooltip)
+        self.search_bar.setToolTip(QCoreApplication.translate("ProductsBalance", u"<html><head/><body><p>Realiza b\u00fasquedas en la tabla de productos en cuenta corriente.</p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
         self.search_bar.setPlaceholderText(QCoreApplication.translate("ProductsBalance", u"Escribir t\u00e9rminos a buscar...", None))
+        self.checkbox_show_all_products.setText(QCoreApplication.translate("ProductsBalance", u"Mostrar historial de productos", None))
         self.le_reduce_debt.setPlaceholderText(QCoreApplication.translate("ProductsBalance", u"Descontar del saldo de productos seleccionados...", None))
     # retranslateUi
 

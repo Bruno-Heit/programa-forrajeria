@@ -677,7 +677,7 @@ QProgressBar::chunk {
           <enum>QTabWidget::TabShape::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <property name="elideMode">
           <enum>Qt::TextElideMode::ElideMiddle</enum>
@@ -1108,7 +1108,7 @@ color: #111;</string>
                        </size>
                       </property>
                       <property name="toolTip">
-                       <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Borra el producto actualmente seleccionado (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;supr&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, debe estar seguro de querer eliminar un producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Borra el producto actualmente seleccionado (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;supr&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Ésta acción elimina la &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;referencia al producto&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;, no el producto como tal.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, debe estar seguro de querer eliminar un producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                       </property>
                       <property name="styleSheet">
                        <string notr="true">QPushButton {
@@ -1536,8 +1536,8 @@ color: #111;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>722</width>
-                <height>223</height>
+                <width>756</width>
+                <height>496</height>
                </rect>
               </property>
               <attribute name="label">
@@ -1972,8 +1972,8 @@ border-right: 1px solid #111;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>364</width>
-                <height>164</height>
+                <width>756</width>
+                <height>496</height>
                </rect>
               </property>
               <attribute name="label">
@@ -2323,7 +2323,7 @@ color: #111;</string>
                      </size>
                     </property>
                     <property name="toolTip">
-                     <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Borra el producto vendido actualmente seleccionado (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;supr&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, debe estar seguro de querer eliminar un producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Borra la venta actualmente seleccionada y las deudas asociadas a ella (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;supr&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;La &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;eliminación de una venta&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; debería ser realizada cuando se hagan &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;ventas&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; que al final &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;no son concretadas&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, debe estar seguro de querer eliminar una venta.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                     <property name="styleSheet">
                      <string notr="true">QPushButton {
@@ -2746,7 +2746,7 @@ color: #111;</string>
                     </size>
                    </property>
                    <property name="toolTip">
-                    <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Elimina la deuda actualmente seleccionada en la tabla (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;supr&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, debe estar seguro de querer borrar una deuda.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Elimina la deuda actualmente seleccionada en la tabla (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;supr&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Ésta acción elimina la &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;referencia a la deuda&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;, no la deuda como tal.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, debe estar seguro de querer borrar una deuda.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
                    <property name="styleSheet">
                     <string notr="true">QPushButton {

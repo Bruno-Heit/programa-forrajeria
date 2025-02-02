@@ -56,6 +56,12 @@ QToolTip {
 }
 
 
+QCheckBox {
+	spacing: 5px;
+	color: #fff;
+}
+
+
 QTableView {
 	background-color: rgba(34, 87, 122, 240);
 	color: #fff;
@@ -149,7 +155,7 @@ QCalendarWidget QToolButton:pressed {
    </property>
    <item>
     <widget class="QWidget" name="central_widget" native="true">
-     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0">
+     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,0">
       <property name="spacing">
        <number>7</number>
       </property>
@@ -185,6 +191,9 @@ QCalendarWidget QToolButton:pressed {
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Realiza búsquedas en la tabla de productos en cuenta corriente.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="frame">
          <bool>false</bool>
         </property>
@@ -193,6 +202,9 @@ QCalendarWidget QToolButton:pressed {
         </property>
         <property name="placeholderText">
          <string>Escribir términos a buscar...</string>
+        </property>
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -243,6 +255,34 @@ QCalendarWidget QToolButton:pressed {
         <attribute name="verticalHeaderVisible">
          <bool>false</bool>
         </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkbox_show_all_products">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Muestra &lt;span style=&quot; font-weight:700;&quot;&gt;todos los productos&lt;/span&gt; que el cliente haya tenido en su cuenta corriente.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;Ésto es útil para, por ejemplo, realizar correcciones sobre cambios hechos en detalles de algún producto que no se debieron haber realizado, como eliminar una deuda incorrecta o ingresar mal una fecha.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>Mostrar historial de productos</string>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
        </widget>
       </item>
       <item>
