@@ -513,8 +513,9 @@ class DebtsProxyModel(QSortFilterProxyModel):
             el IDdeudor del índice actual
         '''
         model:DebtsTableModel = self.sourceModel()
+        
         debtor_id:int = model.data(
-            index=index,
+            index=self.mapToSource(index),
             role=Qt.ItemDataRole.DisplayRole,
             return_debtor_id=True
         )
