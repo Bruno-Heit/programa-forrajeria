@@ -1467,7 +1467,7 @@ class Ui_MainWindow(object):
         self.btn_add_product.setText(QCoreApplication.translate("MainWindow", u"Agregar producto", None))
         self.label_paid.setText(QCoreApplication.translate("MainWindow", u"ABONA", None))
         self.label_change.setText(QCoreApplication.translate("MainWindow", u"CAMBIO", None))
-        self.dateTimeEdit_sale.setDisplayFormat(QCoreApplication.translate("MainWindow", u"d/M/yyyy HH:mm:ss", None))
+        self.dateTimeEdit_sale.setDisplayFormat(QCoreApplication.translate("MainWindow", uDATETIME_FORMAT, None))
         self.btn_end_sale.setText(QCoreApplication.translate("MainWindow", u"Finalizar venta", None))
         self.tab2_toolBox.setItemText(self.tab2_toolBox.indexOf(self.box1_sales_form), QCoreApplication.translate("MainWindow", u"Formulario de venta", None))
         self.label_sales.setText(QCoreApplication.translate("MainWindow", u"VENTAS", None))
