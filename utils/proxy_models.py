@@ -7,8 +7,10 @@ pasadas correctamente entre ellos sin errores.
 
 from PySide6.QtCore import (QSortFilterProxyModel, Qt, QModelIndex, Signal, QDateTime)
 
-from utils.model_classes import (InventoryTableModel, SalesTableModel, DebtsTableModel)
+from utils.model_classes import (InventoryTableModel, SalesTableModel, DebtsTableModel, 
+                                 ProductsBalanceModel)
 from utils.enumclasses import (ModelDataCols, TableViewColumns)
+from utils.functionutils import (DATETIME_FORMAT)
 from typing import (Any, Sequence)
 
 
@@ -64,9 +66,7 @@ class InventoryProxyModel(QSortFilterProxyModel):
         selected_rows : tuple[int]
             tupla con las filas seleccionadas
 
-        Retorna
-        -------
-        None
+        
         '''
         # obtiene el MODELO BASE (simplemente para type-hinting)
         source_model:InventoryTableModel = self.sourceModel()
@@ -101,7 +101,7 @@ class InventoryProxyModel(QSortFilterProxyModel):
                 _left_value = _source_model._data[source_left.row(), ModelDataCols.INV_NAME.value]
                 _right_value = _source_model._data[source_right.row(), ModelDataCols.INV_NAME.value]
             
-            case TableViewColumns.INV_DECRIPTION.value: # descripción (¿tiene sentido ordenar por descripción?)
+            case TableViewColumns.INV_DESCRIPTION.value: # descripción (¿tiene sentido ordenar por descripción?)
                 _left_value = _source_model._data[source_left.row(), ModelDataCols.INV_DESCRIPTION.value]
                 _right_value = _source_model._data[source_right.row(), ModelDataCols.INV_DESCRIPTION.value]
             
@@ -160,9 +160,7 @@ class InventoryProxyModel(QSortFilterProxyModel):
         column : int
             columna a ordenar
 
-        Retorna
-        -------
-        None
+        
         '''
         self._filter_column = column
         self.invalidateFilter() # invalida el filtro existente, esto se hace para 
@@ -303,8 +301,8 @@ class SalesProxyModel(QSortFilterProxyModel):
                 _left_value = str(_source_model._data[source_left.row(), ModelDataCols.SALES_DATETIME.value])
                 _right_value = str(_source_model._data[source_right.row(), ModelDataCols.SALES_DATETIME.value])
                 
-                _left_value = QDateTime.fromString(_left_value, "d/M/yyyy HH:mm:ss")
-                _right_value = QDateTime.fromString(_right_value, "d/M/yyyy HH:mm:ss")
+                _left_value = QDateTime.fromString(_left_value, DATETIME_FORMAT)
+                _right_value = QDateTime.fromString(_right_value, DATETIME_FORMAT)
                 
                 return _left_value < _right_value
 
@@ -322,9 +320,7 @@ class SalesProxyModel(QSortFilterProxyModel):
         column : int
             columna a ordenar
 
-        Retorna
-        -------
-        None
+        
         '''
         self._filter_column = column
         self.invalidateFilter()
@@ -396,7 +392,7 @@ class DebtsProxyModel(QSortFilterProxyModel):
     
     # eliminación de filas
     def removeSelectedRows(self, selected_rows:tuple[int]) -> None:
-        source_model:SalesTableModel = self.sourceModel()
+        source_model:DebtsTableModel = self.sourceModel()
         
         selected_source_rows:tuple[int] = tuple(
             self.mapToSource(self.index(proxy_row, 0)).row() for proxy_row in selected_rows
@@ -455,9 +451,7 @@ class DebtsProxyModel(QSortFilterProxyModel):
         column : int
             columna a ordenar
 
-        Retorna
-        -------
-        None
+        
         '''
         self._filter_column = column
         self.invalidateFilter()
@@ -526,7 +520,96 @@ class DebtsProxyModel(QSortFilterProxyModel):
 
 
 
+class ProductsBalanceProxyModel(QSortFilterProxyModel):
+    '''
+    PROXY MODEL editable de Deudas, es usado cuando se crea el QDialog con los 
+    productos adeudados en la columna "balance".
+    '''
+    baseModelRowsSelected:Signal = Signal(object) # emite una tupla[int] con las filas seleccionadas 
+                                        # mapeadas del MODELO BASE para actualizar los datos.
+    
+    def __init__(self, parent=None):
+        super(ProductsBalanceProxyModel, self).__init__()
+        self.invalidateFilter()
+    
+    # TODO: implementar la eliminación de filas
+    
+    # eliminación de filas
+    def removeSelectedRows(self, selected_rows:tuple[int]) -> None:
+        source_model:ProductsBalanceModel = self.sourceModel()
+        
+        selected_source_rows:tuple[int] = tuple(
+            self.mapToSource(self.index(proxy_row, 0)).row() for proxy_row in selected_rows
+        )
+        
+        if selected_source_rows:
+            # emite señal a MainWindow con las filas seleccionadas en el MODELO BASE
+            self.baseModelRowsSelected.emit(selected_source_rows)
+            
+            source_model.removeSelectedModelRows(selected_rows=selected_source_rows)
+        return None
+    
+    
+    # ordenamiento
+    def lessThan(self, source_left:QModelIndex, source_right:QModelIndex) -> bool:
+        _source_model:ProductsBalanceModel = self.sourceModel()
+        _left_value:float | QDateTime | str # intenta comparar primero los valores como sus tipos de 
+        _right_value:float | QDateTime | str # datos correspondientes, sino puede lo hace como str.
+        
+        # antes de obtener datos del modelo, verifica qué columna se está ordenando
+        match source_left.column():
+            case TableViewColumns.PRODS_BAL_DATETIME.value:
+                _left_value = _source_model._data[source_left.row(), ModelDataCols.PRODS_BAL_DATETIME.value]
+                _right_value = _source_model._data[source_right.row(), ModelDataCols.PRODS_BAL_DATETIME.value]
+                
+                _left_value = QDateTime.fromString(_left_value, DATETIME_FORMAT)
+                _right_value = QDateTime.fromString(_right_value, DATETIME_FORMAT)
+                
+                return _left_value < _right_value
+            
+            case TableViewColumns.PRODS_BAL_DESCRIPTION.value:
+                _left_value = _source_model._data[source_left.row(), ModelDataCols.PRODS_BAL_DESCRIPTION.value]
+                _right_value = _source_model._data[source_right.row(), ModelDataCols.PRODS_BAL_DESCRIPTION.value]
+                
+                _left_value = _left_value.lstrip("$ ")
+                _right_value = _right_value.lstrip("$ ")
+            
+            case TableViewColumns.PRODS_BAL_BALANCE.value:
+                _left_value = _source_model._data[source_left.row(), ModelDataCols.PRODS_BAL_BALANCE.value]
+                _right_value = _source_model._data[source_right.row(), ModelDataCols.PRODS_BAL_BALANCE.value]
+                
+                try:
+                    return float(_left_value) < float(_right_value)
+                except:
+                    pass
+            
+        return str(_left_value) < str(_right_value)
 
 
+    # filtrado avanzado
+    def filterAcceptsRow(self, source_row:int, source_parent:QModelIndex) -> bool:
+        regex = self.filterRegularExpression()
+        
+        if not regex.pattern():
+            return True
+        
+        _source_model:ProductsBalanceModel = self.sourceModel()
+        index_data:Any
+        
+        for col in range(_source_model.columnCount()):
+            index_data = str(
+                _source_model.index(
+                    source_row,
+                    col,
+                    source_parent).data(Qt.ItemDataRole.DisplayRole)
+            )
+            
+            if index_data and regex.match(index_data).hasMatch():
+                return True
+        return False
+
+
+
+        
 
 
