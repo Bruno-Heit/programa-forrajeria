@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ProductsBalance</class>
+ <widget class="QDialog" name="ProductsBalance">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>150</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>400</width>
+    <height>100</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>400</width>
+    <height>16777215</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <property name="windowOpacity">
+   <double>1.000000000000000</double>
+  </property>
+  <property name="toolTip">
+   <string/>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">* {
+	color: #111;
+	font-family: &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
+	font-size: 14px;
+}
+
+
+#central_widget {
+	background-color: rgba(34, 87, 122, 190);
+	border-radius: 5px;
+}
+
+
+QToolTip {
+	background-color: #fff;
+}
+
+
+QTableView {
+	background-color: rgba(34, 87, 122, 240);
+	color: #fff;
+}
+QTableView::item:hover {
+	background-color: #38a3a5;
+}
+QTableView::item:selected {
+	background-color: rgb(84,147,212);
+	color: #333;
+}
+QHeaderView:section {
+	background-color: #fff;
+	border: none;
+	border-right: 1px solid;
+	border-bottom: 1px solid;
+	border-color: #111;
+}
+
+
+QLineEdit {
+	color: #111;
+	background-color: rgba(255, 255, 255, 255);
+	border: none;
+	border-radius: 3px;
+}
+QLineEdit:focus {
+	background-color: rgba(197, 255, 252, 255);
+	border: 1px solid;
+	border-color: #0b7e7f;
+}
+
+
+#search_bar {
+	border-bottom: 1px solid;
+	border-bottom-color: #555;
+	border-bottom-color: #111;
+	margin-left: 30px;
+	margin-right: 30px;
+}
+
+
+#le_reduce_debt {
+	border-top: 1px solid;
+	border-bottom: 1px solid;
+	border-color: #fff;
+}
+
+
+/* estilos del QDateTimeEdit y del QCalendarWidget */
+QDateTimeEdit {
+	color: #333;
+	background-color: #fff;
+}
+
+
+QCalendarWidget QAbstractItemView {
+	background-color: #fff;
+	selection-background-color: #38a3a5;
+	color: #444;
+}
+QCalendarWidget QToolButton {
+	background-color: #22577a;
+	color: #fff;
+}
+QCalendarWidget QHeaderView {
+	background-color: #fff;
+	color: #fff;
+}
+QCalendarWidget QToolButton:hover,
+QCalendarWidget QToolButton:pressed {
+	background-color: #38a3a5;
+	color: #555;
+}</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QWidget" name="central_widget" native="true">
+     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0">
+      <property name="spacing">
+       <number>7</number>
+      </property>
+      <property name="leftMargin">
+       <number>5</number>
+      </property>
+      <property name="topMargin">
+       <number>5</number>
+      </property>
+      <property name="rightMargin">
+       <number>5</number>
+      </property>
+      <property name="bottomMargin">
+       <number>5</number>
+      </property>
+      <item>
+       <widget class="QLineEdit" name="search_bar">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="frame">
+         <bool>false</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
+        </property>
+        <property name="placeholderText">
+         <string>Escribir términos a buscar...</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTableView" name="tv_balance_products">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Shape::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Shadow::Plain</enum>
+        </property>
+        <property name="sizeAdjustPolicy">
+         <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
+        </property>
+        <property name="editTriggers">
+         <set>QAbstractItemView::EditTrigger::DoubleClicked</set>
+        </property>
+        <property name="showDropIndicator" stdset="0">
+         <bool>false</bool>
+        </property>
+        <property name="dragDropOverwriteMode">
+         <bool>false</bool>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectionBehavior::SelectItems</enum>
+        </property>
+        <property name="sortingEnabled">
+         <bool>false</bool>
+        </property>
+        <property name="cornerButtonEnabled">
+         <bool>false</bool>
+        </property>
+        <attribute name="horizontalHeaderMinimumSectionSize">
+         <number>40</number>
+        </attribute>
+        <attribute name="horizontalHeaderHighlightSections">
+         <bool>true</bool>
+        </attribute>
+        <attribute name="verticalHeaderVisible">
+         <bool>false</bool>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="le_reduce_debt">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Descuenta la cantidad especificada de los productos seleccionados en &lt;span style=&quot; font-weight:700;&quot;&gt;orden de selección&lt;/span&gt;. Si no hay productos seleccionados, descuenta desde el primero al último en &lt;span style=&quot; font-weight:700;&quot;&gt;orden de aparición&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="frame">
+         <bool>false</bool>
+        </property>
+        <property name="placeholderText">
+         <string>Descontar del saldo de productos seleccionados...</string>
+        </property>
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

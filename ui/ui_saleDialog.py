@@ -346,7 +346,7 @@ class Ui_saleDialog(object):
         self.dateTimeEdit.setProperty("showGroupSeparator", False)
         self.dateTimeEdit.setDate(QDate(2023, 12, 13))
         self.dateTimeEdit.setMinimumDateTime(QDateTime(QDate(2022, 1, 1), QTime(0, 0, 0)))
-        self.dateTimeEdit.setDisplayFormat(u"d/M/yyyy HH:mm:ss")
+        self.dateTimeEdit.setDisplayFormat(uDATETIME_FORMAT)
         self.dateTimeEdit.setCalendarPopup(True)
 
         self.verticalLayout_2.addWidget(self.dateTimeEdit)
