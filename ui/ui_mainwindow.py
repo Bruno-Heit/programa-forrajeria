@@ -653,7 +653,7 @@ class Ui_MainWindow(object):
         self.btn_delete_product_inventory.setMinimumSize(QSize(180, 23))
         self.btn_delete_product_inventory.setMaximumSize(QSize(250, 23))
 #if QT_CONFIG(tooltip)
-        self.btn_delete_product_inventory.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Borra el producto actualmente seleccionado (</span><span style=\" font-size:12pt; font-style:italic;\">supr</span><span style=\" font-size:12pt;\">).</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:12pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer eliminar un producto.</span></p></body></html>")
+        self.btn_delete_product_inventory.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Borra el producto actualmente seleccionado (</span><span style=\" font-size:12pt; font-style:italic;\">supr</span><span style=\" font-size:12pt;\">).</span></p><p><span style=\" font-size:12pt;\">\u00c9sta acci\u00f3n elimina la </span><span style=\" font-size:12pt; text-decoration: underline;\">referencia al producto</span><span style=\" font-size:12pt;\">, no el producto como tal.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:12pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer eliminar un producto.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.btn_delete_product_inventory.setStyleSheet(u"QPushButton {\n"
 "	background-color: #ff4949;\n"
@@ -894,7 +894,7 @@ class Ui_MainWindow(object):
 "}")
         self.box1_sales_form = QWidget()
         self.box1_sales_form.setObjectName(u"box1_sales_form")
-        self.box1_sales_form.setGeometry(QRect(0, 0, 722, 223))
+        self.box1_sales_form.setGeometry(QRect(0, 0, 756, 496))
         self.box1_sales_form_Vlayout = QVBoxLayout(self.box1_sales_form)
         self.box1_sales_form_Vlayout.setSpacing(4)
         self.box1_sales_form_Vlayout.setObjectName(u"box1_sales_form_Vlayout")
@@ -1105,7 +1105,7 @@ class Ui_MainWindow(object):
         self.tab2_toolBox.addItem(self.box1_sales_form, u"Formulario de venta")
         self.box2_sales_table = QWidget()
         self.box2_sales_table.setObjectName(u"box2_sales_table")
-        self.box2_sales_table.setGeometry(QRect(0, 0, 364, 164))
+        self.box2_sales_table.setGeometry(QRect(0, 0, 756, 496))
         self.box2_sales_Vlayout = QVBoxLayout(self.box2_sales_table)
         self.box2_sales_Vlayout.setSpacing(4)
         self.box2_sales_Vlayout.setObjectName(u"box2_sales_Vlayout")
@@ -1243,7 +1243,7 @@ class Ui_MainWindow(object):
         self.btn_delete_product_sales.setMinimumSize(QSize(180, 25))
         self.btn_delete_product_sales.setMaximumSize(QSize(250, 25))
 #if QT_CONFIG(tooltip)
-        self.btn_delete_product_sales.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Borra el producto vendido actualmente seleccionado (</span><span style=\" font-size:12pt; font-style:italic;\">supr</span><span style=\" font-size:12pt;\">).</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:12pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer eliminar un producto.</span></p></body></html>")
+        self.btn_delete_product_sales.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Borra la venta actualmente seleccionada y las deudas asociadas a ella (</span><span style=\" font-size:12pt; font-style:italic;\">supr</span><span style=\" font-size:12pt;\">).</span></p><p><span style=\" font-size:12pt;\">La </span><span style=\" font-size:12pt; text-decoration: underline;\">eliminaci\u00f3n de una venta</span><span style=\" font-size:12pt;\"> deber\u00eda ser realizada cuando se hagan </span><span style=\" font-size:12pt; text-decoration: underline;\">ventas</span><span style=\" font-size:12pt;\"> que al final </span><span style=\" font-size:12pt; text-decoration: underline;\">no son concretadas</span><span style=\" font-size:12pt;\">.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:12pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer eliminar una venta.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.btn_delete_product_sales.setStyleSheet(u"QPushButton {\n"
 "	background-color: #ff4949;\n"
@@ -1429,7 +1429,7 @@ class Ui_MainWindow(object):
         self.btn_delete_debtor.setMinimumSize(QSize(180, 25))
         self.btn_delete_debtor.setMaximumSize(QSize(250, 25))
 #if QT_CONFIG(tooltip)
-        self.btn_delete_debtor.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Elimina la deuda actualmente seleccionada en la tabla (</span><span style=\" font-size:12pt; font-style:italic;\">supr</span><span style=\" font-size:12pt;\">).</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:12pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer borrar una deuda.</span></p></body></html>")
+        self.btn_delete_debtor.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Elimina la deuda actualmente seleccionada en la tabla (</span><span style=\" font-size:12pt; font-style:italic;\">supr</span><span style=\" font-size:12pt;\">).</span></p><p><span style=\" font-size:12pt;\">\u00c9sta acci\u00f3n elimina la </span><span style=\" font-size:12pt; text-decoration: underline;\">referencia a la deuda</span><span style=\" font-size:12pt;\">, no la deuda como tal.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:12pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer borrar una deuda.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.btn_delete_debtor.setStyleSheet(u"QPushButton {\n"
 "	background-color: #ff4949;\n"
@@ -1492,7 +1492,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
         self.tab2_toolBox.setCurrentIndex(0)
         self.tab2_toolBox.layout().setSpacing(4)
 
