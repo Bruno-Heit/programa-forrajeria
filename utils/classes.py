@@ -3569,6 +3569,7 @@ class ProductsBalanceDialog(QDialog):
         return None
 
 
+    @Slot(int, int, object)
     def onProductsBalanceModelDataToUpdate(self, column:int, IDsales_detail:int,
                                        new_val:Any) -> None:
         '''
