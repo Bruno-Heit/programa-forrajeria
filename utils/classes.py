@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QLineEdit, QCompleter,
                                QWidget, QGraphicsDropShadowEffect)
 from PySide6.QtCore import (Signal, QSize, QRect, QPropertyAnimation, QEasingCurve, 
                             QPoint)
-from PySide6.QtGui import (QIcon, QShowEvent, QCursor, QKeyEvent, QColor)
+from PySide6.QtGui import (QIcon, QShowEvent, QCursor, QKeyEvent, QColor, QCloseEvent)
 
 from ui.ui_productDialog import Ui_Dialog
 from ui.ui_saleDialog import Ui_saleDialog
@@ -3419,7 +3419,6 @@ class DebtorDataDialog(QDialog):
 
 
 class ProductsBalanceDialog(QDialog):
-    
     def __init__(self, debtor_id:int, table_view:QTableView) -> None:
         super(ProductsBalanceDialog, self).__init__()
         self.products_balance_dialog = Ui_ProductsBalance()
@@ -3444,7 +3443,8 @@ class ProductsBalanceDialog(QDialog):
         # crea el dialog como ventana sin frame
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | 
                             Qt.WindowType.Popup)
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
         
         # aplica efecto drop-shadow al central widget
         self.shadow_effect = QGraphicsDropShadowEffect()
@@ -3525,13 +3525,23 @@ class ProductsBalanceDialog(QDialog):
                 LabelFeedbackStyle.INVALID.value
             )
         )
+        
+        self.products_balance_dialog.checkbox_show_all_products.checkStateChanged.connect(
+            self.setModelDataOnCheckStateChange
+        )
         return None
 
 
-    def __getDebtorProducts(self) -> ndarray:
+    def __getDebtorProducts(self, show_all:bool=False) -> ndarray:
         '''
         Retorna los productos que el deudor tiene en su cuenta corriente junto 
         con la fecha y hora en la que se realizó la venta y el saldo.
+
+        Parámetros
+        ----------
+        show_all : bool, opcional
+            flag que determina si retornar todos los productos que el cliente 
+            alguna vez tuvo en su cuenta corriente
 
         Retorna
         -------
@@ -3539,28 +3549,67 @@ class ProductsBalanceDialog(QDialog):
             ndarray[[ID_detalle_venta, fecha y hora, descripción, saldo]]
         '''
         with DatabaseRepository() as db_repo:
-            data = db_repo.selectRegisters(
-                data_sql='''SELECT dv.ID_detalle_venta,
-                                   d.fecha_hora,
-                                   v.detalles_venta,
-                                   d.total_adeudado
-                            FROM Productos AS p,
-                                 Detalle_Ventas AS dv,
-                                 Ventas AS v,
-                                 Deudas AS d,
-                                 Deudores AS de
-                            WHERE de.IDdeudor = ? AND 
-                                  dv.IDproducto = p.IDproducto AND 
-                                  dv.IDdeuda = d.IDdeuda AND 
-                                  dv.IDventa = v.IDventa AND 
-                                  d.IDdeudor = de.IDdeudor AND 
-                                  d.eliminado = 0;''',
-                data_params=(self.debtor_id,)
-            )
-        
+            match show_all:
+                case True: # selecciona todas las deudas
+                    data = db_repo.selectRegisters(
+                        data_sql='''SELECT dv.ID_detalle_venta,
+                                        d.fecha_hora,
+                                        v.detalles_venta,
+                                        d.total_adeudado
+                                    FROM Productos AS p,
+                                        Detalle_Ventas AS dv,
+                                        Ventas AS v,
+                                        Deudas AS d,
+                                        Deudores AS de
+                                    WHERE de.IDdeudor = ? AND 
+                                        dv.IDproducto = p.IDproducto AND 
+                                        dv.IDdeuda = d.IDdeuda AND 
+                                        dv.IDventa = v.IDventa AND 
+                                        d.IDdeudor = de.IDdeudor;''',
+                        data_params=(self.debtor_id,)
+                    )
+                
+                case False: # selecciona las deudas con eliminado = 0
+                    data = db_repo.selectRegisters(
+                        data_sql='''SELECT dv.ID_detalle_venta,
+                                        d.fecha_hora,
+                                        v.detalles_venta,
+                                        d.total_adeudado
+                                    FROM Productos AS p,
+                                        Detalle_Ventas AS dv,
+                                        Ventas AS v,
+                                        Deudas AS d,
+                                        Deudores AS de
+                                    WHERE de.IDdeudor = ? AND 
+                                        dv.IDproducto = p.IDproducto AND 
+                                        dv.IDdeuda = d.IDdeuda AND 
+                                        dv.IDventa = v.IDventa AND 
+                                        d.IDdeudor = de.IDdeudor AND 
+                                        d.eliminado = 0;''',
+                        data_params=(self.debtor_id,)
+                    )
         return array(data, dtype=object)
 
-
+    
+    def setModelDataOnCheckStateChange(self) -> None:
+        '''
+        Actualiza los datos del MODELO DE DATOS con respecto al estado de la 
+        checkbox.
+        '''
+        match self.products_balance_dialog.checkbox_show_all_products.isChecked():
+            case True:
+                self.__products_balance_data = self.__getDebtorProducts(show_all=True)
+            
+            case False:
+                self.__products_balance_data = self.__getDebtorProducts(show_all=False)
+        
+        self.products_balance_model.setModelData(
+            data=self.__products_balance_data,
+            headers=ModelHeaders.PRODS_BAL_HEADERS.value
+        )
+        return None
+    
+    # TODO: implementar la eliminación de filas
     def deleteDebts(self) -> None:
         '''
         Elimina de deudas los productos seleccionados.
@@ -3687,7 +3736,7 @@ class ProductsBalanceDialog(QDialog):
     def keyPressEvent(self, event:QKeyEvent):
         match event.key():
             case Qt.Key.Key_Escape: # si se presiona "esc" se cierra 
-                self.hide()         #el dialog y se rechaza el input
+                self.close()        # el dialog y se rechaza el input
                 self.reject()
             
             case Qt.Key.Key_Delete: # si se presiona "delete" se borran los 

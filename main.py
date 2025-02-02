@@ -1118,11 +1118,12 @@ class MainWindow(QMainWindow):
     @Slot(QTableView)
     def handleTableDeleteRows(self, table_viewID:TableViewId) -> None:
         '''
-        Elimina los registros seleccionados en la VISTA correspondiente y modifica la base 
-        de datos, además actualiza el estado de la progress-bar relacionada con la VISTA.
-        NOTA: Este método NO ELIMINA LOS REGISTROS DE "Productos" NI "Deudas", LOS MARCA 
-        COMO "ELIMINADOS" EN LA BASE DE DATOS. EN CAMBIO SÍ ELIMINA LOS REGISTROS DE "Ventas" 
-        Y "Detalle_Ventas".
+        Elimina los registros seleccionados en la VISTA correspondiente y 
+        modifica la base de datos, además actualiza el estado de la 
+        progress-bar relacionada con la VISTA.
+        NOTA: Este método NO ELIMINA LOS REGISTROS DE "Productos", LOS MARCA 
+        COMO "ELIMINADOS" EN LA BASE DE DATOS. EN CAMBIO SÍ ELIMINA LOS 
+        REGISTROS DE "Ventas", "Detalle_Ventas" Y "Deudas".
         
         Parámetros
         ----------
@@ -1367,14 +1368,13 @@ class MainWindow(QMainWindow):
                 self.DELETE_THREAD.finished.connect(self.update_worker.deleteLater)
             
             case "SALES_TABLE_VIEW":
-                # borra registros de Ventas y Detalle_Ventas
+                # borra registros de Detalle_Ventas, Ventas y Deudas
                 mult_sql:tuple[str] = (
                     '''DELETE FROM Detalle_Ventas 
                        WHERE ID_detalle_venta = ?;''',
                     '''DELETE FROM Ventas 
                        WHERE IDventa = ?;''',
-                    '''UPDATE Deudas 
-                       SET eliminado = 1 
+                    '''DELETE FROM Deudas 
                        WHERE IDdeuda = ?;'''
                     )
                 self.delete_worker = WorkerDelete()

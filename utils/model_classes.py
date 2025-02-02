@@ -1287,6 +1287,25 @@ class ProductsBalanceModel(QAbstractTableModel):
     
     
     #¡ actualización del modelo
+    def setModelData(self, data:Sequence[Sequence[Any]], headers:Sequence[str]) -> None:
+        '''
+        Guarda los datos recibidos en la variable 'self._data' y coloca los headers.
+        Juntos, conforman el set de datos del MODELO.
+
+        Parámetros
+        ----------
+        data : Sequence[Sequence[Any]]
+            Datos para almacenar en el modelo
+        headers : Sequence[str]
+            Headers del modelo
+        '''
+        self.beginResetModel()
+        self._data = data
+        self._headers = headers
+        self.endResetModel()
+        return None
+    
+    
     def removeSelectedModelRows(self, selected_rows:Sequence) -> None:
         '''
         Actualiza el MODELO de datos eliminando los datos de las filas seleccionadas 
