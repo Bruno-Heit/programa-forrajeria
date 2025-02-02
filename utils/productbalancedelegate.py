@@ -1,18 +1,29 @@
+'''
+    Ésta clase en principio iría dentro del archivo 
+    'utils/delegates.py' pero ya que desde el delegado 
+    de la tabla de deudas se llama a un dialog del 
+    archivo 'utils/classes.py' y desde ahí de nuevo al 
+    archivo 'utils/delegates.py' se crea un error de tipo 
+    CircularImport, por lo que decidí mover la clase 
+    delegado del dialog a su propio archivo separado.
+'''
+
+
 from PySide6.QtWidgets import (QWidget, QStyledItemDelegate, QStyleOptionViewItem, 
                                QComboBox, QLineEdit, QDateTimeEdit)
 from PySide6.QtCore import (Qt, QModelIndex, QSize, QPersistentModelIndex, 
                             QAbstractItemModel, Slot, QDateTime)
 
-from utils.enumclasses import (LabelFeedbackStyle, TableViewColumns)
+from utils.enumclasses import (LabelFeedbackStyle, TableViewColumns, Regex)
 from utils.functionutils import (DATETIME_FORMAT)
 from utils.customvalidators import (ProductBalanceValidator, SaleDetailsValidator)
+
+from re import (compile, IGNORECASE, search, sub)
 
 
 class ProductsBalanceDelegate(QStyledItemDelegate):
     '''Clase DELEGADO que se encarga de personalizar/editar celdas del QTableView 
     de los productos adeudados.'''
-    
-    # TODO: reimplementar todos los métodos
     
     def createEditor(self, parent:QWidget, option: QStyleOptionViewItem, 
                      index:QModelIndex | QPersistentModelIndex) -> QWidget:
@@ -75,22 +86,46 @@ class ProductsBalanceDelegate(QStyledItemDelegate):
             )
             editor.setDateTime(cell_datetime)
         
-        elif isinstance(editor, QDateTimeEdit):
-            editor.setText(index.model().data(index, Qt.ItemDataRole.DisplayRole))
+        elif isinstance(editor, QLineEdit):
+            editor.setText(
+                str(index.model().data(
+                    index, Qt.ItemDataRole.DisplayRole)
+                )
+            )
         return None
 
 
-    def setModelData(self, editor: QLineEdit, 
+    def setModelData(self, editor: QLineEdit | QDateTimeEdit, 
                      model: QAbstractItemModel, 
                      index: QModelIndex | QPersistentModelIndex) -> None:
-        
-        #* formateo de datos
         match index.column():
-            case TableViewColumns.DEBTS_POSTAL_CODE.value:
-                value = editor.text().replace(",","").replace(".","").strip()
+            case TableViewColumns.PRODS_BAL_DATETIME.value:
+                editor:QDateTimeEdit
+                value = editor.text()
             
-            case _:
-                value:str = editor.text().strip()
+            case TableViewColumns.PRODS_BAL_DESCRIPTION.value:
+                value = editor.text().strip()
+                pattern = compile(Regex.SALES_DETAILS_PRICE_TYPE.value, IGNORECASE)
+                
+                # busca en el valor el patrón de (P. PÚBLICO) ó (P. COMERCIAL)
+                _price_type = search(pattern, value)
+                
+                # verifica si alguno de esos strings está, sino lo coloca al final
+                if not search(pattern, value):
+                    _price_type = search(pattern, model.data(index, Qt.ItemDataRole.DisplayRole))
+                    _price_type = str(_price_type.group()).upper()
+                    
+                    value = f"{value} {_price_type}"
+                
+                # si SÍ ESTÁ lo reemplaza...
+                else:
+                    _price_type = str(_price_type.group()).upper().replace(" ", "")
+                    value = sub(pattern, _price_type, value)
+            
+            case TableViewColumns.PRODS_BAL_BALANCE.value:
+                value = editor.text().replace(",",".")
+                if value.endswith((",",".")):
+                        value = value.rstrip(",.")
         
         model.setData(index, value, Qt.ItemDataRole.EditRole)
         return None
