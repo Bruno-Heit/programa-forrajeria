@@ -25,6 +25,8 @@ CAMBIOS A HACER/IMPLEMENTACIONES NUEVAS:
 	  deudas ya se agregan).
 	
 	☐ Implementar el sistema de deudas.
+	☐ Dentro de QDialog de productos en cuenta corriente, colocar un botón para mostrar todos los productos que 
+	  el cliente ha comprado.
 
 	☑ Implementar sistema de búsqueda con search-bars para filtrar contenido de las tablas.
 	☐ Implementar en el sistema de búsqueda la opción de una búsqueda más "tolerante" usando el módulo 
