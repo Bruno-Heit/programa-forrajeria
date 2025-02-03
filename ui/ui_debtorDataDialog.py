@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'debtorDataDialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.3
+## Created by: Qt User Interface Compiler version 6.7.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -33,6 +33,11 @@ class Ui_debtorDataDialog(object):
 "}\n"
 "\n"
 "\n"
+"QToolTip {\n"
+"	background-color: #fff;\n"
+"}\n"
+"\n"
+"\n"
 "QDialog {\n"
 "	background-color: qlineargradient(spread:pad, x1:0, y1:0.124364, x2:1, y2:0.409182, stop:0 rgba(178, 229, 246, 255), stop:0.393082 rgba(143, 201, 220, 255), stop:0.59306 rgba(67, 118, 134, 255), stop:0.761006 rgba(152, 151, 154, 255), stop:0.795597 rgba(110, 108, 112, 255), stop:0.845912 rgba(110, 108, 112, 255), stop:0.946372 rgba(67, 118, 134, 255), stop:1 rgba(143, 201, 220, 255));\n"
 "}\n"
@@ -53,11 +58,11 @@ class Ui_debtorDataDialog(object):
 "	border: none;\n"
 "	border-top: 1px solid;\n"
 "	border-bottom: 1px solid;\n"
-"	height: 24px;\n"
+""
+                        "	height: 24px;\n"
 "}\n"
 "QLineEdit:focus {\n"
-"	background-c"
-                        "olor: rgba(176, 214, 245, 0.6);\n"
+"	background-color: rgba(176, 214, 245, 0.6);\n"
 "	border: 1px solid;\n"
 "	border-color: #0b7e7f;\n"
 "	font-size: 18px;\n"
@@ -97,8 +102,8 @@ class Ui_debtorDataDialog(object):
         self.verticalLayout.setContentsMargins(5, 10, 5, 5)
         self.debtor_data = QFrame(debtorDataDialog)
         self.debtor_data.setObjectName(u"debtor_data")
-        self.debtor_data.setFrameShape(QFrame.NoFrame)
-        self.debtor_data.setFrameShadow(QFrame.Raised)
+        self.debtor_data.setFrameShape(QFrame.Shape.NoFrame)
+        self.debtor_data.setFrameShadow(QFrame.Shadow.Raised)
         self.debtor_data_GridLayout = QGridLayout(self.debtor_data)
         self.debtor_data_GridLayout.setSpacing(4)
         self.debtor_data_GridLayout.setObjectName(u"debtor_data_GridLayout")
@@ -106,7 +111,7 @@ class Ui_debtorDataDialog(object):
         self.lineEdit_direction = QLineEdit(self.debtor_data)
         self.lineEdit_direction.setObjectName(u"lineEdit_direction")
 #if QT_CONFIG(tooltip)
-        self.lineEdit_direction.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">(Opcional) direcci\u00f3n del deudor.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:12pt;\"> si el deudor ya existe en la base de datos es recomendable </span><span style=\" font-size:12pt; text-decoration: underline;\">no llenar este campo</span><span style=\" font-size:12pt;\">, porque crear\u00e1 un registro diferente del mismo deudor.</span></p></body></html>")
+        self.lineEdit_direction.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">(Opcional) direcci\u00f3n del propietario.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_direction.setInputMask(u"")
         self.lineEdit_direction.setText(u"")
@@ -123,7 +128,7 @@ class Ui_debtorDataDialog(object):
         self.lineEdit_postalCode = QLineEdit(self.debtor_data)
         self.lineEdit_postalCode.setObjectName(u"lineEdit_postalCode")
 #if QT_CONFIG(tooltip)
-        self.lineEdit_postalCode.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">(Opcional) c\u00f3digo postal del deudor.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:12pt;\"> si el deudor ya existe en la base de datos es recomendable </span><span style=\" font-size:12pt; text-decoration: underline;\">no llenar este campo</span><span style=\" font-size:12pt;\">, porque crear\u00e1 un registro diferente del mismo deudor.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:12pt;\"> por conveniencia s\u00f3lo admite c\u00f3digos postales de Argentina.</span></p></body></html>")
+        self.lineEdit_postalCode.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">(Opcional) c\u00f3digo postal del propietario.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:12pt;\"> por conveniencia s\u00f3lo admite c\u00f3digos postales de Argentina.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_postalCode.setInputMask(u"")
         self.lineEdit_postalCode.setText(u"")
@@ -135,20 +140,20 @@ class Ui_debtorDataDialog(object):
         self.label_debtorSurname_feedback = QLabel(self.debtor_data)
         self.label_debtorSurname_feedback.setObjectName(u"label_debtorSurname_feedback")
         self.label_debtorSurname_feedback.setText(u"")
-        self.label_debtorSurname_feedback.setAlignment(Qt.AlignCenter)
+        self.label_debtorSurname_feedback.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_debtorSurname_feedback.setWordWrap(False)
-        self.label_debtorSurname_feedback.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_debtorSurname_feedback.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
-        self.debtor_data_GridLayout.addWidget(self.label_debtorSurname_feedback, 2, 4, 1, 1, Qt.AlignRight|Qt.AlignTop)
+        self.debtor_data_GridLayout.addWidget(self.label_debtorSurname_feedback, 2, 4, 1, 1, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTop)
 
         self.lineEdit_debtorName = QLineEdit(self.debtor_data)
         self.lineEdit_debtorName.setObjectName(u"lineEdit_debtorName")
 #if QT_CONFIG(tooltip)
-        self.lineEdit_debtorName.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">El nombre del deudor.</span></p></body></html>")
+        self.lineEdit_debtorName.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">El nombre del propietario.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_debtorName.setText(u"")
         self.lineEdit_debtorName.setFrame(False)
-        self.lineEdit_debtorName.setPlaceholderText(u"Nombre del deudor")
+        self.lineEdit_debtorName.setPlaceholderText(u"Nombre")
         self.lineEdit_debtorName.setClearButtonEnabled(True)
 
         self.debtor_data_GridLayout.addWidget(self.lineEdit_debtorName, 1, 1, 1, 2)
@@ -156,11 +161,11 @@ class Ui_debtorDataDialog(object):
         self.label_phoneNumber_feedback = QLabel(self.debtor_data)
         self.label_phoneNumber_feedback.setObjectName(u"label_phoneNumber_feedback")
         self.label_phoneNumber_feedback.setText(u"")
-        self.label_phoneNumber_feedback.setAlignment(Qt.AlignCenter)
+        self.label_phoneNumber_feedback.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_phoneNumber_feedback.setWordWrap(False)
-        self.label_phoneNumber_feedback.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_phoneNumber_feedback.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
-        self.debtor_data_GridLayout.addWidget(self.label_phoneNumber_feedback, 4, 0, 1, 5, Qt.AlignHCenter|Qt.AlignTop)
+        self.debtor_data_GridLayout.addWidget(self.label_phoneNumber_feedback, 4, 0, 1, 5, Qt.AlignmentFlag.AlignHCenter|Qt.AlignmentFlag.AlignTop)
 
         self.label_surnameMark = QLabel(self.debtor_data)
         self.label_surnameMark.setObjectName(u"label_surnameMark")
@@ -178,7 +183,7 @@ class Ui_debtorDataDialog(object):
 
         self.label_debtorInfo = QLabel(self.debtor_data)
         self.label_debtorInfo.setObjectName(u"label_debtorInfo")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.label_debtorInfo.sizePolicy().hasHeightForWidth())
@@ -190,10 +195,10 @@ class Ui_debtorDataDialog(object):
 "margin-bottom: 7px;\n"
 "border-bottom: 1px solid;\n"
 "border-color: rgb(11, 126, 127);")
-        self.label_debtorInfo.setText(u"DATOS DEL DEUDOR")
-        self.label_debtorInfo.setTextFormat(Qt.PlainText)
-        self.label_debtorInfo.setAlignment(Qt.AlignCenter)
-        self.label_debtorInfo.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_debtorInfo.setText(u"DATOS DEL PROPIETARIO DE LA CUENTA")
+        self.label_debtorInfo.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_debtorInfo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_debtorInfo.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.debtor_data_GridLayout.addWidget(self.label_debtorInfo, 0, 0, 1, 5)
 
@@ -209,11 +214,11 @@ class Ui_debtorDataDialog(object):
         self.lineEdit_debtorSurname = QLineEdit(self.debtor_data)
         self.lineEdit_debtorSurname.setObjectName(u"lineEdit_debtorSurname")
 #if QT_CONFIG(tooltip)
-        self.lineEdit_debtorSurname.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">El apellido del deudor.</span></p></body></html>")
+        self.lineEdit_debtorSurname.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">El apellido del propietario.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_debtorSurname.setText(u"")
         self.lineEdit_debtorSurname.setFrame(False)
-        self.lineEdit_debtorSurname.setPlaceholderText(u"Apellido del deudor")
+        self.lineEdit_debtorSurname.setPlaceholderText(u"Apellido")
         self.lineEdit_debtorSurname.setClearButtonEnabled(True)
 
         self.debtor_data_GridLayout.addWidget(self.lineEdit_debtorSurname, 1, 4, 1, 1)
@@ -226,17 +231,17 @@ class Ui_debtorDataDialog(object):
         self.label_debtorName_feedback = QLabel(self.debtor_data)
         self.label_debtorName_feedback.setObjectName(u"label_debtorName_feedback")
         self.label_debtorName_feedback.setText(u"")
-        self.label_debtorName_feedback.setTextFormat(Qt.PlainText)
-        self.label_debtorName_feedback.setAlignment(Qt.AlignCenter)
+        self.label_debtorName_feedback.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_debtorName_feedback.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_debtorName_feedback.setWordWrap(False)
-        self.label_debtorName_feedback.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_debtorName_feedback.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
-        self.debtor_data_GridLayout.addWidget(self.label_debtorName_feedback, 2, 1, 1, 2, Qt.AlignLeft|Qt.AlignTop)
+        self.debtor_data_GridLayout.addWidget(self.label_debtorName_feedback, 2, 1, 1, 2, Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignTop)
 
         self.lineEdit_phoneNumber = QLineEdit(self.debtor_data)
         self.lineEdit_phoneNumber.setObjectName(u"lineEdit_phoneNumber")
 #if QT_CONFIG(tooltip)
-        self.lineEdit_phoneNumber.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">(Opcional) n\u00famero de tel\u00e9fono del deudor.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:12pt;\"> si el deudor ya existe en la base de datos es recomendable </span><span style=\" font-size:12pt; text-decoration: underline;\">no llenar este campo</span><span style=\" font-size:12pt;\">, porque crear\u00e1 un registro diferente del mismo deudor.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:12pt;\"> no lleva ni 0 ni 15, pero s\u00ed requiere el c\u00f3digo de pa\u00eds (el de Argentina es +54).</span></p></body></html>")
+        self.lineEdit_phoneNumber.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">(Opcional) n\u00famero de tel\u00e9fono del propietario.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_phoneNumber.setInputMask(u"")
         self.lineEdit_phoneNumber.setText(u"")
@@ -250,11 +255,11 @@ class Ui_debtorDataDialog(object):
         self.label_postalCode_feedback = QLabel(self.debtor_data)
         self.label_postalCode_feedback.setObjectName(u"label_postalCode_feedback")
         self.label_postalCode_feedback.setText(u"")
-        self.label_postalCode_feedback.setAlignment(Qt.AlignCenter)
+        self.label_postalCode_feedback.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_postalCode_feedback.setWordWrap(False)
-        self.label_postalCode_feedback.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_postalCode_feedback.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
-        self.debtor_data_GridLayout.addWidget(self.label_postalCode_feedback, 8, 0, 1, 5, Qt.AlignHCenter|Qt.AlignTop)
+        self.debtor_data_GridLayout.addWidget(self.label_postalCode_feedback, 8, 0, 1, 5, Qt.AlignmentFlag.AlignHCenter|Qt.AlignmentFlag.AlignTop)
 
         self.debtor_data_GridLayout.setColumnStretch(1, 1)
         self.debtor_data_GridLayout.setColumnStretch(2, 1)
@@ -264,8 +269,8 @@ class Ui_debtorDataDialog(object):
 
         self.buttonBox = QDialogButtonBox(debtorDataDialog)
         self.buttonBox.setObjectName(u"buttonBox")
-        self.buttonBox.setOrientation(Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
+        self.buttonBox.setOrientation(Qt.Orientation.Horizontal)
+        self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
         self.buttonBox.setCenterButtons(True)
 
         self.verticalLayout.addWidget(self.buttonBox)

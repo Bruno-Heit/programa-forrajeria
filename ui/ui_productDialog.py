@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'productDialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.3
+## Created by: Qt User Interface Compiler version 6.7.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -31,6 +31,11 @@ class Ui_Dialog(object):
 "	border-color: #0b7e7f;\n"
 "	font-family: \"Tahoma\", \"Verdana\", \"Sans-Serif\";\n"
 "	font-size: 16px;\n"
+"}\n"
+"\n"
+"\n"
+"QToolTip {\n"
+"	background-color: #fff;\n"
 "}\n"
 "\n"
 "\n"
@@ -68,12 +73,12 @@ class Ui_Dialog(object):
 "	border: none;\n"
 "	border-top: 1px solid;\n"
 "	border-bottom: 1px solid;\n"
-"	border-color: #0b7e7f;\n"
+"	border-color: #0b7e7"
+                        "f;\n"
 "	height: 24px;\n"
 "}\n"
 "QLineEdit:focus {\n"
-"	backg"
-                        "round-color: rgb(197, 255, 252);\n"
+"	background-color: rgb(197, 255, 252);\n"
 "	border: 1px solid;\n"
 "	border-color: #0b7e7f;\n"
 "	font-size: 18px;\n"
@@ -117,10 +122,10 @@ class Ui_Dialog(object):
 "	padding-top: 2px;\n"
 "	padding-left: 4px;\n"
 "}\n"
-"QComboBox QAbstractItemView {\n"
+"QComboBox Q"
+                        "AbstractItemView {\n"
 "	background-color: #fff;\n"
-"	selecti"
-                        "on-background-color: #38a3a5;\n"
+"	selection-background-color: #38a3a5;\n"
 "}\n"
 "")
         Dialog.setSizeGripEnabled(True)
@@ -227,15 +232,15 @@ class Ui_Dialog(object):
                         "or: #38a3a5;\n"
 "}\n"
 "")
-        self.mainForm.setFrameShape(QFrame.NoFrame)
-        self.mainForm.setFrameShadow(QFrame.Raised)
+        self.mainForm.setFrameShape(QFrame.Shape.NoFrame)
+        self.mainForm.setFrameShadow(QFrame.Shadow.Raised)
         self.mainForm_Vlayout = QVBoxLayout(self.mainForm)
         self.mainForm_Vlayout.setSpacing(4)
         self.mainForm_Vlayout.setObjectName(u"mainForm_Vlayout")
         self.mainForm_Vlayout.setContentsMargins(0, 0, 0, 0)
         self.frame_productName = QFrame(self.mainForm)
         self.frame_productName.setObjectName(u"frame_productName")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.frame_productName.sizePolicy().hasHeightForWidth())
@@ -244,8 +249,8 @@ class Ui_Dialog(object):
 #if QT_CONFIG(tooltip)
         self.frame_productName.setToolTip(u"<html><head/><body><p>El nombre del producto.</p><p><span style=\" font-weight:600; text-decoration: underline;\">CONSEJO:</span> mantener el nombre simple, usando marcas de los productos y el tipo como nombre (ejemplo: Dog-Chow razas peque\u00f1as).</p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        self.frame_productName.setFrameShape(QFrame.NoFrame)
-        self.frame_productName.setFrameShadow(QFrame.Raised)
+        self.frame_productName.setFrameShape(QFrame.Shape.NoFrame)
+        self.frame_productName.setFrameShadow(QFrame.Shadow.Raised)
         self.frame_productName_GridLayout = QGridLayout(self.frame_productName)
         self.frame_productName_GridLayout.setSpacing(4)
         self.frame_productName_GridLayout.setObjectName(u"frame_productName_GridLayout")
@@ -265,8 +270,8 @@ class Ui_Dialog(object):
         self.label_productName.setToolTip(u"")
 #endif // QT_CONFIG(tooltip)
         self.label_productName.setText(u"<html><head/><body><p>Nombre del producto  <span style=\" color:#ff0000;\">*</span></p></body></html>")
-        self.label_productName.setTextFormat(Qt.RichText)
-        self.label_productName.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_productName.setTextFormat(Qt.TextFormat.RichText)
+        self.label_productName.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.frame_productName_GridLayout.addWidget(self.label_productName, 0, 0, 1, 1)
 
@@ -277,12 +282,12 @@ class Ui_Dialog(object):
         self.label_nameWarning.setToolTip(u"")
 #endif // QT_CONFIG(tooltip)
         self.label_nameWarning.setText(u"")
-        self.label_nameWarning.setTextFormat(Qt.PlainText)
-        self.label_nameWarning.setAlignment(Qt.AlignRight|Qt.AlignTop|Qt.AlignTrailing)
+        self.label_nameWarning.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_nameWarning.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTop|Qt.AlignmentFlag.AlignTrailing)
         self.label_nameWarning.setWordWrap(False)
-        self.label_nameWarning.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_nameWarning.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
-        self.frame_productName_GridLayout.addWidget(self.label_nameWarning, 1, 0, 1, 2, Qt.AlignRight|Qt.AlignTop)
+        self.frame_productName_GridLayout.addWidget(self.label_nameWarning, 1, 0, 1, 2, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTop)
 
         self.frame_productName_GridLayout.setColumnStretch(0, 2)
         self.frame_productName_GridLayout.setColumnStretch(1, 3)
@@ -298,8 +303,8 @@ class Ui_Dialog(object):
 #if QT_CONFIG(tooltip)
         self.frame_productCategory.setToolTip(u"<html><head/><body><p>Elegir a qu\u00e9 categor\u00eda pertenece el producto.</p><p><span style=\" font-weight:600; text-decoration: underline;\">CONSEJO:</span> si se considera que un producto no pertenece a ninguna categor\u00eda de la lista, introducirla en &quot;Varios&quot;.</p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        self.frame_productCategory.setFrameShape(QFrame.NoFrame)
-        self.frame_productCategory.setFrameShadow(QFrame.Raised)
+        self.frame_productCategory.setFrameShape(QFrame.Shape.NoFrame)
+        self.frame_productCategory.setFrameShadow(QFrame.Shadow.Raised)
         self.frame_productCategory_GridLayout = QGridLayout(self.frame_productCategory)
         self.frame_productCategory_GridLayout.setSpacing(4)
         self.frame_productCategory_GridLayout.setObjectName(u"frame_productCategory_GridLayout")
@@ -307,8 +312,8 @@ class Ui_Dialog(object):
         self.label_productCategory = QLabel(self.frame_productCategory)
         self.label_productCategory.setObjectName(u"label_productCategory")
         self.label_productCategory.setText(u"<html><head/><body><p>Categor\u00eda a la que pertenece  <span style=\" color:#ff0000;\">*</span></p></body></html>")
-        self.label_productCategory.setTextFormat(Qt.RichText)
-        self.label_productCategory.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_productCategory.setTextFormat(Qt.TextFormat.RichText)
+        self.label_productCategory.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.frame_productCategory_GridLayout.addWidget(self.label_productCategory, 0, 0, 1, 1)
 
@@ -319,7 +324,7 @@ class Ui_Dialog(object):
 #endif // QT_CONFIG(tooltip)
         self.cb_productCategory.setEditable(True)
         self.cb_productCategory.setCurrentText(u"")
-        self.cb_productCategory.setSizeAdjustPolicy(QComboBox.AdjustToContentsOnFirstShow)
+        self.cb_productCategory.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToContentsOnFirstShow)
         self.cb_productCategory.setPlaceholderText(u"Seleccionar categor\u00eda")
         self.cb_productCategory.setFrame(False)
 
@@ -330,12 +335,12 @@ class Ui_Dialog(object):
         self.label_categoryWarning.setMinimumSize(QSize(0, 18))
         self.label_categoryWarning.setMaximumSize(QSize(16777215, 16777215))
         self.label_categoryWarning.setText(u"")
-        self.label_categoryWarning.setTextFormat(Qt.PlainText)
-        self.label_categoryWarning.setAlignment(Qt.AlignRight|Qt.AlignTop|Qt.AlignTrailing)
+        self.label_categoryWarning.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_categoryWarning.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTop|Qt.AlignmentFlag.AlignTrailing)
         self.label_categoryWarning.setWordWrap(False)
-        self.label_categoryWarning.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_categoryWarning.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
-        self.frame_productCategory_GridLayout.addWidget(self.label_categoryWarning, 1, 0, 1, 2, Qt.AlignRight|Qt.AlignTop)
+        self.frame_productCategory_GridLayout.addWidget(self.label_categoryWarning, 1, 0, 1, 2, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTop)
 
         self.frame_productCategory_GridLayout.setColumnStretch(0, 2)
         self.frame_productCategory_GridLayout.setColumnStretch(1, 3)
@@ -351,8 +356,8 @@ class Ui_Dialog(object):
 #if QT_CONFIG(tooltip)
         self.frame_productDescription.setToolTip(u"<html><head/><body><p>Es un campo opcional. Admite una descripci\u00f3n m\u00e1s extensa si se desea del producto.</p><p><span style=\" font-weight:600; text-decoration: underline;\">CONSEJO: </span>usar palabras clave en la descripci\u00f3n que permitan posteriormente la b\u00fasqueda del producto mediante esas palabras (algunos ejemplos de palabras clave: perro; adulto; cachorro; urinary; gato; granja; ca\u00f1a; veneno; insecto; hormiga; etc.)</p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        self.frame_productDescription.setFrameShape(QFrame.NoFrame)
-        self.frame_productDescription.setFrameShadow(QFrame.Raised)
+        self.frame_productDescription.setFrameShape(QFrame.Shape.NoFrame)
+        self.frame_productDescription.setFrameShadow(QFrame.Shadow.Raised)
         self.frame_productDescription_Hlayout = QHBoxLayout(self.frame_productDescription)
         self.frame_productDescription_Hlayout.setSpacing(4)
         self.frame_productDescription_Hlayout.setObjectName(u"frame_productDescription_Hlayout")
@@ -360,14 +365,14 @@ class Ui_Dialog(object):
         self.label_productDescription = QLabel(self.frame_productDescription)
         self.label_productDescription.setObjectName(u"label_productDescription")
         self.label_productDescription.setText(u"Descripci\u00f3n del producto")
-        self.label_productDescription.setTextFormat(Qt.PlainText)
-        self.label_productDescription.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_productDescription.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_productDescription.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.frame_productDescription_Hlayout.addWidget(self.label_productDescription)
 
         self.lineedit_productDescription = QLineEdit(self.frame_productDescription)
         self.lineedit_productDescription.setObjectName(u"lineedit_productDescription")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.lineedit_productDescription.sizePolicy().hasHeightForWidth())
@@ -394,8 +399,8 @@ class Ui_Dialog(object):
 #if QT_CONFIG(tooltip)
         self.frame_productStock.setToolTip(u"")
 #endif // QT_CONFIG(tooltip)
-        self.frame_productStock.setFrameShape(QFrame.NoFrame)
-        self.frame_productStock.setFrameShadow(QFrame.Raised)
+        self.frame_productStock.setFrameShape(QFrame.Shape.NoFrame)
+        self.frame_productStock.setFrameShadow(QFrame.Shadow.Raised)
         self.frame_productStock_GridLayout = QGridLayout(self.frame_productStock)
         self.frame_productStock_GridLayout.setSpacing(4)
         self.frame_productStock_GridLayout.setObjectName(u"frame_productStock_GridLayout")
@@ -406,8 +411,8 @@ class Ui_Dialog(object):
         self.label_productStock.setToolTip(u"")
 #endif // QT_CONFIG(tooltip)
         self.label_productStock.setText(u"<html><head/><body><p>Stock  <span style=\" color:#ff0000;\">*</span></p></body></html>")
-        self.label_productStock.setTextFormat(Qt.RichText)
-        self.label_productStock.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_productStock.setTextFormat(Qt.TextFormat.RichText)
+        self.label_productStock.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.frame_productStock_GridLayout.addWidget(self.label_productStock, 0, 0, 1, 1)
 
@@ -428,12 +433,12 @@ class Ui_Dialog(object):
         self.label_stockWarning.setMinimumSize(QSize(0, 18))
         self.label_stockWarning.setMaximumSize(QSize(16777215, 16777215))
         self.label_stockWarning.setText(u"")
-        self.label_stockWarning.setTextFormat(Qt.PlainText)
-        self.label_stockWarning.setAlignment(Qt.AlignRight|Qt.AlignTop|Qt.AlignTrailing)
+        self.label_stockWarning.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_stockWarning.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTop|Qt.AlignmentFlag.AlignTrailing)
         self.label_stockWarning.setWordWrap(False)
-        self.label_stockWarning.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_stockWarning.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
-        self.frame_productStock_GridLayout.addWidget(self.label_stockWarning, 1, 0, 1, 2, Qt.AlignRight|Qt.AlignTop)
+        self.frame_productStock_GridLayout.addWidget(self.label_stockWarning, 1, 0, 1, 2, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTop)
 
         self.frame_productStock_GridLayout.setColumnStretch(0, 2)
         self.frame_productStock_GridLayout.setColumnStretch(1, 3)
@@ -449,8 +454,8 @@ class Ui_Dialog(object):
 #if QT_CONFIG(tooltip)
         self.frame_measurementUnit.setToolTip(u"<html><head/><body><p>Campo opcional. De qu\u00e9 forma se mide el producto en stock. La existencia de este campo es puramente de ayuda al navegar por los productos.</p><p><span style=\" font-weight:600; text-decoration: underline;\">CONSEJO:</span> usar unidades de medida sencillas, tales como kilogramos, litros, bolsas, cajas, unidades, etc.</p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        self.frame_measurementUnit.setFrameShape(QFrame.NoFrame)
-        self.frame_measurementUnit.setFrameShadow(QFrame.Raised)
+        self.frame_measurementUnit.setFrameShape(QFrame.Shape.NoFrame)
+        self.frame_measurementUnit.setFrameShadow(QFrame.Shadow.Raised)
         self.frame_measurementUnit_Hlayout = QHBoxLayout(self.frame_measurementUnit)
         self.frame_measurementUnit_Hlayout.setSpacing(4)
         self.frame_measurementUnit_Hlayout.setObjectName(u"frame_measurementUnit_Hlayout")
@@ -461,15 +466,15 @@ class Ui_Dialog(object):
         self.label_measurementUnit.setToolTip(u"")
 #endif // QT_CONFIG(tooltip)
         self.label_measurementUnit.setText(u"Unidad de medida")
-        self.label_measurementUnit.setTextFormat(Qt.PlainText)
-        self.label_measurementUnit.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_measurementUnit.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_measurementUnit.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.frame_measurementUnit_Hlayout.addWidget(self.label_measurementUnit)
 
         self.lineedit_measurementUnit = QLineEdit(self.frame_measurementUnit)
         self.lineedit_measurementUnit.setObjectName(u"lineedit_measurementUnit")
         self.lineedit_measurementUnit.setText(u"")
-        self.lineedit_measurementUnit.setMaxLength(40)
+        self.lineedit_measurementUnit.setMaxLength(20)
         self.lineedit_measurementUnit.setPlaceholderText(u"(opcional) Ejs.: bolsas; litros; kgs.")
         self.lineedit_measurementUnit.setClearButtonEnabled(True)
 
@@ -486,8 +491,8 @@ class Ui_Dialog(object):
         self.frame_unitPrice.setSizePolicy(sizePolicy)
         self.frame_unitPrice.setMinimumSize(QSize(0, 0))
         self.frame_unitPrice.setMaximumSize(QSize(16777215, 16777215))
-        self.frame_unitPrice.setFrameShape(QFrame.NoFrame)
-        self.frame_unitPrice.setFrameShadow(QFrame.Raised)
+        self.frame_unitPrice.setFrameShape(QFrame.Shape.NoFrame)
+        self.frame_unitPrice.setFrameShadow(QFrame.Shadow.Raised)
         self.frame_unitPrice_GridLayout = QGridLayout(self.frame_unitPrice)
         self.frame_unitPrice_GridLayout.setSpacing(4)
         self.frame_unitPrice_GridLayout.setObjectName(u"frame_unitPrice_GridLayout")
@@ -496,18 +501,18 @@ class Ui_Dialog(object):
         self.label_unitPriceWarning.setObjectName(u"label_unitPriceWarning")
         self.label_unitPriceWarning.setMinimumSize(QSize(0, 18))
         self.label_unitPriceWarning.setText(u"")
-        self.label_unitPriceWarning.setTextFormat(Qt.PlainText)
-        self.label_unitPriceWarning.setAlignment(Qt.AlignRight|Qt.AlignTop|Qt.AlignTrailing)
+        self.label_unitPriceWarning.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_unitPriceWarning.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTop|Qt.AlignmentFlag.AlignTrailing)
         self.label_unitPriceWarning.setWordWrap(False)
-        self.label_unitPriceWarning.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_unitPriceWarning.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
-        self.frame_unitPrice_GridLayout.addWidget(self.label_unitPriceWarning, 1, 0, 1, 4, Qt.AlignRight|Qt.AlignTop)
+        self.frame_unitPrice_GridLayout.addWidget(self.label_unitPriceWarning, 1, 0, 1, 4, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTop)
 
         self.label_productUnitPrice = QLabel(self.frame_unitPrice)
         self.label_productUnitPrice.setObjectName(u"label_productUnitPrice")
         self.label_productUnitPrice.setText(u"<html><head/><body><p>Precio unitario  <span style=\" color:#ff0000;\">*</span></p></body></html>")
-        self.label_productUnitPrice.setTextFormat(Qt.RichText)
-        self.label_productUnitPrice.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_productUnitPrice.setTextFormat(Qt.TextFormat.RichText)
+        self.label_productUnitPrice.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.frame_unitPrice_GridLayout.addWidget(self.label_productUnitPrice, 0, 0, 1, 2)
 
@@ -535,8 +540,8 @@ class Ui_Dialog(object):
 #if QT_CONFIG(tooltip)
         self.frame_comercialPrice.setToolTip(u"<html><head/><body><p>Campo opcional. El precio especial que se les cobra a los comercios.</p><p><span style=\" font-weight:600; text-decoration: underline;\">NOTA:</span> no es necesario escribir el signo de &quot;$&quot;.</p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        self.frame_comercialPrice.setFrameShape(QFrame.NoFrame)
-        self.frame_comercialPrice.setFrameShadow(QFrame.Raised)
+        self.frame_comercialPrice.setFrameShape(QFrame.Shape.NoFrame)
+        self.frame_comercialPrice.setFrameShadow(QFrame.Shadow.Raised)
         self.frame_comercialPrice_GridLayout = QGridLayout(self.frame_comercialPrice)
         self.frame_comercialPrice_GridLayout.setSpacing(4)
         self.frame_comercialPrice_GridLayout.setObjectName(u"frame_comercialPrice_GridLayout")
@@ -544,8 +549,8 @@ class Ui_Dialog(object):
         self.label_productComercialPrice = QLabel(self.frame_comercialPrice)
         self.label_productComercialPrice.setObjectName(u"label_productComercialPrice")
         self.label_productComercialPrice.setText(u"Precio comercial")
-        self.label_productComercialPrice.setTextFormat(Qt.PlainText)
-        self.label_productComercialPrice.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_productComercialPrice.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_productComercialPrice.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.frame_comercialPrice_GridLayout.addWidget(self.label_productComercialPrice, 0, 0, 1, 1)
 
@@ -566,12 +571,12 @@ class Ui_Dialog(object):
         font.setItalic(False)
         self.label_comercialPriceWarning.setFont(font)
         self.label_comercialPriceWarning.setText(u"")
-        self.label_comercialPriceWarning.setTextFormat(Qt.PlainText)
-        self.label_comercialPriceWarning.setAlignment(Qt.AlignRight|Qt.AlignTop|Qt.AlignTrailing)
+        self.label_comercialPriceWarning.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_comercialPriceWarning.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTop|Qt.AlignmentFlag.AlignTrailing)
         self.label_comercialPriceWarning.setWordWrap(False)
-        self.label_comercialPriceWarning.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_comercialPriceWarning.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
-        self.frame_comercialPrice_GridLayout.addWidget(self.label_comercialPriceWarning, 1, 0, 1, 2, Qt.AlignRight|Qt.AlignTop)
+        self.frame_comercialPrice_GridLayout.addWidget(self.label_comercialPriceWarning, 1, 0, 1, 2, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTop)
 
         self.frame_comercialPrice_GridLayout.setColumnStretch(0, 2)
         self.frame_comercialPrice_GridLayout.setColumnStretch(1, 3)
@@ -583,8 +588,8 @@ class Ui_Dialog(object):
 
         self.buttonBox = QDialogButtonBox(Dialog)
         self.buttonBox.setObjectName(u"buttonBox")
-        self.buttonBox.setOrientation(Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
+        self.buttonBox.setOrientation(Qt.Orientation.Horizontal)
+        self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
         self.buttonBox.setCenterButtons(True)
 
         self.dialog_Vlayout.addWidget(self.buttonBox)

@@ -31,6 +31,10 @@
 }
 
 
+QToolTip {
+	background-color: #fff;
+}
+
 QFrame, QWidget {
 	border: none;
 }
