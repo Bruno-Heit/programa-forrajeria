@@ -25,7 +25,7 @@ from utils.enumclasses import (WidgetStyle, InventoryPriceType,
 from utils.model_classes import (ProductsBalanceModel)
 from utils.proxy_models import (ProductsBalanceProxyModel)
 from utils.productbalancedelegate import (ProductsBalanceDelegate)
-from utils.customvalidators import (SearchBarValidator)
+from utils.customvalidators import (SearchBarValidator, ProductReduceDebtValidator)
 
 from sqlite3 import (Error as sqlite3Error)
 from phonenumbers import (parse, format_number, is_valid_number, 
@@ -441,7 +441,7 @@ class ProductDialog(QDialog):
 
 # TABLA VENTAS =================================================================================================
 
-
+# TODO: CORREGIR LA UNIDAD DE MEDIDA QUE DEVUELVE CUANDO ES NULL, DEVUELVE None, DEBERÍA DEVOLVER '' EN ESOS CASOS
 # Dialog con datos de la venta -y del deudor si se debe algo/hay algo a favor-
 class SaleDialog(QDialog):
     # TODO: corregir, cuando se eligen valores se deben ir actualizando los campos de costo y detalles de venta, 
@@ -3419,6 +3419,22 @@ class DebtorDataDialog(QDialog):
 
 
 class ProductsBalanceDialog(QDialog):
+    '''
+    QDialog con formato Popup que contiene los productos en cuenta corriente 
+    de la persona seleccionada en la tabla de Cuentas Corrientes en MainWindow.
+    
+    Éste QDialog admite las siguientes operaciones sobre la tabla que contiene:
+        - READ: para mostrar los productos
+        - UPDATE: para modificar campos de los productos
+        - DELETE: para marcar como eliminadas las deudas de los productos
+        
+    No admite 
+
+    Parameters
+    ----------
+    QDialog : _type_
+        _description_
+    '''
     def __init__(self, debtor_id:int, table_view:QTableView) -> None:
         super(ProductsBalanceDialog, self).__init__()
         self.products_balance_dialog = Ui_ProductsBalance()
@@ -3463,12 +3479,22 @@ class ProductsBalanceDialog(QDialog):
     
     
     def setup_validators(self) -> None:
+        # search bar
         self.search_bar_validator = SearchBarValidator(
             self.products_balance_dialog.search_bar
         )
         
         self.products_balance_dialog.search_bar.setValidator(
             self.search_bar_validator
+        )
+        
+        # lineedit para reducir deudas
+        self.le_reduce_debt_validator = ProductReduceDebtValidator(
+            self.products_balance_dialog.le_reduce_debt
+        )
+        
+        self.products_balance_dialog.le_reduce_debt.setValidator(
+            self.le_reduce_debt_validator
         )
         return None
     
@@ -3504,6 +3530,7 @@ class ProductsBalanceDialog(QDialog):
     
     
     def setup_signals(self) -> None:
+        # actualización del modelo de datos
         self.products_balance_model.dataToUpdate.connect(
             lambda data: self.onProductsBalanceModelDataToUpdate(
                 column=data['column'],
@@ -3511,7 +3538,7 @@ class ProductsBalanceDialog(QDialog):
                 new_val=data['new_value']
             )
         )
-        
+        # search bar
         self.products_balance_dialog.search_bar.textChanged.connect(
             self.products_balance_proxy_model.setFilterRegularExpression
         )
@@ -3526,12 +3553,36 @@ class ProductsBalanceDialog(QDialog):
             )
         )
         
+        # checkbox para mostrar/ocultar historial
         self.products_balance_dialog.checkbox_show_all_products.checkStateChanged.connect(
             self.setModelDataOnCheckStateChange
+        )
+        
+        # lineedit para reducir deudas
+        self.products_balance_dialog.le_reduce_debt.textChanged.connect(
+            lambda: self.products_balance_dialog.le_reduce_debt.setStyleSheet(
+                LabelFeedbackStyle.VALID.value
+            )
+        )
+        self.products_balance_dialog.le_reduce_debt.inputRejected.connect(
+            lambda: self.products_balance_dialog.le_reduce_debt.setStyleSheet(
+                LabelFeedbackStyle.INVALID.value
+            )
+        )
+        self.le_reduce_debt_validator.isEmpty.connect(
+            lambda: self.products_balance_dialog.le_reduce_debt.setStyleSheet("")
+        )
+        
+        self.products_balance_dialog.le_reduce_debt.returnPressed.connect(
+            self.formatLineEditReduceDebtValue
+        )
+        self.products_balance_dialog.le_reduce_debt.returnPressed.connect(
+            self.onLEReduceDebtReturnPressed
         )
         return None
 
 
+    # mostrar productos (SELECT)
     def __getDebtorProducts(self, show_all:bool=False) -> ndarray:
         '''
         Retorna los productos que el deudor tiene en su cuenta corriente junto 
@@ -3609,7 +3660,9 @@ class ProductsBalanceDialog(QDialog):
         )
         return None
     
-    # TODO: implementar la eliminación de filas
+    
+    # eliminar productos (DELETE)
+    # TODO: implementar la eliminación de filas (marcar como eliminadas las deudas seleccionadas)
     def deleteDebts(self) -> None:
         '''
         Elimina de deudas los productos seleccionados.
@@ -3618,6 +3671,7 @@ class ProductsBalanceDialog(QDialog):
         return None
 
 
+    # actualizar productos (UPDATE)
     @Slot(int, int, object)
     def onProductsBalanceModelDataToUpdate(self, column:int, IDsales_detail:int,
                                        new_val:Any) -> None:
@@ -3677,17 +3731,101 @@ class ProductsBalanceDialog(QDialog):
                     db_repo.updateRegisters(
                         upd_sql= '''UPDATE Deudas
                                     SET 
-                                        total_adeudado = CASE WHEN ? <> 0 THEN ? ELSE total_adeudado END,
-                                        eliminado = CASE WHEN ? = 0 THEN 1 ELSE eliminado END
+                                        total_adeudado = ?,
+                                        eliminado = CASE WHEN ? = 0 THEN 1 ELSE 0 END
                                     WHERE IDdeuda = (
                                         SELECT IDdeuda 
                                         FROM Detalle_Ventas 
                                         WHERE ID_detalle_venta = ?
                                     );''',
-                        upd_params=(new_val, new_val, new_val, IDsales_detail)
+                        upd_params=(new_val, new_val, IDsales_detail)
                     )
         
         return None
+
+
+    # reducir deuda de productos seleccionados (UPDATE también)
+    @Slot()
+    def formatLineEditReduceDebtValue(self) -> None:
+        '''
+        Formatea el valor del QLineEdit usado para reducir las deudas de los 
+        productos y lo vuelve a asignar al QLineEdit.
+        '''
+        value:str | float = self.products_balance_dialog.le_reduce_debt.text()
+        
+        value = value.replace(",",".").strip()
+        if value.endswith("."):
+            value.rstrip(".")
+        
+        self.products_balance_dialog.le_reduce_debt.setText(value)
+        return None
+    
+    
+    @Slot()
+    def onLEReduceDebtReturnPressed(self) -> None:
+        '''
+        Obtiene los valores de los índices y descuenta en total la cantidad 
+        ingresada de los productos seleccionados.
+        
+        Sigue la siguiente lógica:
+            - si la cantidad ingresada es mayor o igual al total adeudado 
+            del producto cancela la deuda de ese producto y el resto de 
+            la cantidad ingresada es descontada del siguiente producto.
+            - si la cantidad ingresada es menor al total adeudado del producto 
+            reduce la deuda por la cantidad ingresada.
+        '''
+        _mapped_indexes:list[QModelIndex] = self.__getSelectedMappedIndexes()
+        value:float = float(self.products_balance_dialog.le_reduce_debt.text())
+        _idx_balance:float
+        
+        # descuenta la cantidad especificada
+        for idx in _mapped_indexes:
+            _idx_balance = float(idx.data(Qt.ItemDataRole.DisplayRole))
+            
+            # si el valor es mayor o igual anula la deuda
+            if value >= _idx_balance:
+                value -= _idx_balance
+                value = round(value, 2)
+                self.products_balance_model.setData(
+                    index=idx,
+                    value=0.0
+                )
+            
+            # si el valor es menor descuenta el valor y deja de iterar
+            else:
+                self.products_balance_model.setData(
+                    index=idx,
+                    value=round(_idx_balance - value, 2)
+                )
+                value = 0 # ya no queda más que repartir, sale del bucle
+            
+            # sale del bucle al haber descontado todo lo ingresado como valor
+            if not value:
+                break
+            
+        return None
+    
+    
+    def __getSelectedMappedIndexes(self) -> list[QModelIndex]:
+        '''
+        Obtiene los índices ya mapeados seleccionados en la VISTA para usarse 
+        en el MODELO DE DATOS BASE.
+
+        Retorna
+        -------
+        list[QModelIndex]
+            lista con todos los índices meapeados del MODELO DE DATOS BASE
+        '''
+        selected_rows:tuple[int] # filas seleccionadas
+        table_view = self.products_balance_dialog.tv_balance_products
+        proxy_model = self.products_balance_proxy_model
+        col = TableViewColumns.PRODS_BAL_BALANCE.value
+        
+        # obtengo las filas seleccionadas
+        selected_rows = getSelectedTableRows(tableView=table_view)
+        
+        # mapea los índices
+        return [proxy_model.mapToSource(proxy_model.index(row, col)) for row in selected_rows]
 
 
     # eventos
