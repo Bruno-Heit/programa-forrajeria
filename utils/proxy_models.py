@@ -609,7 +609,30 @@ class ProductsBalanceProxyModel(QSortFilterProxyModel):
         return False
 
 
+    # data
+    def getSaleDetailID(self, index:QModelIndex) -> int:
+        '''
+        Obtiene y devuelve el ID_detalle_venta desde el MODELO DE DATOS base.
 
+        Parámetros
+        ----------
+        index : QModelIndex
+            el índice actual
+
+        Retorna
+        -------
+        int
+            el ID_detalle_venta del índice actual
+        '''
+        model:ProductsBalanceModel = self.sourceModel()
+        
+        debtor_id:int = model.data(
+            index=index,
+            role=Qt.ItemDataRole.DisplayRole,
+            return_sale_detail_id=True
+        )
+        
+        return int(debtor_id)
         
 
 

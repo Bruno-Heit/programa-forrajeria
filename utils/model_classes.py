@@ -1219,7 +1219,8 @@ class ProductsBalanceModel(QAbstractTableModel):
     
     
     def data(self, index:QModelIndex | QPersistentModelIndex, 
-             role:Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole) -> Any:
+             role:Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole,
+             return_sale_detail_id:bool = False) -> Any:
         if not index.isValid():
             return None
         
@@ -1236,7 +1237,11 @@ class ProductsBalanceModel(QAbstractTableModel):
                         return f"{self._data[row, ModelDataCols.PRODS_BAL_DESCRIPTION.value]}"
                     
                     case TableViewColumns.PRODS_BAL_BALANCE.value:
-                        return self._data[row, ModelDataCols.PRODS_BAL_BALANCE.value]
+                        if not return_sale_detail_id:
+                            return self._data[row, ModelDataCols.PRODS_BAL_BALANCE.value]
+                        else:
+                            return self._data[row, ModelDataCols.PRODS_BAL_ID_SALES_DETAIL.value]
+                            
             
             case Qt.ItemDataRole.BackgroundRole:
                 if col == TableViewColumns.PRODS_BAL_BALANCE.value:
