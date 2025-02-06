@@ -3427,13 +3427,6 @@ class ProductsBalanceDialog(QDialog):
         - READ: para mostrar los productos
         - UPDATE: para modificar campos de los productos
         - DELETE: para marcar como eliminadas las deudas de los productos
-        
-    No admite 
-
-    Parameters
-    ----------
-    QDialog : _type_
-        _description_
     '''
     def __init__(self, debtor_id:int, table_view:QTableView) -> None:
         super(ProductsBalanceDialog, self).__init__()
