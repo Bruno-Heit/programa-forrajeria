@@ -1529,7 +1529,8 @@ class MainWindow(QMainWindow):
                     db_repo.updateRegisters(
                         upd_sql= '''UPDATE Deudas 
                                     SET total_adeudado = CASE 
-                                        WHEN Detalle_Ventas.abonado = 0 THEN Productos.precio_unit * Detalle_Ventas.cantidad
+                                        WHEN deudas.eliminado = 0 AND Detalle_Ventas.abonado = 0 THEN Productos.precio_unit * Detalle_Ventas.cantidad 
+                                        WHEN deudas.eliminado = 1 THEN deudas.total_adeudado 
                                         ELSE ROUND(Productos.precio_unit * Detalle_Ventas.cantidad - Detalle_Ventas.abonado, 2) 
                                     END 
                                     FROM Detalle_Ventas, Productos, Ventas 
@@ -1548,7 +1549,8 @@ class MainWindow(QMainWindow):
                     db_repo.updateRegisters(
                         upd_sql= '''UPDATE Deudas 
                                     SET total_adeudado = CASE 
-                                        WHEN Detalle_Ventas.abonado = 0 THEN Productos.precio_comerc * Detalle_Ventas.cantidad
+                                        WHEN deudas.eliminado = 0 AND Detalle_Ventas.abonado = 0 THEN Productos.precio_comerc * Detalle_Ventas.cantidad 
+                                        WHEN deudas.eliminado = 1 THEN deudas.total_adeudado 
                                         ELSE ROUND(Productos.precio_comerc * Detalle_Ventas.cantidad - Detalle_Ventas.abonado, 2) 
                                     END 
                                     FROM Detalle_Ventas, Productos, Ventas 
