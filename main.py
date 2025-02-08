@@ -350,9 +350,7 @@ class MainWindow(QMainWindow):
         #* (UPDATE) modificar celdas de 'tv_sales_data'
         ...
         #* delegado de deudas
-        self.debts_delegate.balanceDialogCreated.connect(
-            self.__saveProductBalanceDialogReference
-        )
+        ...
         
         #* search bar
         self.ui.debts_searchBar.returnPressed.connect(
@@ -1472,147 +1470,42 @@ class MainWindow(QMainWindow):
                         )
             
             case TableViewColumns.INV_NORMAL_PRICE.value:
-                # si el sidebar de porcentajes está abierto se modifican porcentajes
-                if not self.ui.inventory_side_bar_body.isHidden():
-                    # actualiza contador de registros y acumulador
-                    var_loaded = self.__updateInventoryPricesBatchVar(
-                        price_type=InventoryPriceType.NORMAL,
-                        IDproduct=IDproduct,
-                        new_value=new_val)
-                    
-                    if var_loaded:
-                        self.__resetInventoryUpdateVariables()
-                        
-                        # actualiza en Productos
-                        with self._db_repo as db_repo:
-                            db_repo.updateRegisters(
-                                upd_sql='''UPDATE Productos 
-                                        SET precio_unit = ? 
-                                        WHERE IDproducto = ?;''',
-                                upd_params=self._inv_model_data_acc,
-                                executemany=True
-                                )
-                        
-                        # actualiza en Deudas
-                        self.__updateDebtsOnPriceChange(
-                            price_type=InventoryPriceType.NORMAL,
-                            executemany=True
-                            )
-                
-                # se modifica un solo precio
-                else:
-                    # actualiza en Productos
-                    with self._db_repo as db_repo:
-                        db_repo.updateRegisters(
-                            upd_sql='''UPDATE Productos
-                                    SET precio_unit = ?
-                                    WHERE IDproducto = ?;''',
-                            upd_params=(new_val, IDproduct,),
-                        )
-                    
-                    # actualiza en Deudas
-                    self.__updateDebtsOnPriceChange(
-                        price_type=InventoryPriceType.NORMAL,
-                        params=(IDproduct,)
+                # actualiza en Productos
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Productos
+                                SET precio_unit = ?
+                                WHERE IDproducto = ?;''',
+                        upd_params=(new_val, IDproduct,),
                     )
+                
+                # actualiza en Deudas
+                self.__updateDebtsOnPriceChange(
+                    price_type=InventoryPriceType.NORMAL,
+                    params=(IDproduct,)
+                )
             
             case TableViewColumns.INV_COMERCIAL_PRICE.value:
-                # si el sidebar de porcentajes está abierto se modifican porcentajes
-                if not self.ui.inventory_side_bar_body.isHidden():
-                    var_loaded = self.__updateInventoryPricesBatchVar(
-                        price_type=InventoryPriceType.COMERCIAL,
-                        IDproduct=IDproduct,
-                        new_value=new_val)
-                    
-                    if var_loaded:
-                        self.__resetInventoryUpdateVariables()
-                    
-                        with self._db_repo as db_repo:
-                            # actualiza en Productos
-                            db_repo.updateRegisters(
-                                upd_sql='''UPDATE Productos 
-                                        SET precio_comerc = ? 
-                                        WHERE IDproducto = ?;''',
-                                upd_params=self._inv_model_data_acc,
-                                executemany=True
-                                )
-                    
-                        # actualiza en Deudas
-                        self.__updateDebtsOnPriceChange(
-                            price_type=InventoryPriceType.COMERCIAL,
-                            executemany=True
-                            )
-                
-                # modifica un solo precio
-                else:
-                    # actualiza en Productos
-                    with self._db_repo as db_repo:
-                        db_repo.updateRegisters(
-                            upd_sql='''UPDATE Productos
+                # actualiza en Productos
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql= '''UPDATE Productos
                                     SET precio_comerc = ?
                                     WHERE IDproducto = ?;''',
-                            upd_params=(new_val, IDproduct,),
-                        )
-                    
-                    # actualiza en Deudas
-                    self.__updateDebtsOnPriceChange(
-                        price_type=InventoryPriceType.COMERCIAL,
-                        params=(IDproduct,)
+                        upd_params=(new_val, IDproduct,),
                     )
+                
+                # actualiza en Deudas
+                self.__updateDebtsOnPriceChange(
+                    price_type=InventoryPriceType.COMERCIAL,
+                    params=(IDproduct,)
+                )
         
         return None
-
-
-    def __updateInventoryPricesBatchVar(self, price_type:InventoryPriceType, IDproduct:int, new_value:float=None) -> bool:
-        '''
-        Actualiza el contador de registros 'self.__upd_reg_count' y el acumulador 
-        de registros 'self._inv_model_data_acc' con los valores nuevos recibidos.
-        Al terminar de llenarse el acumulador reinicia el contador.
-
-        Parámetros
-        ----------
-        price_type : InventoryPriceType
-            Tipo de precio al que se referencia. Admite NORMAL o COMERCIAL
-        IDproduct : int
-            ID del producto que hay que modificar
-        new_value : float, opcional
-            El nuevo valor del producto, por defecto None. Si es None es porque 
-            el usuario no introdujo un nuevo valor COMERCIAL
-
-        Retorna
-        -------
-        bool
-            Cuando se termina de guardar los registros en la variable devuelve 
-            True, sino devuelve False
-        '''
-        has_finished:bool = False
-        
-        if self.__upd_reg_count <= self._UPD_BATCH_SIZE - 1:
-            # coloca el valor del precio nuevo
-            match price_type:
-                case InventoryPriceType.NORMAL:
-                    self._inv_model_data_acc[self.__upd_reg_count, 0] = new_value
-                
-                case InventoryPriceType.COMERCIAL:
-                    self._inv_model_data_acc[self.__upd_reg_count, 0] = new_value if new_value else 0
-                
-            # coloca el valor del IDproducto
-            self._inv_model_data_acc[self.__upd_reg_count, 1] = IDproduct
-            
-            # actualiza el contador
-            self.__upd_reg_count += 1
-
-            # Si el contador llega al tamaño del batch, se reinicia
-            if self.__upd_reg_count == self._UPD_BATCH_SIZE:
-                self.__upd_reg_count = 0
-                has_finished = True
-        
-        return has_finished
-
- 
+    
+    
     def __updateDebtsOnPriceChange(self, price_type:InventoryPriceType, 
-                                   params:tuple[int]=None, 
-                                   executemany:bool=False) -> None:
+                                   params:tuple[int]=None) -> None:
         '''
         Actualiza el precio normal / comercial de un producto en Deudas cuando 
         se actualiza en la tabla Productos.
@@ -1624,9 +1517,6 @@ class MainWindow(QMainWindow):
         params: tuple[int], opcional
             Se usa cuando no se modifican los precios en porcentajes, recibe 
             una tupla con el IDproduct del producto
-        executemany: bool, opcional
-            Flag que determina si ejecutar una (False) o más veces (True) la 
-            consulta update a la base de datos
         
         Retorna
         -------
@@ -1649,8 +1539,7 @@ class MainWindow(QMainWindow):
                                         Detalle_Ventas.IDproducto = Productos.IDproducto AND 
                                         Detalle_Ventas.IDventa = Ventas.IDventa AND 
                                         Ventas.detalles_venta LIKE "%(P. PÚBLICO)%";''',
-                        upd_params=self._inv_model_data_acc[:, 1:] if not params else params,
-                        executemany=executemany
+                        upd_params=params
                     )
         
             case InventoryPriceType.COMERCIAL:
@@ -1669,24 +1558,8 @@ class MainWindow(QMainWindow):
                                         Detalle_Ventas.IDproducto = Productos.IDproducto AND 
                                         Detalle_Ventas.IDventa = Ventas.IDventa AND 
                                         Ventas.detalles_venta LIKE "%(P. COMERCIAL)%";''',
-                        upd_params=self._inv_model_data_acc[:, 1:] if not params else params,
-                        executemany=executemany
+                        upd_params=params
                     )
-        
-        return None
-    
-    
-    def __resetInventoryUpdateVariables(self) -> None:
-        '''
-        Reinicia el valor de las variables usadas durante la actualización a la 
-        base de datos del modelo de datos de inventario.
-
-        Retorna
-        -------
-        None
-        '''
-        self.__upd_reg_count = 0
-        self._UPD_BATCH_SIZE = 0
         return None
     
     
@@ -1965,8 +1838,7 @@ class MainWindow(QMainWindow):
     def onLePercentageEditingFinished(self) -> None:
         ''' 
         A partir de las filas seleccionadas calcula los precios nuevos y 
-        actualiza el modelo de datos, luego inicializa el acumulador de 
-        datos.
+        actualiza el modelo de datos.
         NOTA: la actualización de la base de datos se hace luego de la 
         actualización del modelo de datos, y no se hace en éste método, 
         se hace en 'self.onInventoryModelDataToUpdate'.
@@ -1975,102 +1847,119 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
-        new_values:tuple[float] # tuplas con los valores nuevos
-        selected_rows:dict[int, list[QModelIndex, float]] # key=fila, value=lista[índice, nuevo valor]
+        percentage:float
+        selected_indexes:list[QModelIndex]
         
+        # obtiene el valor del lineedit
         try:
-            text:float = float(self.ui.lineEdit_percentage_change.text().replace(",","."))
+            percentage:float = float(self.ui.lineEdit_percentage_change.text().replace(",","."))
         except ValueError:
             return None
         
-        if text:
-            selected_rows = getSelectedTableRows(
-                tableView=self.ui.tv_inventory_data,
-                indexes_in_col=4 if self.ui.checkbox_unit_prices.isChecked() else 5
-                )
-            
-            if not selected_rows:
-                return None
-            
-            # convierto a 'selected_rows' de -> 'dict[int, QModelIndex]'
-            #                             a  -> 'dict[int, list[QModelIndex, float]]'
-            selected_rows = {key:[idx,] for key, idx in selected_rows.items()}
-            
-            # obtiene los precios nuevos (tupla[precio nuevo])
-            new_values = self.__calculateNewPrices(text, tuple(selected_rows.keys()))
-            
-            # agrega los precios nuevos a la lista del diccionario
-            for i, (key, value) in enumerate(selected_rows.items()):
-                value.append(new_values[i])
-                
-            # actualiza self._UPD_BATCH_SIZE con el total de registros a actualizar
-            self._UPD_BATCH_SIZE = len(new_values)
-            
-            # reinicio y especifico dimensiones del acumulador
-            self.setNpDataAccumulator(
-                table_viewID=TableViewId.INVEN_TABLE_VIEW,
-                model_shape=(self._UPD_BATCH_SIZE, 2) # array[nuevo valor][IDproducto]
+        if not percentage:
+            return None
+        
+        if self.ui.checkbox_unit_prices.isChecked():
+            selected_indexes = self.__getInventoryMappedIndexes(
+                column=TableViewColumns.INV_NORMAL_PRICE
             )
-            
-            # paso al modelo los nuevos valores
-            for (key, value) in selected_rows.items():
-                self.inventory_data_model.setData(
-                    index=value[0],
-                    value=value[1]
-                )
-            
+        else:
+            selected_indexes = self.__getInventoryMappedIndexes(
+                column=TableViewColumns.INV_COMERCIAL_PRICE
+            )
+        
+        if not selected_indexes:
+            return None
+        
+        # calcula y asigna al MODELO los precios nuevos
+        self.__calculateNewPrices(
+            percentage=percentage,
+            selected_indexes=selected_indexes
+        )
         return None
 
 
+    def __getInventoryMappedIndexes(self, column:TableViewColumns) -> list[QModelIndex]:
+        '''
+        Obtiene los índices ya mapeados seleccionados en la VISTA para usarse 
+        en el MODELO DE DATOS de Inventario.
+        
+        Parámetros
+        ----------
+        column : TableViewColumns
+            la columna de la cual obtener los índices mapeados, sólo admite 
+            las columnas de "precio normal" y "precio comercial"
+
+        Retorna
+        -------
+        list[QModelIndex]
+            lista con todos los índices meapeados del MODELO DE DATOS BASE
+        '''
+        selected_rows:tuple[int] # filas seleccionadas
+        table_view = self.ui.tv_inventory_data
+        proxy_model = self.inventory_proxy_model
+        
+        # obtengo las filas seleccionadas
+        selected_rows = getSelectedTableRows(tableView=table_view)
+        
+        # mapea los índices
+        return [proxy_model.mapToSource(proxy_model.index(row, column)) for row in selected_rows]
+
+    
     def __calculateNewPrices(self, percentage:float, 
-                             selected_rows:tuple[int]) -> tuple[float]:
+                             selected_indexes:list[QModelIndex]) -> None:
         '''
         Calcula los aumentos/decrementos en los precios unitarios o comerciales 
-        dependiendo de cuál es la checkbox marcada y devuelve los precios nuevos.
+        y actualiza el MODELO DE DATOS.
         
         Parámetros
         ----------
         percentage : float
             Porcentaje de incremento/decremento
-        selected_rows: tuple[int]
-            Filas seleccionadas en la vista
+        selected_indexes: list[QModelIndex]
+            Índices seleccionadas en la vista
         
         Retorna
         -------
-        tuple[float]
-            Tupla con tuplas internas con cada precio nuevo en formato float
+        None
         '''
-        new_values:dict[int,float] = {}
-        col_value:float # valor de la columna de precio (unitario o comercial)
+        _idx_value:float
+        _new_val:float
         
         # si está activada la checkbox de precios unitarios...
         if self.ui.checkbox_unit_prices.isChecked():
-            for row in selected_rows:
-                # obtengo el precio unitario de cada celda
-                col_value = float(self.inventory_data_model.data(
-                        self.inventory_data_model.index(row, TableViewColumns.INV_NORMAL_PRICE.value)
-                    ).replace(",",".")
+            for idx in selected_indexes:
+                _idx_value = float(
+                    idx.data(Qt.ItemDataRole.DisplayRole).replace(",",".")
                 )
-                    
+                
                 # asigna el valor nuevo
-                new_values[row] = round(col_value + (col_value * percentage / 100), 2)
+                _new_val = round(_idx_value + (_idx_value * percentage / 100), 2)
+                
+                self.inventory_data_model.setData(
+                    index=idx,
+                    value=_new_val
+                )
 
         # sino, si está activada la checkbox de precios comerciales...
         else:
-            for row in selected_rows:
-                col_value = self.inventory_data_model.data(
-                    self.inventory_data_model.index(row, TableViewColumns.INV_COMERCIAL_PRICE.value)
-                    ).replace(",",".")
-                if col_value:
-                    col_value = float(col_value)
-                   
-                    # asigna el valor nuevo
-                    new_values[row] = round(col_value + (col_value * percentage / 100), 2)
+            for idx in selected_indexes:
+                _idx_value = idx.data(Qt.ItemDataRole.DisplayRole).replace(",",".")
+                
+                if _idx_value:
+                    _idx_value = float(_idx_value)
+                    
+                    _new_val = round(_idx_value + (_idx_value * percentage / 100), 2)
                 
                 else:
-                    new_values[row] = 0.0
+                    _new_val = 0.0
+                
+                self.inventory_data_model.setData(
+                    index=idx,
+                    value=_new_val
+                )
             
-        return tuple(new_values.values())
+        return None
 
 
     #¡### VENTAS ######################################################
@@ -2702,24 +2591,6 @@ class MainWindow(QMainWindow):
     
     
     #¡### DEUDAS ######################################################
-    def __saveProductBalanceDialogReference(self, balance_dialog:ProductsBalanceDialog) -> None:
-        '''
-        Guarda la referencia al QDialog personalizado creado para permitir 
-        modificar la columna de "balance" en Deudas. La referencia se debe 
-        guardar porque el QDialog es no-modal y no tiene un 'parent', por lo 
-        que el 'garbage collector' lo identifica y lo elimina inmediatamente.
-
-        Parámetros
-        ----------
-        balance_dialog : ProductsBalanceDialog
-            el dialog con la tabla de productos de la columna "balance"
-        
-        Retorna
-        -------
-        None
-        '''
-        self.__debtor_products_balance_dialog = balance_dialog
-        return None
 
 
 
