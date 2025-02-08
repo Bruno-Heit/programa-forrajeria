@@ -1426,10 +1426,6 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
-        var_loaded:bool = None # se usa al modificar en batches los precios, 
-                               # flag que determina si se terminó de cargar 
-                               # el acumulador
-        
         match column:
             case TableViewColumns.INV_CATEGORY.value:
                 with self._db_repo as db_repo:
