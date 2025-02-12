@@ -360,9 +360,9 @@ class DebtsDelegate(QStyledItemDelegate):
     fieldIsInvalid:Signal = Signal(object) # extensión de 'validator.validationFailed',
                                         # emite hacia MainWindow tuple(TableViewId, 
                                         # feedback como str).
-    balanceDialogCreated:Signal = Signal(QObject) # cuando se edita la columna de balance 
-                            # se emite la referencia al dialog a MainWindow, sino se cierra
-                            # el dialog porque lo captura el garbage collector.
+    balanceDialogCreated:Signal = Signal()
+    balanceDialogFinished:Signal = Signal()
+    
 
     def createEditor(self, parent:QWidget, option: QStyleOptionViewItem, 
                      index:QModelIndex | QPersistentModelIndex) -> QWidget:
@@ -485,8 +485,12 @@ class DebtsDelegate(QStyledItemDelegate):
                 )                            # el dialog cuando se crea y no se salga del 
                                              # rectángulo del table view.
                 
+                # TODO: EMITIR SEÑAL CUANDO SE CIERRE EL DIALOG A MAINWINDOW PARA ACTUALIZAR EL MODELO DE DATOS DE DEUDAS CON EL NUEVO BALANCE
                 #? emite el dialog a MainWindow para que se tenga una referencia, sino se cierra
                 self.balanceDialogCreated.emit(balance_dialog)
+                
+                # emite la señal "finished" hacia MainWindow, se usa para obtener el nuevo balance
+                balance_dialog.finished.connect(lambda: self.balanceDialogFinished.emit())
                 
                 balance_dialog.show()
                 balance_dialog.raise_()

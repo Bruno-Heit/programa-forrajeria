@@ -3522,6 +3522,7 @@ class ProductsBalanceDialog(QDialog):
         return None
     
     
+    # TODO: al cerrarse el dialog tengo que devolver al modelo de datos de deudas el nuevo valor de "balance"
     def setup_signals(self) -> None:
         # actualización del modelo de datos
         self.products_balance_model.dataToUpdate.connect(
