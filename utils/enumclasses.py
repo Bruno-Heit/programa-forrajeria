@@ -5,6 +5,8 @@ simplificar la lectura de algunos valores recurrentes.
 '''
 from PySide6.QtGui import (QColor)
 
+from resources import (rc_icons)
+
 from enum import (Enum, StrEnum, IntEnum)
 
 
@@ -112,6 +114,8 @@ class WidgetStyle(StrEnum):
     LABEL_NEUTRAL_VAL = "color: #555; border: none; background-color: rgba(200,200,200,0.7);"
     FIELD_VALID_VAL = "border: 1px solid #40dc26; background-color: rgba(185, 224, 164, 0.7);"
     FIELD_INVALID_VAL = "border: 1px solid #dc2627; background-color: rgba(224, 164, 164, 0.7);"
+    
+    DEF_COMBOBOX_FILTER_ICON = "QComboBox::down-arrow {image: url(':/icons/filter.svg');}"
 
 
 

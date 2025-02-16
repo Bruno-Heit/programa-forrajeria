@@ -1,19 +1,32 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource prefix="icons">
-        <file alias="menu-white.svg">../icons/menuWhite.svg</file>
-        <file alias="plus-white.svg">../icons/plusWhite.svg</file>
-        <file alias="minus-circle-white.svg">../icons/minus-circleWhite.svg</file>
-        <file alias="check-white.svg">../icons/checkWhite.svg</file>
-        <file alias="chevron-down-black.svg">../icons/chevron-downBlack.svg</file>
-        <file alias="chevron-down-light-grey.svg">../icons/chevron-downLightGrey.svg</file>
-        <file alias="chevron-up-black.svg">../icons/chevron-upBlack.svg</file>
-        <file alias="x-white.svg">../icons/xWhite.svg</file>
-        <file alias="arrow-left-white.svg">../icons/arrow-leftWhite.svg</file>
-        <file alias="arrow-right-white.svg">../icons/arrow-rightWhite.svg</file>
-        <file alias="chevron-left-white.svg">../icons/chevron-leftWhite.svg</file>
-        <file alias="chevron-right-white.svg">../icons/chevron-rightWhite.svg</file>
-        <file alias="filter-white.svg">../icons/filterWhite.svg</file>
-        <file alias="filter-black.svg">../icons/filterBlack.svg</file>
+        
+        <!-- íconos para los botones de los menús laterales -->        
+        <file alias="list-normal.svg">../icons/listNormal.svg</file>
+        <file alias="list-focus.svg">../icons/listFocus.svg</file>
+
+        <file alias="menu-normal.svg">../icons/menuNormal.svg</file>
+        <file alias="menu-focus.svg">../icons/menuFocus.svg</file>
+
+        <!-- ícono para barras de búsqueda -->
+        <file alias="search.svg">../icons/search.svg</file>
+
+        <!-- ícono para filtrar columnas -->
+        <file alias="filter.svg">../icons/filter.svg</file>
+
+        <!-- íconos para los botones que se usan para agregar o borrar registros -->
+        <file alias="plus.svg">../icons/plus.svg</file>
+        <file alias="minus-circle.svg">../icons/minusCircle.svg</file>
+
+        <!-- íconos para porcentajes -->
+        <file alias="percent.svg">../icons/percent.svg</file>
+
+        <!-- ícono para el botón de finalizar venta -->
+        <file alias="check-circle.svg">../icons/checkCircle.svg</file>
+
+        <!-- flecha hacia abajo para comboboxes -->
+        <file alias="chevron-down.svg">../icons/chevronDown.svg</file>
+
     </qresource>
 </RCC>

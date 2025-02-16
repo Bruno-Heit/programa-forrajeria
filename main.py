@@ -2,11 +2,11 @@ import sys
 from numpy import (empty, ndarray)
 from typing import (Any, Iterable)
 
-from PySide6.QtWidgets import (QApplication, QMainWindow, QLineEdit, QTableView, 
-                               QCheckBox, QAbstractItemView, QDateTimeEdit, QListWidgetItem, 
-                               QLabel)
-from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot)
-from PySide6.QtGui import (QIcon)
+from PySide6.QtWidgets import (QApplication, QMainWindow, QTableView, 
+                               QCheckBox, QAbstractItemView, QListWidgetItem, 
+                               QLineEdit)
+from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot, QSize)
+from PySide6.QtGui import (QIcon, QAction)
 
 from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemValues, 
                            DebtorDataDialog, WidgetStyle, ListItemFields, ProductsBalanceDialog)
@@ -17,7 +17,7 @@ from utils.delegates import (InventoryDelegate, SalesDelegate, DebtsDelegate)
 from utils.workerclasses import (WorkerSelect, WorkerUpdate, WorkerDelete)
 from utils.dboperations import (DatabaseRepository)
 from utils.customvalidators import (SalePaidValidator)
-from utils.enumclasses import (LoggingMessage, DBQueries, ModelHeaders, TableViewId, 
+from utils.enumclasses import (LoggingMessage, ModelHeaders, TableViewId, 
                                LabelFeedbackStyle, InventoryPriceType, TypeSideBar, 
                                TableViewColumns, ModelDataCols)
 from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxyModel)
@@ -78,7 +78,8 @@ class MainWindow(QMainWindow):
         
         self.__initGeneralValidators() # inicializa validadores existentes
         
-        self.__addIconsToWidgets() # añade íconos a los widgets
+        self.__setInitialIconsToWidgets() # añade íconos a los widgets...
+        self.__setInitialStylesheets() # y estilos iniciales a comboboxes
         
         # políticas de QTableViews
         setTableViewPolitics(self.ui.tv_inventory_data)
@@ -370,37 +371,77 @@ class MainWindow(QMainWindow):
     
     #¡ === FIN SEÑALES ============================================================================
     
-    def __addIconsToWidgets(self) -> None:
+    def __setInitialIconsToWidgets(self) -> None:
         '''
-        Simplemente le coloca los íconos que le corresponde a cada Widget. 
+        Coloca los íconos por defecto que le corresponde a cada Widget. Éste 
+        método aplica los íconos instanciando objetos.
         
         Retorna
         -------
         None
         '''
-        icon:QIcon = QIcon()
+        self.sidebar_toggle_icon = QIcon() # sidebar de categorías
+        self.inv_sidebar_toggle_icon = QIcon() # sidebar de porcentajes
+        self.percent_icon = QIcon() # lineedit de porcentajes
+        self.search_bars_icon = QIcon() # searchbars
+        self.add_register_icon = QIcon() # añadir registros
+        self.delete_register_icon = QIcon() # eliminar registros
+        self.end_sale_icon = QIcon() # terminar venta (formulario)
         
-        # botones de side bars
-        icon.addFile(":/icons/menu-white.svg")
-        self.ui.btn_side_barToggle.setIcon(icon)
-        self.ui.btn_inventory_sideBarToggle.setIcon(icon)
-
+        # sidebar de categorías
+        self.sidebar_toggle_icon.addFile(":/icons/list-normal.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.sidebar_toggle_icon.addFile(":/icons/list-focus.svg", QSize(), QIcon.Mode.Active, QIcon.State.On)
+        self.ui.btn_side_barToggle.setIcon(self.sidebar_toggle_icon)
+        
+        # sidebar de porcentajes
+        self.inv_sidebar_toggle_icon.addFile(":/icons/menu-normal.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.inv_sidebar_toggle_icon.addFile(":/icons/menu-focus.svg", QSize(), QIcon.Mode.Active, QIcon.State.On)
+        self.ui.btn_inventory_sideBarToggle.setIcon(self.inv_sidebar_toggle_icon)
+        
+        # lineedit de porcentajes
+        self.percent_icon.addFile(":/icons/percent.svg", QSize())
+        self.ui.lineEdit_percentage_change.addAction(self.percent_icon, QLineEdit.ActionPosition.LeadingPosition)
+        
+        # search-bars
+        self.search_bars_icon.addFile(":/icons/search.svg")
+        self.ui.inventory_searchBar.addAction(self.search_bars_icon, QLineEdit.ActionPosition.LeadingPosition)
+        self.ui.sales_searchBar.addAction(self.search_bars_icon, QLineEdit.ActionPosition.LeadingPosition)
+        self.ui.debts_searchBar.addAction(self.search_bars_icon, QLineEdit.ActionPosition.LeadingPosition)
+        
         # botones para añadir registros
-        icon.addFile(":/icons/plus-white.svg")
-        self.ui.btn_add_product_inventory.setIcon(icon)
-        self.ui.btn_add_product.setIcon(icon)
-        self.ui.btn_add_product_sales.setIcon(icon)
-        self.ui.btn_add_debtor.setIcon(icon)
-
-        # botones para eliminar registros
-        icon.addFile(":/icons/minus-circle-white.svg")
-        self.ui.btn_delete_product_inventory.setIcon(icon)
-        self.ui.btn_delete_product_sales.setIcon(icon)
-        self.ui.btn_delete_debtor.setIcon(icon)
+        self.add_register_icon.addFile(":/icons/plus.svg", QSize())
+        self.ui.btn_add_product_inventory.setIcon(self.add_register_icon)
+        self.ui.btn_add_product.setIcon(self.add_register_icon)
+        self.ui.btn_add_product_sales.setIcon(self.add_register_icon)
+        self.ui.btn_add_debtor.setIcon(self.add_register_icon)
+        
+        # # botones para eliminar registros
+        self.delete_register_icon.addFile(":/icons/minus-circle.svg", QSize())
+        self.ui.btn_delete_product_inventory.setIcon(self.delete_register_icon)
+        self.ui.btn_delete_product_sales.setIcon(self.delete_register_icon)
+        self.ui.btn_delete_debtor.setIcon(self.delete_register_icon)
 
         # botón para terminar venta
-        icon.addFile(":/icons/check-white.svg")
-        self.ui.btn_end_sale.setIcon(icon)
+        self.end_sale_icon.addFile(":/icons/check-circle.svg")
+        self.ui.btn_end_sale.setIcon(self.end_sale_icon)
+        
+        return None
+
+
+    def __setInitialStylesheets(self) -> None:
+        '''
+        Coloca las QSS por defecto que le corresponde a cada widget. Éste 
+        método asigna íconos y estilos usando stylesheets, no instancia ningún 
+        objeto.
+        
+        Retorna
+        -------
+        None
+        '''
+        # comboboxes
+        self.ui.cb_inventory_colsFilter.setStyleSheet(WidgetStyle.DEF_COMBOBOX_FILTER_ICON.value)
+        self.ui.cb_sales_colsFilter.setStyleSheet(WidgetStyle.DEF_COMBOBOX_FILTER_ICON.value)
+        self.ui.cb_debts_colsFilter.setStyleSheet(WidgetStyle.DEF_COMBOBOX_FILTER_ICON.value)
         
         return None
 

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>600</height>
+    <height>615</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -32,13 +32,14 @@
 
 QToolTip {
 	background-color: #fff;
+	color: #0d1b2a;
 }
 
 
 #centralwidget,
 #main_body,
 #debts_info {
-	background-color: #20ae7c;
+	background-color: #e0e1dd;
 }
 
 
@@ -55,7 +56,7 @@ QFrame, QWidget {
    </property>
    <property name="styleSheet">
     <string notr="true">QScrollBar {
-	background-color: #fff;
+	background-color: #e0e1dd;
 	border: 1px solid transparent;
 	border-radius: 5px;
 }
@@ -63,11 +64,11 @@ QScrollBar:groove {
 	border-radius: 5px;
 }
 QScrollBar::handle {
-	background-color: #0b7e7f;
+	background-color:  #1b263b;
 	border-radius: 5px;
 }
 QScrollBar::handle:pressed {
-	background-color: #35bc88;
+	background-color: #3b465b;
 }
 QScrollBar::sub-line {
 	width: 0;
@@ -148,29 +149,58 @@ QScrollBar::handle:horizontal {
       </property>
       <property name="styleSheet">
        <string notr="true">* {
-	background-color: #22577a;
-	color: #c7f9cc;
+	background-color: #0d1b2a;
+	color: #e0e1dd;
 }
+
+
+QToolTip {
+	background-color: #fff;
+	color: #0d1b2a;
+}
+
 
 #side_bar {
 	border-bottom-right-radius: 20px;
 }
 
 
+QPushButton {
+	border: none;
+}
+QPushButton:hover {
+	border: 2px solid #3b66ab;
+	border-radius: 3px;
+	border-bottom-right-radius: 10px;
+	padding-right: 3px;
+	padding-bottom: 4px;
+}
+
+
 QScrollBar {
-	background-color: white;
+	background-color: #fff;
 }
 
 
 QListWidget {
 	margin-bottom: 15px;
+	border: none;
+}
+QListWidget::item {
+	font: 14pt &quot;Tahoma&quot;, &quot;Arial&quot;, &quot;Sans-Serif&quot;;
+	margin-bottom: 5px;
+}
+QListWidget::item:selected {
+	font-size: 15pt;
+	background-color: 3b66ab;
+	border-radius: 3px;
 }
 
 
 QLabel {
-	font-size: 16px;
-	margin-top: 5px;
-	border-bottom: 1px solid #c7f9cc;
+	font-family: &quot;Arial&quot;, &quot;Calibri&quot;, &quot;Sans-Serif&quot;;
+	font-size: 18px;
+	font-weight: 600px;
 }</string>
       </property>
       <property name="frameShape">
@@ -181,13 +211,13 @@ QLabel {
       </property>
       <layout class="QVBoxLayout" name="side_bar_VLayout" stretch="0,0">
        <property name="spacing">
-        <number>8</number>
+        <number>7</number>
        </property>
        <property name="leftMargin">
         <number>0</number>
        </property>
        <property name="topMargin">
-        <number>0</number>
+        <number>5</number>
        </property>
        <property name="rightMargin">
         <number>0</number>
@@ -195,7 +225,7 @@ QLabel {
        <property name="bottomMargin">
         <number>18</number>
        </property>
-       <item alignment="Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop">
+       <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
         <widget class="QPushButton" name="btn_side_barToggle">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -209,18 +239,6 @@ QLabel {
            <height>40</height>
           </size>
          </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-	border: none;
-}
-QPushButton:hover {
-	border: 2px solid #38a3a5;
-	border-radius: 3px;
-	border-bottom-right-radius: 10px;
-	padding-right: 2px;
-	padding-bottom: 3px;
-}</string>
-         </property>
          <property name="text">
           <string/>
          </property>
@@ -229,6 +247,9 @@ QPushButton:hover {
            <width>32</width>
            <height>32</height>
           </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -248,16 +269,16 @@ QPushButton:hover {
          </property>
          <layout class="QVBoxLayout" name="side_bar_body_Vlayout">
           <property name="spacing">
-           <number>4</number>
+           <number>20</number>
           </property>
           <property name="leftMargin">
-           <number>0</number>
+           <number>8</number>
           </property>
           <property name="topMargin">
-           <number>0</number>
+           <number>5</number>
           </property>
           <property name="rightMargin">
-           <number>0</number>
+           <number>8</number>
           </property>
           <property name="bottomMargin">
            <number>0</number>
@@ -283,7 +304,7 @@ QPushButton:hover {
              <bool>false</bool>
             </property>
             <property name="text">
-             <string notr="true">CATEGORÍAS</string>
+             <string notr="true">Categorías</string>
             </property>
             <property name="textFormat">
              <enum>Qt::TextFormat::PlainText</enum>
@@ -298,19 +319,6 @@ QPushButton:hover {
           </item>
           <item>
            <widget class="QListWidget" name="tables_ListWidget">
-            <property name="styleSheet">
-             <string notr="true">QListWidget {
-	border: none;
-}
-QListWidget::item {
-	font: 14pt &quot;Tahoma&quot;;
-}
-QListWidget::item:selected {
-	font-size: 15pt;
-	background-color: rgb(71, 184, 255);
-	border-radius: 3px;
-}</string>
-            </property>
             <property name="frameShape">
              <enum>QFrame::Shape::NoFrame</enum>
             </property>
@@ -485,7 +493,7 @@ QListWidget::item:selected {
         <number>0</number>
        </property>
        <property name="topMargin">
-        <number>5</number>
+        <number>0</number>
        </property>
        <property name="rightMargin">
         <number>0</number>
@@ -509,36 +517,33 @@ QListWidget::item:selected {
 #sales_searchBar,
 #debts_searchBar,
 #lineEdit_paid {
-	background-color: #fff;
+	background-color: #e0e1dd;
+	color: #0d1b2a;
 	border: none;
-	border-top: 1px solid;
-	border-bottom: 1px solid;
-	border-color: #0b7e7f;
-	width: 400px;
+	border-radius: 10px;
 }
 #inventory_searchBar:focus,
 #sales_searchBar:focus,
 #debts_searchBar:focus,
-#lineEdit_paid:focus {
-	background-color: rgb(197, 255, 252);
-	border: 1px solid;
-	border-color: #0b7e7f;
+#lineEdit_paid:focus,
+QTableView QLineEdit { /* estilos de lineedits creados por los delegados para edición */
+	background-color: #3b66ab;
+	color: #fff;
 }
 
 
 QPushButton {
 	color: #fff;
-	background-color: #22577a;
-	border: 1px solid #12476a;
-	border-radius: 2px;
+	background-color: #415a77;
+	border: None;
+	border-radius: 4px;
 }
 QPushButton:hover {
-	background-color: #38a3a5;
-	border: 1px inset #289395;
+	background-color: #3b66ab;
 }
 QPushButton:pressed {
-	background-color: #58c3c5;
-	border: 1px inset #48b3b5;
+	background-color: #3b66ab;
+	border: 1px inset #778da9;
 }
 QPushButton:disabled {
 	background-color: rgb(103, 115, 122);
@@ -547,112 +552,127 @@ QPushButton:disabled {
 
 
 QTabWidget::pane { /* selecciona la ventana, sin las pestañas */
-	border-top: 2px solid #0b7e7f;
-	margin-top: -1px;
+	margin-top: -6px;
 }
 QTabWidget::tab-bar {
-	left: 5px;
+	left: 15px;
+	background-color: #e0e1dd;
 }
 
 QTabBar::tab { /* selecciona la barra de las pestañas */
-	background-color: #0b7e7f;
-	border: 1px solid #0b7e7f;
-	margin: 0 1px;
-	color: #fff;
+	background-color: #415a77;
+	border: 1px solid #415a77;
+	border-top-right-radius: 5px;
+	margin: 1 2px;
+	color: #e0e1dd;
 	padding: 2px;
-	width: 150px;
-	height: 20px;
-	font-size: 18px;
+	width: 220px;
+	height: 24px;
+	font-family: &quot;Corbel&quot;, &quot;Arial&quot;, &quot;Sans-Serif&quot;;
+	font-weight: 600;
+	font-size: 19px;
 }
 QTabBar::tab:hover {
-	background-color: #35bc88;
-	border: 1px solid #20ae7c;
+	background-color: #3b66ab;
+	border: 1px solid #778da9;
 }
 QTabBar::tab:selected {
+	color: #fff;
 	margin-bottom: -1px;
-	background-color: qlineargradient(spread:pad, x1:0.658, y1:1, x2:0.289, y2:0, stop:0 rgba(11, 126, 127, 255), stop:1 rgba(84, 137, 172, 255));
-	border-top-color:  rgba(84, 137, 172, 255);
+	background-color: #3b66ab;
+	border-top-color:  #778da9;
+	font-size: 20px;
 }
 QTabBar::tab:!selected {
+	color: #e0e1dd;
 	margin-top: 3px;
-	height: 17px;
+	height: 22px;
 }
 
 
+/* QTableViews */
 QTableView {
-	background-color: #58dfab;
-	alternate-background-color: #98ffcb;
-	border: 1px solid #111;
+	color: #0d1b2a;
+	background-color: #fff;
+	border: None;
+	border-radius: 10px;
 }
 QTableView::item:hover {
-	background-color: rgb(197, 255, 252);
+	background-color: #778da9;
 }
 QTableView::item:selected {
-	background-color: #38a3a5;
+	background-color: #778da9;
+	border: 1px solid #fff;
 }
-QHeaderView:section {
-	background-color: #fff;
+/* QHeaderViews */
+QHeaderView::section {
+	background-color: #778da9;
+	color: #fff;
 	border: none;
 	border-right: 1px solid;
 	border-bottom: 1px solid;
-	border-color: #111;
+	border-color: #e0e1dd;
 }
 
 
-QToolBox::tab {
-	background-color: #13947d;
+/* QComboBoxes */
+QComboBox,
+QTableView QCombobox { /* estilos de comboboxes creados por los delegados para edición */
+	background-color: #e0e1dd;
+	color: #0d1b2a;
+	border: 1px solid #3b66ab;
+	border-radius: 5px;
+	padding-left: 2px 0;
+}
+QComboBox:on,
+QTableView QComboBox:on { /* estilos de comboboxes creados por los delegados para edición */
+	background-color: #3b66ab;
 	color: #fff;
-	height: 18px;
-}
-QToolBox::tab:hover {
-	background-color: rgb(197, 255, 252);
-	color: #111;
-}
-QToolBox::tab:selected {
-	font: italic;
-	font-size: 16px;
-	background-color: qlineargradient(spread:pad, x1:0.658, y1:1, x2:0.289, y2:0, stop:0 rgba(11, 126, 127, 255), stop:1 rgba(84, 137, 172, 255));
-	border-top-color:  rgba(84, 137, 172, 255);
-}
-
-
-QComboBox {
-	background-color: #fff;
-	color: #111;
 	border: none;
-	border-top: 1px solid;
-	border-bottom: 1px solid;
-	border-color: #111;
-}
-QComboBox:on {
-	background-color: rgb(197, 255, 252);
-	border: 1px solid;
-	border-color: rgb(11, 126, 127);
-	padding-top: 2px;
+	padding-top: 3px;
 	padding-left: 4px;
 }
-QComboBox QAbstractItemView {
-	background-color: #fff;
-	selection-background-color: #38a3a5;
+QComboBox::drop-down {
+	subcontrol-origin: padding;
+	subcontrol-position: top right;
+	width: 20px;
+	padding-right: 3px;
+	border-left: none;
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
+}
+QComboBox::down-arrow:on {
+    top: 1px;
+    left: 1px;
+}
+QComboBox QAbstractItemView,
+QTableView QComboBox QAbstractItemView { /* estilos de comboboxes creados por los delegados para edición */
+	background-color: #778da9;
+	color: #fff;
+	selection-background-color: #3b66ab;
 }
 
 
 /* estilos del QDateTimeEdit y del QCalendarWidget */
-QDateTimeEdit {
+QDateTimeEdit,
+QTableView QDateTimeEdit { /* estilos de datetimeedits creados por los delegados para edición */
 	background-color: #fff;
 }
-
-
-QCalendarWidget QAbstractItemView {
+QCalendarWidget QAbstractItemView,
+QTableView QCalendarWidget QAbstractItemView  { /* estilos de datetimeedits creados por los delegados para edición */
 	background-color: #fff;
 	selection-background-color: #38a3a5;
 }
-QCalendarWidget QToolButton {
+QCalendarWidget QToolButton,
+QTableView QCalendarWidget QToolButton { /* estilos de datetimeedits creados por los delegados para edición */
 	background-color: #22577a;
 	color: #fff;
 }
 QCalendarWidget QToolButton:hover,
-QCalendarWidget QToolButton:pressed {
+QCalendarWidget QToolButton:pressed,
+QTableView QCalendarWidget QToolButton:hover, /* estilos de datetimeedits creados por los ... */
+QTableView QCalendarWidget QToolButton:pressed /* ... delegados para edición */
+ {
 	background-color: #38a3a5;
 	color: #111;
 }
@@ -699,13 +719,23 @@ QProgressBar::chunk {
            </font>
           </property>
           <property name="styleSheet">
-           <string notr="true">#main_inventory_frame {
-	background-color: #35bc88;
-	border-color: #0b7e7f;
+           <string notr="true">#tab1_inventory {
+	background-color: #e0e1dd;
+}
+
+
+#main_inventory_frame {
+	border-top-left-radius: 20px;
+}
+
+
+#inventory_header {
+	background-color: #fff;
+	border-radius: 10px;
 }</string>
           </property>
           <attribute name="title">
-           <string>INVENTARIO</string>
+           <string>Inventario</string>
           </attribute>
           <attribute name="toolTip">
            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Muestra el inventario de una tabla que haya sido seleccionada desde el menú lateral de la izquierda.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -715,10 +745,10 @@ QProgressBar::chunk {
             <number>4</number>
            </property>
            <property name="leftMargin">
-            <number>0</number>
+            <number>10</number>
            </property>
            <property name="topMargin">
-            <number>0</number>
+            <number>10</number>
            </property>
            <property name="rightMargin">
             <number>0</number>
@@ -766,10 +796,10 @@ QProgressBar::chunk {
                   <number>0</number>
                  </property>
                  <property name="topMargin">
-                  <number>8</number>
+                  <number>6</number>
                  </property>
                  <property name="rightMargin">
-                  <number>0</number>
+                  <number>10</number>
                  </property>
                  <property name="bottomMargin">
                   <number>0</number>
@@ -777,37 +807,43 @@ QProgressBar::chunk {
                  <item>
                   <widget class="QFrame" name="inventory_header">
                    <property name="sizePolicy">
-                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
                    </property>
                    <property name="frameShape">
                     <enum>QFrame::Shape::NoFrame</enum>
                    </property>
                    <property name="frameShadow">
-                    <enum>QFrame::Shadow::Raised</enum>
+                    <enum>QFrame::Shadow::Plain</enum>
                    </property>
-                   <layout class="QHBoxLayout" name="inventory_header_Hlayout">
+                   <layout class="QHBoxLayout" name="inventory_header_Hlayout" stretch="3,1">
                     <property name="spacing">
-                     <number>4</number>
+                     <number>7</number>
                     </property>
                     <property name="leftMargin">
-                     <number>5</number>
+                     <number>10</number>
                     </property>
                     <property name="topMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="rightMargin">
                      <number>5</number>
                     </property>
-                    <property name="bottomMargin">
-                     <number>0</number>
+                    <property name="rightMargin">
+                     <number>10</number>
                     </property>
-                    <item alignment="Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter">
+                    <property name="bottomMargin">
+                     <number>20</number>
+                    </property>
+                    <item>
                      <widget class="QLineEdit" name="inventory_searchBar">
                       <property name="sizePolicy">
-                       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                         <horstretch>0</horstretch>
                         <verstretch>0</verstretch>
                        </sizepolicy>
@@ -820,7 +856,7 @@ QProgressBar::chunk {
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>16777215</width>
+                        <width>1000</width>
                         <height>25</height>
                        </size>
                       </property>
@@ -840,7 +876,7 @@ QProgressBar::chunk {
                        <string notr="true"/>
                       </property>
                       <property name="maxLength">
-                       <number>100</number>
+                       <number>255</number>
                       </property>
                       <property name="frame">
                        <bool>false</bool>
@@ -848,8 +884,11 @@ QProgressBar::chunk {
                       <property name="echoMode">
                        <enum>QLineEdit::EchoMode::Normal</enum>
                       </property>
+                      <property name="alignment">
+                       <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+                      </property>
                       <property name="placeholderText">
-                       <string notr="true">Ingresar detalles de productos a buscar...</string>
+                       <string notr="true">Buscar productos por nombre, precio, stock...</string>
                       </property>
                       <property name="cursorMoveStyle">
                        <enum>Qt::CursorMoveStyle::LogicalMoveStyle</enum>
@@ -859,10 +898,10 @@ QProgressBar::chunk {
                       </property>
                      </widget>
                     </item>
-                    <item>
+                    <item alignment="Qt::AlignmentFlag::AlignLeft">
                      <widget class="QComboBox" name="cb_inventory_colsFilter">
                       <property name="sizePolicy">
-                       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                         <horstretch>0</horstretch>
                         <verstretch>0</verstretch>
                        </sizepolicy>
@@ -875,7 +914,7 @@ QProgressBar::chunk {
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>16777215</width>
+                        <width>350</width>
                         <height>26</height>
                        </size>
                       </property>
@@ -1024,8 +1063,9 @@ QProgressBar::chunk {
 font-size: 16px;
 letter-spacing: 0px;
 word-spacing: 0px;
-background-color: rgb(88, 223, 171);
-color: #111;</string>
+background-color: #778da9;
+color: #1b263b;
+border-radius: 5px;</string>
                    </property>
                    <property name="text">
                     <string notr="true"/>
@@ -1091,6 +1131,9 @@ color: #111;</string>
                       <property name="shortcut">
                        <string notr="true">+</string>
                       </property>
+                      <property name="checkable">
+                       <bool>true</bool>
+                      </property>
                      </widget>
                     </item>
                     <item>
@@ -1131,6 +1174,9 @@ QPushButton:hover {
                       <property name="shortcut">
                        <string notr="true">Del</string>
                       </property>
+                      <property name="checkable">
+                       <bool>true</bool>
+                      </property>
                      </widget>
                     </item>
                    </layout>
@@ -1163,13 +1209,20 @@ QPushButton:hover {
                  </size>
                 </property>
                 <property name="toolTip">
-                 <string notr="true"/>
+                 <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Éste menú lateral permite cambiar precios usando porcentajes, para eso se sigue el siguiente procedimiento (es necesario mantener el menú lateral abierta durante el proceso):&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;1)&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; Seleccionar el &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;tipo de precio&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; que se desea modificar dentro del menú&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;2)&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; Seleccionar los &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;productos&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; a modificar en la tabla&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;3)&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; Escribir el &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;porcentaje de cambio&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; en la barra inferior del menú y presionar &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;Enter&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;De esa forma se cambia el precio elegido de todos los &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;productos seleccionados &lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;y también se actualizan las &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;cuentas corrientes&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; con los nuevos valores.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="styleSheet">
                  <string notr="true">* {
-	background-color: #22577a;
-	color: #c7f9cc;
+	background-color: #0d1b2a;
+	color: #e0e1dd;
 }
+
+
+QToolTip {
+	background-color: #fff;
+	color: #0d1b2a;
+}
+
 
 #inventory_sideBar {
 	border-bottom-left-radius: 20px;
@@ -1179,26 +1232,61 @@ QScrollBar {
 	background-color: white;
 }
 
-QLabel {
-	font-size: 16px;
+
+/* botones */
+QPushButton {
+	border: none;
+}
+QPushButton:hover {
+	border: 2px solid #38a3a5;
+	border-radius: 3px;
+	border-bottom-right-radius: 10px;
+	padding-right: 2px;
+	padding-bottom: 3px;
 }
 
 
+/* labels */
+QLabel {
+	font-family: &quot;Arial&quot;, &quot;Calibri&quot;, &quot;Sans-Serif&quot;;
+	font-size: 18px;
+	font-weight: 600px;
+	margin-bottom: 5px;
+}
+
+
+#percentage_label {
+	margin-top: 25px;
+	margin-bottom: 0;
+}
+
+
+/* lineedit */
 QLineEdit {
-	background-color: #fff;
-	color: #111;
+	background-color: #e0e1dd;
+	color: #0d1b2a;
 	border: none;
 	border-top: 1px solid;
 	border-bottom: 1px solid;
 	border-color: #0b7e7f;
+	border-radius: 10px;
 	height: 24px;
 }
 QLineEdit:focus {
-	background-color: rgb(197, 255, 252);
+	background-color: #3b66ab;
+	color: #fff;
 	border: 1px solid;
 	border-color: #0b7e7f;
 	font-size: 18px;
-}</string>
+}
+QLineEdit:disabled {
+	background-color: #bbb;
+	color: #555;
+}
+
+
+/* checkbuttons */
+</string>
                 </property>
                 <property name="frameShape">
                  <enum>QFrame::Shape::NoFrame</enum>
@@ -1208,21 +1296,21 @@ QLineEdit:focus {
                 </property>
                 <layout class="QVBoxLayout" name="inventory_sideBar_Vlayout" stretch="0,10">
                  <property name="spacing">
-                  <number>10</number>
+                  <number>15</number>
                  </property>
                  <property name="leftMargin">
                   <number>0</number>
                  </property>
                  <property name="topMargin">
-                  <number>0</number>
+                  <number>5</number>
                  </property>
                  <property name="rightMargin">
                   <number>0</number>
                  </property>
                  <property name="bottomMargin">
-                  <number>10</number>
+                  <number>18</number>
                  </property>
-                 <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
+                 <item alignment="Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop">
                   <widget class="QPushButton" name="btn_inventory_sideBarToggle">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -1242,18 +1330,6 @@ QLineEdit:focus {
                      <height>16777215</height>
                     </size>
                    </property>
-                   <property name="styleSheet">
-                    <string notr="true">QPushButton {
-	border: none;
-}
-QPushButton:hover {
-	border: 2px solid #38a3a5;
-	border-radius: 3px;
-	border-bottom-left-radius: 10px;
-	padding-left: 2px;
-	padding-bottom: 3px;
-}</string>
-                   </property>
                    <property name="text">
                     <string/>
                    </property>
@@ -1262,6 +1338,9 @@ QPushButton:hover {
                      <width>32</width>
                      <height>32</height>
                     </size>
+                   </property>
+                   <property name="checkable">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
@@ -1281,28 +1360,24 @@ QPushButton:hover {
                    </property>
                    <layout class="QVBoxLayout" name="inventory_side_bar_body_Vlayout">
                     <property name="spacing">
-                     <number>14</number>
+                     <number>35</number>
                     </property>
                     <property name="leftMargin">
-                     <number>5</number>
+                     <number>8</number>
                     </property>
                     <property name="topMargin">
-                     <number>10</number>
+                     <number>5</number>
                     </property>
                     <property name="rightMargin">
-                     <number>5</number>
+                     <number>8</number>
                     </property>
                     <property name="bottomMargin">
-                     <number>5</number>
+                     <number>0</number>
                     </property>
                     <item>
                      <widget class="QLabel" name="inventory_sideBar_label_changePrices">
-                      <property name="styleSheet">
-                       <string notr="true">border-bottom: 1px solid #fff;
-margin-bottom: 5px;</string>
-                      </property>
                       <property name="text">
-                       <string notr="true">CAMBIAR PRECIOS USANDO PORCENTAJES</string>
+                       <string notr="true">Cambios porcentuales de precios</string>
                       </property>
                       <property name="textFormat">
                        <enum>Qt::TextFormat::PlainText</enum>
@@ -1331,19 +1406,19 @@ margin-bottom: 5px;</string>
                       </property>
                       <layout class="QVBoxLayout" name="change_percentage_frame_Vlayout" stretch="0,0,1,1">
                        <property name="spacing">
-                        <number>8</number>
+                        <number>25</number>
                        </property>
                        <property name="leftMargin">
                         <number>0</number>
                        </property>
                        <property name="topMargin">
-                        <number>15</number>
+                        <number>5</number>
                        </property>
                        <property name="rightMargin">
                         <number>0</number>
                        </property>
                        <property name="bottomMargin">
-                        <number>0</number>
+                        <number>5</number>
                        </property>
                        <item>
                         <widget class="QCheckBox" name="checkbox_unit_prices">
@@ -1388,12 +1463,8 @@ margin-bottom: 5px;</string>
                          <property name="toolTip">
                           <string notr="true"/>
                          </property>
-                         <property name="styleSheet">
-                          <string notr="true">margin-top: 20px;
-margin-bottom: 0;</string>
-                         </property>
                          <property name="text">
-                          <string notr="true">Porcentaje de cambio</string>
+                          <string notr="true">Porcentaje</string>
                          </property>
                          <property name="textFormat">
                           <enum>Qt::TextFormat::PlainText</enum>
@@ -1418,16 +1489,10 @@ margin-bottom: 0;</string>
                           <bool>false</bool>
                          </property>
                          <property name="toolTip">
-                          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#000000;&quot;&gt;Aumenta o disminuye un cierto porcentaje los precios normales/comerciales seleccionados.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; color:#000000;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:12pt; color:#000000;&quot;&gt; No es necesario escribir el símbolo de porcentaje &amp;quot;%&amp;quot;, simplemente escribir el porcentaje nuevo.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; color:#000000;&quot;&gt;EJ.: &lt;/span&gt;&lt;span style=&quot; font-size:12pt; color:#000000;&quot;&gt;Para aumentar un 25% un valor, introducir &amp;quot;25&amp;quot;; en cambio, para disminuir el precio un 25%, introducir &amp;quot;-25&amp;quot;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#000000;&quot;&gt;Aumenta o disminuye un cierto porcentaje los precios normales/comerciales seleccionados.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; color:#000000;&quot;&gt;EJ.: &lt;/span&gt;&lt;span style=&quot; font-size:12pt; color:#000000;&quot;&gt;Para aumentar un 25% un valor introducir &amp;quot;25&amp;quot;, para disminuir el precio un 25% introducir &amp;quot;-25&amp;quot;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                          </property>
                          <property name="styleSheet">
-                          <string notr="true">QLineEdit {
-	height: 24px;
-}
-QLineEdit:disabled {
-	background-color: #bbb;
-	color: #555;
-}</string>
+                          <string notr="true"/>
                          </property>
                          <property name="text">
                           <string notr="true"/>
@@ -1485,16 +1550,31 @@ color: #111;</string>
          </widget>
          <widget class="QWidget" name="tab2_sales">
           <property name="styleSheet">
-           <string notr="true">#tab2_sales,
-#sales_buttons,
-#box2_sales_table,
-#box1_sales_form {
-	background-color: #35bc88;
-	border-color: #0b7e7f;
+           <string notr="true">#tab2_sales {
+	background-color: #e0e1dd;
+}
+
+
+/* QToolBox */
+QToolBox::tab {
+	background-color: #415a77;
+	color: #fff;
+	height: 18px;
+}
+QToolBox::tab:hover {
+	background-color: #3b66ab;
+	border: 1px solid #778da9;
+}
+QToolBox::tab:selected {
+	font: italic;
+	font-size: 16px;
+	background-color: #3b66ab;
+	color: #fff;
+	border-top-color:  #778da9;
 }</string>
           </property>
           <attribute name="title">
-           <string>VENTAS</string>
+           <string>Ventas</string>
           </attribute>
           <attribute name="toolTip">
            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Muestra información sobre las ventas realizadas y permite ingresar nuevas ventas.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1517,14 +1597,6 @@ color: #111;</string>
            </property>
            <item>
             <widget class="QToolBox" name="tab2_toolBox">
-             <property name="styleSheet">
-              <string notr="true">QLabel {
-	font-size:14px;
-	font-weight: 100;
-	letter-spacing: 1px;
-	word-spacing: 1px;
-}</string>
-             </property>
              <property name="currentIndex">
               <number>0</number>
              </property>
@@ -1537,8 +1609,38 @@ color: #111;</string>
                 <x>0</x>
                 <y>0</y>
                 <width>756</width>
-                <height>496</height>
+                <height>517</height>
                </rect>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">#box1_sales_form {
+	background-color: #e0e1dd;
+}
+
+
+#frame_list #add_products,
+#sale_info {
+	background-color: #fff;
+	border-radius: 10px;
+}
+
+
+/* list widget de productos */
+QListWidget {
+	background-color: #fff;
+	border-radius: 10px;
+}
+QListWidget::item {
+	background-color: qlineargradient(spread:pad, x1:0, y1:0.273, x2:1, y2:0.835, stop:0 rgba(144, 205, 171, 255), stop:1 rgba(187, 255, 154, 255));
+	margin-left: 7px;
+	margin-right: 7px;
+	padding: 2px;
+	border-bottom: 1px solid;
+	border-color: rgb(65, 117, 75);
+}
+QListWidget::item:selected {
+	border-left: 7px solid rgb(34, 87, 122);
+}</string>
               </property>
               <attribute name="label">
                <string>Formulario de venta</string>
@@ -1554,7 +1656,7 @@ color: #111;</string>
                 <number>6</number>
                </property>
                <property name="rightMargin">
-                <number>0</number>
+                <number>10</number>
                </property>
                <property name="bottomMargin">
                 <number>0</number>
@@ -1569,19 +1671,19 @@ color: #111;</string>
                  </property>
                  <layout class="QVBoxLayout" name="box1_main_form_Vlayout" stretch="10,0,0">
                   <property name="spacing">
-                   <number>4</number>
+                   <number>10</number>
                   </property>
                   <property name="leftMargin">
-                   <number>0</number>
+                   <number>5</number>
                   </property>
                   <property name="topMargin">
-                   <number>0</number>
+                   <number>10</number>
                   </property>
                   <property name="rightMargin">
-                   <number>0</number>
+                   <number>5</number>
                   </property>
                   <property name="bottomMargin">
-                   <number>0</number>
+                   <number>5</number>
                   </property>
                   <item>
                    <widget class="QFrame" name="frame_list">
@@ -1610,26 +1712,26 @@ color: #111;</string>
                      <item>
                       <widget class="QFrame" name="add_products">
                        <property name="frameShape">
-                        <enum>QFrame::Shape::StyledPanel</enum>
+                        <enum>QFrame::Shape::NoFrame</enum>
                        </property>
                        <property name="frameShadow">
-                        <enum>QFrame::Shadow::Raised</enum>
+                        <enum>QFrame::Shadow::Plain</enum>
                        </property>
                        <layout class="QHBoxLayout" name="box1_add_products_Hlayout" stretch="0,10">
                         <property name="spacing">
                          <number>4</number>
                         </property>
                         <property name="leftMargin">
-                         <number>0</number>
+                         <number>10</number>
                         </property>
                         <property name="topMargin">
-                         <number>0</number>
+                         <number>5</number>
                         </property>
                         <property name="rightMargin">
-                         <number>0</number>
+                         <number>10</number>
                         </property>
                         <property name="bottomMargin">
-                         <number>0</number>
+                         <number>5</number>
                         </property>
                         <item>
                          <widget class="QPushButton" name="btn_add_product">
@@ -1660,6 +1762,9 @@ color: #111;</string>
                           <property name="shortcut">
                            <string notr="true">+</string>
                           </property>
+                          <property name="checkable">
+                           <bool>true</bool>
+                          </property>
                          </widget>
                         </item>
                         <item>
@@ -1687,20 +1792,7 @@ color: #111;</string>
                         </sizepolicy>
                        </property>
                        <property name="styleSheet">
-                        <string notr="true">QListWidget {
-	background-color: rgb(194, 255, 237);
-}
-QListWidget::item {
-	background-color: qlineargradient(spread:pad, x1:0, y1:0.273, x2:1, y2:0.835, stop:0 rgba(144, 205, 171, 255), stop:1 rgba(187, 255, 154, 255));
-	margin-left: 7px;
-	margin-right: 7px;
-	padding: 2px;
-	border-bottom: 1px solid;
-	border-color: rgb(65, 117, 75);
-}
-QListWidget::item:selected {
-	border-left: 7px solid rgb(34, 87, 122);
-}</string>
+                        <string notr="true"/>
                        </property>
                        <property name="sizeAdjustPolicy">
                         <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
@@ -1760,13 +1852,13 @@ QListWidget::item:selected {
                       <number>10</number>
                      </property>
                      <property name="topMargin">
-                      <number>0</number>
+                      <number>5</number>
                      </property>
                      <property name="rightMargin">
                       <number>10</number>
                      </property>
                      <property name="bottomMargin">
-                      <number>0</number>
+                      <number>5</number>
                      </property>
                      <property name="horizontalSpacing">
                       <number>5</number>
@@ -1957,6 +2049,9 @@ border-right: 1px solid #111;</string>
                        <property name="shortcut">
                         <string notr="true">Shift+Return</string>
                        </property>
+                       <property name="checkable">
+                        <bool>true</bool>
+                       </property>
                       </widget>
                      </item>
                     </layout>
@@ -1972,9 +2067,20 @@ border-right: 1px solid #111;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>364</width>
-                <height>164</height>
+                <width>756</width>
+                <height>517</height>
                </rect>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">#box2_sales_table {
+	background-color: #e0e1dd;
+}
+
+
+#sales_table_header {
+	background-color: #fff;
+	border-radius: 10px;
+}</string>
               </property>
               <attribute name="label">
                <string>Tabla de ventas</string>
@@ -1990,7 +2096,7 @@ border-right: 1px solid #111;</string>
                 <number>6</number>
                </property>
                <property name="rightMargin">
-                <number>0</number>
+                <number>10</number>
                </property>
                <property name="bottomMargin">
                 <number>0</number>
@@ -1998,7 +2104,7 @@ border-right: 1px solid #111;</string>
                <item>
                 <widget class="QFrame" name="sales_table_header">
                  <property name="sizePolicy">
-                  <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
@@ -2009,26 +2115,26 @@ border-right: 1px solid #111;</string>
                  <property name="frameShadow">
                   <enum>QFrame::Shadow::Raised</enum>
                  </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_2">
+                 <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0">
                   <property name="spacing">
-                   <number>4</number>
+                   <number>7</number>
                   </property>
                   <property name="leftMargin">
-                   <number>5</number>
+                   <number>10</number>
                   </property>
                   <property name="topMargin">
-                   <number>0</number>
-                  </property>
-                  <property name="rightMargin">
                    <number>5</number>
                   </property>
+                  <property name="rightMargin">
+                   <number>10</number>
+                  </property>
                   <property name="bottomMargin">
-                   <number>0</number>
+                   <number>20</number>
                   </property>
                   <item>
                    <widget class="QLineEdit" name="sales_searchBar">
                     <property name="sizePolicy">
-                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                       <horstretch>0</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
@@ -2041,7 +2147,7 @@ border-right: 1px solid #111;</string>
                     </property>
                     <property name="maximumSize">
                      <size>
-                      <width>16777215</width>
+                      <width>1000</width>
                       <height>25</height>
                      </size>
                     </property>
@@ -2055,7 +2161,7 @@ border-right: 1px solid #111;</string>
                      <string notr="true"/>
                     </property>
                     <property name="maxLength">
-                     <number>100</number>
+                     <number>255</number>
                     </property>
                     <property name="frame">
                      <bool>false</bool>
@@ -2064,7 +2170,7 @@ border-right: 1px solid #111;</string>
                      <enum>QLineEdit::EchoMode::Normal</enum>
                     </property>
                     <property name="placeholderText">
-                     <string notr="true">Ingresar detalles de ventas a buscar...</string>
+                     <string notr="true">Buscar ventas por detalles, costo, fecha...</string>
                     </property>
                     <property name="cursorMoveStyle">
                      <enum>Qt::CursorMoveStyle::LogicalMoveStyle</enum>
@@ -2074,8 +2180,14 @@ border-right: 1px solid #111;</string>
                     </property>
                    </widget>
                   </item>
-                  <item>
+                  <item alignment="Qt::AlignmentFlag::AlignLeft">
                    <widget class="QComboBox" name="cb_sales_colsFilter">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
                     <property name="minimumSize">
                      <size>
                       <width>60</width>
@@ -2084,7 +2196,7 @@ border-right: 1px solid #111;</string>
                     </property>
                     <property name="maximumSize">
                      <size>
-                      <width>16777215</width>
+                      <width>350</width>
                       <height>26</height>
                      </size>
                     </property>
@@ -2233,8 +2345,9 @@ border-right: 1px solid #111;</string>
 font-size: 16px;
 letter-spacing: 0px;
 word-spacing: 0px;
-background-color: rgb(88, 223, 171);
-color: #111;</string>
+background-color: #778da9;
+color: #1b263b;
+border-radius: 5px;</string>
                  </property>
                  <property name="text">
                   <string notr="true"/>
@@ -2306,6 +2419,9 @@ color: #111;</string>
                     <property name="shortcut">
                      <string notr="true">+</string>
                     </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
                    </widget>
                   </item>
                   <item>
@@ -2346,6 +2462,9 @@ QPushButton:hover {
                     <property name="shortcut">
                      <string notr="true">Del</string>
                     </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
                    </widget>
                   </item>
                  </layout>
@@ -2358,8 +2477,19 @@ QPushButton:hover {
           </layout>
          </widget>
          <widget class="QWidget" name="tab3_debts">
+          <property name="styleSheet">
+           <string notr="true">#tab3_debts {
+	background-color: #e0e1dd;
+}
+
+
+#debts_header {
+	background-color: #fff;
+	border-radius: 10px;
+}</string>
+          </property>
           <attribute name="title">
-           <string>CUENTAS CORRIENTES</string>
+           <string>Cuentas Corrientes</string>
           </attribute>
           <attribute name="toolTip">
            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Muestra las cuentas corrientes y datos personales de quienes posean una.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -2407,7 +2537,7 @@ QPushButton:hover {
               <item>
                <widget class="QFrame" name="debts_header">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -2418,26 +2548,26 @@ QPushButton:hover {
                 <property name="frameShadow">
                  <enum>QFrame::Shadow::Raised</enum>
                 </property>
-                <layout class="QHBoxLayout" name="horizontalLayout_4">
+                <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="3,1">
                  <property name="spacing">
-                  <number>4</number>
+                  <number>7</number>
                  </property>
                  <property name="leftMargin">
-                  <number>5</number>
+                  <number>10</number>
                  </property>
                  <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
                   <number>5</number>
                  </property>
+                 <property name="rightMargin">
+                  <number>10</number>
+                 </property>
                  <property name="bottomMargin">
-                  <number>0</number>
+                  <number>20</number>
                  </property>
                  <item>
                   <widget class="QLineEdit" name="debts_searchBar">
                    <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
@@ -2450,7 +2580,7 @@ QPushButton:hover {
                    </property>
                    <property name="maximumSize">
                     <size>
-                     <width>16777215</width>
+                     <width>1000</width>
                      <height>25</height>
                     </size>
                    </property>
@@ -2471,7 +2601,7 @@ QPushButton:hover {
                     <string notr="true"/>
                    </property>
                    <property name="maxLength">
-                    <number>100</number>
+                    <number>255</number>
                    </property>
                    <property name="frame">
                     <bool>false</bool>
@@ -2480,7 +2610,7 @@ QPushButton:hover {
                     <enum>QLineEdit::EchoMode::Normal</enum>
                    </property>
                    <property name="placeholderText">
-                    <string notr="true">Ingresar detalles de cuenta corriente a buscar...</string>
+                    <string notr="true">Buscar cuentas por nombre, apellido, teléfono, dirección...</string>
                    </property>
                    <property name="cursorMoveStyle">
                     <enum>Qt::CursorMoveStyle::LogicalMoveStyle</enum>
@@ -2490,8 +2620,14 @@ QPushButton:hover {
                    </property>
                   </widget>
                  </item>
-                 <item>
+                 <item alignment="Qt::AlignmentFlag::AlignLeft">
                   <widget class="QComboBox" name="cb_debts_colsFilter">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
                    <property name="minimumSize">
                     <size>
                      <width>60</width>
@@ -2500,7 +2636,7 @@ QPushButton:hover {
                    </property>
                    <property name="maximumSize">
                     <size>
-                     <width>16777215</width>
+                     <width>350</width>
                      <height>26</height>
                     </size>
                    </property>
@@ -2592,19 +2728,6 @@ QPushButton:hover {
                 <property name="toolTip">
                  <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Para &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;modificar&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; las &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;características&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; de una deuda simplemente hacer &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;doble click&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; sobre la celda que se quiere modificar e ingresar el nuevo valor.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
-                <property name="styleSheet">
-                 <string notr="true">#tv_debts_data QLabel {
-	font-size: 16px;
-}
-
-
-#tv_debts_data QPushButton {
-	max-width: 24px;
-	max-height: 24px;
-	border-radius: 1px;
-	background-color: rgb(71, 184, 255);
-}</string>
-                </property>
                 <property name="frameShape">
                  <enum>QFrame::Shape::NoFrame</enum>
                 </property>
@@ -2656,8 +2779,9 @@ QPushButton:hover {
 font-size: 16px;
 letter-spacing: 0px;
 word-spacing: 0px;
-background-color: rgb(88, 223, 171);
-color: #111;</string>
+background-color: #778da9;
+color: #1b263b;
+border-radius: 5px;</string>
                 </property>
                 <property name="text">
                  <string notr="true"/>
@@ -2729,6 +2853,9 @@ color: #111;</string>
                    <property name="shortcut">
                     <string notr="true">+</string>
                    </property>
+                   <property name="checkable">
+                    <bool>true</bool>
+                   </property>
                   </widget>
                  </item>
                  <item>
@@ -2768,6 +2895,9 @@ QPushButton:hover {
                    </property>
                    <property name="shortcut">
                     <string notr="true">Del</string>
+                   </property>
+                   <property name="checkable">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
@@ -2824,7 +2954,6 @@ QPushButton:hover {
  </widget>
  <tabstops>
   <tabstop>tabWidget</tabstop>
-  <tabstop>inventory_searchBar</tabstop>
   <tabstop>cb_inventory_colsFilter</tabstop>
   <tabstop>tv_inventory_data</tabstop>
   <tabstop>btn_add_product_inventory</tabstop>
@@ -2840,13 +2969,9 @@ QPushButton:hover {
   <tabstop>dateTimeEdit_sale</tabstop>
   <tabstop>lineEdit_paid</tabstop>
   <tabstop>btn_end_sale</tabstop>
-  <tabstop>sales_searchBar</tabstop>
-  <tabstop>cb_sales_colsFilter</tabstop>
   <tabstop>tv_sales_data</tabstop>
   <tabstop>btn_add_product_sales</tabstop>
   <tabstop>btn_delete_product_sales</tabstop>
-  <tabstop>debts_searchBar</tabstop>
-  <tabstop>cb_debts_colsFilter</tabstop>
   <tabstop>tv_debts_data</tabstop>
   <tabstop>btn_add_debtor</tabstop>
   <tabstop>btn_delete_debtor</tabstop>
