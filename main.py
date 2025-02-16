@@ -255,7 +255,7 @@ class MainWindow(QMainWindow):
         self.ui.checkbox_comercial_prices.stateChanged.connect(self.handleCheckboxStateChange)
         
         #* lineedit de porcentajes
-        self.ui.lineEdit_percentage_change.editingFinished.connect(self.onLePercentageEditingFinished)
+        self.ui.lineEdit_percentage_change.returnPressed.connect(self.onLePercentageEditingFinished)
         self.ui.lineEdit_percentage_change.validator().validationSucceeded.connect(
             self.__onPercentageValidatorSucceded)
         self.ui.lineEdit_percentage_change.validator().validationFailed.connect(
