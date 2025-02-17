@@ -2,31 +2,37 @@
 <RCC version="1.0">
     <qresource prefix="icons">
         
-        <!-- íconos para los botones de los menús laterales -->        
+        <!-- #### (MainWindow) ####   íconos para los botones de los menús laterales -->        
         <file alias="list-normal.svg">../icons/listNormal.svg</file>
         <file alias="list-focus.svg">../icons/listFocus.svg</file>
 
         <file alias="menu-normal.svg">../icons/menuNormal.svg</file>
         <file alias="menu-focus.svg">../icons/menuFocus.svg</file>
 
-        <!-- ícono para barras de búsqueda -->
+        <!-- #### (uso general) ####   ícono para barras de búsqueda -->
         <file alias="search.svg">../icons/search.svg</file>
 
-        <!-- ícono para filtrar columnas -->
+        <!-- #### (uso general) ####   ícono para filtrar columnas -->
         <file alias="filter.svg">../icons/filter.svg</file>
 
-        <!-- íconos para los botones que se usan para agregar o borrar registros -->
+        <!-- #### (uso general) ####   íconos para los botones que se usan para agregar o borrar registros -->
         <file alias="plus.svg">../icons/plus.svg</file>
         <file alias="minus-circle.svg">../icons/minusCircle.svg</file>
 
-        <!-- íconos para porcentajes -->
+        <!-- #### (MainWindow) ####   íconos para porcentajes -->
         <file alias="percent.svg">../icons/percent.svg</file>
 
-        <!-- ícono para el botón de finalizar venta -->
+        <!-- #### (MainWindow) ####   ícono para el botón de finalizar venta -->
         <file alias="check-circle.svg">../icons/checkCircle.svg</file>
 
-        <!-- flecha hacia abajo para comboboxes -->
+        <!-- #### (uso general) ####   flecha hacia abajo para comboboxes -->
         <file alias="chevron-down.svg">../icons/chevronDown.svg</file>
+
+        <!-- #### (Dialogs) ####   ícono para cancelar una operación -->
+        <file alias="cancel.svg">../icons/xCircle.svg</file>
+
+        <!-- #### (Dialogs) ####   ícono para guardar un registro nuevo -->
+        <file alias="accept.svg">../icons/plusCircle.svg</file>
 
     </qresource>
 </RCC>
