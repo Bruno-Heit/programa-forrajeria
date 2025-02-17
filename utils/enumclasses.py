@@ -116,6 +116,7 @@ class WidgetStyle(StrEnum):
     FIELD_INVALID_VAL = "color: #fff; background-color: #F65755;"
     
     DEF_COMBOBOX_FILTER_ICON = "QComboBox::down-arrow {image: url(':/icons/filter.svg');}"
+    DEF_COMBOBOX_ARROW_ICON = "QComboBox::down-arrow {image: url(':/icons/chevron-down.svg');}"
 
 
 
