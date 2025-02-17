@@ -30,11 +30,32 @@
 
 QToolTip {
 	background-color: #fff;
+	color: #0d1b2a;
 }
 
 
 QDialog {
-	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 178, 102, 255), stop:0.378531 rgba(230, 177, 61, 255), stop:0.745763 rgba(232, 105, 57, 255), stop:0.982955 rgba(255, 180, 128, 255));
+	background-color: #e0e1dd;
+}
+
+
+#sale_data,
+#debtor_data {
+	background-color: #fff;
+	padding: 5px 3px;
+	border-radius: 10px;
+}
+
+
+#sale_data {
+	margin-bottom: 10px;
+}
+
+
+/* labels */
+QLabel {
+	padding-right: 2px;
+	padding-left: 2px;
 }
 
 
@@ -45,50 +66,49 @@ QDialog {
 #label_debtorSurname_feedback,
 #label_phoneNumber_feedback,
 #label_postalCode_feedback {
-	color: #dc2627;
-	border: 1px solid #dc2627;
-	background-color: rgba(224,164,164,0.7)
+	background-color: #F65755;
+	color: #fff;
+	border-radius: 5px;
 }
 
 
+/* lineedits */
 #lineEdit_direction:disabled,
 #lineEdit_phoneNumber:disabled,
 #lineEdit_postalCode:disabled {
-	background-color: rgba(204, 204, 204, 0.6);
-	color: #888;
+	background-color: #e0e1dd;
+	color: #0d1b2a;
 }
 
 
 QLineEdit {
-	background-color: #fff;
+	background-color: #e0e1dd;
+	color: #0d1b2a;
 	border: none;
-	border-top: 1px solid;
-	border-bottom: 1px solid;
-	border-color: #0b7e7f;
-	height: 24px;
+	border-radius: 10px;
+	padding-left: 3px;
+	padding-right: 3px;
 }
 QLineEdit:focus {
-	background-color: rgb(197, 255, 252);
-	border: 1px solid;
-	border-color: #0b7e7f;
-	font-size: 18px;
-}
-
-
-QPushButton {
-	font-size: 16px;
-	background-color: #22577a;
+	background-color: #3b66ab;
 	color: #fff;
-	border: 1px solid #12476a;
-	border-radius: 2px;
-	min-width: 200px;
-	min-height: 23px;
 }
-QPushButton:hover,
+
+
+/* pushbuttons */
+QPushButton {
+	background-color: #415a77;
+	color: #fff;
+	border: none;
+	border-radius: 4px;
+	width: 220px;
+}
+QPushButton:hover {
+	background-color: #3b66ab;
+}
 QPushButton:pressed {
-	background-color: #38a3a5;
-	color: #111;
-	border: 1px inset #289395;
+	background-color: #3b66ab;
+	border: 1px inset #778da9;
 }
 QPushButton:disabled {
 	background-color: rgb(103, 115, 122);
@@ -96,48 +116,63 @@ QPushButton:disabled {
 }
 
 
-/*cambia el estilo del combobox*/
+/* combobox */
 QComboBox {
-	background-color: #fff;
-	color: #111;
-	border: none;
-	border-top: 1px solid;
-	border-bottom: 1px solid;
-	border-color: #111;
+	background-color: #e0e1dd;
+	color: #0d1b2a;
+	border: 1px solid #3b66ab;
+	border-radius: 5px;
+	padding-left: 2px 0;
 }
 QComboBox:on {
-	background-color: rgb(197, 255, 252);
-	border: 1px solid;
-	border-color: rgb(11, 126, 127);
-	padding-top: 2px;
+	background-color: #3b66ab;
+	color: #fff;
+	border: none;
+	padding-top: 3px;
 	padding-left: 4px;
 }
-QComboBox QAbstractItemView {
+QComboBox::drop-down {
+	subcontrol-origin: padding;
+	subcontrol-position: top right;
+	width: 20px;
+	padding-right: 3px;
+	border-left: none;
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
+}
+QComboBox::down-arrow:on {
+    top: 1px;
+    left: 1px;
+}
+QComboBox QAbstractItemView{
+	background-color: #778da9;
+	color: #fff;
+	selection-background-color: #3b66ab;
+}
+
+
+/* datetimeedit y calendar */
+QDateTimeEdit {
+	background-color: #fff;
+}
+QCalendarWidget QAbstractItemView {
 	background-color: #fff;
 	selection-background-color: #38a3a5;
-}</string>
-  </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="spacing">
-    <number>4</number>
-   </property>
-   <property name="leftMargin">
-    <number>5</number>
-   </property>
-   <property name="topMargin">
-    <number>5</number>
-   </property>
-   <property name="rightMargin">
-    <number>5</number>
-   </property>
-   <property name="bottomMargin">
-    <number>5</number>
-   </property>
-   <item>
-    <widget class="QFrame" name="sale_data">
-     <property name="styleSheet">
-      <string notr="true">QScrollBar {
-	background-color: #fff;
+}
+QCalendarWidget QToolButton {
+	background-color: #22577a;
+	color: #fff;
+}
+QCalendarWidget QToolButton:hover,
+QCalendarWidget QToolButton:pressed {
+	background-color: #38a3a5;
+	color: #111;
+}
+
+
+/* scrollbars */
+QScrollBar {
+	background-color: #e0e1dd;
 	border: 1px solid transparent;
 	border-radius: 5px;
 }
@@ -145,11 +180,11 @@ QScrollBar:groove {
 	border-radius: 5px;
 }
 QScrollBar::handle {
-	background-color: #0b7e7f;
+	background-color:  #1b263b;
 	border-radius: 5px;
 }
 QScrollBar::handle:pressed {
-	background-color: #35bc88;
+	background-color: #3b465b;
 }
 QScrollBar::sub-line {
 	width: 0;
@@ -183,6 +218,33 @@ QScrollBar:horizontal {
 }
 QScrollBar::handle:horizontal {
 	min-width: 15px;
+}</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>4</number>
+   </property>
+   <property name="leftMargin">
+    <number>5</number>
+   </property>
+   <property name="topMargin">
+    <number>5</number>
+   </property>
+   <property name="rightMargin">
+    <number>5</number>
+   </property>
+   <property name="bottomMargin">
+    <number>5</number>
+   </property>
+   <item>
+    <widget class="QFrame" name="sale_data">
+     <property name="styleSheet">
+      <string notr="true">#label_productTotalCost {
+	font-size: 19px;
+	font-weight: 500;
+	background-color: #bbb;
+	border-top: 1px solid #111;
+	border-right: 1px solid #111;
 }</string>
      </property>
      <property name="frameShape">
@@ -377,13 +439,6 @@ QScrollBar::handle:horizontal {
          </item>
          <item row="5" column="1">
           <widget class="QLabel" name="label_productTotalCost">
-           <property name="styleSheet">
-            <string notr="true">font-size: 19px;
-font-weight: 500;
-background-color: #bbb;
-border-top: 1px solid #111;
-border-right: 1px solid #111;</string>
-           </property>
            <property name="text">
             <string notr="true">COSTO TOTAL</string>
            </property>
@@ -436,92 +491,6 @@ border-right: 1px solid #111;</string>
           <widget class="QLineEdit" name="lineEdit_totalPaid">
            <property name="toolTip">
             <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;El valor total que abonado en esta venta.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; si es diferente al costo se pedirán los datos del comprador y la diferencia se agregará a la base de datos como saldo a favor/en contra.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="styleSheet">
-            <string>* {
-	background-color: #35bc88;
-	color: #111;
-	border-color: #0b7e7f;
-	font-family: &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
-	font-size: 16px;
-}
-
-
-#label_productName_feedback,
-#label_productQuantity_feedback,
-#label_totalPaid_feedback,
-#label_debtorName_feedback,
-#label_debtorSurname_feedback,
-#label_phoneNumber_feedback,
-#label_postalCode_feedback {
-	color: #dc2627;
-	border: 1px solid #dc2627;
-	background-color: #e0a4a4;
-}
-
-
-*[mandatoryField=&quot;True&quot;] {
-	background-color: rgb(255, 251, 142);
-}
-
-
-QLineEdit {
-	background-color: #fff;
-	border: none;
-	border-top: 1px solid;
-	border-bottom: 1px solid;
-	border-color: #0b7e7f;
-	height: 24px;
-}
-QLineEdit:focus {
-	background-color: rgb(197, 255, 252);
-	border: 1px solid;
-	border-color: #0b7e7f;
-	font-size: 18px;
-}
-
-
-QPushButton {
-	font-size: 16px;
-	background-color: #22577a;
-	color: #fff;
-	border: 1px solid #12476a;
-	border-radius: 2px;
-	min-width: 200px;
-	min-height: 23px;
-}
-QPushButton:hover,
-QPushButton:pressed {
-	background-color: #38a3a5;
-	color: #111;
-	border: 1px inset #289395;
-}
-QPushButton:disabled {
-	background-color: rgb(103, 115, 122);
-	color: #999;
-}
-
-
-/*cambia el estilo del combobox*/
-QComboBox {
-	background-color: #fff;
-	color: #111;
-	border: none;
-	border-top: 1px solid;
-	border-bottom: 1px solid;
-	border-color: #111;
-}
-QComboBox:on {
-	background-color: rgb(197, 255, 252);
-	border: 1px solid;
-	border-color: rgb(11, 126, 127);
-	padding-top: 2px;
-	padding-left: 4px;
-}
-QComboBox QAbstractItemView {
-	background-color: #fff;
-	selection-background-color: #38a3a5;
-}</string>
            </property>
            <property name="placeholderText">
             <string notr="true">Total abonado. Ej.: 15000</string>
@@ -606,6 +575,16 @@ QComboBox QAbstractItemView {
    </item>
    <item>
     <widget class="QFrame" name="debtor_data">
+     <property name="styleSheet">
+      <string notr="true">#label_debtorInfo {
+	color: rgb(8, 68, 68);
+	margin-top: 15px;
+	margin-left: 30px;
+	margin-right: 30px;
+	border-bottom: 1px solid;
+	border-color: rgb(11, 126, 127);
+}</string>
+     </property>
      <property name="frameShape">
       <enum>QFrame::Shape::NoFrame</enum>
      </property>
@@ -760,14 +739,6 @@ QComboBox QAbstractItemView {
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">color: rgb(8, 68, 68);
-margin-top: 15px;
-margin-left: 30px;
-margin-right: 30px;
-border-bottom: 1px solid;
-border-color: rgb(11, 126, 127);</string>
         </property>
         <property name="text">
          <string notr="true">INFORMACIÓN SOBRE EL DEUDOR</string>

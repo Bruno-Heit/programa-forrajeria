@@ -34,5 +34,10 @@
         <!-- #### (Dialogs) ####   ícono para guardar un registro nuevo -->
         <file alias="accept.svg">../icons/plusCircle.svg</file>
 
+        <!-- #### (QDateTimeEdit) ####   flechas para cambiar los meses -->
+        <file alias="prev-month.svg">../icons/arrowLeft.svg</file>
+        <file alias="next-month.svg">../icons/arrowRight.svg</file>
+
+
     </qresource>
 </RCC>

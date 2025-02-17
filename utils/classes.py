@@ -36,6 +36,7 @@ from phonenumbers import (parse, format_number, is_valid_number,
 # PRODUCTOS ====================================================================================================
 
 
+# TODO: corregir ProductDialog, no valida bien, sólo permite hacer click en "Aceptar" cuando se validaron todos los campos, y el campo de precio comercial es opcional
 # Dialog con datos de un producto
 class ProductDialog(QDialog):
     '''QDialog creado al presionar el botón 'MainWindow.btn_add_product_inventory'. 
@@ -502,41 +503,11 @@ class SaleDialog(QDialog):
         # desactiva desde el principio el botón "Aceptar"
         self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
         self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Cancel).setText("Cancelar")
-        self.saleDialog_ui.buttonBox.setStyleSheet("QDialogButtonBox QPushButton[text='Cancelar'] {\
-                                                        background-color: #ff4949;\
-                                                      }\
-                                                      QDialogButtonBox QPushButton[text='Cancelar']:hover,\
-                                                      QDialogButtonBox QPushButton[text='Cancelar']:pressed {\
-                                                        background-color: #faa;\
-                                                      }")
+        
+        self.__setInitialStyles()
+        
         self.saleDialog_ui.comboBox_productName.addItems(getProductNames())
-        self.saleDialog_ui.dateTimeEdit.setStyleSheet(
-            "QDateTimeEdit {\
-                background-color: #fff;\
-            }\
-            \
-            \
-            QCalendarWidget QAbstractItemView {\
-                background-color: #fff;\
-                selection-background-color: #38a3a5;\
-            }\
-            QCalendarWidget QToolButton {\
-                background-color: #22577a;\
-                color: #fff;\
-            }\
-            QCalendarWidget QToolButton:hover,\
-            QCalendarWidget QToolButton:pressed {\
-                background-color: #38a3a5;\
-                color: #111;\
-            }\
-            \
-            \
-            QCalendarWidget QWidget#qt_calendar_prevmonth{\
-                qproperty-icon: url(':/icons/arrow-left-white.svg')\
-            }\
-            QCalendarWidget QWidget#qt_calendar_nextmonth{\
-                qproperty-icon: url(':/icons/arrow-right-white.svg')\
-            }")
+        
         self.saleDialog_ui.dateTimeEdit.setDateTime(QDateTime.currentDateTime())
 
         # esconde widgets
@@ -572,6 +543,43 @@ class SaleDialog(QDialog):
         self.saleDialog_ui.lineEdit_debtorSurname.setValidator(self.debtor_surname_validator)
         self.saleDialog_ui.lineEdit_phoneNumber.setValidator(self.phone_number_validator)
         self.saleDialog_ui.lineEdit_postalCode.setValidator(self.postal_code_validator)
+        return None
+    
+    
+    def __setInitialStyles(self):
+        '''
+        Coloca íconos y establece stylesheets iniciales en los widgets.
+        '''
+        self.accept_icon = QIcon() # botón "Aceptar"
+        self.cancel_icon = QIcon() # botón "Cancelar"
+        
+        # botón "Aceptar"
+        self.cancel_icon.addFile(":/icons/accept.svg", QSize())
+        # botón "Cancelar"
+        self.cancel_icon.addFile(":/icons/cancel.svg", QSize())
+        self.saleDialog_ui.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setIcon(self.cancel_icon)
+        
+        self.saleDialog_ui.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setIcon(self.cancel_icon)
+        
+        # flecha del combobox
+        # self.saleDialog_ui.frame_productCategory.setStyleSheet(WidgetStyle.DEF_COMBOBOX_ARROW_ICON.value)
+        
+        self.saleDialog_ui.buttonBox.setStyleSheet(
+            ''' QDialogButtonBox QPushButton[text='Cancelar'] {
+                    background-color: #ff4949;
+                }
+                QDialogButtonBox QPushButton[text='Cancelar']:hover,
+                QDialogButtonBox QPushButton[text='Cancelar']:pressed {
+                    background-color: #faa;
+                }''')
+        
+        self.saleDialog_ui.dateTimeEdit.setStyleSheet(
+            ''' QCalendarWidget QWidget#qt_calendar_prevmonth{
+                    qproperty-icon: url(':/icons/prev-month.svg')
+                }
+                QCalendarWidget QWidget#qt_calendar_nextmonth{
+                    qproperty-icon: url(':/icons/next-month.svg')
+                }''')
         return None
     
     
