@@ -111,9 +111,9 @@ class DBQueries(IntEnum):
 # estilos generales para widgets
 class WidgetStyle(StrEnum):
     '''Clase de tipo 'strEnum' con estilos generales para aplicar a los widgets.'''
-    LABEL_NEUTRAL_VAL = "color: #555; border: none; background-color: rgba(200,200,200,0.7);"
-    FIELD_VALID_VAL = "border: 1px solid #40dc26; background-color: rgba(185, 224, 164, 0.7);"
-    FIELD_INVALID_VAL = "border: 1px solid #dc2627; background-color: rgba(224, 164, 164, 0.7);"
+    LABEL_NEUTRAL_VAL = "color: #555; background-color: rgba(200,200,200,0.7);"
+    FIELD_VALID_VAL = "color: #fff; background-color: #9DD367;"
+    FIELD_INVALID_VAL = "color: #fff; background-color: #F65755;"
     
     DEF_COMBOBOX_FILTER_ICON = "QComboBox::down-arrow {image: url(':/icons/filter.svg');}"
 
