@@ -82,15 +82,10 @@ class ProductDialog(QDialog):
         # desactiva desde el principio el botón "Aceptar"
         self.productDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
         self.productDialog_ui.buttonBox.button(QDialogButtonBox.Cancel).setText("Cancelar")
-        self.productDialog_ui.buttonBox.setStyleSheet("QDialogButtonBox QPushButton[text='Cancelar'] {\
-                                                        background-color: #ff4949;\
-                                                      }\
-                                                      QDialogButtonBox QPushButton[text='Cancelar']:hover,\
-                                                      QDialogButtonBox QPushButton[text='Cancelar']:pressed {\
-                                                        background-color: #faa;\
-                                                      }")
         comboBox_categories:list[str] = getProductsCategories()
         self.productDialog_ui.cb_productCategory.addItems(comboBox_categories)
+        
+        self.__setInitialStyles()
         
         # validators
         self.productDialog_ui.lineedit_productName.setValidator(self.name_validator)
@@ -101,6 +96,35 @@ class ProductDialog(QDialog):
         # completers
         self.productDialog_ui.lineedit_productName.setCompleter(createCompleter(type=3))
         
+        return None
+    
+    
+    def __setInitialStyles(self):
+        '''
+        Coloca íconos y establece stylesheets iniciales en los widgets.
+        '''
+        self.accept_icon = QIcon() # botón "Aceptar"
+        self.cancel_icon = QIcon() # botón "Cancelar"
+        
+        # botón "Aceptar"
+        self.cancel_icon.addFile(":/icons/accept.svg", QSize())
+        self.productDialog_ui.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setIcon(self.cancel_icon)
+        
+        # botón "Cancelar"
+        self.cancel_icon.addFile(":/icons/cancel.svg", QSize())
+        self.productDialog_ui.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setIcon(self.cancel_icon)
+        
+        # flecha del combobox
+        self.productDialog_ui.frame_productCategory.setStyleSheet(WidgetStyle.DEF_COMBOBOX_ARROW_ICON.value)
+        
+        self.productDialog_ui.buttonBox.setStyleSheet(
+            ''' QDialogButtonBox QPushButton[text='Cancelar'] {
+                    background-color: #ff4949;
+                }
+                QDialogButtonBox QPushButton[text='Cancelar']:hover,
+                QDialogButtonBox QPushButton[text='Cancelar']:pressed {
+                background-color: #faa;
+                }''')
         return None
     
     
