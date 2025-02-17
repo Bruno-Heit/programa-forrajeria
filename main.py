@@ -388,6 +388,8 @@ class MainWindow(QMainWindow):
         self.delete_register_icon = QIcon() # eliminar registros
         self.end_sale_icon = QIcon() # terminar venta (formulario)
         
+        # TODO: añadir ícono de alerta a labels de feedback, y también cambiar su estilo en qt designer (elegir el de ProductDialog)
+        
         # sidebar de categorías
         self.sidebar_toggle_icon.addFile(":/icons/list-normal.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.sidebar_toggle_icon.addFile(":/icons/list-focus.svg", QSize(), QIcon.Mode.Active, QIcon.State.On)
@@ -1076,26 +1078,30 @@ class MainWindow(QMainWindow):
         '''
         match table_viewID.name:
             case 'INVEN_TABLE_VIEW':
-                self.inventory_proxy_model.insertRows(
-                    row=self.inventory_data_model.rowCount(),
-                    count=1,
-                    data_to_insert=data_to_insert)
+                if self.inventory_data_model.modelHasData():
+                    self.inventory_proxy_model.insertRows(
+                        row=self.inventory_data_model.rowCount(),
+                        count=1,
+                        data_to_insert=data_to_insert
+                    )
             
             case 'SALES_TABLE_VIEW':
                 self.__updateStockOnSaleCreation(data_to_insert=data_to_insert)
                 
-                self.sales_proxy_model.insertRows(
-                    row=self.sales_data_model.rowCount(),
-                    count=1,
-                    data_to_insert=data_to_insert
-                )
+                if self.sales_data_model.modelHasData():
+                    self.sales_proxy_model.insertRows(
+                        row=self.sales_data_model.rowCount(),
+                        count=1,
+                        data_to_insert=data_to_insert
+                    )
             
             case 'DEBTS_TABLE_VIEW':
-                self.debts_proxy_model.insertRows(
-                    row=self.debts_data_model.rowCount(),
-                    count=1,
-                    data_to_insert=data_to_insert
-                )
+                if self.debts_data_model.modelHasData():
+                    self.debts_proxy_model.insertRows(
+                        row=self.debts_data_model.rowCount(),
+                        count=1,
+                        data_to_insert=data_to_insert
+                    )
         
         return None
     
