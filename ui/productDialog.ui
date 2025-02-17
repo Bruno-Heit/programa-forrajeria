@@ -6,14 +6,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>651</width>
-    <height>359</height>
+    <width>556</width>
+    <height>470</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>650</width>
-    <height>0</height>
+    <width>556</width>
+    <height>470</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>556</width>
+    <height>470</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -22,7 +34,6 @@
   <property name="styleSheet">
    <string notr="true">* {
 	color: #111;
-	border-color: #0b7e7f;
 	font-family: &quot;Tahoma&quot;, &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
 	font-size: 16px;
 }
@@ -30,19 +41,40 @@
 
 QToolTip {
 	background-color: #fff;
+	color: #0d1b2a;
 }
 
 
 QDialog {
-	background-color: qlineargradient(spread:pad, x1:0.149, y1:0.892, x2:0.774, y2:0.0860909, stop:0 rgba(30, 168, 59, 255), stop:1 rgba(153, 228, 184, 255));
+	background-color: #e0e1dd;
+}
+
+
+/* frames */
+QFrame, QWidget {
+	border: none;
+}
+
+
+#frame_upper,
+#frame_middle,
+#frame_lower {
+	background-color: #fff;
+	padding: 5px 3px;
+	border-radius: 10px;
 }
 
 
 #frame_productDescription,
 #frame_measurementUnit {
-	border: none;
-	border-bottom: 1px solid;
-	border-color: #0b7e7f;
+	margin-bottom: 10px;
+}
+
+
+/* labels */
+QLabel {
+	padding-right: 2px;
+	padding-left: 2px;
 }
 
 
@@ -51,47 +83,41 @@ QDialog {
 #label_categoryWarning,
 #label_unitPriceWarning,
 #label_comercialPriceWarning {
-	color: #dc2627;
-	border: 1px solid #dc2627;
-	background-color: rgba(224, 164, 164, 0.7);
+	background-color: #F65755;
+	color: #fff;
+	border-radius: 5px;
 }
 
 
-#frame_productStock {
-	margin-bottom: 5px;
-}
-
-
+/* lineedits */
 QLineEdit {
-	background-color: #fff;
+	background-color: #e0e1dd;
+	color: #0d1b2a;
 	border: none;
-	border-top: 1px solid;
-	border-bottom: 1px solid;
-	border-color: #0b7e7f;
-	height: 24px;
+	border-radius: 10px;
+	padding-left: 3px;
+	padding-right: 3px;
 }
 QLineEdit:focus {
-	background-color: rgb(197, 255, 252);
-	border: 1px solid;
-	border-color: #0b7e7f;
-	font-size: 18px;
-}
-
-
-QPushButton {
-	font-size: 16px;
-	background-color: #22577a;
+	background-color: #3b66ab;
 	color: #fff;
-	border: 1px solid #12476a;
-	border-radius: 2px;
-	min-width: 200px;
-	min-height: 23px;
 }
-QPushButton:hover,
+
+
+/* botones */
+QPushButton {
+	background-color: #415a77;
+	color: #fff;
+	border: none;
+	border-radius: 4px;
+	width: 220px;
+}
+QPushButton:hover {
+	background-color: #3b66ab;
+}
 QPushButton:pressed {
-	background-color: #38a3a5;
-	color: #111;
-	border: 1px inset #289395;
+	background-color: #3b66ab;
+	border: 1px inset #778da9;
 }
 QPushButton:disabled {
 	background-color: rgb(103, 115, 122);
@@ -99,145 +125,115 @@ QPushButton:disabled {
 }
 
 
-/*cambia el estilo del combobox*/
+/* QComboBoxes */
 QComboBox {
-	background-color: #fff;
-	color: #111;
-	border: none;
-	border-top: 1px solid;
-	border-bottom: 1px solid;
-	border-color: #111;
+	background-color: #e0e1dd;
+	color: #0d1b2a;
+	border: 1px solid #3b66ab;
+	border-radius: 5px;
+	padding-left: 2px 0;
 }
 QComboBox:on {
-	background-color: rgb(197, 255, 252);
-	border: 1px solid;
-	border-color: rgb(11, 126, 127);
-	padding-top: 2px;
+	background-color: #3b66ab;
+	color: #fff;
+	border: none;
+	padding-top: 3px;
 	padding-left: 4px;
 }
-QComboBox QAbstractItemView {
-	background-color: #fff;
-	selection-background-color: #38a3a5;
+QComboBox::drop-down {
+	subcontrol-origin: padding;
+	subcontrol-position: top right;
+	width: 20px;
+	padding-right: 3px;
+	border-left: none;
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
 }
-</string>
+QComboBox::down-arrow:on {
+    top: 1px;
+    left: 1px;
+}
+QComboBox QAbstractItemView{
+	background-color: #778da9;
+	color: #fff;
+	selection-background-color: #3b66ab;
+}
+
+
+/* scrollbars */
+QScrollBar {
+	background-color: #e0e1dd;
+	border: 1px solid transparent;
+	border-radius: 5px;
+}
+QScrollBar:groove {
+	border-radius: 5px;
+}
+QScrollBar::handle {
+	background-color:  #1b263b;
+	border-radius: 5px;
+}
+QScrollBar::handle:pressed {
+	background-color: #3b465b;
+}
+QScrollBar::sub-line {
+	width: 0;
+	height: 0;
+	background: none;
+}
+QScrollBar::add-line {
+	width: 0;
+	height: 0;
+	background: none;
+}
+
+
+/*vertical scrollbars*/
+QScrollBar:vertical {
+	width: 13px;
+}
+QScrollBar::handle:vertical {
+	min-height: 15px;
+}
+QScrollBar::sub-page:vertical {
+	background: none;
+}
+QScrollBar::add-page:vertical {
+	background: none;
+}</string>
   </property>
   <property name="sizeGripEnabled">
-   <bool>true</bool>
+   <bool>false</bool>
   </property>
   <layout class="QVBoxLayout" name="dialog_Vlayout" stretch="0,0">
    <property name="spacing">
-    <number>4</number>
+    <number>5</number>
    </property>
    <property name="leftMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="topMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <item>
     <widget class="QFrame" name="mainForm">
-     <property name="styleSheet">
-      <string notr="true">* {
-	color: #111;
-	border-color: #0b7e7f;
-	font-family: &quot;Tahoma&quot;, &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
-	font-size: 16px;
-}
-
-
-QDialog {
-	background-color: qlineargradient(spread:pad, x1:0.149, y1:0.892, x2:0.774, y2:0.0860909, stop:0 rgba(30, 168, 59, 255), stop:1 rgba(153, 228, 184, 255));
-}
-
-
-#frame_productDescription,
-#frame_measurementUnit {
-	border: none;
-	border-bottom: 1px solid;
-	border-color: #0b7e7f;
-}
-
-
-#label_nameWarning,
-#label_stockWarning,
-#label_categoryWarning,
-#label_unitPriceWarning,
-#label_comercialPriceWarning {
-	color: #dc2627;
-	border: 1px solid #dc2627;
-	background-color: #e0a4a4;
-}
-
-
-#frame_productStock {
-	margin-bottom: 5px;
-}
-
-
-QLineEdit {
-	background-color: #fff;
-	border: none;
-	border-top: 1px solid;
-	border-bottom: 1px solid;
-	border-color: #0b7e7f;
-	height: 24px;
-}
-QLineEdit:focus {
-	background-color: rgb(197, 255, 252);
-	border: 1px solid;
-	border-color: #0b7e7f;
-	font-size: 18px;
-}
-
-
-QPushButton {
-	font-size: 16px;
-	background-color: #22577a;
-	color: #fff;
-	border: 1px solid #12476a;
-	border-radius: 2px;
-	min-width: 200px;
-	min-height: 23px;
-}
-QPushButton:hover,
-QPushButton:pressed {
-	background-color: #38a3a5;
-	color: #111;
-	border: 1px inset #289395;
-}
-QPushButton:disabled {
-	background-color: rgb(103, 115, 122);
-	color: #999;
-}
-
-
-/*cambia el estilo del combobox*/
-QComboBox {
-	background-color: #fff;
-	color: #111;
-	border: none;
-	border-top: 1px solid;
-	border-bottom: 1px solid;
-	border-color: #111;
-}
-QComboBox:on {
-	background-color: rgb(197, 255, 252);
-	border: 1px solid;
-	border-color: rgb(11, 126, 127);
-	padding-top: 2px;
-	padding-left: 4px;
-}
-QComboBox QAbstractItemView {
-	background-color: #fff;
-	selection-background-color: #38a3a5;
-}
-</string>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>425</height>
+      </size>
      </property>
      <property name="frameShape">
       <enum>QFrame::Shape::NoFrame</enum>
@@ -247,126 +243,24 @@ QComboBox QAbstractItemView {
      </property>
      <layout class="QVBoxLayout" name="mainForm_Vlayout">
       <property name="spacing">
-       <number>4</number>
+       <number>15</number>
       </property>
       <property name="leftMargin">
-       <number>0</number>
+       <number>5</number>
       </property>
       <property name="topMargin">
-       <number>0</number>
+       <number>5</number>
       </property>
       <property name="rightMargin">
-       <number>0</number>
+       <number>5</number>
       </property>
       <property name="bottomMargin">
-       <number>0</number>
+       <number>5</number>
       </property>
       <item>
-       <widget class="QFrame" name="frame_productName">
+       <widget class="QFrame" name="frame_upper">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;El nombre del producto.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;CONSEJO:&lt;/span&gt; mantener el nombre simple, usando marcas de los productos y el tipo como nombre (ejemplo: Dog-Chow razas pequeñas).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Shape::NoFrame</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Shadow::Raised</enum>
-        </property>
-        <layout class="QGridLayout" name="frame_productName_GridLayout" columnstretch="2,3">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <property name="spacing">
-          <number>4</number>
-         </property>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="lineedit_productName">
-           <property name="text">
-            <string notr="true"/>
-           </property>
-           <property name="maxLength">
-            <number>50</number>
-           </property>
-           <property name="placeholderText">
-            <string notr="true">Escribir el nombre del producto</string>
-           </property>
-           <property name="clearButtonEnabled">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_productName">
-           <property name="toolTip">
-            <string notr="true"/>
-           </property>
-           <property name="text">
-            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nombre del producto  &lt;span style=&quot; color:#ff0000;&quot;&gt;*&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="textFormat">
-            <enum>Qt::TextFormat::RichText</enum>
-           </property>
-           <property name="textInteractionFlags">
-            <set>Qt::TextInteractionFlag::NoTextInteraction</set>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0" colspan="2" alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
-          <widget class="QLabel" name="label_nameWarning">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>18</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string notr="true"/>
-           </property>
-           <property name="text">
-            <string notr="true"/>
-           </property>
-           <property name="textFormat">
-            <enum>Qt::TextFormat::PlainText</enum>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop|Qt::AlignmentFlag::AlignTrailing</set>
-           </property>
-           <property name="wordWrap">
-            <bool>false</bool>
-           </property>
-           <property name="textInteractionFlags">
-            <set>Qt::TextInteractionFlag::NoTextInteraction</set>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QFrame" name="frame_productCategory">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -374,17 +268,8 @@ QComboBox QAbstractItemView {
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>0</height>
+          <height>160</height>
          </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Elegir a qué categoría pertenece el producto.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;CONSEJO:&lt;/span&gt; si se considera que un producto no pertenece a ninguna categoría de la lista, introducirla en &amp;quot;Varios&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="frameShape">
          <enum>QFrame::Shape::NoFrame</enum>
@@ -392,63 +277,148 @@ QComboBox QAbstractItemView {
         <property name="frameShadow">
          <enum>QFrame::Shadow::Raised</enum>
         </property>
-        <layout class="QGridLayout" name="frame_productCategory_GridLayout" rowstretch="0,0" columnstretch="2,3">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
          <property name="spacing">
           <number>4</number>
          </property>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_productCategory">
-           <property name="text">
-            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Categoría a la que pertenece  &lt;span style=&quot; color:#ff0000;&quot;&gt;*&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <property name="leftMargin">
+          <number>5</number>
+         </property>
+         <property name="topMargin">
+          <number>5</number>
+         </property>
+         <property name="rightMargin">
+          <number>5</number>
+         </property>
+         <property name="bottomMargin">
+          <number>5</number>
+         </property>
+         <item>
+          <widget class="QFrame" name="frame_productName">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <property name="textFormat">
-            <enum>Qt::TextFormat::RichText</enum>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
            </property>
-           <property name="textInteractionFlags">
-            <set>Qt::TextInteractionFlag::NoTextInteraction</set>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QComboBox" name="cb_productCategory">
            <property name="toolTip">
-            <string notr="true"/>
+            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;El nombre del producto.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;CONSEJO:&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; mantener el nombre simple, usando marcas de los productos y el tipo como nombre (ejemplo: Dog-Chow razas pequeñas).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="editable">
-            <bool>true</bool>
+           <property name="frameShape">
+            <enum>QFrame::Shape::NoFrame</enum>
            </property>
-           <property name="currentText">
-            <string notr="true"/>
+           <property name="frameShadow">
+            <enum>QFrame::Shadow::Raised</enum>
            </property>
-           <property name="sizeAdjustPolicy">
-            <enum>QComboBox::SizeAdjustPolicy::AdjustToContentsOnFirstShow</enum>
-           </property>
-           <property name="placeholderText">
-            <string notr="true">Seleccionar categoría</string>
-           </property>
-           <property name="frame">
-            <bool>false</bool>
-           </property>
+           <layout class="QGridLayout" name="frame_productName_GridLayout" columnstretch="2,3">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <property name="spacing">
+             <number>4</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_productName">
+              <property name="toolTip">
+               <string notr="true"/>
+              </property>
+              <property name="text">
+               <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nombre del producto  &lt;span style=&quot; color:#ff0000;&quot;&gt;*&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::TextFormat::RichText</enum>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::TextInteractionFlag::NoTextInteraction</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" colspan="2" alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
+             <widget class="QLabel" name="label_nameWarning">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>18</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string notr="true"/>
+              </property>
+              <property name="text">
+               <string notr="true"/>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::TextFormat::PlainText</enum>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop|Qt::AlignmentFlag::AlignTrailing</set>
+              </property>
+              <property name="wordWrap">
+               <bool>false</bool>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::TextInteractionFlag::NoTextInteraction</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="lineedit_productName">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="text">
+               <string notr="true"/>
+              </property>
+              <property name="maxLength">
+               <number>50</number>
+              </property>
+              <property name="placeholderText">
+               <string notr="true">Escribir el nombre del producto</string>
+              </property>
+              <property name="clearButtonEnabled">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
-         <item row="1" column="0" colspan="2" alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
-          <widget class="QLabel" name="label_categoryWarning">
+         <item>
+          <widget class="QFrame" name="frame_productCategory">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>18</height>
+             <height>0</height>
             </size>
            </property>
            <property name="maximumSize">
@@ -457,196 +427,104 @@ QComboBox QAbstractItemView {
              <height>16777215</height>
             </size>
            </property>
-           <property name="text">
-            <string notr="true"/>
-           </property>
-           <property name="textFormat">
-            <enum>Qt::TextFormat::PlainText</enum>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop|Qt::AlignmentFlag::AlignTrailing</set>
-           </property>
-           <property name="wordWrap">
-            <bool>false</bool>
-           </property>
-           <property name="textInteractionFlags">
-            <set>Qt::TextInteractionFlag::NoTextInteraction</set>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QFrame" name="frame_productDescription">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Es un campo opcional. Admite una descripción más extensa si se desea del producto.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;CONSEJO: &lt;/span&gt;usar palabras clave en la descripción que permitan posteriormente la búsqueda del producto mediante esas palabras (algunos ejemplos de palabras clave: perro; adulto; cachorro; urinary; gato; granja; caña; veneno; insecto; hormiga; etc.)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Shape::NoFrame</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Shadow::Raised</enum>
-        </property>
-        <layout class="QHBoxLayout" name="frame_productDescription_Hlayout" stretch="2,3">
-         <property name="spacing">
-          <number>4</number>
-         </property>
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QLabel" name="label_productDescription">
-           <property name="text">
-            <string notr="true">Descripción del producto</string>
-           </property>
-           <property name="textFormat">
-            <enum>Qt::TextFormat::PlainText</enum>
-           </property>
-           <property name="textInteractionFlags">
-            <set>Qt::TextInteractionFlag::NoTextInteraction</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lineedit_productDescription">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string notr="true"/>
-           </property>
-           <property name="maxLength">
-            <number>255</number>
-           </property>
-           <property name="frame">
-            <bool>true</bool>
-           </property>
-           <property name="placeholderText">
-            <string notr="true">(opcional) Ej.: alimento para gatos adultos</string>
-           </property>
-           <property name="clearButtonEnabled">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QFrame" name="frame_productStock">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string notr="true"/>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Shape::NoFrame</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Shadow::Raised</enum>
-        </property>
-        <layout class="QGridLayout" name="frame_productStock_GridLayout" columnstretch="2,3">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <property name="spacing">
-          <number>4</number>
-         </property>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_productStock">
            <property name="toolTip">
-            <string notr="true"/>
+            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Elegir a qué categoría pertenece el producto.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;CONSEJO:&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; si se considera que un producto no pertenece a ninguna categoría de la lista, introducirla en &amp;quot;Varios&amp;quot;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="text">
-            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stock  &lt;span style=&quot; color:#ff0000;&quot;&gt;*&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <property name="frameShape">
+            <enum>QFrame::Shape::NoFrame</enum>
            </property>
-           <property name="textFormat">
-            <enum>Qt::TextFormat::RichText</enum>
+           <property name="frameShadow">
+            <enum>QFrame::Shadow::Raised</enum>
            </property>
-           <property name="textInteractionFlags">
-            <set>Qt::TextInteractionFlag::NoTextInteraction</set>
-           </property>
+           <layout class="QGridLayout" name="frame_productCategory_GridLayout" rowstretch="0,0" columnstretch="2,3">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <property name="spacing">
+             <number>4</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_productCategory">
+              <property name="text">
+               <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Categoría &lt;span style=&quot; color:#ff0000;&quot;&gt;*&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::TextFormat::RichText</enum>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::TextInteractionFlag::NoTextInteraction</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="cb_productCategory">
+              <property name="toolTip">
+               <string notr="true"/>
+              </property>
+              <property name="editable">
+               <bool>true</bool>
+              </property>
+              <property name="currentText">
+               <string notr="true"/>
+              </property>
+              <property name="sizeAdjustPolicy">
+               <enum>QComboBox::SizeAdjustPolicy::AdjustToContentsOnFirstShow</enum>
+              </property>
+              <property name="placeholderText">
+               <string notr="true">Seleccionar categoría</string>
+              </property>
+              <property name="frame">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" colspan="2" alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
+             <widget class="QLabel" name="label_categoryWarning">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>18</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string notr="true"/>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::TextFormat::PlainText</enum>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop|Qt::AlignmentFlag::AlignTrailing</set>
+              </property>
+              <property name="wordWrap">
+               <bool>false</bool>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::TextInteractionFlag::NoTextInteraction</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="lineedit_productStock">
-           <property name="text">
-            <string notr="true"/>
-           </property>
-           <property name="maxLength">
-            <number>10</number>
-           </property>
-           <property name="placeholderText">
-            <string notr="true">Cantidad del producto en stock</string>
-           </property>
-           <property name="clearButtonEnabled">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0" colspan="2" alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
-          <widget class="QLabel" name="label_stockWarning">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
+         <item>
+          <widget class="QFrame" name="frame_productDescription">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -654,7 +532,7 @@ QComboBox QAbstractItemView {
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>18</height>
+             <height>0</height>
             </size>
            </property>
            <property name="maximumSize">
@@ -663,30 +541,91 @@ QComboBox QAbstractItemView {
              <height>16777215</height>
             </size>
            </property>
-           <property name="text">
-            <string notr="true"/>
+           <property name="toolTip">
+            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Admite una descripción más extensa si se desea del producto.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;CONSEJO: &lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;usar palabras clave en la descripción que permitan posteriormente la búsqueda del producto mediante esas palabras (algunos ejemplos de palabras clave: perro; adulto; cachorro; urinary; gato; granja; caña; veneno; insecto; hormiga; etc.)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="textFormat">
-            <enum>Qt::TextFormat::PlainText</enum>
+           <property name="frameShape">
+            <enum>QFrame::Shape::NoFrame</enum>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop|Qt::AlignmentFlag::AlignTrailing</set>
+           <property name="frameShadow">
+            <enum>QFrame::Shadow::Raised</enum>
            </property>
-           <property name="wordWrap">
-            <bool>false</bool>
-           </property>
-           <property name="textInteractionFlags">
-            <set>Qt::TextInteractionFlag::NoTextInteraction</set>
-           </property>
+           <layout class="QHBoxLayout" name="frame_productDescription_Hlayout" stretch="2,3">
+            <property name="spacing">
+             <number>4</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_productDescription">
+              <property name="text">
+               <string notr="true">Descripción del producto</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::TextFormat::PlainText</enum>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::TextInteractionFlag::NoTextInteraction</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineedit_productDescription">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="text">
+               <string notr="true"/>
+              </property>
+              <property name="maxLength">
+               <number>255</number>
+              </property>
+              <property name="frame">
+               <bool>true</bool>
+              </property>
+              <property name="placeholderText">
+               <string notr="true">(opcional) Ej.: alimento para gatos adultos</string>
+              </property>
+              <property name="clearButtonEnabled">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
         </layout>
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="frame_measurementUnit">
+       <widget class="QFrame" name="frame_middle">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -694,17 +633,8 @@ QComboBox QAbstractItemView {
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>0</height>
+          <height>110</height>
          </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Campo opcional. De qué forma se mide el producto en stock. La existencia de este campo es puramente de ayuda al navegar por los productos.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;CONSEJO:&lt;/span&gt; usar unidades de medida sencillas, tales como kilogramos, litros, bolsas, cajas, unidades, etc.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="frameShape">
          <enum>QFrame::Shape::NoFrame</enum>
@@ -712,61 +642,253 @@ QComboBox QAbstractItemView {
         <property name="frameShadow">
          <enum>QFrame::Shadow::Raised</enum>
         </property>
-        <layout class="QHBoxLayout" name="frame_measurementUnit_Hlayout" stretch="2,3">
+        <layout class="QVBoxLayout" name="verticalLayout_2">
          <property name="spacing">
           <number>4</number>
          </property>
          <property name="leftMargin">
-          <number>0</number>
+          <number>5</number>
          </property>
          <property name="topMargin">
-          <number>0</number>
+          <number>5</number>
          </property>
          <property name="rightMargin">
-          <number>0</number>
+          <number>5</number>
          </property>
          <property name="bottomMargin">
-          <number>0</number>
+          <number>5</number>
          </property>
          <item>
-          <widget class="QLabel" name="label_measurementUnit">
+          <widget class="QFrame" name="frame_productStock">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
            <property name="toolTip">
             <string notr="true"/>
            </property>
-           <property name="text">
-            <string notr="true">Unidad de medida</string>
+           <property name="frameShape">
+            <enum>QFrame::Shape::NoFrame</enum>
            </property>
-           <property name="textFormat">
-            <enum>Qt::TextFormat::PlainText</enum>
+           <property name="frameShadow">
+            <enum>QFrame::Shadow::Raised</enum>
            </property>
-           <property name="textInteractionFlags">
-            <set>Qt::TextInteractionFlag::NoTextInteraction</set>
-           </property>
+           <layout class="QGridLayout" name="frame_productStock_GridLayout" columnstretch="2,3">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <property name="spacing">
+             <number>4</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_productStock">
+              <property name="toolTip">
+               <string notr="true"/>
+              </property>
+              <property name="text">
+               <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stock  &lt;span style=&quot; color:#ff0000;&quot;&gt;*&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::TextFormat::RichText</enum>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::TextInteractionFlag::NoTextInteraction</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="lineedit_productStock">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="text">
+               <string notr="true"/>
+              </property>
+              <property name="maxLength">
+               <number>10</number>
+              </property>
+              <property name="placeholderText">
+               <string notr="true">Cantidad del producto en stock</string>
+              </property>
+              <property name="clearButtonEnabled">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" colspan="2" alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
+             <widget class="QLabel" name="label_stockWarning">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>18</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string notr="true"/>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::TextFormat::PlainText</enum>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop|Qt::AlignmentFlag::AlignTrailing</set>
+              </property>
+              <property name="wordWrap">
+               <bool>false</bool>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::TextInteractionFlag::NoTextInteraction</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineedit_measurementUnit">
-           <property name="text">
-            <string notr="true"/>
+          <widget class="QFrame" name="frame_measurementUnit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <property name="maxLength">
-            <number>20</number>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
            </property>
-           <property name="placeholderText">
-            <string notr="true">(opcional) Ejs.: bolsas; litros; kgs.</string>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
            </property>
-           <property name="clearButtonEnabled">
-            <bool>true</bool>
+           <property name="toolTip">
+            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Forma en que se mide el producto en stock. La existencia de este campo es puramente de ayuda al navegar por los productos.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;CONSEJO:&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; usar unidades de medida sencillas, tales como kilogramos, litros, bolsas, cajas, unidades, etc.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
+           <property name="frameShape">
+            <enum>QFrame::Shape::NoFrame</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Shadow::Raised</enum>
+           </property>
+           <layout class="QHBoxLayout" name="frame_measurementUnit_Hlayout" stretch="2,3">
+            <property name="spacing">
+             <number>4</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_measurementUnit">
+              <property name="toolTip">
+               <string notr="true"/>
+              </property>
+              <property name="text">
+               <string notr="true">Unidad de medida</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::TextFormat::PlainText</enum>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::TextInteractionFlag::NoTextInteraction</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineedit_measurementUnit">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="text">
+               <string notr="true"/>
+              </property>
+              <property name="maxLength">
+               <number>20</number>
+              </property>
+              <property name="placeholderText">
+               <string notr="true">(opcional) Ejs.: bolsas; litros; kgs.</string>
+              </property>
+              <property name="clearButtonEnabled">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
         </layout>
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="frame_unitPrice">
+       <widget class="QFrame" name="frame_lower">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -774,17 +896,8 @@ QComboBox QAbstractItemView {
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>0</height>
+          <height>125</height>
          </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;El precio que tiene una sola unidad del producto.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA: &lt;/span&gt;no es necesario escribir el signo de &amp;quot;$&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="frameShape">
          <enum>QFrame::Shape::NoFrame</enum>
@@ -792,175 +905,247 @@ QComboBox QAbstractItemView {
         <property name="frameShadow">
          <enum>QFrame::Shadow::Raised</enum>
         </property>
-        <layout class="QGridLayout" name="frame_unitPrice_GridLayout" columnstretch="2,2,3,3">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
          <property name="spacing">
           <number>4</number>
          </property>
-         <item row="1" column="0" colspan="4" alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
-          <widget class="QLabel" name="label_unitPriceWarning">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>18</height>
-            </size>
-           </property>
-           <property name="text">
-            <string notr="true"/>
-           </property>
-           <property name="textFormat">
-            <enum>Qt::TextFormat::PlainText</enum>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop|Qt::AlignmentFlag::AlignTrailing</set>
-           </property>
-           <property name="wordWrap">
-            <bool>false</bool>
-           </property>
-           <property name="textInteractionFlags">
-            <set>Qt::TextInteractionFlag::NoTextInteraction</set>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0" colspan="2">
-          <widget class="QLabel" name="label_productUnitPrice">
-           <property name="text">
-            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Precio unitario  &lt;span style=&quot; color:#ff0000;&quot;&gt;*&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="textFormat">
-            <enum>Qt::TextFormat::RichText</enum>
-           </property>
-           <property name="textInteractionFlags">
-            <set>Qt::TextInteractionFlag::NoTextInteraction</set>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2" colspan="2">
-          <widget class="QLineEdit" name="lineedit_productUnitPrice">
-           <property name="inputMask">
-            <string notr="true"/>
-           </property>
-           <property name="text">
-            <string notr="true"/>
-           </property>
-           <property name="placeholderText">
-            <string notr="true">Precio por unidad del producto</string>
-           </property>
-           <property name="clearButtonEnabled">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QFrame" name="frame_comercialPrice">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Campo opcional. El precio especial que se les cobra a los comercios.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt; no es necesario escribir el signo de &amp;quot;$&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Shape::NoFrame</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Shadow::Raised</enum>
-        </property>
-        <layout class="QGridLayout" name="frame_comercialPrice_GridLayout" columnstretch="2,3">
          <property name="leftMargin">
-          <number>0</number>
+          <number>5</number>
          </property>
          <property name="topMargin">
-          <number>0</number>
+          <number>5</number>
          </property>
          <property name="rightMargin">
-          <number>0</number>
+          <number>5</number>
          </property>
          <property name="bottomMargin">
-          <number>0</number>
+          <number>5</number>
          </property>
-         <property name="spacing">
-          <number>4</number>
-         </property>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_productComercialPrice">
-           <property name="text">
-            <string notr="true">Precio comercial</string>
+         <item>
+          <widget class="QFrame" name="frame_unitPrice">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <property name="textFormat">
-            <enum>Qt::TextFormat::PlainText</enum>
-           </property>
-           <property name="textInteractionFlags">
-            <set>Qt::TextInteractionFlag::NoTextInteraction</set>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="lineedit_productComercialPrice">
-           <property name="text">
-            <string notr="true"/>
-           </property>
-           <property name="placeholderText">
-            <string notr="true">(opcional) precio para comercios</string>
-           </property>
-           <property name="clearButtonEnabled">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0" colspan="2" alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
-          <widget class="QLabel" name="label_comercialPriceWarning">
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>18</height>
+             <height>0</height>
             </size>
            </property>
-           <property name="font">
-            <font>
-             <family>Tahoma</family>
-             <pointsize>-1</pointsize>
-             <italic>false</italic>
-             <bold>false</bold>
-            </font>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
            </property>
-           <property name="text">
-            <string notr="true"/>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;El precio que se le cobra al público.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="textFormat">
-            <enum>Qt::TextFormat::PlainText</enum>
+           <property name="frameShape">
+            <enum>QFrame::Shape::NoFrame</enum>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop|Qt::AlignmentFlag::AlignTrailing</set>
+           <property name="frameShadow">
+            <enum>QFrame::Shadow::Raised</enum>
            </property>
-           <property name="wordWrap">
-            <bool>false</bool>
+           <layout class="QGridLayout" name="frame_unitPrice_GridLayout" columnstretch="2,2,3,3">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <property name="spacing">
+             <number>4</number>
+            </property>
+            <item row="1" column="0" colspan="4" alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
+             <widget class="QLabel" name="label_unitPriceWarning">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>18</height>
+               </size>
+              </property>
+              <property name="text">
+               <string notr="true"/>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::TextFormat::PlainText</enum>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop|Qt::AlignmentFlag::AlignTrailing</set>
+              </property>
+              <property name="wordWrap">
+               <bool>false</bool>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::TextInteractionFlag::NoTextInteraction</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" colspan="2">
+             <widget class="QLabel" name="label_productUnitPrice">
+              <property name="text">
+               <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Precio público &lt;span style=&quot; color:#ff0000;&quot;&gt;*&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::TextFormat::RichText</enum>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::TextInteractionFlag::NoTextInteraction</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" colspan="2">
+             <widget class="QLineEdit" name="lineedit_productUnitPrice">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="inputMask">
+               <string notr="true"/>
+              </property>
+              <property name="text">
+               <string notr="true"/>
+              </property>
+              <property name="placeholderText">
+               <string notr="true">Precio al público</string>
+              </property>
+              <property name="clearButtonEnabled">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QFrame" name="frame_comercialPrice">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <property name="textInteractionFlags">
-            <set>Qt::TextInteractionFlag::NoTextInteraction</set>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
            </property>
+           <property name="toolTip">
+            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;El precio que se le cobra a los comercios.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::Shape::NoFrame</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Shadow::Raised</enum>
+           </property>
+           <layout class="QGridLayout" name="frame_comercialPrice_GridLayout" columnstretch="2,3">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <property name="spacing">
+             <number>4</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_productComercialPrice">
+              <property name="text">
+               <string notr="true">Precio comercial</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::TextFormat::PlainText</enum>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::TextInteractionFlag::NoTextInteraction</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="lineedit_productComercialPrice">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="text">
+               <string notr="true"/>
+              </property>
+              <property name="placeholderText">
+               <string notr="true">(opcional) precio para comercios</string>
+              </property>
+              <property name="clearButtonEnabled">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" colspan="2" alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
+             <widget class="QLabel" name="label_comercialPriceWarning">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>18</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <family>Tahoma</family>
+                <pointsize>-1</pointsize>
+                <italic>false</italic>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string notr="true"/>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::TextFormat::PlainText</enum>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop|Qt::AlignmentFlag::AlignTrailing</set>
+              </property>
+              <property name="wordWrap">
+               <bool>false</bool>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::TextInteractionFlag::NoTextInteraction</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
         </layout>
@@ -971,6 +1156,24 @@ QComboBox QAbstractItemView {
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>556</width>
+       <height>26</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>556</width>
+       <height>26</height>
+      </size>
+     </property>
      <property name="orientation">
       <enum>Qt::Orientation::Horizontal</enum>
      </property>

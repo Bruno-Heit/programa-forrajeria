@@ -513,7 +513,8 @@ QLabel {
           <string notr="true"/>
          </property>
          <property name="styleSheet">
-          <string notr="true">#inventory_searchBar,
+          <string notr="true">/* lineedits */
+#inventory_searchBar,
 #sales_searchBar,
 #debts_searchBar,
 #lineEdit_paid {
@@ -532,6 +533,26 @@ QTableView QLineEdit { /* estilos de lineedits creados por los delegados para ed
 }
 
 
+/* labels */
+QLabel {
+	padding-right: 2px;
+	padding-left: 2px;
+}
+
+
+#label_feedbackInventory,
+#label_feedbackSales,
+#label_feedbackDebts {
+	background-color: #F65755;
+	color: #fff;
+	border-radius: 5px;
+	letter-spacing: 0px;
+	word-spacing: 0px;
+}
+
+
+
+/* pushbuttons */
 QPushButton {
 	color: #fff;
 	background-color: #415a77;
@@ -632,7 +653,8 @@ QTableView QComboBox:on { /* estilos de comboboxes creados por los delegados par
 	padding-top: 3px;
 	padding-left: 4px;
 }
-QComboBox::drop-down {
+QComboBox::drop-down,
+QTableView QComboBox::drop-down { /* estilos de comboboxes creados por los delegados para edición */
 	subcontrol-origin: padding;
 	subcontrol-position: top right;
 	width: 20px;
@@ -641,7 +663,8 @@ QComboBox::drop-down {
 	border-top-right-radius: 5px;
 	border-bottom-right-radius: 5px;
 }
-QComboBox::down-arrow:on {
+QComboBox::down-arrow:on,
+QTableView QComboBox::down-arrow:on { /* estilos de comboboxes creados por los delegados para edición */
     top: 1px;
     left: 1px;
 }
@@ -1058,15 +1081,6 @@ QProgressBar::chunk {
                  </item>
                  <item>
                   <widget class="QLabel" name="label_feedbackInventory">
-                   <property name="styleSheet">
-                    <string notr="true">font-family: &quot;Verdana&quot;;
-font-size: 16px;
-letter-spacing: 0px;
-word-spacing: 0px;
-background-color: #778da9;
-color: #1b263b;
-border-radius: 5px;</string>
-                   </property>
                    <property name="text">
                     <string notr="true"/>
                    </property>
@@ -2340,15 +2354,6 @@ border-right: 1px solid #111;</string>
                </item>
                <item>
                 <widget class="QLabel" name="label_feedbackSales">
-                 <property name="styleSheet">
-                  <string notr="true">font-family: &quot;Verdana&quot;;
-font-size: 16px;
-letter-spacing: 0px;
-word-spacing: 0px;
-background-color: #778da9;
-color: #1b263b;
-border-radius: 5px;</string>
-                 </property>
                  <property name="text">
                   <string notr="true"/>
                  </property>
@@ -2774,15 +2779,6 @@ QPushButton:hover {
               </item>
               <item>
                <widget class="QLabel" name="label_feedbackDebts">
-                <property name="styleSheet">
-                 <string notr="true">font-family: &quot;Verdana&quot;;
-font-size: 16px;
-letter-spacing: 0px;
-word-spacing: 0px;
-background-color: #778da9;
-color: #1b263b;
-border-radius: 5px;</string>
-                </property>
                 <property name="text">
                  <string notr="true"/>
                 </property>

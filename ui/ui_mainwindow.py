@@ -324,7 +324,8 @@ class Ui_MainWindow(object):
 #if QT_CONFIG(tooltip)
         self.tabWidget.setToolTip(u"")
 #endif // QT_CONFIG(tooltip)
-        self.tabWidget.setStyleSheet(u"#inventory_searchBar,\n"
+        self.tabWidget.setStyleSheet(u"/* lineedits */\n"
+"#inventory_searchBar,\n"
 "#sales_searchBar,\n"
 "#debts_searchBar,\n"
 "#lineEdit_paid {\n"
@@ -343,6 +344,26 @@ class Ui_MainWindow(object):
 "}\n"
 "\n"
 "\n"
+"/* labels */\n"
+"QLabel {\n"
+"	padding-right: 2px;\n"
+"	padding-left: 2px;\n"
+"}\n"
+"\n"
+"\n"
+"#label_feedbackInventory,\n"
+"#label_feedbackSales,\n"
+"#label_feedbackDebts {\n"
+"	background-color: #F65755;\n"
+"	color: #fff;\n"
+"	border-radius: 5px;\n"
+"	letter-spacing: 0px;\n"
+"	word-spacing: 0px;\n"
+"}\n"
+"\n"
+"\n"
+"\n"
+"/* pushbuttons */\n"
 "QPushButton {\n"
 "	color: #fff;\n"
 "	background-color: #415a77;\n"
@@ -352,7 +373,8 @@ class Ui_MainWindow(object):
 "QPushButton:hover {\n"
 "	background-color: #3b66ab;\n"
 "}\n"
-"QPushButton:pressed {\n"
+"QPushB"
+                        "utton:pressed {\n"
 "	background-color: #3b66ab;\n"
 "	border: 1px inset #778da9;\n"
 "}\n"
@@ -367,8 +389,7 @@ class Ui_MainWindow(object):
 "}\n"
 "QTabWidget::tab-bar {\n"
 "	left: 15px;\n"
-"	background-color: #e0e1dd"
-                        ";\n"
+"	background-color: #e0e1dd;\n"
 "}\n"
 "\n"
 "QTabBar::tab { /* selecciona la barra de las pesta\u00f1as */\n"
@@ -395,7 +416,8 @@ class Ui_MainWindow(object):
 "	border-top-color:  #778da9;\n"
 "	font-size: 20px;\n"
 "}\n"
-"QTabBar::tab:!selected {\n"
+"QTabBar::ta"
+                        "b:!selected {\n"
 "	color: #e0e1dd;\n"
 "	margin-top: 3px;\n"
 "	height: 22px;\n"
@@ -414,8 +436,7 @@ class Ui_MainWindow(object):
 "}\n"
 "QTableView::item:selected {\n"
 "	background-color: #778da9;\n"
-""
-                        "	border: 1px solid #fff;\n"
+"	border: 1px solid #fff;\n"
 "}\n"
 "/* QHeaderViews */\n"
 "QHeaderView::section {\n"
@@ -439,13 +460,15 @@ class Ui_MainWindow(object):
 "}\n"
 "QComboBox:on,\n"
 "QTableView QComboBox:on { /* estilos de comboboxes creados por los delegados para edici\u00f3n */\n"
-"	background-color: #3b66ab;\n"
+"	"
+                        "background-color: #3b66ab;\n"
 "	color: #fff;\n"
 "	border: none;\n"
 "	padding-top: 3px;\n"
 "	padding-left: 4px;\n"
 "}\n"
-"QComboBox::drop-down {\n"
+"QComboBox::drop-down,\n"
+"QTableView QComboBox::drop-down { /* estilos de comboboxes creados por los delegados para edici\u00f3n */\n"
 "	subcontrol-origin: padding;\n"
 "	subcontrol-position: top right;\n"
 "	width: 20px;\n"
@@ -454,8 +477,8 @@ class Ui_MainWindow(object):
 "	border-top-right-radius: 5px;\n"
 "	border-bottom-right-radius: 5px;\n"
 "}\n"
-"QCo"
-                        "mboBox::down-arrow:on {\n"
+"QComboBox::down-arrow:on,\n"
+"QTableView QComboBox::down-arrow:on { /* estilos de comboboxes creados por los delegados para edici\u00f3n */\n"
 "    top: 1px;\n"
 "    left: 1px;\n"
 "}\n"
@@ -469,7 +492,8 @@ class Ui_MainWindow(object):
 "\n"
 "/* estilos del QDateTimeEdit y del QCalendarWidget */\n"
 "QDateTimeEdit,\n"
-"QTableView QDateTimeEdit { /* estilos de datetimeedits creados por los delegados para edici\u00f3n */\n"
+"QTableView QDateTimeEdit { /* "
+                        "estilos de datetimeedits creados por los delegados para edici\u00f3n */\n"
 "	background-color: #fff;\n"
 "}\n"
 "QCalendarWidget QAbstractItemView,\n"
@@ -482,8 +506,7 @@ class Ui_MainWindow(object):
 "	background-color: #22577a;\n"
 "	color: #fff;\n"
 "}\n"
-"QCalendarWidget QToolButto"
-                        "n:hover,\n"
+"QCalendarWidget QToolButton:hover,\n"
 "QCalendarWidget QToolButton:pressed,\n"
 "QTableView QCalendarWidget QToolButton:hover, /* estilos de datetimeedits creados por los ... */\n"
 "QTableView QCalendarWidget QToolButton:pressed /* ... delegados para edici\u00f3n */\n"
@@ -496,7 +519,8 @@ class Ui_MainWindow(object):
 "/* estilos de QProgressBar */\n"
 "QProgressBar {\n"
 "	margin: 0 10px 0 10px;\n"
-"	background-color: rgba(255, 255, 255, 0.6);\n"
+"	background-color: rgba(255, 255, 255,"
+                        " 0.6);\n"
 "	border: None;\n"
 "	border-radius: 5px;\n"
 "}\n"
@@ -650,13 +674,6 @@ class Ui_MainWindow(object):
 
         self.label_feedbackInventory = QLabel(self.inventory_display)
         self.label_feedbackInventory.setObjectName(u"label_feedbackInventory")
-        self.label_feedbackInventory.setStyleSheet(u"font-family: \"Verdana\";\n"
-"font-size: 16px;\n"
-"letter-spacing: 0px;\n"
-"word-spacing: 0px;\n"
-"background-color: #778da9;\n"
-"color: #1b263b;\n"
-"border-radius: 5px;")
         self.label_feedbackInventory.setText(u"")
         self.label_feedbackInventory.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_feedbackInventory.setWordWrap(True)
@@ -1306,13 +1323,6 @@ class Ui_MainWindow(object):
 
         self.label_feedbackSales = QLabel(self.box2_sales_table)
         self.label_feedbackSales.setObjectName(u"label_feedbackSales")
-        self.label_feedbackSales.setStyleSheet(u"font-family: \"Verdana\";\n"
-"font-size: 16px;\n"
-"letter-spacing: 0px;\n"
-"word-spacing: 0px;\n"
-"background-color: #778da9;\n"
-"color: #1b263b;\n"
-"border-radius: 5px;")
         self.label_feedbackSales.setText(u"")
         self.label_feedbackSales.setTextFormat(Qt.TextFormat.PlainText)
         self.label_feedbackSales.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -1497,13 +1507,6 @@ class Ui_MainWindow(object):
 
         self.label_feedbackDebts = QLabel(self.debts_info)
         self.label_feedbackDebts.setObjectName(u"label_feedbackDebts")
-        self.label_feedbackDebts.setStyleSheet(u"font-family: \"Verdana\";\n"
-"font-size: 16px;\n"
-"letter-spacing: 0px;\n"
-"word-spacing: 0px;\n"
-"background-color: #778da9;\n"
-"color: #1b263b;\n"
-"border-radius: 5px;")
         self.label_feedbackDebts.setText(u"")
         self.label_feedbackDebts.setTextFormat(Qt.TextFormat.PlainText)
         self.label_feedbackDebts.setAlignment(Qt.AlignmentFlag.AlignCenter)

@@ -1449,6 +1449,68 @@ class MainWindow(QMainWindow):
 
 
     #¡ tablas (UPDATE)
+    @Slot(object)
+    def __onDelegateValidationSucceded(self, table_viewID:TableViewId) -> None:
+        '''
+        Esconde los labels de feedback relacionados con la VISTA a la que se 
+        referencia.
+
+        Parámetros
+        ----------
+        table_viewID : TableViewId
+            QTableView al que se refencia
+
+        Retorna
+        -------
+        None
+        '''
+        match table_viewID.name:
+            case "INVEN_TABLE_VIEW": # inventario
+                self.ui.label_feedbackInventory.hide()
+            
+            case "SALES_TABLE_VIEW":
+                self.ui.label_feedbackSales.hide()
+                
+            case "DEBTS_TABLE_VIEW":
+                self.ui.label_feedbackDebts.hide()
+        
+        return None
+
+
+    @Slot(tuple)
+    def __onDelegateValidationFailed(self, feedback:tuple[TableViewId, str]) -> None:
+        '''
+        Muestra el label con feedback relacionado con la VISTA a la que se referencia 
+        y cambia la hoja de estilos del label.
+        
+        Parámetros
+        ----------
+        feedback: tuple[TableViewId, str]
+            contiene el QTableView al que se referencia y el texto como feedback a mostrar 
+            en el label
+        
+        Retorna
+        -------
+        None
+        '''
+        match feedback[0].name:
+            case "INVEN_TABLE_VIEW":
+                self.ui.label_feedbackInventory.show()
+                self.ui.label_feedbackInventory.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
+                self.ui.label_feedbackInventory.setText(feedback[1])
+                
+            case "SALES_TABLE_VIEW":
+                self.ui.label_feedbackSales.show()
+                self.ui.label_feedbackSales.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
+                self.ui.label_feedbackSales.setText(feedback[1])
+                
+            case "DEBTS_TABLE_VIEW":
+                self.ui.label_feedbackDebts.show()
+                self.ui.label_feedbackDebts.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
+                self.ui.label_feedbackDebts.setText(feedback[1])
+        return None
+    
+    
     #¡¡ ....... inventario ........................................................................
     @Slot(int, int, object)
     def onInventoryModelDataToUpdate(self, column:int, IDproduct:int,
@@ -1721,68 +1783,6 @@ class MainWindow(QMainWindow):
                         upd_params=(new_val, IDsales_detail)
                     )
         
-        return None
-
-
-    @Slot(object)
-    def __onDelegateValidationSucceded(self, table_viewID:TableViewId) -> None:
-        '''
-        Esconde los labels de feedback relacionados con la VISTA a la que se 
-        referencia.
-
-        Parámetros
-        ----------
-        table_viewID : TableViewId
-            QTableView al que se refencia
-
-        Retorna
-        -------
-        None
-        '''
-        match table_viewID.name:
-            case "INVEN_TABLE_VIEW": # inventario
-                self.ui.label_feedbackInventory.hide()
-            
-            case "SALES_TABLE_VIEW":
-                self.ui.label_feedbackSales.hide()
-                
-            case "DEBTS_TABLE_VIEW":
-                self.ui.label_feedbackDebts.hide()
-        
-        return None
-
-
-    @Slot(tuple)
-    def __onDelegateValidationFailed(self, feedback:tuple[TableViewId, str]) -> None:
-        '''
-        Muestra el label con feedback relacionado con la VISTA a la que se referencia 
-        y cambia la hoja de estilos del label.
-        
-        Parámetros
-        ----------
-        feedback: tuple[TableViewId, str]
-            contiene el QTableView al que se referencia y el texto como feedback a mostrar 
-            en el label
-        
-        Retorna
-        -------
-        None
-        '''
-        match feedback[0].name:
-            case "INVEN_TABLE_VIEW":
-                self.ui.label_feedbackInventory.show()
-                self.ui.label_feedbackInventory.setStyleSheet(LabelFeedbackStyle.INVALID.value)
-                self.ui.label_feedbackInventory.setText(feedback[1])
-                
-            case "SALES_TABLE_VIEW":
-                self.ui.label_feedbackSales.show()
-                self.ui.label_feedbackSales.setStyleSheet(LabelFeedbackStyle.INVALID.value)
-                self.ui.label_feedbackSales.setText(feedback[1])
-                
-            case "DEBTS_TABLE_VIEW":
-                self.ui.label_feedbackDebts.show()
-                self.ui.label_feedbackDebts.setStyleSheet(LabelFeedbackStyle.INVALID.value)
-                self.ui.label_feedbackDebts.setText(feedback[1])
         return None
 
 
