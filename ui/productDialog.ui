@@ -34,7 +34,7 @@
   <property name="styleSheet">
    <string notr="true">* {
 	color: #111;
-	font-family: &quot;Tahoma&quot;, &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
+	font-family: &quot;Futura&quot;, &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
 	font-size: 16px;
 }
 
@@ -1122,7 +1122,7 @@ QScrollBar::add-page:vertical {
               </property>
               <property name="font">
                <font>
-                <family>Tahoma</family>
+                <family>Futura</family>
                 <pointsize>-1</pointsize>
                 <italic>false</italic>
                 <bold>false</bold>

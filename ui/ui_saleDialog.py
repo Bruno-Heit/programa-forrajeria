@@ -24,23 +24,58 @@ class Ui_saleDialog(object):
     def setupUi(self, saleDialog):
         if not saleDialog.objectName():
             saleDialog.setObjectName(u"saleDialog")
-        saleDialog.resize(615, 295)
-        saleDialog.setMinimumSize(QSize(615, 295))
+        saleDialog.resize(555, 422)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(saleDialog.sizePolicy().hasHeightForWidth())
+        saleDialog.setSizePolicy(sizePolicy)
+        saleDialog.setMinimumSize(QSize(555, 422))
+        saleDialog.setMaximumSize(QSize(555, 422))
         saleDialog.setStyleSheet(u"* {\n"
 "	color: #111;\n"
 "	border-color: #0b7e7f;\n"
-"	font-family: \"Tahoma\", \"Verdana\", \"Sans-Serif\";\n"
+"	font-family: \"Futura\", \"Verdana\", \"Sans-Serif\";\n"
 "	font-size: 16px;\n"
 "}\n"
 "\n"
 "\n"
 "QToolTip {\n"
 "	background-color: #fff;\n"
+"	color: #0d1b2a;\n"
 "}\n"
 "\n"
 "\n"
 "QDialog {\n"
-"	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 178, 102, 255), stop:0.378531 rgba(230, 177, 61, 255), stop:0.745763 rgba(232, 105, 57, 255), stop:0.982955 rgba(255, 180, 128, 255));\n"
+"	background-color: #e0e1dd;\n"
+"}\n"
+"\n"
+"\n"
+"#sale_data,\n"
+"#debtor_data {\n"
+"	background-color: #fff;\n"
+"	padding: 5px 3px;\n"
+"	border-radius: 10px;\n"
+"}\n"
+"\n"
+"\n"
+"#sale_data {\n"
+"	margin-bottom: 10px;\n"
+"}\n"
+"\n"
+"\n"
+"/* labels */\n"
+"QLabel {\n"
+"	padding-right: 2px;\n"
+"	padding-left: 2px;\n"
+"}\n"
+"\n"
+"\n"
+"#label_productTotalCost {\n"
+"	font-size: 19px;\n"
+"	font-weight: 900;\n"
+"	background-color: #0d1b2a;\n"
+"	color: #e0e1dd;\n"
 "}\n"
 "\n"
 "\n"
@@ -51,78 +86,101 @@ class Ui_saleDialog(object):
 "#label_debtorSurname_feedback,\n"
 "#label_phoneNumber_feedback,\n"
 "#label_postalCode_feedback {\n"
-"	color: #dc2627;\n"
-"	border: 1px solid #dc2627;\n"
-"	background-color: rgba(224,164,164,0.7)\n"
+"	background-color: #F65755;\n"
+"	color: #fff;\n"
+"	border-radius: 5px;"
+                        "\n"
 "}\n"
 "\n"
 "\n"
+"#label_debtor_header {\n"
+"	font-family: \"Arial\", \"Calibri\", \"Sans-Serif\";\n"
+"	font-size: 18px;\n"
+"	font-weight: 600px;\n"
+"}\n"
+"\n"
+"\n"
+"/* lineedits */\n"
 "#lineEdit_direction:disabled,\n"
 "#lineEdit_phoneNumber:disabled,\n"
 "#lineEdit_postalCode:disabled {\n"
-"	background-color: rgba(204, 204, 204, 0.6);\n"
-"	color: #888;\n"
+"	background-color: #e0e1dd;\n"
+"	color: #0d1b2a;\n"
 "}\n"
 "\n"
 "\n"
 "QLineEdit {\n"
-"	bac"
-                        "kground-color: #fff;\n"
+"	background-color: #e0e1dd;\n"
+"	color: #0d1b2a;\n"
 "	border: none;\n"
-"	border-top: 1px solid;\n"
-"	border-bottom: 1px solid;\n"
-"	border-color: #0b7e7f;\n"
-"	height: 24px;\n"
+"	border-radius: 10px;\n"
+"	padding-left: 3px;\n"
+"	padding-right: 3px;\n"
 "}\n"
 "QLineEdit:focus {\n"
-"	background-color: rgb(197, 255, 252);\n"
-"	border: 1px solid;\n"
-"	border-color: #0b7e7f;\n"
-"	font-size: 18px;\n"
-"}\n"
-"\n"
-"\n"
-"QPushButton {\n"
-"	font-size: 16px;\n"
-"	background-color: #22577a;\n"
+"	background-color: #3b66ab;\n"
 "	color: #fff;\n"
-"	border: 1px solid #12476a;\n"
-"	border-radius: 2px;\n"
-"	min-width: 200px;\n"
-"	min-height: 23px;\n"
 "}\n"
-"QPushButton:hover,\n"
+"\n"
+"\n"
+"/* pushbuttons */\n"
+"QPushButton {\n"
+"	background-color: #415a77;\n"
+"	color: #fff;\n"
+"	border: none;\n"
+"	border-radius: 4px;\n"
+"	width: 220px;\n"
+"}\n"
+"QPushButton:hover {\n"
+"	background-color: #3b66ab;\n"
+"}\n"
 "QPushButton:pressed {\n"
-"	background-color: #38a3a5;\n"
-"	color: #111;\n"
-"	border: 1px inset #289395;\n"
+"	background-color: #3b66ab;\n"
+"	border: 1px inset #778da9;\n"
 "}\n"
 "QPushButton:disabled {\n"
 "	background-color: rgb(103, 115, 122);\n"
 "	color: #999;\n"
-"}\n"
+""
+                        "}\n"
 "\n"
 "\n"
-"/*cambia el estilo del combobox*/\n"
+"/* combobox */\n"
 "QComboBox {\n"
-"	background-color: #fff;\n"
-"	color: #111;\n"
-"	border: none;\n"
-"	border-top: 1px solid;\n"
-"	border-bottom: 1px solid;\n"
-"	border-color: #111;\n"
+"	background-color: #e0e1dd;\n"
+"	color: #0d1b2a;\n"
+"	border: 1px solid #3b66ab;\n"
+"	border-radius: 5px;\n"
+"	padding-left: 2px 0;\n"
 "}\n"
 "QComboBox:on {\n"
-"	background-color: rgb(197, 255, 252);\n"
-"	b"
-                        "order: 1px solid;\n"
-"	border-color: rgb(11, 126, 127);\n"
-"	padding-top: 2px;\n"
+"	background-color: #3b66ab;\n"
+"	color: #fff;\n"
+"	border: none;\n"
+"	padding-top: 3px;\n"
 "	padding-left: 4px;\n"
 "}\n"
-"QComboBox QAbstractItemView {\n"
-"	background-color: #fff;\n"
-"	selection-background-color: #38a3a5;\n"
+"QComboBox::drop-down {\n"
+"	subcontrol-origin: padding;\n"
+"	subcontrol-position: top right;\n"
+"	width: 20px;\n"
+"	padding-right: 3px;\n"
+"	border-left: none;\n"
+"	border-top-right-radius: 5px;\n"
+"	border-bottom-right-radius: 5px;\n"
+"}\n"
+"QComboBox::down-arrow:on {\n"
+"    top: 1px;\n"
+"    left: 1px;\n"
+"}\n"
+"QComboBox QAbstractItemView{\n"
+"	background-color: #778da9;\n"
+"	color: #fff;\n"
+"	selection-background-color: #3b66ab;\n"
+"}\n"
+"QComboBox:disabled {\n"
+"	background-color: rgb(103, 115, 122);\n"
+"	color: #999;\n"
 "}\n"
 "\n"
 "\n"
@@ -131,7 +189,8 @@ class Ui_saleDialog(object):
 "	background-color: #fff;\n"
 "}\n"
 "QCalendarWidget QAbstractItemView {\n"
-"	background-color: #fff;\n"
+"	background-"
+                        "color: #fff;\n"
 "	selection-background-color: #38a3a5;\n"
 "}\n"
 "QCalendarWidget QToolButton {\n"
@@ -142,15 +201,12 @@ class Ui_saleDialog(object):
 "QCalendarWidget QToolButton:pressed {\n"
 "	background-color: #38a3a5;\n"
 "	color: #111;\n"
-"}")
-        self.verticalLayout = QVBoxLayout(saleDialog)
-        self.verticalLayout.setSpacing(4)
-        self.verticalLayout.setObjectName(u"verticalLayout")
-        self.verticalLayout.setContentsMargins(5, 5, 5, 5)
-        self.sale_data = QFrame(saleDialog)
-        self.sale_data.setObjectName(u"sale_data")
-        self.sale_data.setStyleSheet(u"QScrollBar {\n"
-"	background-color: #fff;\n"
+"}\n"
+"\n"
+"\n"
+"/* scrollbars */\n"
+"QScrollBar {\n"
+"	background-color: #e0e1dd;\n"
 "	border: 1px solid transparent;\n"
 "	border-radius: 5px;\n"
 "}\n"
@@ -158,11 +214,11 @@ class Ui_saleDialog(object):
 "	border-radius: 5px;\n"
 "}\n"
 "QScrollBar::handle {\n"
-"	background-color: #0b7e7f;\n"
+"	background-color:  #1b263b;\n"
 "	border-radius: 5px;\n"
 "}\n"
 "QScrollBar::handle:pressed {\n"
-"	background-color: #35bc88;\n"
+"	background-color: #3b465b;\n"
 "}\n"
 "QScrollBar::sub-line {\n"
 "	width: 0;\n"
@@ -184,7 +240,8 @@ class Ui_saleDialog(object):
 "	min-height: 15px;\n"
 "}\n"
 "QScrollBar::sub-page:vertical {\n"
-"	background: none;\n"
+"	backgroun"
+                        "d: none;\n"
 "}\n"
 "QScrollBar::add-page:vertical {\n"
 "	background: none;\n"
@@ -197,14 +254,24 @@ class Ui_saleDialog(object):
 "QScrollBar::handle:horizontal {\n"
 "	min-width: 15px;\n"
 "}")
+        self.verticalLayout = QVBoxLayout(saleDialog)
+        self.verticalLayout.setSpacing(4)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setContentsMargins(5, 5, 5, 5)
+        self.sale_data = QFrame(saleDialog)
+        self.sale_data.setObjectName(u"sale_data")
+        self.sale_data.setMinimumSize(QSize(545, 277))
+        self.sale_data.setMaximumSize(QSize(16777215, 277))
         self.sale_data.setFrameShape(QFrame.Shape.NoFrame)
         self.sale_data.setFrameShadow(QFrame.Shadow.Raised)
         self.verticalLayout_2 = QVBoxLayout(self.sale_data)
-        self.verticalLayout_2.setSpacing(4)
+        self.verticalLayout_2.setSpacing(8)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.frame_saleDetail = QFrame(self.sale_data)
         self.frame_saleDetail.setObjectName(u"frame_saleDetail")
+        self.frame_saleDetail.setMinimumSize(QSize(0, 21))
+        self.frame_saleDetail.setMaximumSize(QSize(16777215, 21))
         self.frame_saleDetail.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_saleDetail.setFrameShadow(QFrame.Shadow.Raised)
         self.horizontalLayout = QHBoxLayout(self.frame_saleDetail)
@@ -212,6 +279,7 @@ class Ui_saleDialog(object):
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.label_saleDetail = QLabel(self.frame_saleDetail)
         self.label_saleDetail.setObjectName(u"label_saleDetail")
+        self.label_saleDetail.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.horizontalLayout.addWidget(self.label_saleDetail)
 
@@ -228,6 +296,8 @@ class Ui_saleDialog(object):
 
         self.product_data = QFrame(self.sale_data)
         self.product_data.setObjectName(u"product_data")
+        self.product_data.setMinimumSize(QSize(0, 145))
+        self.product_data.setMaximumSize(QSize(16777215, 145))
         self.product_data.setFrameShape(QFrame.Shape.NoFrame)
         self.product_data.setFrameShadow(QFrame.Shadow.Raised)
         self.gridLayout = QGridLayout(self.product_data)
@@ -236,6 +306,7 @@ class Ui_saleDialog(object):
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.label_productQuantity = QLabel(self.product_data)
         self.label_productQuantity.setObjectName(u"label_productQuantity")
+        self.label_productQuantity.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.gridLayout.addWidget(self.label_productQuantity, 2, 0, 1, 1)
 
@@ -272,6 +343,7 @@ class Ui_saleDialog(object):
 
         self.label_productName = QLabel(self.product_data)
         self.label_productName.setObjectName(u"label_productName")
+        self.label_productName.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.gridLayout.addWidget(self.label_productName, 0, 0, 1, 1)
 
@@ -288,9 +360,9 @@ class Ui_saleDialog(object):
         self.checkBox_comercialPrice = QCheckBox(self.product_data)
         self.checkBox_comercialPrice.setObjectName(u"checkBox_comercialPrice")
 #if QT_CONFIG(tooltip)
-        self.checkBox_comercialPrice.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Si la casilla est\u00e1 </span><span style=\" font-size:11pt; text-decoration: underline;\">desmarcada</span><span style=\" font-size:11pt;\"> el precio calculado del producto es en base al </span><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">precio unitario</span><span style=\" font-size:11pt;\">.</span></p><p><span style=\" font-size:11pt;\">Si la casilla est\u00e1 </span><span style=\" font-size:11pt; text-decoration: underline;\">marcada</span><span style=\" font-size:11pt;\"> el precio total calculado se basa en el </span><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">precio comercial</span><span style=\" font-size:11pt;\">.</span></p></body></html>")
+        self.checkBox_comercialPrice.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Si la casilla est\u00e1 </span><span style=\" font-size:11pt; font-weight:700;\">marcada</span><span style=\" font-size:11pt;\"> el precio calculado del producto es en base al </span><span style=\" font-size:11pt; font-weight:700;\">precio comercial</span><span style=\" font-size:11pt;\">.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        self.checkBox_comercialPrice.setText(u"Aplicar precio comercial")
+        self.checkBox_comercialPrice.setText(u"precio comercial")
 #if QT_CONFIG(shortcut)
         self.checkBox_comercialPrice.setShortcut(u"")
 #endif // QT_CONFIG(shortcut)
@@ -300,11 +372,13 @@ class Ui_saleDialog(object):
 
         self.label_productTotalCost = QLabel(self.product_data)
         self.label_productTotalCost.setObjectName(u"label_productTotalCost")
-        self.label_productTotalCost.setStyleSheet(u"font-size: 19px;\n"
-"font-weight: 500;\n"
-"background-color: #bbb;\n"
-"border-top: 1px solid #111;\n"
-"border-right: 1px solid #111;")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.label_productTotalCost.sizePolicy().hasHeightForWidth())
+        self.label_productTotalCost.setSizePolicy(sizePolicy1)
+        self.label_productTotalCost.setMinimumSize(QSize(0, 23))
+        self.label_productTotalCost.setMaximumSize(QSize(16777215, 23))
         self.label_productTotalCost.setText(u"COSTO TOTAL")
         self.label_productTotalCost.setTextFormat(Qt.TextFormat.AutoText)
         self.label_productTotalCost.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
@@ -319,6 +393,8 @@ class Ui_saleDialog(object):
 
         self.frame_totalPaid = QFrame(self.sale_data)
         self.frame_totalPaid.setObjectName(u"frame_totalPaid")
+        self.frame_totalPaid.setMinimumSize(QSize(0, 44))
+        self.frame_totalPaid.setMaximumSize(QSize(16777215, 44))
         self.frame_totalPaid.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_totalPaid.setFrameShadow(QFrame.Shadow.Raised)
         self.gridLayout_2 = QGridLayout(self.frame_totalPaid)
@@ -327,13 +403,14 @@ class Ui_saleDialog(object):
         self.gridLayout_2.setContentsMargins(0, 0, 0, 0)
         self.label_totalPaid = QLabel(self.frame_totalPaid)
         self.label_totalPaid.setObjectName(u"label_totalPaid")
+        self.label_totalPaid.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.gridLayout_2.addWidget(self.label_totalPaid, 0, 0, 1, 1)
 
         self.lineEdit_totalPaid = QLineEdit(self.frame_totalPaid)
         self.lineEdit_totalPaid.setObjectName(u"lineEdit_totalPaid")
 #if QT_CONFIG(tooltip)
-        self.lineEdit_totalPaid.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">El valor total que abonado en esta venta.</span></p><p><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:11pt;\"> si es diferente al costo se pedir\u00e1n los datos del comprador y la diferencia se agregar\u00e1 a la base de datos como saldo a favor/en contra.</span></p></body></html>")
+        self.lineEdit_totalPaid.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">El valor total abonado en esta venta.</span></p><p><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:11pt;\"> si es diferente al costo se pedir\u00e1n los datos del comprador y la diferencia se agregar\u00e1 a la base de datos como saldo a favor/adeudado.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.lineEdit_totalPaid.setPlaceholderText(u"Total abonado. Ej.: 15000")
         self.lineEdit_totalPaid.setClearButtonEnabled(True)
@@ -342,11 +419,11 @@ class Ui_saleDialog(object):
 
         self.label_totalPaid_feedback = QLabel(self.frame_totalPaid)
         self.label_totalPaid_feedback.setObjectName(u"label_totalPaid_feedback")
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_totalPaid_feedback.sizePolicy().hasHeightForWidth())
-        self.label_totalPaid_feedback.setSizePolicy(sizePolicy)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.label_totalPaid_feedback.sizePolicy().hasHeightForWidth())
+        self.label_totalPaid_feedback.setSizePolicy(sizePolicy2)
         self.label_totalPaid_feedback.setMaximumSize(QSize(16777215, 20))
         self.label_totalPaid_feedback.setText(u"")
         self.label_totalPaid_feedback.setTextFormat(Qt.TextFormat.PlainText)
@@ -362,6 +439,8 @@ class Ui_saleDialog(object):
 
         self.dateTimeEdit = QDateTimeEdit(self.sale_data)
         self.dateTimeEdit.setObjectName(u"dateTimeEdit")
+        self.dateTimeEdit.setMinimumSize(QSize(0, 23))
+        self.dateTimeEdit.setMaximumSize(QSize(16777215, 23))
 #if QT_CONFIG(tooltip)
         self.dateTimeEdit.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Fecha y hora de la venta.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
@@ -380,175 +459,104 @@ class Ui_saleDialog(object):
 
         self.debtor_data = QFrame(saleDialog)
         self.debtor_data.setObjectName(u"debtor_data")
+        self.debtor_data.setEnabled(False)
+        self.debtor_data.setMinimumSize(QSize(0, 97))
+        self.debtor_data.setMaximumSize(QSize(16777215, 97))
         self.debtor_data.setFrameShape(QFrame.Shape.NoFrame)
         self.debtor_data.setFrameShadow(QFrame.Shadow.Raised)
-        self.debtor_data_GridLayout = QGridLayout(self.debtor_data)
-        self.debtor_data_GridLayout.setSpacing(4)
-        self.debtor_data_GridLayout.setObjectName(u"debtor_data_GridLayout")
-        self.debtor_data_GridLayout.setContentsMargins(0, 0, 0, 0)
-        self.lineEdit_direction = QLineEdit(self.debtor_data)
-        self.lineEdit_direction.setObjectName(u"lineEdit_direction")
+        self.verticalLayout_3 = QVBoxLayout(self.debtor_data)
+        self.verticalLayout_3.setSpacing(8)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.verticalLayout_3.setContentsMargins(0, 5, 0, 5)
+        self.label_debtor_header = QLabel(self.debtor_data)
+        self.label_debtor_header.setObjectName(u"label_debtor_header")
+        sizePolicy1.setHeightForWidth(self.label_debtor_header.sizePolicy().hasHeightForWidth())
+        self.label_debtor_header.setSizePolicy(sizePolicy1)
+        self.label_debtor_header.setMinimumSize(QSize(0, 25))
+        self.label_debtor_header.setMaximumSize(QSize(16777215, 25))
 #if QT_CONFIG(tooltip)
-        self.lineEdit_direction.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">(Opcional) direcci\u00f3n del propietario.</span></p></body></html>")
+        self.label_debtor_header.setToolTip(u"")
 #endif // QT_CONFIG(tooltip)
-        self.lineEdit_direction.setInputMask(u"")
-        self.lineEdit_direction.setText(u"")
-        self.lineEdit_direction.setPlaceholderText(u"(Opcional) Ej.: Padre J.M. Criado Alonso 200")
-        self.lineEdit_direction.setClearButtonEnabled(True)
+        self.label_debtor_header.setText(u"Cuenta corriente")
+        self.label_debtor_header.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_debtor_header.setScaledContents(False)
+        self.label_debtor_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_debtor_header.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
-        self.debtor_data_GridLayout.addWidget(self.lineEdit_direction, 6, 2, 1, 3)
+        self.verticalLayout_3.addWidget(self.label_debtor_header)
 
-        self.label_phoneNumber = QLabel(self.debtor_data)
-        self.label_phoneNumber.setObjectName(u"label_phoneNumber")
+        self.frame_debtor_name = QFrame(self.debtor_data)
+        self.frame_debtor_name.setObjectName(u"frame_debtor_name")
+        self.frame_debtor_name.setMinimumSize(QSize(0, 23))
+        self.frame_debtor_name.setMaximumSize(QSize(16777215, 23))
+        self.frame_debtor_name.setFrameShape(QFrame.Shape.NoFrame)
+        self.frame_debtor_name.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_3 = QHBoxLayout(self.frame_debtor_name)
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
+        self.label_debtor_name = QLabel(self.frame_debtor_name)
+        self.label_debtor_name.setObjectName(u"label_debtor_name")
+        sizePolicy1.setHeightForWidth(self.label_debtor_name.sizePolicy().hasHeightForWidth())
+        self.label_debtor_name.setSizePolicy(sizePolicy1)
+        self.label_debtor_name.setTextFormat(Qt.TextFormat.RichText)
+        self.label_debtor_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.debtor_data_GridLayout.addWidget(self.label_phoneNumber, 3, 0, 1, 2)
+        self.horizontalLayout_3.addWidget(self.label_debtor_name)
 
-        self.lineEdit_postalCode = QLineEdit(self.debtor_data)
-        self.lineEdit_postalCode.setObjectName(u"lineEdit_postalCode")
-#if QT_CONFIG(tooltip)
-        self.lineEdit_postalCode.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">(Opcional) c\u00f3digo postal del propietario.</span></p><p><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">NOTA:</span><span style=\" font-size:11pt;\"> por conveniencia s\u00f3lo admite c\u00f3digos postales de Argentina.</span></p></body></html>")
-#endif // QT_CONFIG(tooltip)
-        self.lineEdit_postalCode.setInputMask(u"")
-        self.lineEdit_postalCode.setText(u"")
-        self.lineEdit_postalCode.setPlaceholderText(u"(Opcional) Ej.: 6703")
-        self.lineEdit_postalCode.setClearButtonEnabled(True)
+        self.cb_debtor_name = QComboBox(self.frame_debtor_name)
+        self.cb_debtor_name.setObjectName(u"cb_debtor_name")
+        sizePolicy1.setHeightForWidth(self.cb_debtor_name.sizePolicy().hasHeightForWidth())
+        self.cb_debtor_name.setSizePolicy(sizePolicy1)
+        self.cb_debtor_name.setEditable(True)
+        self.cb_debtor_name.setPlaceholderText(u"")
 
-        self.debtor_data_GridLayout.addWidget(self.lineEdit_postalCode, 7, 2, 1, 3)
+        self.horizontalLayout_3.addWidget(self.cb_debtor_name)
 
-        self.label_debtorSurname_feedback = QLabel(self.debtor_data)
-        self.label_debtorSurname_feedback.setObjectName(u"label_debtorSurname_feedback")
-        self.label_debtorSurname_feedback.setMaximumSize(QSize(16777215, 20))
-        self.label_debtorSurname_feedback.setText(u"")
-        self.label_debtorSurname_feedback.setTextFormat(Qt.TextFormat.PlainText)
-        self.label_debtorSurname_feedback.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
-        self.label_debtorSurname_feedback.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
+        self.horizontalLayout_3.setStretch(0, 1)
+        self.horizontalLayout_3.setStretch(1, 2)
 
-        self.debtor_data_GridLayout.addWidget(self.label_debtorSurname_feedback, 2, 4, 1, 1, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTop)
+        self.verticalLayout_3.addWidget(self.frame_debtor_name)
 
-        self.lineEdit_debtorName = QLineEdit(self.debtor_data)
-        self.lineEdit_debtorName.setObjectName(u"lineEdit_debtorName")
-#if QT_CONFIG(tooltip)
-        self.lineEdit_debtorName.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Nombre del propietario.</span></p></body></html>")
-#endif // QT_CONFIG(tooltip)
-        self.lineEdit_debtorName.setText(u"")
-        self.lineEdit_debtorName.setFrame(False)
-        self.lineEdit_debtorName.setPlaceholderText(u"Nombre del deudor")
-        self.lineEdit_debtorName.setClearButtonEnabled(True)
+        self.frame_debtor_surname = QFrame(self.debtor_data)
+        self.frame_debtor_surname.setObjectName(u"frame_debtor_surname")
+        self.frame_debtor_surname.setMinimumSize(QSize(0, 23))
+        self.frame_debtor_surname.setMaximumSize(QSize(16777215, 23))
+        self.frame_debtor_surname.setFrameShape(QFrame.Shape.NoFrame)
+        self.frame_debtor_surname.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_2 = QHBoxLayout(self.frame_debtor_surname)
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.label_debtor_surname = QLabel(self.frame_debtor_surname)
+        self.label_debtor_surname.setObjectName(u"label_debtor_surname")
+        sizePolicy1.setHeightForWidth(self.label_debtor_surname.sizePolicy().hasHeightForWidth())
+        self.label_debtor_surname.setSizePolicy(sizePolicy1)
+        self.label_debtor_surname.setTextFormat(Qt.TextFormat.RichText)
+        self.label_debtor_surname.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.debtor_data_GridLayout.addWidget(self.lineEdit_debtorName, 1, 1, 1, 2)
+        self.horizontalLayout_2.addWidget(self.label_debtor_surname)
 
-        self.label_phoneNumber_feedback = QLabel(self.debtor_data)
-        self.label_phoneNumber_feedback.setObjectName(u"label_phoneNumber_feedback")
-        self.label_phoneNumber_feedback.setMaximumSize(QSize(16777215, 20))
-        self.label_phoneNumber_feedback.setText(u"")
-        self.label_phoneNumber_feedback.setTextFormat(Qt.TextFormat.PlainText)
-        self.label_phoneNumber_feedback.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.label_phoneNumber_feedback.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
+        self.cb_debtor_surname = QComboBox(self.frame_debtor_surname)
+        self.cb_debtor_surname.setObjectName(u"cb_debtor_surname")
+        sizePolicy1.setHeightForWidth(self.cb_debtor_surname.sizePolicy().hasHeightForWidth())
+        self.cb_debtor_surname.setSizePolicy(sizePolicy1)
+        self.cb_debtor_surname.setEditable(True)
+        self.cb_debtor_surname.setPlaceholderText(u"")
+        self.cb_debtor_surname.setFrame(True)
 
-        self.debtor_data_GridLayout.addWidget(self.label_phoneNumber_feedback, 4, 0, 1, 5, Qt.AlignmentFlag.AlignHCenter|Qt.AlignmentFlag.AlignTop)
+        self.horizontalLayout_2.addWidget(self.cb_debtor_surname)
 
-        self.label_surnameMark = QLabel(self.debtor_data)
-        self.label_surnameMark.setObjectName(u"label_surnameMark")
-#if QT_CONFIG(tooltip)
-        self.label_surnameMark.setToolTip(u"")
-#endif // QT_CONFIG(tooltip)
-        self.label_surnameMark.setText(u"<html><head/><body><p><span style=\" color:#ff0000;\">*</span></p></body></html>")
+        self.horizontalLayout_2.setStretch(0, 1)
+        self.horizontalLayout_2.setStretch(1, 2)
 
-        self.debtor_data_GridLayout.addWidget(self.label_surnameMark, 1, 3, 1, 1)
+        self.verticalLayout_3.addWidget(self.frame_debtor_surname)
 
-        self.label_postalCode = QLabel(self.debtor_data)
-        self.label_postalCode.setObjectName(u"label_postalCode")
-
-        self.debtor_data_GridLayout.addWidget(self.label_postalCode, 7, 0, 1, 2)
-
-        self.label_debtorInfo = QLabel(self.debtor_data)
-        self.label_debtorInfo.setObjectName(u"label_debtorInfo")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.label_debtorInfo.sizePolicy().hasHeightForWidth())
-        self.label_debtorInfo.setSizePolicy(sizePolicy1)
-        self.label_debtorInfo.setStyleSheet(u"color: rgb(8, 68, 68);\n"
-"margin-top: 15px;\n"
-"margin-left: 30px;\n"
-"margin-right: 30px;\n"
-"border-bottom: 1px solid;\n"
-"border-color: rgb(11, 126, 127);")
-        self.label_debtorInfo.setText(u"INFORMACI\u00d3N SOBRE EL DEUDOR")
-        self.label_debtorInfo.setTextFormat(Qt.TextFormat.PlainText)
-        self.label_debtorInfo.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.label_debtorInfo.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
-
-        self.debtor_data_GridLayout.addWidget(self.label_debtorInfo, 0, 0, 1, 5)
-
-        self.label_nameMark = QLabel(self.debtor_data)
-        self.label_nameMark.setObjectName(u"label_nameMark")
-#if QT_CONFIG(tooltip)
-        self.label_nameMark.setToolTip(u"")
-#endif // QT_CONFIG(tooltip)
-        self.label_nameMark.setText(u"<html><head/><body><p><span style=\" color:#ff0000;\">*</span></p></body></html>")
-
-        self.debtor_data_GridLayout.addWidget(self.label_nameMark, 1, 0, 1, 1)
-
-        self.lineEdit_debtorSurname = QLineEdit(self.debtor_data)
-        self.lineEdit_debtorSurname.setObjectName(u"lineEdit_debtorSurname")
-#if QT_CONFIG(tooltip)
-        self.lineEdit_debtorSurname.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">Apellido del propietario.</span></p></body></html>")
-#endif // QT_CONFIG(tooltip)
-        self.lineEdit_debtorSurname.setText(u"")
-        self.lineEdit_debtorSurname.setFrame(False)
-        self.lineEdit_debtorSurname.setPlaceholderText(u"Apellido del deudor")
-        self.lineEdit_debtorSurname.setClearButtonEnabled(True)
-
-        self.debtor_data_GridLayout.addWidget(self.lineEdit_debtorSurname, 1, 4, 1, 1)
-
-        self.label_direction = QLabel(self.debtor_data)
-        self.label_direction.setObjectName(u"label_direction")
-
-        self.debtor_data_GridLayout.addWidget(self.label_direction, 6, 0, 1, 2)
-
-        self.label_debtorName_feedback = QLabel(self.debtor_data)
-        self.label_debtorName_feedback.setObjectName(u"label_debtorName_feedback")
-        self.label_debtorName_feedback.setMaximumSize(QSize(16777215, 20))
-        self.label_debtorName_feedback.setText(u"")
-        self.label_debtorName_feedback.setTextFormat(Qt.TextFormat.PlainText)
-        self.label_debtorName_feedback.setAlignment(Qt.AlignmentFlag.AlignLeading|Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
-        self.label_debtorName_feedback.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
-
-        self.debtor_data_GridLayout.addWidget(self.label_debtorName_feedback, 2, 1, 1, 2, Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignTop)
-
-        self.lineEdit_phoneNumber = QLineEdit(self.debtor_data)
-        self.lineEdit_phoneNumber.setObjectName(u"lineEdit_phoneNumber")
-#if QT_CONFIG(tooltip)
-        self.lineEdit_phoneNumber.setToolTip(u"<html><head/><body><p><span style=\" font-size:11pt;\">(Opcional) n\u00famero de tel\u00e9fono del propietario.</span></p></body></html>")
-#endif // QT_CONFIG(tooltip)
-        self.lineEdit_phoneNumber.setInputMask(u"")
-        self.lineEdit_phoneNumber.setText(u"")
-        self.lineEdit_phoneNumber.setFrame(False)
-        self.lineEdit_phoneNumber.setCursorPosition(0)
-        self.lineEdit_phoneNumber.setPlaceholderText(u"(Opcional) Ej.: 2323-123456")
-        self.lineEdit_phoneNumber.setClearButtonEnabled(True)
-
-        self.debtor_data_GridLayout.addWidget(self.lineEdit_phoneNumber, 3, 2, 1, 3)
-
-        self.label_postalCode_feedback = QLabel(self.debtor_data)
-        self.label_postalCode_feedback.setObjectName(u"label_postalCode_feedback")
-        self.label_postalCode_feedback.setMaximumSize(QSize(16777215, 20))
-        self.label_postalCode_feedback.setText(u"")
-        self.label_postalCode_feedback.setTextFormat(Qt.TextFormat.PlainText)
-        self.label_postalCode_feedback.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.label_postalCode_feedback.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
-
-        self.debtor_data_GridLayout.addWidget(self.label_postalCode_feedback, 8, 0, 1, 5, Qt.AlignmentFlag.AlignHCenter|Qt.AlignmentFlag.AlignTop)
-
-        self.debtor_data_GridLayout.setColumnStretch(1, 1)
-        self.debtor_data_GridLayout.setColumnStretch(2, 1)
-        self.debtor_data_GridLayout.setColumnStretch(4, 2)
 
         self.verticalLayout.addWidget(self.debtor_data)
 
         self.buttonBox = QDialogButtonBox(saleDialog)
         self.buttonBox.setObjectName(u"buttonBox")
+        self.buttonBox.setMinimumSize(QSize(0, 26))
+        self.buttonBox.setMaximumSize(QSize(16777215, 26))
         self.buttonBox.setOrientation(Qt.Orientation.Horizontal)
         self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
         self.buttonBox.setCenterButtons(True)
@@ -560,11 +568,6 @@ class Ui_saleDialog(object):
         QWidget.setTabOrder(self.lineEdit_productQuantity, self.checkBox_comercialPrice)
         QWidget.setTabOrder(self.checkBox_comercialPrice, self.lineEdit_totalPaid)
         QWidget.setTabOrder(self.lineEdit_totalPaid, self.dateTimeEdit)
-        QWidget.setTabOrder(self.dateTimeEdit, self.lineEdit_debtorName)
-        QWidget.setTabOrder(self.lineEdit_debtorName, self.lineEdit_debtorSurname)
-        QWidget.setTabOrder(self.lineEdit_debtorSurname, self.lineEdit_phoneNumber)
-        QWidget.setTabOrder(self.lineEdit_phoneNumber, self.lineEdit_direction)
-        QWidget.setTabOrder(self.lineEdit_direction, self.lineEdit_postalCode)
 
         self.retranslateUi(saleDialog)
         self.buttonBox.accepted.connect(saleDialog.accept)
@@ -578,95 +581,15 @@ class Ui_saleDialog(object):
         self.label_saleDetail.setText(QCoreApplication.translate("saleDialog", u"Detalle de la venta", None))
         self.label_productQuantity.setText(QCoreApplication.translate("saleDialog", u"<html><head/><body><p>Cantidad  <span style=\" color:#ff0000;\">*</span></p></body></html>", None))
         self.comboBox_productName.setPlaceholderText(QCoreApplication.translate("saleDialog", u"Elegir el producto...", None))
-        self.label_productName.setText(QCoreApplication.translate("saleDialog", u"<html><head/><body><p>Nombre del producto  <span style=\" color:#ff0000;\">*</span></p></body></html>", None))
+        self.label_productName.setText(QCoreApplication.translate("saleDialog", u"<html><head/><body><p>Producto <span style=\" color:#ff0000;\">*</span></p></body></html>", None))
         self.label_totalPaid.setText(QCoreApplication.translate("saleDialog", u"<html><head/><body><p>Total abonado  <span style=\" color:#ff0000;\">*</span></p></body></html>", None))
-        self.lineEdit_totalPaid.setStyleSheet(QCoreApplication.translate("saleDialog", u"* {\n"
-"	background-color: #35bc88;\n"
-"	color: #111;\n"
-"	border-color: #0b7e7f;\n"
-"	font-family: \"Verdana\", \"Sans-Serif\";\n"
-"	font-size: 16px;\n"
-"}\n"
-"\n"
-"\n"
-"#label_productName_feedback,\n"
-"#label_productQuantity_feedback,\n"
-"#label_totalPaid_feedback,\n"
-"#label_debtorName_feedback,\n"
-"#label_debtorSurname_feedback,\n"
-"#label_phoneNumber_feedback,\n"
-"#label_postalCode_feedback {\n"
-"	color: #dc2627;\n"
-"	border: 1px solid #dc2627;\n"
-"	background-color: #e0a4a4;\n"
-"}\n"
-"\n"
-"\n"
-"*[mandatoryField=\"True\"] {\n"
-"	background-color: rgb(255, 251, 142);\n"
-"}\n"
-"\n"
-"\n"
-"QLineEdit {\n"
-"	background-color: #fff;\n"
-"	border: none;\n"
-"	border-top: 1px solid;\n"
-"	border-bottom: 1px solid;\n"
-"	border-color: #0b7e7f;\n"
-"	height: 24px;\n"
-"}\n"
-"QLineEdit:focus {\n"
-"	background-color: rgb(197, 255, 252);\n"
-"	border: 1px solid;\n"
-"	border-color: #0b7e7f;\n"
-"	font-size: 18px;\n"
-"}\n"
-"\n"
-"\n"
-"QPushButton {\n"
-"	font-size: 16px;\n"
-"	background-color: #22577a;\n"
-"	color: #fff;\n"
-"	borde"
-                        "r: 1px solid #12476a;\n"
-"	border-radius: 2px;\n"
-"	min-width: 200px;\n"
-"	min-height: 23px;\n"
-"}\n"
-"QPushButton:hover,\n"
-"QPushButton:pressed {\n"
-"	background-color: #38a3a5;\n"
-"	color: #111;\n"
-"	border: 1px inset #289395;\n"
-"}\n"
-"QPushButton:disabled {\n"
-"	background-color: rgb(103, 115, 122);\n"
-"	color: #999;\n"
-"}\n"
-"\n"
-"\n"
-"/*cambia el estilo del combobox*/\n"
-"QComboBox {\n"
-"	background-color: #fff;\n"
-"	color: #111;\n"
-"	border: none;\n"
-"	border-top: 1px solid;\n"
-"	border-bottom: 1px solid;\n"
-"	border-color: #111;\n"
-"}\n"
-"QComboBox:on {\n"
-"	background-color: rgb(197, 255, 252);\n"
-"	border: 1px solid;\n"
-"	border-color: rgb(11, 126, 127);\n"
-"	padding-top: 2px;\n"
-"	padding-left: 4px;\n"
-"}\n"
-"QComboBox QAbstractItemView {\n"
-"	background-color: #fff;\n"
-"	selection-background-color: #38a3a5;\n"
-"}", None))
-        self.label_phoneNumber.setText(QCoreApplication.translate("saleDialog", u"N\u00fam. de tel\u00e9fono", None))
-        self.label_postalCode.setText(QCoreApplication.translate("saleDialog", u"C\u00f3digo postal", None))
-        self.label_direction.setText(QCoreApplication.translate("saleDialog", u"Direcci\u00f3n", None))
+#if QT_CONFIG(tooltip)
+        self.frame_debtor_name.setToolTip(QCoreApplication.translate("saleDialog", u"<html><head/><body><p><span style=\" font-size:11pt;\">El nombre del propietario de la cuenta corriente.</span></p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.label_debtor_name.setText(QCoreApplication.translate("saleDialog", u"<html><head/><body><p>Nombre <span style=\" color:#ff0000;\">*</span></p></body></html>", None))
+#if QT_CONFIG(tooltip)
+        self.frame_debtor_surname.setToolTip(QCoreApplication.translate("saleDialog", u"<html><head/><body><p><span style=\" font-size:11pt;\">El apellido del propietario de la cuenta corriente.</span></p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.label_debtor_surname.setText(QCoreApplication.translate("saleDialog", u"<html><head/><body><p>Apellido <span style=\" color:#ff0000;\">*</span></p></body></html>", None))
     # retranslateUi
 

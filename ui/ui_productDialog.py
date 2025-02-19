@@ -34,7 +34,7 @@ class Ui_Dialog(object):
         Dialog.setMaximumSize(QSize(556, 470))
         Dialog.setStyleSheet(u"* {\n"
 "	color: #111;\n"
-"	font-family: \"Tahoma\", \"Verdana\", \"Sans-Serif\";\n"
+"	font-family: \"Futura\", \"Verdana\", \"Sans-Serif\";\n"
 "	font-size: 16px;\n"
 "}\n"
 "\n"
@@ -602,7 +602,7 @@ class Ui_Dialog(object):
         self.label_comercialPriceWarning.setObjectName(u"label_comercialPriceWarning")
         self.label_comercialPriceWarning.setMinimumSize(QSize(0, 18))
         font = QFont()
-        font.setFamilies([u"Tahoma"])
+        font.setFamilies([u"Futura"])
         font.setBold(False)
         font.setItalic(False)
         self.label_comercialPriceWarning.setFont(font)

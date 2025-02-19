@@ -6,14 +6,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>615</width>
-    <height>295</height>
+    <width>555</width>
+    <height>422</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>615</width>
-    <height>295</height>
+    <width>555</width>
+    <height>422</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>555</width>
+    <height>422</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -23,7 +35,7 @@
    <string notr="true">* {
 	color: #111;
 	border-color: #0b7e7f;
-	font-family: &quot;Tahoma&quot;, &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
+	font-family: &quot;Futura&quot;, &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
 	font-size: 16px;
 }
 
@@ -59,6 +71,14 @@ QLabel {
 }
 
 
+#label_productTotalCost {
+	font-size: 19px;
+	font-weight: 900;
+	background-color: #0d1b2a;
+	color: #e0e1dd;
+}
+
+
 #label_productName_feedback,
 #label_productQuantity_feedback,
 #label_totalPaid_feedback,
@@ -69,6 +89,13 @@ QLabel {
 	background-color: #F65755;
 	color: #fff;
 	border-radius: 5px;
+}
+
+
+#label_debtor_header {
+	font-family: &quot;Arial&quot;, &quot;Calibri&quot;, &quot;Sans-Serif&quot;;
+	font-size: 18px;
+	font-weight: 600px;
 }
 
 
@@ -148,6 +175,10 @@ QComboBox QAbstractItemView{
 	background-color: #778da9;
 	color: #fff;
 	selection-background-color: #3b66ab;
+}
+QComboBox:disabled {
+	background-color: rgb(103, 115, 122);
+	color: #999;
 }
 
 
@@ -238,14 +269,17 @@ QScrollBar::handle:horizontal {
    </property>
    <item>
     <widget class="QFrame" name="sale_data">
-     <property name="styleSheet">
-      <string notr="true">#label_productTotalCost {
-	font-size: 19px;
-	font-weight: 500;
-	background-color: #bbb;
-	border-top: 1px solid #111;
-	border-right: 1px solid #111;
-}</string>
+     <property name="minimumSize">
+      <size>
+       <width>545</width>
+       <height>277</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>277</height>
+      </size>
      </property>
      <property name="frameShape">
       <enum>QFrame::Shape::NoFrame</enum>
@@ -255,7 +289,7 @@ QScrollBar::handle:horizontal {
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <property name="spacing">
-       <number>4</number>
+       <number>8</number>
       </property>
       <property name="leftMargin">
        <number>0</number>
@@ -271,6 +305,18 @@ QScrollBar::handle:horizontal {
       </property>
       <item>
        <widget class="QFrame" name="frame_saleDetail">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>21</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>21</height>
+         </size>
+        </property>
         <property name="frameShape">
          <enum>QFrame::Shape::NoFrame</enum>
         </property>
@@ -295,6 +341,9 @@ QScrollBar::handle:horizontal {
            <property name="text">
             <string>Detalle de la venta</string>
            </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
+           </property>
           </widget>
          </item>
          <item>
@@ -309,6 +358,18 @@ QScrollBar::handle:horizontal {
       </item>
       <item>
        <widget class="QFrame" name="product_data">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>145</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>145</height>
+         </size>
+        </property>
         <property name="frameShape">
          <enum>QFrame::Shape::NoFrame</enum>
         </property>
@@ -335,6 +396,9 @@ QScrollBar::handle:horizontal {
           <widget class="QLabel" name="label_productQuantity">
            <property name="text">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cantidad  &lt;span style=&quot; color:#ff0000;&quot;&gt;*&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -404,7 +468,10 @@ QScrollBar::handle:horizontal {
          <item row="0" column="0">
           <widget class="QLabel" name="label_productName">
            <property name="text">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nombre del producto  &lt;span style=&quot; color:#ff0000;&quot;&gt;*&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Producto &lt;span style=&quot; color:#ff0000;&quot;&gt;*&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -424,10 +491,10 @@ QScrollBar::handle:horizontal {
          <item row="3" column="1">
           <widget class="QCheckBox" name="checkBox_comercialPrice">
            <property name="toolTip">
-            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Si la casilla está &lt;/span&gt;&lt;span style=&quot; font-size:11pt; text-decoration: underline;&quot;&gt;desmarcada&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; el precio calculado del producto es en base al &lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;precio unitario&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Si la casilla está &lt;/span&gt;&lt;span style=&quot; font-size:11pt; text-decoration: underline;&quot;&gt;marcada&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; el precio total calculado se basa en el &lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;precio comercial&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Si la casilla está &lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-weight:700;&quot;&gt;marcada&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; el precio calculado del producto es en base al &lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-weight:700;&quot;&gt;precio comercial&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
-            <string notr="true">Aplicar precio comercial</string>
+            <string notr="true">precio comercial</string>
            </property>
            <property name="shortcut">
             <string notr="true"/>
@@ -439,6 +506,24 @@ QScrollBar::handle:horizontal {
          </item>
          <item row="5" column="1">
           <widget class="QLabel" name="label_productTotalCost">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>23</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>23</height>
+            </size>
+           </property>
            <property name="text">
             <string notr="true">COSTO TOTAL</string>
            </property>
@@ -458,6 +543,18 @@ QScrollBar::handle:horizontal {
       </item>
       <item>
        <widget class="QFrame" name="frame_totalPaid">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>44</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>44</height>
+         </size>
+        </property>
         <property name="frameShape">
          <enum>QFrame::Shape::NoFrame</enum>
         </property>
@@ -485,12 +582,15 @@ QScrollBar::handle:horizontal {
            <property name="text">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Total abonado  &lt;span style=&quot; color:#ff0000;&quot;&gt;*&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
+           </property>
           </widget>
          </item>
          <item row="0" column="1">
           <widget class="QLineEdit" name="lineEdit_totalPaid">
            <property name="toolTip">
-            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;El valor total que abonado en esta venta.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; si es diferente al costo se pedirán los datos del comprador y la diferencia se agregará a la base de datos como saldo a favor/en contra.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;El valor total abonado en esta venta.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; si es diferente al costo se pedirán los datos del comprador y la diferencia se agregará a la base de datos como saldo a favor/adeudado.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="placeholderText">
             <string notr="true">Total abonado. Ej.: 15000</string>
@@ -533,6 +633,18 @@ QScrollBar::handle:horizontal {
       </item>
       <item>
        <widget class="QDateTimeEdit" name="dateTimeEdit">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>23</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>23</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Fecha y hora de la venta.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
@@ -575,15 +687,20 @@ QScrollBar::handle:horizontal {
    </item>
    <item>
     <widget class="QFrame" name="debtor_data">
-     <property name="styleSheet">
-      <string notr="true">#label_debtorInfo {
-	color: rgb(8, 68, 68);
-	margin-top: 15px;
-	margin-left: 30px;
-	margin-right: 30px;
-	border-bottom: 1px solid;
-	border-color: rgb(11, 126, 127);
-}</string>
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>97</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>97</height>
+      </size>
      </property>
      <property name="frameShape">
       <enum>QFrame::Shape::NoFrame</enum>
@@ -591,160 +708,53 @@ QScrollBar::handle:horizontal {
      <property name="frameShadow">
       <enum>QFrame::Shadow::Raised</enum>
      </property>
-     <layout class="QGridLayout" name="debtor_data_GridLayout" columnstretch="0,1,1,0,2">
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <property name="spacing">
+       <number>8</number>
+      </property>
       <property name="leftMargin">
        <number>0</number>
       </property>
       <property name="topMargin">
-       <number>0</number>
+       <number>5</number>
       </property>
       <property name="rightMargin">
        <number>0</number>
       </property>
       <property name="bottomMargin">
-       <number>0</number>
+       <number>5</number>
       </property>
-      <property name="spacing">
-       <number>4</number>
-      </property>
-      <item row="6" column="2" colspan="3">
-       <widget class="QLineEdit" name="lineEdit_direction">
-        <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;(Opcional) dirección del propietario.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="inputMask">
-         <string notr="true"/>
-        </property>
-        <property name="text">
-         <string notr="true"/>
-        </property>
-        <property name="placeholderText">
-         <string notr="true">(Opcional) Ej.: Padre J.M. Criado Alonso 200</string>
-        </property>
-        <property name="clearButtonEnabled">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0" colspan="2">
-       <widget class="QLabel" name="label_phoneNumber">
-        <property name="text">
-         <string>Núm. de teléfono</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="2" colspan="3">
-       <widget class="QLineEdit" name="lineEdit_postalCode">
-        <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;(Opcional) código postal del propietario.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;NOTA:&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; por conveniencia sólo admite códigos postales de Argentina.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="inputMask">
-         <string notr="true"/>
-        </property>
-        <property name="text">
-         <string notr="true"/>
-        </property>
-        <property name="placeholderText">
-         <string notr="true">(Opcional) Ej.: 6703</string>
-        </property>
-        <property name="clearButtonEnabled">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="4" alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
-       <widget class="QLabel" name="label_debtorSurname_feedback">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="text">
-         <string notr="true"/>
-        </property>
-        <property name="textFormat">
-         <enum>Qt::TextFormat::PlainText</enum>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-        </property>
-        <property name="textInteractionFlags">
-         <set>Qt::TextInteractionFlag::NoTextInteraction</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1" colspan="2">
-       <widget class="QLineEdit" name="lineEdit_debtorName">
-        <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Nombre del propietario.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="text">
-         <string notr="true"/>
-        </property>
-        <property name="frame">
-         <bool>false</bool>
-        </property>
-        <property name="placeholderText">
-         <string notr="true">Nombre del deudor</string>
-        </property>
-        <property name="clearButtonEnabled">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0" colspan="5" alignment="Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignTop">
-       <widget class="QLabel" name="label_phoneNumber_feedback">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="text">
-         <string notr="true"/>
-        </property>
-        <property name="textFormat">
-         <enum>Qt::TextFormat::PlainText</enum>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignCenter</set>
-        </property>
-        <property name="textInteractionFlags">
-         <set>Qt::TextInteractionFlag::NoTextInteraction</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3">
-       <widget class="QLabel" name="label_surnameMark">
-        <property name="toolTip">
-         <string notr="true"/>
-        </property>
-        <property name="text">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;*&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0" colspan="2">
-       <widget class="QLabel" name="label_postalCode">
-        <property name="text">
-         <string>Código postal</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="5">
-       <widget class="QLabel" name="label_debtorInfo">
+      <item>
+       <widget class="QLabel" name="label_debtor_header">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string notr="true"/>
+        </property>
         <property name="text">
-         <string notr="true">INFORMACIÓN SOBRE EL DEUDOR</string>
+         <string notr="true">Cuenta corriente</string>
         </property>
         <property name="textFormat">
          <enum>Qt::TextFormat::PlainText</enum>
+        </property>
+        <property name="scaledContents">
+         <bool>false</bool>
         </property>
         <property name="alignment">
          <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -754,109 +764,155 @@ QScrollBar::handle:horizontal {
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_nameMark">
-        <property name="toolTip">
-         <string notr="true"/>
+      <item>
+       <widget class="QFrame" name="frame_debtor_name">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>23</height>
+         </size>
         </property>
-        <property name="text">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;*&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="4">
-       <widget class="QLineEdit" name="lineEdit_debtorSurname">
-        <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Apellido del propietario.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="text">
-         <string notr="true"/>
-        </property>
-        <property name="frame">
-         <bool>false</bool>
-        </property>
-        <property name="placeholderText">
-         <string notr="true">Apellido del deudor</string>
-        </property>
-        <property name="clearButtonEnabled">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0" colspan="2">
-       <widget class="QLabel" name="label_direction">
-        <property name="text">
-         <string>Dirección</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1" colspan="2" alignment="Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop">
-       <widget class="QLabel" name="label_debtorName_feedback">
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>20</height>
+          <height>23</height>
          </size>
         </property>
-        <property name="text">
-         <string notr="true"/>
-        </property>
-        <property name="textFormat">
-         <enum>Qt::TextFormat::PlainText</enum>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
-        </property>
-        <property name="textInteractionFlags">
-         <set>Qt::TextInteractionFlag::NoTextInteraction</set>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2" colspan="3">
-       <widget class="QLineEdit" name="lineEdit_phoneNumber">
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;(Opcional) número de teléfono del propietario.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;El nombre del propietario de la cuenta corriente.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
-        <property name="inputMask">
-         <string notr="true"/>
+        <property name="frameShape">
+         <enum>QFrame::Shape::NoFrame</enum>
         </property>
-        <property name="text">
-         <string notr="true"/>
+        <property name="frameShadow">
+         <enum>QFrame::Shadow::Raised</enum>
         </property>
-        <property name="frame">
-         <bool>false</bool>
-        </property>
-        <property name="cursorPosition">
-         <number>0</number>
-        </property>
-        <property name="placeholderText">
-         <string notr="true">(Opcional) Ej.: 2323-123456</string>
-        </property>
-        <property name="clearButtonEnabled">
-         <bool>true</bool>
-        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,2">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_debtor_name">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nombre &lt;span style=&quot; color:#ff0000;&quot;&gt;*&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="textFormat">
+            <enum>Qt::TextFormat::RichText</enum>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cb_debtor_name">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="editable">
+            <bool>true</bool>
+           </property>
+           <property name="placeholderText">
+            <string notr="true"/>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
-      <item row="8" column="0" colspan="5" alignment="Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignTop">
-       <widget class="QLabel" name="label_postalCode_feedback">
+      <item>
+       <widget class="QFrame" name="frame_debtor_surname">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>23</height>
+         </size>
+        </property>
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>20</height>
+          <height>23</height>
          </size>
         </property>
-        <property name="text">
-         <string notr="true"/>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;El apellido del propietario de la cuenta corriente.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
-        <property name="textFormat">
-         <enum>Qt::TextFormat::PlainText</enum>
+        <property name="frameShape">
+         <enum>QFrame::Shape::NoFrame</enum>
         </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignCenter</set>
+        <property name="frameShadow">
+         <enum>QFrame::Shadow::Raised</enum>
         </property>
-        <property name="textInteractionFlags">
-         <set>Qt::TextInteractionFlag::NoTextInteraction</set>
-        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,2">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_debtor_surname">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Apellido &lt;span style=&quot; color:#ff0000;&quot;&gt;*&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="textFormat">
+            <enum>Qt::TextFormat::RichText</enum>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cb_debtor_surname">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="editable">
+            <bool>true</bool>
+           </property>
+           <property name="placeholderText">
+            <string notr="true"/>
+           </property>
+           <property name="frame">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>
@@ -864,6 +920,18 @@ QScrollBar::handle:horizontal {
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>26</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>26</height>
+      </size>
+     </property>
      <property name="orientation">
       <enum>Qt::Orientation::Horizontal</enum>
      </property>
@@ -884,11 +952,6 @@ QScrollBar::handle:horizontal {
   <tabstop>checkBox_comercialPrice</tabstop>
   <tabstop>lineEdit_totalPaid</tabstop>
   <tabstop>dateTimeEdit</tabstop>
-  <tabstop>lineEdit_debtorName</tabstop>
-  <tabstop>lineEdit_debtorSurname</tabstop>
-  <tabstop>lineEdit_phoneNumber</tabstop>
-  <tabstop>lineEdit_direction</tabstop>
-  <tabstop>lineEdit_postalCode</tabstop>
  </tabstops>
  <resources/>
  <connections>
