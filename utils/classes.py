@@ -5,7 +5,8 @@ from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QLineEdit, QCompleter,
                                QWidget, QGraphicsDropShadowEffect)
 from PySide6.QtCore import (Signal, QSize, QRect, QPropertyAnimation, QEasingCurve, 
                             QPoint)
-from PySide6.QtGui import (QIcon, QShowEvent, QCursor, QKeyEvent, QColor, QCloseEvent)
+from PySide6.QtGui import (QIcon, QShowEvent, QCursor, QKeyEvent, QColor, QCloseEvent, 
+                           QStandardItemModel, QStandardItem)
 
 from ui.ui_productDialog import Ui_Dialog
 from ui.ui_saleDialog import Ui_saleDialog
@@ -21,9 +22,10 @@ from utils.dboperations import *
 from utils.enumclasses import (WidgetStyle, InventoryPriceType, 
                                ListItemFields, DebtsFields, 
                                ModelDataCols, ModelHeaders, 
-                               LabelFeedbackStyle, TableViewColumns)
+                               LabelFeedbackStyle, TableViewColumns,
+                               SaleDialogHeights)
 from utils.model_classes import (ProductsBalanceModel)
-from utils.proxy_models import (ProductsBalanceProxyModel)
+from utils.proxy_models import (ProductsBalanceProxyModel, DebtorNameSurnameProxyModel)
 from utils.productbalancedelegate import (ProductsBalanceDelegate)
 from utils.customvalidators import (SearchBarValidator, ProductReduceDebtValidator)
 
@@ -481,13 +483,20 @@ class SaleDialog(QDialog):
         self.saleDialog_ui = Ui_saleDialog()
         self.saleDialog_ui.setupUi(self)
 
-        self.setup_ui()
-        
         self.setup_variables()
         
-        self.setup_signals()
+        self.saleDialog_ui.cb_debtor_name.addItems(self.DEBTORS_FULL_NAMES.keys())
+        self.saleDialog_ui.cb_debtor_surname.addItems(self.DEBTORS_FULL_NAMES.values())
         
+        self.setup_ui()
+        
+        self.setup_validators()
+        
+        self.setup_signals()
         return None
+    
+    # TODO: la parte de los comboboxes de deudores funciona relativamente bien, tengo que tomar como referencia DebtorDialog y 
+    # todo: refactorizar todo esto...
 
     
     def setup_ui(self) -> None:
@@ -515,34 +524,12 @@ class SaleDialog(QDialog):
         self.saleDialog_ui.label_productQuantity_feedback.hide()
         self.saleDialog_ui.label_totalPaid_feedback.hide()
 
-        # esconde los campos de datos del deudor
-        self.saleDialog_ui.debtor_data.setEnabled(False)
-        self.saleDialog_ui.debtor_data.hide()
-        
-        # QCompleters #! estos completers son "iniciales" y cambian cuando el usuario escribe en uno de ellos.
-                      #! Al principio tienen todos los valores de nombres/apellidos de la base de datos, pero 
-                      #! al ingresar por ej. un nombre el campo de apellido se actualiza con los apellidos que 
-                      #! coincidan con ese nombre, y viceversa. Eso se maneja en 'onDebtorNameAndSurnameEditingFinished'.
-        self.saleDialog_ui.lineEdit_debtorName.setCompleter(createCompleter(type=1))
-        self.saleDialog_ui.lineEdit_debtorSurname.setCompleter(createCompleter(type=2))
-
-        # validadores de venta
-        self.sale_detail_validator = SaleDetailsValidator(self.saleDialog_ui.lineEdit_saleDetail)
-        self.quantity_validator = SaleQuantityValidator(self.saleDialog_ui.lineEdit_productQuantity)
-        self.total_paid_validator = SalePaidValidator(self.saleDialog_ui.lineEdit_totalPaid)
-        self.saleDialog_ui.lineEdit_saleDetail.setValidator(self.sale_detail_validator)
-        self.saleDialog_ui.lineEdit_productQuantity.setValidator(self.quantity_validator)
-        self.saleDialog_ui.lineEdit_totalPaid.setValidator(self.total_paid_validator)
-        
-        # validadores de cuenta corriente
-        self.debtor_name_validator = DebtorNameValidator(self.saleDialog_ui.lineEdit_debtorName)
-        self.debtor_surname_validator = DebtorSurnameValidator(self.saleDialog_ui.lineEdit_debtorSurname)
-        self.phone_number_validator = DebtorPhoneNumberValidator(self.saleDialog_ui.lineEdit_phoneNumber)
-        self.postal_code_validator = DebtorPostalCodeValidator(self.saleDialog_ui.lineEdit_postalCode)
-        self.saleDialog_ui.lineEdit_debtorName.setValidator(self.debtor_name_validator)
-        self.saleDialog_ui.lineEdit_debtorSurname.setValidator(self.debtor_surname_validator)
-        self.saleDialog_ui.lineEdit_phoneNumber.setValidator(self.phone_number_validator)
-        self.saleDialog_ui.lineEdit_postalCode.setValidator(self.postal_code_validator)
+        # esconde los campos de datos del deudor        
+        self.__setSaleDialogSize(
+            min_width=SaleDialogHeights.WIDTH.value,
+            min_height=SaleDialogHeights.HEIGHT_NO_DEBT.value,
+            hide_debtor_data=True
+        )
         return None
     
     
@@ -555,14 +542,14 @@ class SaleDialog(QDialog):
         
         # botón "Aceptar"
         self.cancel_icon.addFile(":/icons/accept.svg", QSize())
+        self.saleDialog_ui.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setIcon(self.accept_icon)
         # botón "Cancelar"
         self.cancel_icon.addFile(":/icons/cancel.svg", QSize())
-        self.saleDialog_ui.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setIcon(self.cancel_icon)
-        
         self.saleDialog_ui.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setIcon(self.cancel_icon)
         
         # flecha del combobox
-        # self.saleDialog_ui.frame_productCategory.setStyleSheet(WidgetStyle.DEF_COMBOBOX_ARROW_ICON.value)
+        self.saleDialog_ui.sale_data.setStyleSheet(WidgetStyle.DEF_COMBOBOX_ARROW_ICON.value)
+        self.saleDialog_ui.debtor_data.setStyleSheet(WidgetStyle.DEF_COMBOBOX_ARROW_ICON.value)
         
         self.saleDialog_ui.buttonBox.setStyleSheet(
             ''' QDialogButtonBox QPushButton[text='Cancelar'] {
@@ -583,15 +570,19 @@ class SaleDialog(QDialog):
         return None
     
     
+    def setup_validators(self) -> None:
+        # validadores de venta
+        self.sale_detail_validator = SaleDetailsValidator(self.saleDialog_ui.lineEdit_saleDetail)
+        self.quantity_validator = SaleQuantityValidator(self.saleDialog_ui.lineEdit_productQuantity)
+        self.total_paid_validator = SalePaidValidator(self.saleDialog_ui.lineEdit_totalPaid)
+        
+        self.saleDialog_ui.lineEdit_saleDetail.setValidator(self.sale_detail_validator)
+        self.saleDialog_ui.lineEdit_productQuantity.setValidator(self.quantity_validator)
+        self.saleDialog_ui.lineEdit_totalPaid.setValidator(self.total_paid_validator)
+        return None
+    
+    
     def setup_variables(self) -> None:
-        '''
-        Al igual que el método 'self.setup_ui' y 'self.setup_signals', este 
-        método tiene el objeto de simplificar la lectura del método 'self.__init__'.
-        Contiene las declaraciones de variables locales que se usan a lo largo de la 
-        ejecución del QDialog.
-        
-        
-        '''
         # flags de validación
         self.VALID_FIELDS:dict[str,bool|None] = {
             'PRODUCT_NAME': None,
@@ -599,25 +590,48 @@ class SaleDialog(QDialog):
             'PRODUCT_PAID': None,
             'DEBTOR_NAME': None,
             'DEBTOR_SURNAME': None,
-            'DEBTOR_PHONE_NUMBER': True, # el número de tel. es opcional, así que si está vacío es válido...
-            'DEBTOR_POSTAL_CODE': True # y el código postal también
         }
         
         # variables
-        self.TOTAL_COST:float|None = None # se obtiene en __setDetailsAndCost, si el precio está disponible, sino es None        
+        self.TOTAL_COST:float|None = None # se obtiene en __setDetailsAndCost, si el precio está disponible, sino es None
+        
+        # nombres y apellidos de cuentas corrientes
+        self.DEBTORS_FULL_NAMES:dict[str, tuple[str]] = self.__getNameAndSurname()
         return None
     
     
+    def __getNameAndSurname(self) -> dict[str, tuple[str]]:
+        '''
+        Obtiene los nombres y apellidos de cada cuenta corriente.
+
+        Retorna
+        -------
+        dict[str, tuple[str]]
+            diccionario con nombres como claves y tuplas de [apellido] como 
+            valor de cada cuenta corriente
+        '''
+        full_name:list[tuple[str, str]]
+        full_name_as_dict:dict[str, list[str]] = {}
+        
+        with DatabaseRepository() as db_repo:
+            full_name = db_repo.selectRegisters(
+                data_sql='''SELECT nombre, apellido 
+                            FROM Deudores;'''
+            )
+            
+            for name, surname in full_name:
+                if name in full_name_as_dict:
+                    full_name_as_dict[name].append(surname)
+                
+                else:
+                    full_name_as_dict[name] = [surname]
+            
+            [tuple(full_name_as_dict[name]) for name in full_name_as_dict.keys()]
+        
+        return full_name_as_dict
+    
+    
     def setup_signals(self) -> None:
-        '''
-        Al igual que los métodos 'self.setup_ui' y 'self.setup_variables', este 
-        método tiene el objeto de simplificar la lectura del método 'self.__init__'.
-        Contiene las declaraciones de señales/slots de Widgets ya existentes 
-        desde la instanciación de 'MainWindow'.
-        
-        
-        '''
-        #--- SEÑALES --------------------------------------------------
         # combobox nombre de producto (venta)
         self.saleDialog_ui.comboBox_productName.currentIndexChanged.connect(self.validateProductNameField)
         
@@ -642,37 +656,8 @@ class SaleDialog(QDialog):
             field_validated='product_total_paid',
             error_message=error_message))
         
-        # lineedit nombre (cuenta corriente)
-        self.saleDialog_ui.lineEdit_debtorName.editingFinished.connect(lambda: self.onDebtorNameAndSurnameEditingFinished(
-            field_validated='debtor_name'))
-        
-        self.debtor_name_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('debtor_name'))
-        self.debtor_name_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
-            field_validated='debtor_name',
-            error_message=error_message))
-        
-        # lineedit apellido (cuenta corriente)
-        self.saleDialog_ui.lineEdit_debtorSurname.editingFinished.connect(lambda: self.onDebtorNameAndSurnameEditingFinished(
-            field_validated='debtor_surname'))
-        
-        self.debtor_surname_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('debtor_surname'))
-        self.debtor_surname_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
-            field_validated='debtor_surname',
-            error_message=error_message))
-        
-        # lineedit núm. de tel. (cuenta corriente)
-        self.saleDialog_ui.lineEdit_phoneNumber.editingFinished.connect(lambda: self.formatField('debtor_phone_num'))
-        
-        self.phone_number_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('debtor_phone_num'))
-        self.phone_number_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
-            field_validated='debtor_phone_num',
-            error_message=error_message))
-        
-        # lineedit cód. postal (cuenta corriente)
-        self.postal_code_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('debtor_postal_code'))
-        self.postal_code_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
-            field_validated='debtor_postal_code',
-            error_message=error_message))
+        # combobox nombre (cuenta corriente)
+        self.saleDialog_ui.cb_debtor_name.currentTextChanged.connect(self.__updateSurnames)
         
         # botón Ok (Aceptar)
         self.saleDialog_ui.buttonBox.accepted.connect(self.handleOkClicked)
@@ -1020,82 +1005,38 @@ class SaleDialog(QDialog):
 
 
     @Slot()
-    def onDebtorNameAndSurnameEditingFinished(self, field_validated:str) -> None:
+    def __updateSurnames(self, current_name:str) -> None:
         '''
-        Es llamado desde la señal 'editingFinished' de 'lineEdit_debtorName'|'lineEdit_debtorSurname'.
+        Al elegirse el nombre, actualiza los datos del combobox de apellido 
+        para mostrar los apellidos coincidentes.
         
-        Crea un QCompleter para el campo opuesto, es decir, si 'field_validated' es 'debtor_name' crea un 
-        completer para 'debtor_surname', y viceversa.
-        Llama al método 'self.formatField' para formatear los campos y si existe esa combinación de nombre y 
-        apellido busca el número de teléfono, la dirección y el código postal existente del usuario y los 
-        coloca en sus respectivos campos, luego desactiva los campos para evitar su modificación.
-        
-        Retorna None.
+        Parámetros
+        ----------
+        current_name : str
+            el nombre ingresado
         '''
-        debtor_data:list[tuple[str,str,str]]
+        self.saleDialog_ui.cb_debtor_surname.clear()
         
-        self.formatField(field_to_format=field_validated)
-        
-        # crea QCompleters
-        if field_validated == 'debtor_name': # crea completer para apellidos que coincidan con el nombre
-            self.saleDialog_ui.lineEdit_debtorSurname.setCompleter(
-                createCompleter(sql="SELECT DISTINCT apellido FROM Deudores WHERE nombre = ?",
-                                params=(self.saleDialog_ui.lineEdit_debtorName.text(),)
-                                )
-                )
-        
-        elif field_validated == 'debtor_surname': # crea completer para nombres que coincidan con el apellido
-            self.saleDialog_ui.lineEdit_debtorName.setCompleter(
-                createCompleter(sql="SELECT DISTINCT nombre FROM Deudores WHERE apellido = ?",
-                                params=(self.saleDialog_ui.lineEdit_debtorSurname.text(),)
-                                )
-                )
-        
-        # si ambos campos son válidos es porque ambos campos se llenaron, y coloca los datos en los campos restantes
-        if self.VALID_FIELDS['DEBTOR_NAME'] and self.VALID_FIELDS['DEBTOR_SURNAME']:
-            # obtengo los datos desde la cta. cte.
-            debtor_data = makeReadQuery(
-                sql="SELECT num_telefono, direccion, codigo_postal FROM Deudores WHERE (nombre = ?) AND (apellido = ?);",
-                params=(self.saleDialog_ui.lineEdit_debtorName.text(), self.saleDialog_ui.lineEdit_debtorSurname.text(), ))
-            
-            # los coloco en sus campos (si se encontraron coincidencias)
-            if len(debtor_data) > 0:    
-                self.saleDialog_ui.lineEdit_phoneNumber.setEnabled(False)
-                self.saleDialog_ui.lineEdit_direction.setEnabled(False)
-                self.saleDialog_ui.lineEdit_postalCode.setEnabled(False)
-            
-                self.saleDialog_ui.lineEdit_phoneNumber.setText( str(debtor_data[0][0]) )
-                self.saleDialog_ui.lineEdit_direction.setText( str(debtor_data[0][1]) )
-                self.saleDialog_ui.lineEdit_postalCode.setText( str(debtor_data[0][2]) )
-            
-            else:
-                self.saleDialog_ui.lineEdit_phoneNumber.setEnabled(True)
-                self.saleDialog_ui.lineEdit_direction.setEnabled(True)
-                self.saleDialog_ui.lineEdit_postalCode.setEnabled(True)
-        
+        if current_name in self.DEBTORS_FULL_NAMES:
+            self.saleDialog_ui.cb_debtor_surname.addItems(self.DEBTORS_FULL_NAMES[current_name])
         return None
+    
 
 
     @Slot(str)
     def formatField(self, field_to_format:str) -> None:
         '''
-        Es llamado desde cada QLineEdit que deba ser formateado, y desde los métodos 'self.onTotalPaidEditingFinished'|
-        'onDebtorNameAndSurnameEditingFinished' y desde la señal 'editingFinished' de 'lineEdit_phoneNumber'.
+        Dependiendo del campo 'field_to_format' formatea el texto y lo asigna 
+        en el campo correspondiente.
         
-        Dependiendo del campo 'field_to_format' formatea el texto y lo asigna en el campo correspondiente.
-        
-        PARAMS:
-        - field_to_format: el campo a formatear. Admite los siguientes valores:
-            - product_quantity: formatea el campo de cantidad del producto.
-            - product_total_paid: formatea el campo de total abonado del producto.
-            - debtor_name: formatea el campo de nombre del deudor.
-            - debtor_surname: formatea el campo de apellido del deudor.
-            - debtor_phone_num: formatea el campo de teléfono del deudor.
-
-        Retorna None.
+        Parámetros
+        ----------
+        field_to_format: str
+            el campo a formatear, admite los siguientes valores:
+            - product_quantity: formatea el campo de cantidad del producto
+            - product_total_paid: formatea el campo de total abonado del producto
         '''
         field_text:str
-        phone_number:PhoneNumber # se usa cuando el campo a formatear es el de núm. de teléfono
         
         match field_to_format:
             case 'product_quantity': # cambia puntos por comas, si termina con "." ó "," lo saca
@@ -1113,29 +1054,6 @@ class SaleDialog(QDialog):
                     field_text = field_text.rstrip(".")
                 field_text = field_text.replace(".",",")
                 self.saleDialog_ui.lineEdit_totalPaid.setText(field_text)
-            
-            case 'debtor_name': # pasa a minúsculas y pone en mayúsculas la primera letra de cada nombre
-                field_text = self.saleDialog_ui.lineEdit_debtorName.text()
-                field_text = field_text.lower().title()
-                self.saleDialog_ui.lineEdit_debtorName.setText(field_text)
-            
-            case 'debtor_surname': # pasa a minúsculas y pone en mayúsculas la primera letra de cada apellido
-                field_text = self.saleDialog_ui.lineEdit_debtorSurname.text()
-                field_text = field_text.lower().title()
-                self.saleDialog_ui.lineEdit_debtorSurname.setText(field_text)
-            
-            case 'debtor_phone_num': # agrega un "+" al principio (si no tiene) y formatea el núm. estilo internacional
-                field_text = self.saleDialog_ui.lineEdit_phoneNumber.text()
-                try:
-                    phone_number = parse(f"+{field_text}")
-                    if is_valid_number(phone_number):
-                        field_text = format_number(phone_number, PhoneNumberFormat.INTERNATIONAL)
-                
-                except NumberParseException as err:
-                    logging.error(err)
-                    field_text = self.saleDialog_ui.lineEdit_phoneNumber.text()
-                
-                self.saleDialog_ui.lineEdit_phoneNumber.setText(field_text)
         
         return None
 
@@ -1192,10 +1110,16 @@ class SaleDialog(QDialog):
             try:
                 # ...luego ve si lo abonado es igual al costo total
                 if float(self.saleDialog_ui.lineEdit_totalPaid.text().replace(",",".")) == self.TOTAL_COST:
-                    self.__setSaleDialogSize(615, 295, True) if TOGGLE_DEBTOR_DATA else None
+                    self.__setSaleDialogSize(
+                        min_width=SaleDialogHeights.WIDTH.value,
+                        min_height=SaleDialogHeights.HEIGHT_NO_DEBT.value,
+                        hide_debtor_data=True) if TOGGLE_DEBTOR_DATA else None
             
                 else:
-                    self.__setSaleDialogSize(615, 525, False) if TOGGLE_DEBTOR_DATA else None
+                    self.__setSaleDialogSize(
+                        min_width=SaleDialogHeights.WIDTH.value,
+                        min_height=SaleDialogHeights.HEIGHT_WITH_DEBT.value,
+                        hide_debtor_data=False) if TOGGLE_DEBTOR_DATA else None
                     pos_to_check = 7
             
             except ValueError as err: # salta este error más que nada cuando se intenta escribir "-" en lineEdit_totalPaid
@@ -1223,16 +1147,10 @@ class SaleDialog(QDialog):
         self.saleDialog_ui.debtor_data.setEnabled(not hide_debtor_data)
         
         # antes de habilitar/deshabilitar los widgets, hay que habilitar 'debtor_data'
-        for lineEdit in self.saleDialog_ui.debtor_data.findChildren(QLineEdit):
-            lineEdit.setEnabled(not hide_debtor_data)
+        self.saleDialog_ui.cb_debtor_name.setEnabled(not hide_debtor_data)
+        self.saleDialog_ui.cb_debtor_surname.setEnabled(not hide_debtor_data)
         
-        # y esconde los labels de feedback (sólo si se muestra debtor_data)
         if not self.saleDialog_ui.debtor_data.isHidden():
-            self.saleDialog_ui.label_debtorName_feedback.hide()
-            self.saleDialog_ui.label_debtorSurname_feedback.hide()
-            self.saleDialog_ui.label_phoneNumber_feedback.hide()
-            self.saleDialog_ui.label_postalCode_feedback.hide()
-            
             # desactiva el botón "Aceptar"
             self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
         
@@ -1284,11 +1202,10 @@ class SaleDialog(QDialog):
                 total_paid, # 5
                 self.saleDialog_ui.dateTimeEdit.text(), # 6
                 # title() hace que cada palabra comience con mayúsculas...
-                self.saleDialog_ui.lineEdit_debtorName.text().title(), # 7
-                self.saleDialog_ui.lineEdit_debtorSurname.text().title(), # 8
-                self.saleDialog_ui.lineEdit_phoneNumber.text(), # 9
-                self.saleDialog_ui.lineEdit_direction.text().title(), # 10
-                self.saleDialog_ui.lineEdit_postalCode.text() # 11
+                self.saleDialog_ui.cb_debtor_name.itemText(
+                    self.saleDialog_ui.cb_debtor_name.currentIndex()), # 7
+                self.saleDialog_ui.cb_debtor_surname.itemText(
+                    self.saleDialog_ui.cb_debtor_surname.currentIndex()), # 8
                 )
         return values
 
@@ -1326,8 +1243,8 @@ class SaleDialog(QDialog):
             cursor.execute(sql_sales, params_sales)
             conn.commit()
 
-            # si el largo de 'values' es de 12, es porque hay una deuda/cantidad a favor dentro de la compra...
-            if len(values) == 12:
+            # si el largo de 'values' es de 8, es porque hay una deuda/cantidad a favor dentro de la compra...
+            if len(values) == 8:
                 # verifica si el deudor en Deudores existe
                 sql_verify:str = '''SELECT COUNT(*) 
                                     FROM Deudores 
@@ -1467,7 +1384,7 @@ class SaleDialog(QDialog):
             }
             
             # si el largo de la tupla es de 12 es porque hay deuda
-            if len(values) == 12:
+            if len(values) == 8:
                 values_to_dict.update({
                     'IDdebt': db_repo.selectRegisters(
                         data_sql='''SELECT IDdeuda 
