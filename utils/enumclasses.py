@@ -172,6 +172,18 @@ class ListItemFields(IntEnum):
 
 
 
+# alturas predefinidas para QDialog de ventas
+class SaleDialogHeights(IntEnum):
+    '''
+    IntEnum con los valores de 'height' que toma el dialog de ventas.
+    '''
+    WIDTH = 555
+    HEIGHT_NO_DEBT = 325
+    HEIGHT_WITH_DEBT = 422
+    
+
+
+
 
 # tipos de campos a validar para Deudas
 class DebtsFields(IntEnum):
@@ -241,6 +253,9 @@ class ModelDataCols(IntEnum):
     SALES_TOTAL_COST = 5
     SALES_TOTAL_PAID = 6
     SALES_DATETIME = 7
+    
+    DEBTOR_NAME_SURNAME_MODEL_NAME = 0
+    DEBTOR_NAME_SURNAME_MODEL_SURNAME = 1
     
     DEBTS_IDDEBTOR = 0
     DEBTS_NAME = 1
