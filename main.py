@@ -9,7 +9,7 @@ from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot, QSize)
 from PySide6.QtGui import (QIcon, QAction)
 
 from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemValues, 
-                           DebtorDataDialog, WidgetStyle, ListItemFields, ProductsBalanceDialog)
+                           DebtorDataDialog, WidgetStyle, SaleFields, ProductsBalanceDialog)
 from ui.ui_mainwindow import (Ui_MainWindow)
 from utils.functionutils import *
 from utils.model_classes import (InventoryTableModel, SalesTableModel, DebtsTableModel)
@@ -2236,7 +2236,7 @@ class MainWindow(QMainWindow):
         try:
             # si 'sales_input_list' no está vacía y todos los valores son válidos...
             if (self.ui.sales_input_list.count() > 0
-                and all([item[ListItemFields.IS_ALL_VALID.name] for item in self.DICT_ITEMS_VALUES.values()]) ):
+                and all([item[SaleFields.IS_ALL_VALID.name] for item in self.DICT_ITEMS_VALUES.values()]) ):
                 self.__onValidSalesItemsFields()
 
             else:
@@ -2268,7 +2268,7 @@ class MainWindow(QMainWindow):
         _total_cost:str # var. aux. que contiene el costo total
         
         # obtiene los subtotales (para obtener el total y para luego colocarlos en el completer)
-        subtotals = [subtotal[ListItemFields.SUBTOTAL.name] for subtotal in self.DICT_ITEMS_VALUES.values()]
+        subtotals = [subtotal[SaleFields.SUBTOTAL.name] for subtotal in self.DICT_ITEMS_VALUES.values()]
         
         # obtiene el costo total
         try:
@@ -2411,7 +2411,7 @@ class MainWindow(QMainWindow):
                                         fecha_hora, detalles_venta) 
                                     VALUES(?, ?);''',
                         ins_params=(self.ui.dateTimeEdit_sale.text(),
-                                    item[ListItemFields.SALE_DETAILS.name],)
+                                    item[SaleFields.SALE_DETAILS.name],)
                     )
                     
                     # inserta a Detalle_Ventas
@@ -2430,12 +2430,12 @@ class MainWindow(QMainWindow):
                                                         AND detalles_venta = ?), 
                                                 ?, 
                                                 NULL);''',
-                            ins_params=(item[ListItemFields.QUANTITY.name],
-                                        item[ListItemFields.SUBTOTAL.name],
-                                        item[ListItemFields.PRODUCT_NAME.name],
+                            ins_params=(item[SaleFields.QUANTITY.name],
+                                        item[SaleFields.SUBTOTAL.name],
+                                        item[SaleFields.PRODUCT_NAME.name],
                                         self.ui.dateTimeEdit_sale.text(),
-                                        item[ListItemFields.SALE_DETAILS.name],
-                                        item[ListItemFields.SUBTOTAL.name],)
+                                        item[SaleFields.SALE_DETAILS.name],
+                                        item[SaleFields.SUBTOTAL.name],)
                     )
                         
                     # actualiza en Productos
@@ -2443,8 +2443,8 @@ class MainWindow(QMainWindow):
                         upd_sql= '''UPDATE Productos 
                                     SET stock = stock - ? 
                                     WHERE nombre = ?;''',
-                        upd_params= (item[ListItemFields.QUANTITY.name],
-                                    item[ListItemFields.PRODUCT_NAME.name],)
+                        upd_params= (item[SaleFields.QUANTITY.name],
+                                    item[SaleFields.PRODUCT_NAME.name],)
                     )
             
             # hace los reinicios necesarios para otras ventas
