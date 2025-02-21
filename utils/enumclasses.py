@@ -157,10 +157,10 @@ class TypeSideBar(IntEnum):
 
 
 
-# [ListItemValues] tipos de campos a validar para el formulario de Ventas
-class ListItemFields(IntEnum):
+# tipos de campos a validar para el formulario de Ventas
+class SaleFields(IntEnum):
     '''Clase de tipo 'IntEnum' con los campos de los cuales se guarda registro 
-    cuando se debe ingresar Ventas dede el formulario de ventas.'''
+    cuando se debe ingresar Ventas.'''
     PRODUCT_ID = 0
     PRODUCT_NAME = 1
     QUANTITY = 2
@@ -168,6 +168,7 @@ class ListItemFields(IntEnum):
     IS_COMERCIAL_PRICE = 4
     SALE_DETAILS = 5
     IS_ALL_VALID = 6
+    TOTAL_PAID = 7
 
 
 
