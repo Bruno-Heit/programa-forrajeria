@@ -115,6 +115,9 @@ class WidgetStyle(StrEnum):
     FIELD_VALID_VAL = "color: #fff; background-color: #9DD367;"
     FIELD_INVALID_VAL = "color: #fff; background-color: #F65755;"
     
+    LABEL_RICHTEXT_NEUTRAL = "font-size:20px; color: #fff;"
+    LABEL_RICHTEXT_CONTENT = "font-size: 20px; color: #415a77;"
+    
     DEF_COMBOBOX_FILTER_ICON = "QComboBox::down-arrow {image: url(':/icons/filter.svg');}"
     DEF_COMBOBOX_ARROW_ICON = "QComboBox::down-arrow {image: url(':/icons/chevron-down.svg');}"
 
@@ -169,14 +172,16 @@ class SaleFields(IntEnum):
     SALE_DETAILS = 5
     IS_ALL_VALID = 6
     TOTAL_PAID = 7
+    DEBTOR_NAME = 8
+    DEBTOR_SURNAME = 9
 
 
 
 
 # alturas predefinidas para QDialog de ventas
-class SaleDialogHeights(IntEnum):
+class SaleDialogDimensions(IntEnum):
     '''
-    IntEnum con los valores de 'height' que toma el dialog de ventas.
+    IntEnum con los valores de dimensiones que toma el dialog de ventas.
     '''
     WIDTH = 555
     HEIGHT_NO_DEBT = 325
