@@ -20,12 +20,12 @@ from utils.functionutils import *
 from utils.workerclasses import *
 from utils.dboperations import *
 from utils.enumclasses import (WidgetStyle, InventoryPriceType, 
-                               ListItemFields, DebtsFields, 
+                               SaleFields, DebtsFields, 
                                ModelDataCols, ModelHeaders, 
                                LabelFeedbackStyle, TableViewColumns,
-                               SaleDialogHeights)
+                               SaleDialogDimensions)
 from utils.model_classes import (ProductsBalanceModel)
-from utils.proxy_models import (ProductsBalanceProxyModel, DebtorNameSurnameProxyModel)
+from utils.proxy_models import (ProductsBalanceProxyModel)
 from utils.productbalancedelegate import (ProductsBalanceDelegate)
 from utils.customvalidators import (SearchBarValidator, ProductReduceDebtValidator)
 
@@ -468,36 +468,513 @@ class ProductDialog(QDialog):
 
 # TABLA VENTAS =================================================================================================
 
+
+class SaleValues(QObject):
+    '''
+    Clase que contiene los valores de los campos de SaleDialog. El principal 
+    uso de la clase es para "simular" un MODELO DE DATOS, ya que no usa 
+    exactamente la misma metodología para guardar los datos, y al mismo tiempo 
+    maneja mediante señales los cambios en los datos más relevantes.
+    '''
+    saleDetailChanged:Signal = Signal(str)
+    productNameChanged:Signal = Signal(str)
+    priceCheckboxEnabled:Signal = Signal(bool) # si se elige un producto que no tiene precio comercial 
+        # esta señal notifica al dialog que debe desactivar la checkbox, sino la activa
+    quantityChanged:Signal = Signal(float)
+    priceTypeChanged:Signal = Signal(bool)
+    totalCostChanged:Signal = Signal(float)
+    totalPaidChanged:Signal = Signal(float)
+    costIsDiffThanPaid:Signal = Signal(bool) # se emite para mostrar/esconder el frame de deudor en el dialog
+    datetimeChanged:Signal = Signal(str)
+    validityChanged:Signal = Signal() # se emite para activar/desactivar el botón 'Ok' del dialog
+    debtorNameChanged:Signal = Signal(str)
+    debtorSurnameChanged:Signal = Signal(str)
+    
+    
+    def __init__(self) -> None:
+        super(SaleValues, self).__init__()
+        self.__sale_detail:str = ""
+        self.__product_name:str = None
+        self.__quantity:float = None
+        self.__is_comercial_price:bool = False
+        self.__total_cost:float = None
+        self.__total_paid:float = None
+        self.__datetime:str = ""
+        
+        # cuenta corriente
+        self.__THERE_IS_DEBT:bool = False # flag que determina si en el dialog 'debtor_data' está 
+            # activo o no, si lo está entonces se debe agregar a una cuenta corriente
+        self.__debtor_name:str = None
+        self.__debtor_surname:str = None
+        
+        # validez de datos
+        self.__FIELDS_VALIDITY:dict[str, bool] = {
+            SaleFields.PRODUCT_NAME.name: None,
+            SaleFields.QUANTITY.name: None,
+            SaleFields.TOTAL_PAID.name: None,
+            SaleFields.DEBTOR_NAME.name: None,
+            SaleFields.DEBTOR_SURNAME.name: None,
+        }
+        
+        self.setup_signals()
+        return None
+    
+    
+    def setup_signals(self) -> None:
+        self.productNameChanged.connect(self.setTotalCost)
+        self.quantityChanged.connect(self.setTotalCost)
+        self.priceTypeChanged.connect(self.setTotalCost)
+        
+        self.totalCostChanged.connect(
+            lambda: self.setSaleDetail(sale_detail=None)
+        )
+        self.totalCostChanged.connect(self.isCostDifferentThanPaid)
+        self.totalPaidChanged.connect(self.isCostDifferentThanPaid)
+        return None
+    
+    
+    # setters
+    @Slot(str)
+    def setSaleDetail(self, sale_detail:str=None) -> None:
+        '''
+        Guarda el detalle de la venta.
+
+        Parámetros
+        ----------
+        sale_detail : str, opcional
+            el nuevo detalle de la venta, si es None es porque se actualiza 
+            de forma programática, sino es porque el usuario lo escribió
+        '''
+        price_type:str = None
+        new_sale_detail:str = None
+        _pattern:Pattern
+        
+        match sale_detail:
+            case None: # generado programáticamente
+                price_type = "P. COMERCIAL" if self.__is_comercial_price else "P. PÚBLICO"
+                self.__sale_detail = f"{self.__quantity} de {self.__product_name} ({price_type})"
+            
+            case _: # lo escribió el usuario
+                _pattern = compile(
+                    Regex.SALES_DETAILS_PRICE_TYPE.value,
+                    flags=IGNORECASE)
+                new_sale_detail = sub(
+                    pattern=_pattern,
+                    repl="",
+                    string=sale_detail
+                )
+                new_sale_detail = f"{new_sale_detail.strip()} ({price_type})"
+                self.__sale_detail = new_sale_detail
+        
+        self.saleDetailChanged.emit(self.__sale_detail)
+        return None
+    
+    
+    def setProductName(self, product_name:str) -> None:
+        '''
+        Guarda el nombre del producto.
+        Éste método emite las siguientes señales:
+        - 'productNameChanged' con el nuevo nombre
+        - 'priceCheckboxEnabled' para notificar que el precio comercial está 
+        o no disponible
+
+        Parámetros
+        ----------
+        product_name : str
+            el nuevo nombre de producto
+        '''
+        if self.__product_name != product_name:
+            self.__product_name = product_name
+            
+            self.priceCheckboxEnabled.emit(
+                self.__comercialPriceExists(self.__product_name)
+            )
+            self.productNameChanged.emit(self.__product_name)
+        return None
+    
+    
+    def __comercialPriceExists(self, product_name:str) -> bool:
+        '''
+        Determina si existe un precio comercial asociado al producto elegido.
+
+        Parámetros
+        ----------
+        product_name : str
+            el nombre de producto elegido
+
+        Retorna
+        -------
+        bool
+            True si el producto tiene precio comercial, sino False
+        '''
+        comerc_price:float|None|str # si None o str es porque no tiene precio comercial
+        
+        with DatabaseRepository() as db_repo:
+            comerc_price = db_repo.selectRegisters(
+                data_sql='''SELECT precio_comerc 
+                            FROM Productos 
+                            WHERE nombre = ?;''',
+                data_params=(product_name,)
+            )[0][0]
+        
+        return True if comerc_price else False
+    
+    
+    def setQuantity(self, quantity:str) -> None:
+        '''
+        Guarda la cantidad. Emite la señal 'quantityChanged' con la nueva 
+        cantidad.
+
+        Parámetros
+        ----------
+        quantity : str
+            la nueva cantidad del producto
+        '''
+        if self.__quantity != quantity:
+            self.__quantity = quantity
+            self.quantityChanged.emit(self.__quantity)
+        return None
+    
+    
+    def setPriceType(self, price_type:InventoryPriceType) -> None:
+        '''
+        Guarda el tipo de precio. Emite la señal 'priceTypeChanged' con el 
+        nuevo tipo de precio.
+
+        Parámetros
+        ----------
+        price_type : InventoryPriceType
+            el nuevo tipo de precio
+        '''
+        match price_type:
+            case InventoryPriceType.NORMAL:
+                self.__is_comercial_price = False
+            
+            case InventoryPriceType.COMERCIAL:
+                self.__is_comercial_price = True
+        
+        self.priceTypeChanged.emit(self.__is_comercial_price)
+        return None
+    
+    
+    def setDebtFlag(self, there_is_debt:bool) -> None:
+        '''
+        Actualiza el valor del flag interno del modelo que se usa para saber 
+        qué valores es necesario validar.
+
+        Parámetros
+        ----------
+        there_is_debt : bool
+            flag que determina si hay diferencia entre el costo total y lo 
+            abonado
+        '''
+        self.__THERE_IS_DEBT = there_is_debt
+        return None
+    
+    
+    def setDebtorName(self, debtor_name:str) -> None:
+        '''
+        Guarda el nombre del propietario de la cuenta corriente. Emite la 
+        señal 'debtorNameChanged' con el nuevo nombre.
+
+        Parámetros
+        ----------
+        debtor_name : str
+            el nuevo nombre
+        '''
+        if self.__debtor_name != debtor_name:
+            self.__debtor_name = debtor_name
+            self.debtorNameChanged.emit(self.__debtor_name)
+        return None
+    
+    
+    def setDebtorSurname(self, debtor_surname:str) -> None:
+        '''
+        Guarda el apellido del propietario de la cuenta corriente. Emite la 
+        señal 'debtorSurnameChanged' con el nuevo apellido.
+
+        Parámetros
+        ----------
+        debtor_surname : str
+            el nuevo apellido
+        '''
+        if self.__debtor_surname != debtor_surname:
+            self.__debtor_surname = debtor_surname
+            self.debtorSurnameChanged.emit(self.__debtor_surname)
+        return None
+    
+    
+    @Slot()
+    def setTotalCost(self) -> None:
+        '''
+        Calcula el total a partir del precio del producto y la cantidad, y 
+        emite laseñal 'totalCostChanged'.
+        
+        Nota: El precio es obtenido desde la base de datos en este método.
+        '''
+        if self.isProductNameValid() and self.isQuantityValid():
+            self.__total_cost = self.__getPrice()
+        
+        else:
+            self.__total_cost = None
+        
+        self.totalCostChanged.emit(self.__total_cost)
+        return None
+    
+    
+    def __getPrice(self) -> float | None:
+        '''
+        Obtiene el precio correspondiente (comercial o normal) de la base de 
+        datos y lo devuelve si existe.
+        
+        Retorna
+        -------
+        float | None
+            será un float si el precio existe y es mayor a 0, sino None
+        '''
+        with DatabaseRepository() as db_repo:
+            match self.getPriceType():
+                # si el precio es comercial...
+                case InventoryPriceType.COMERCIAL:
+                        total_cost = db_repo.selectRegisters(
+                            data_sql='''SELECT ? * precio_comerc 
+                                        FROM Productos 
+                                        WHERE nombre = ?;''',
+                            data_params=(
+                                self.__quantity,
+                                self.__product_name,
+                            )
+                        )
+                
+                # si es normal...
+                case InventoryPriceType.NORMAL:
+                        total_cost = db_repo.selectRegisters(
+                            data_sql='''SELECT ? * precio_unit 
+                                        FROM Productos 
+                                        WHERE nombre = ?;''',
+                            data_params=(
+                                self.__quantity,
+                                self.__product_name,
+                            )
+                        )
+        
+        if total_cost:
+            total_cost = total_cost[0][0]
+        return total_cost if total_cost else None
+    
+    
+    def setTotalPaid(self, total_paid:float) -> None:
+        '''
+        Guarda el valor de la cantidad abonada. Emite la señal 
+        'totalPaidChanged'.
+
+        Parámetros
+        ----------
+        total_paid : float
+            el total abonado
+        '''
+        if self.__total_paid != total_paid:
+            self.__total_paid = total_paid
+            self.totalPaidChanged.emit(self.__total_paid)
+        return None
+    
+    
+    def setDatetime(self, datetime:QDateTime) -> None:
+        '''
+        Guarda la fecha y hora de la venta en formato str.
+
+        Parámetros
+        ----------
+        datetime : QDateTime
+            la fecha y hora de la venta
+        '''
+        self.__datetime = datetime.toString(DATETIME_FORMAT)
+        self.datetimeChanged.emit(self.__datetime)
+        return None
+    
+    
+    def setFieldValidity(self, field:SaleFields, validity:bool) -> None:
+        '''
+        Guarda el valor de verdad del campo especificado. Emite la señal 
+        'validityChanged'.
+        
+        Parámetros
+        ----------
+        field : SaleFields
+            campo al que asignarle el nuevo valor de verdad
+        validity : bool
+            nuevo valor de verdad del campo
+        '''
+        match field:
+            case SaleFields.PRODUCT_NAME:
+                self.__FIELDS_VALIDITY[SaleFields.PRODUCT_NAME.name] = validity
+            
+            case SaleFields.QUANTITY:
+                self.__FIELDS_VALIDITY[SaleFields.QUANTITY.name] = validity
+            
+            case SaleFields.TOTAL_PAID:
+                self.__FIELDS_VALIDITY[SaleFields.TOTAL_PAID.name] = validity
+            
+            case SaleFields.DEBTOR_NAME:
+                self.__FIELDS_VALIDITY[SaleFields.DEBTOR_NAME.name] = validity
+            
+            case SaleFields.DEBTOR_SURNAME:
+                self.__FIELDS_VALIDITY[SaleFields.DEBTOR_SURNAME.name] = validity
+        
+        self.validityChanged.emit()
+        return None
+    
+    
+    # getters
+    def getProductName(self) -> str:
+        return str(self.__product_name)
+    
+    
+    def getQuantity(self) -> str:
+        return str(self.__quantity)
+    
+    
+    def getPriceType(self) -> InventoryPriceType:
+        return InventoryPriceType.NORMAL if not self.__is_comercial_price else InventoryPriceType.COMERCIAL
+    
+    
+    def isProductNameValid(self) -> bool:
+        '''
+        Retorna un valor de verdad que determina la validez del nombre del 
+        producto.
+
+        Retorna
+        -------
+        bool
+            validez del nombre del producto, será True si el nombre del 
+            producto es válido, si no fue introducido retorna False
+        '''
+        return False if not self.__FIELDS_VALIDITY[SaleFields.PRODUCT_NAME.name] else True
+    
+    
+    def isQuantityValid(self) -> bool:
+        '''
+        Retorna un valor de verdad que determina la validez de la cantidad.
+
+        Retorna
+        -------
+        bool
+            validez de la cantidad, True si es válida sino False
+        '''
+        return False if not self.__FIELDS_VALIDITY[SaleFields.QUANTITY.name] else True
+
+
+    def thereIsDebt(self) -> bool:
+        '''
+        Devuelve el valor del flag interno de deuda.
+
+        Retorna
+        -------
+        bool
+            el valor del flag interno de deuda, que será True si hay 
+            diferencia entre el costo total y lo abonado, sino False
+        '''
+        return self.__THERE_IS_DEBT
+    
+
+    def isAllValid(self) -> bool:
+        '''
+        Devuelve un valor de verdad que determina si todos los campos tienen 
+        valores válidos. Éste método usa el valor del flag interno 
+        '__THERE_IS_DEBT' para corroborar la validez de sólo los campos 
+        necesarios.
+
+        Retorna
+        -------
+        bool
+            flag que determina si todos los campos son válidos
+        '''
+        pos_to_check:int = len(self.__FIELDS_VALIDITY.values())
+        pos_to_check = pos_to_check if self.thereIsDebt() else pos_to_check - 2 # si no hay deuda no tiene 
+            # en cuenta los campos de nombre y apellido del deudor.
+        return all( list(self.__FIELDS_VALIDITY.values())[:pos_to_check] )
+
+
+    @Slot()
+    def isCostDifferentThanPaid(self) -> None:
+        '''
+        Verifica si el costo total es diferente a lo abonado y actualiza el 
+        flag de deuda en el modelo.
+        Emite la señal 'costIsDiffThanPaid'.
+        '''
+        if self.getTotalCost() != self.getTotalPaid():
+            self.setDebtFlag(there_is_debt=True)
+            self.costIsDiffThanPaid.emit(True)
+        
+        else:
+            self.setDebtFlag(there_is_debt=False)
+            self.costIsDiffThanPaid.emit(False)
+            
+        return None
+
+
+    def getTotalCost(self) -> str | None:
+        '''
+        Retorna el costo total si existe como str, sino retorna None.
+        La razón de retorna el costo como str es para poder agregarse el valor 
+        directamente a un QCompleter sin necesidad de hacer type-casting.
+
+        Retorna
+        -------
+        str | None
+            si existe es el costo total como str, sino None
+        '''
+        return str(self.__total_cost) if self.__total_cost else None
+
+
+    def getTotalPaid(self) -> str | None:
+        '''
+        Retorna el total abonado si existe como str, sino retorna None.
+
+        Retorna
+        -------
+        str | None
+            si existe es el costo total como str, sino None
+        '''
+        return str(self.__total_paid) if self.__total_paid else None
+
+
+
 # TODO: CORREGIR LA UNIDAD DE MEDIDA QUE DEVUELVE CUANDO ES NULL, DEVUELVE None, DEBERÍA DEVOLVER '' EN ESOS CASOS
 # Dialog con datos de la venta -y del deudor si se debe algo/hay algo a favor-
 class SaleDialog(QDialog):
-    # TODO: corregir, cuando se eligen valores se deben ir actualizando los campos de costo y detalles de venta, 
-    # TODO: pero al alternar entre precio comercial o normal no se actualizan los campos.
     '''QDialog creado al presionar el botón 'MainWindow.btn_add_product_sales'. Sirve para crear un nuevo registro 
     de venta en la tabla "Ventas", de detalles de venta en "Detalle_Ventas", de deuda en "Deudas" (si hay diferencia 
     entre lo abonado y el costo total) y de deudor en "Deudores" (si hay deuda) en la base de datos.'''
-    dataFilled:Signal = Signal(object) # emite un dict con todos los datos introducidos a MainWindow
+    minHeightChanged:Signal = Signal(int) # emite el nuevo minimumHeight, sirve para activar/desactivar el botón Ok.
+    dataFilled:Signal = Signal(object) # emite un dict con todos los datos introducidos a MainWindow.
     
     def __init__(self):
         super(SaleDialog, self).__init__()
         self.saleDialog_ui = Ui_saleDialog()
         self.saleDialog_ui.setupUi(self)
+        
+        # pseudo-modelo de datos
+        self.sale_values = SaleValues()
 
-        self.setup_variables()
+        # nombres y apellidos de cuentas corrientes
+        self.DEBTORS_FULL_NAMES:dict[str, tuple[str]] = self.__getNameAndSurname()
         
         self.saleDialog_ui.cb_debtor_name.addItems(self.DEBTORS_FULL_NAMES.keys())
+        self.saleDialog_ui.cb_debtor_name.setCurrentIndex(-1)
         self.saleDialog_ui.cb_debtor_surname.addItems(self.DEBTORS_FULL_NAMES.values())
+        self.saleDialog_ui.cb_debtor_surname.setCurrentIndex(-1)
         
         self.setup_ui()
         
         self.setup_validators()
         
         self.setup_signals()
+        
+        #? por alguna razón, si desactivo antes el botón "Aceptar" no lo desactiva, así que lo hago al final
+        self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
         return None
     
-    # TODO: la parte de los comboboxes de deudores funciona relativamente bien, tengo que tomar como referencia DebtorDialog y 
-    # todo: refactorizar todo esto...
-
     
     def setup_ui(self) -> None:
         '''
@@ -509,8 +986,6 @@ class SaleDialog(QDialog):
         self.setWindowTitle("Nueva venta")
 
         self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setText("Aceptar")
-        # desactiva desde el principio el botón "Aceptar"
-        self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
         self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Cancel).setText("Cancelar")
         
         self.__setInitialStyles()
@@ -526,8 +1001,8 @@ class SaleDialog(QDialog):
 
         # esconde los campos de datos del deudor        
         self.__setSaleDialogSize(
-            min_width=SaleDialogHeights.WIDTH.value,
-            min_height=SaleDialogHeights.HEIGHT_NO_DEBT.value,
+            min_width=SaleDialogDimensions.WIDTH.value,
+            min_height=SaleDialogDimensions.HEIGHT_NO_DEBT.value,
             hide_debtor_data=True
         )
         return None
@@ -582,24 +1057,6 @@ class SaleDialog(QDialog):
         return None
     
     
-    def setup_variables(self) -> None:
-        # flags de validación
-        self.VALID_FIELDS:dict[str,bool|None] = {
-            'PRODUCT_NAME': None,
-            'PRODUCT_QUANTITY': None,
-            'PRODUCT_PAID': None,
-            'DEBTOR_NAME': None,
-            'DEBTOR_SURNAME': None,
-        }
-        
-        # variables
-        self.TOTAL_COST:float|None = None # se obtiene en __setDetailsAndCost, si el precio está disponible, sino es None
-        
-        # nombres y apellidos de cuentas corrientes
-        self.DEBTORS_FULL_NAMES:dict[str, tuple[str]] = self.__getNameAndSurname()
-        return None
-    
-    
     def __getNameAndSurname(self) -> dict[str, tuple[str]]:
         '''
         Obtiene los nombres y apellidos de cada cuenta corriente.
@@ -632,383 +1089,329 @@ class SaleDialog(QDialog):
     
     
     def setup_signals(self) -> None:
-        # combobox nombre de producto (venta)
-        self.saleDialog_ui.comboBox_productName.currentIndexChanged.connect(self.validateProductNameField)
-        
-        # lineedit cantidad (venta)
-        self.saleDialog_ui.lineEdit_productQuantity.editingFinished.connect(lambda: self.formatField('product_quantity'))
-        
-        self.quantity_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('product_quantity'))
-        self.quantity_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
-            field_validated='product_quantity',
-            error_message=error_message))
-        
-        # checkbox de tipo de precio (venta)
-        self.saleDialog_ui.checkBox_comercialPrice.clicked.connect(
-            lambda: self.onFieldsChange if self.VALID_FIELDS['PRODUCT_QUANTITY'] else None
+        # detalles de venta
+        self.saleDialog_ui.lineEdit_saleDetail.editingFinished.connect(
+            self.sale_values.setSaleDetail(
+                self.saleDialog_ui.lineEdit_saleDetail.text()
+            )
+        )
+        self.sale_values.saleDetailChanged.connect(
+            lambda sale_detail: self.saleDialog_ui.lineEdit_saleDetail.setText(sale_detail)
         )
         
-        # lineedit total pago (venta)
-        self.saleDialog_ui.lineEdit_totalPaid.editingFinished.connect(self.onTotalPaidEditingFinished)
+        # combobox nombre de producto
+        self.saleDialog_ui.comboBox_productName.currentIndexChanged.connect(
+            self.validateProductNameField
+        )
         
-        self.total_paid_validator.validationSucceeded.connect(lambda: self.validatorOnValidationSucceded('product_total_paid'))
-        self.total_paid_validator.validationFailed.connect(lambda error_message: self.validatorOnValidationFailed(
-            field_validated='product_total_paid',
-            error_message=error_message))
+        # lineedit cantidad
+        self.saleDialog_ui.lineEdit_productQuantity.editingFinished.connect(
+            lambda: self.formatField(SaleFields.QUANTITY)
+        )
+        
+        self.quantity_validator.validationSucceeded.connect(
+            lambda: self.validatorOnValidationSucceded(SaleFields.QUANTITY)
+        )
+        self.quantity_validator.validationFailed.connect(
+            lambda error_message: self.validatorOnValidationFailed(
+                field_validated=SaleFields.QUANTITY,
+                error_message=error_message
+            )
+        )
+        
+        # checkbox de tipo de precio
+        self.sale_values.priceCheckboxEnabled.connect(self.onPriceCheckboxEnabled)
+        self.saleDialog_ui.checkBox_comercialPrice.checkStateChanged.connect(
+            self.onCheckboxChanged
+        )
+        
+        # lineedit total pago
+        self.saleDialog_ui.lineEdit_totalPaid.editingFinished.connect(
+            lambda: self.formatField(SaleFields.TOTAL_PAID)
+        )
+        
+        self.total_paid_validator.validationSucceeded.connect(
+            lambda: self.validatorOnValidationSucceded(
+                field_validated=SaleFields.TOTAL_PAID
+            )
+        )
+        self.total_paid_validator.validationFailed.connect(
+            lambda error_message: self.validatorOnValidationFailed(
+                field_validated=SaleFields.TOTAL_PAID,
+                error_message=error_message
+            )
+        )
+        
+        # datetimeedit
+        self.saleDialog_ui.dateTimeEdit.dateTimeChanged.connect(self.sale_values.setDatetime)
+        
+        # señal de cambio de tamaño del dialog
+        self.minHeightChanged.connect(self.onDialogSizeChanged)
+        
+        # señales del pseudo-modelo de datos
+        self.sale_values.totalCostChanged.connect(self.onTotalCostChanged)
+        
+        self.sale_values.validityChanged.connect(self.toggleOkButton)
+        
+        self.sale_values.costIsDiffThanPaid.connect(self.onCostIsDifferentThanPaid)
+        
+        self.sale_values.debtorNameChanged.connect(self.onDebtorNameChanged)
         
         # combobox nombre (cuenta corriente)
-        self.saleDialog_ui.cb_debtor_name.currentTextChanged.connect(self.__updateSurnames)
+        self.saleDialog_ui.cb_debtor_name.currentTextChanged.connect(self.onDebtorNameTextChanged)
+        
+        # combobox apellido (cuenta corriente)
+        self.saleDialog_ui.cb_debtor_surname.currentIndexChanged.connect(self.onDebtorSurnameIndexChanged)
         
         # botón Ok (Aceptar)
         self.saleDialog_ui.buttonBox.accepted.connect(self.handleOkClicked)
         return None
     
     
-    #¡ validadores
     @Slot(str)
-    def validatorOnValidationSucceded(self, field_validated:str) -> None:
+    def validatorOnValidationSucceded(self, field_validated:SaleFields) -> None:
         '''
-        Es llamado desde la señal 'validationSucceeded' de los validadores.
+        Cambia el valor del flag asociado al campo que fue validado a True, 
+        cambia el QSS del campo y esconde el QLabel asociado al campo.
         
-        Cambia el valor del flag asociado al campo que fue validado 'field_validated' a True, cambia el 
-        QSS del campo y esconde el QLabel asociado al campo, excepto si 'debtor_quantity' donde no esconde 
-        el QLabel sino que cambia su QSS.
-        Al finalizar, llama a 'self.verifyFieldsValidity' para comprobar si el resto de campos son válidos.
-        
-        PARAMS:
-        - field_validated: el campo que se valida. Admite los siguientes valores:
-            - product_quantity: se valida el campo de cantidad del producto.
-            - product_total_paid: se valida el campo de total abonado del producto.
-            - debtor_name: se valida el campo de nombre del deudor.
-            - debtor_surname: se valida el campo de apellido del deudor.
-            - debtor_phone_num: se valida el campo de teléfono del deudor.
-            - debtor_postal_code: se valida el campo de código postal del deudor.
-        
-        Retorna None.
+        Parámetros
+        ----------
+        field_validated : SaleFields
+            el campo validado, admite los siguientes valores:
+            - SaleFields.QUANTITY: campo de cantidad del producto
+            - SaleFields.TOTAL_PAID: campo de total abonado del producto
         '''
         match field_validated:
-            case 'product_quantity':
+            case SaleFields.QUANTITY:
                 # sólo puedo validar completamente la cantidad cuando el nombre sea válido
-                if self.VALID_FIELDS['PRODUCT_NAME']:
-                    self.VALID_FIELDS['PRODUCT_QUANTITY'] = True
-                    self.saleDialog_ui.lineEdit_productQuantity.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
-                    self.saleDialog_ui.label_productQuantity_feedback.setText(f"El stock disponible es de {self.quantity_validator.AVAILABLE_STOCK[0]} {self.quantity_validator.AVAILABLE_STOCK[1]}")
-                
-                    # actualiza los detalles de venta, costo total y crea un completer para el campo de total abonado
-                    self.onFieldsChange()
+                if self.sale_values.isProductNameValid():
+                    self.sale_values.setFieldValidity(SaleFields.QUANTITY, True)
+                    self.sale_values.setQuantity(
+                        quantity=self.saleDialog_ui.lineEdit_productQuantity.text().replace(",",".")
+                    )
+                    
+                    self.saleDialog_ui.label_productQuantity_feedback.setText(
+                        f"El stock disponible es de {self.quantity_validator.AVAILABLE_STOCK[0]} {self.quantity_validator.AVAILABLE_STOCK[1]}"
+                    )
                 
                 # sea el nombre válido o no, igualmente cambia los estilos del label y el lineedit
                 self.saleDialog_ui.label_productQuantity_feedback.setStyleSheet(WidgetStyle.LABEL_NEUTRAL_VAL.value)
                 self.saleDialog_ui.lineEdit_productQuantity.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
                 if not "El stock disponible" in self.saleDialog_ui.label_productQuantity_feedback.text():
                     self.saleDialog_ui.label_productQuantity_feedback.setText("")
-
             
-            case 'product_total_paid':
-                self.VALID_FIELDS['PRODUCT_PAID'] = True
+            case SaleFields.TOTAL_PAID:
+                self.sale_values.setFieldValidity(SaleFields.TOTAL_PAID, True)
+                self.sale_values.setTotalPaid(self.saleDialog_ui.lineEdit_totalPaid.text().replace(",","."))
+                
                 self.saleDialog_ui.lineEdit_totalPaid.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
                 self.saleDialog_ui.label_totalPaid_feedback.hide()
-            
-            case 'debtor_name':
-                self.VALID_FIELDS['DEBTOR_NAME'] = True
-                self.saleDialog_ui.lineEdit_debtorName.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
-                self.saleDialog_ui.label_debtorName_feedback.hide()
-            
-            case 'debtor_surname':
-                self.VALID_FIELDS['DEBTOR_SURNAME'] = True
-                self.saleDialog_ui.lineEdit_debtorSurname.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
-                self.saleDialog_ui.label_debtorSurname_feedback.hide()
-            
-            case 'debtor_phone_num':
-                self.VALID_FIELDS['DEBTOR_PHONE_NUMBER'] = True
-                if self.saleDialog_ui.lineEdit_phoneNumber.text() != "" and self.saleDialog_ui.lineEdit_phoneNumber.isEnabled():
-                    self.saleDialog_ui.lineEdit_phoneNumber.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
-                else:
-                    self.saleDialog_ui.lineEdit_phoneNumber.setStyleSheet("")
-                
-                self.saleDialog_ui.label_phoneNumber_feedback.hide()
-            
-            case 'debtor_postal_code':
-                self.VALID_FIELDS['DEBTOR_POSTAL_CODE'] = True
-                if self.saleDialog_ui.lineEdit_postalCode.text() != "" and self.saleDialog_ui.lineEdit_postalCode.isEnabled():
-                    self.saleDialog_ui.lineEdit_postalCode.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
-                else:
-                    self.saleDialog_ui.lineEdit_postalCode.setStyleSheet("")
-                    
-                self.saleDialog_ui.label_postalCode_feedback.hide()
-        
-        self.verifyFieldsValidity()
         return None
         
     
     @Slot(str, str)
-    def validatorOnValidationFailed(self, field_validated:str, error_message:str) -> None:
+    def validatorOnValidationFailed(self, field_validated:SaleFields, error_message:str) -> None:
         '''
-        Es llamado desde la señal 'validationFailed' de los validadores.
+        Cambia el valor del flag asociado al campo validado a False, cambia el 
+        QSS del campo y muestra el QLabel asociado al campo con el mensaje 
+        de error.
         
-        Cambia el valor del flag asociado al campo que fue validado 'field_validated' a False, cambia el 
-        QSS del campo y muestra el QLabel asociado al campo con el mensaje 'error_message' con feedback.
-        
-        PARAMS:
-        - field_validated: el campo que se valida. Admite los siguientes valores:
-            - product_quantity: se valida el campo de cantidad del producto.
-            - product_total_paid: se valida el campo de total abonado del producto.
-            - debtor_name: se valida el campo de nombre del deudor.
-            - debtor_surname: se valida el campo de apellido del deudor.
-            - debtor_phone_num: se valida el campo de teléfono del deudor.
-            - debtor_postal_code: se valida el campo de código postal del deudor.
-        
-        Retorna None.
+        Parámetros
+        ----------
+        field_validated : SaleFields
+            el campo que se valida, admite los siguientes valores:
+            - SaleFields.QUANTITY: campo de cantidad del producto
+            - SaleFields.TOTAL_PAID: campo de total abonado del producto
         '''
         match field_validated:
-            case 'product_quantity':
-                self.VALID_FIELDS['PRODUCT_QUANTITY'] = False
+            case SaleFields.QUANTITY:
+                self.sale_values.setFieldValidity(field_validated, False)
+                self.sale_values.setQuantity("")
+                
                 self.saleDialog_ui.lineEdit_productQuantity.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
-                self.saleDialog_ui.label_productQuantity_feedback.show()
                 # resetea el estilo del campo (por defecto es rojo, igual que los otros de feedback)
+                self.saleDialog_ui.label_productQuantity_feedback.show()
                 self.saleDialog_ui.label_productQuantity_feedback.setStyleSheet("")
                 self.saleDialog_ui.label_productQuantity_feedback.setText(error_message)
             
-            case 'product_total_paid':
-                self.VALID_FIELDS['PRODUCT_PAID'] = False
+            case SaleFields.TOTAL_PAID:
+                self.sale_values.setFieldValidity(field_validated, False)
+                
                 self.saleDialog_ui.lineEdit_totalPaid.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
                 self.saleDialog_ui.label_totalPaid_feedback.show()
                 self.saleDialog_ui.label_totalPaid_feedback.setText(error_message)
-            
-            case 'debtor_name':
-                self.VALID_FIELDS['DEBTOR_NAME'] = False
-                self.saleDialog_ui.lineEdit_debtorName.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
-                self.saleDialog_ui.label_debtorName_feedback.show()
-                self.saleDialog_ui.label_debtorName_feedback.setText(error_message)
-            
-            case 'debtor_surname':
-                self.VALID_FIELDS['DEBTOR_SURNAME'] = False
-                self.saleDialog_ui.lineEdit_debtorSurname.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
-                self.saleDialog_ui.label_debtorSurname_feedback.show()
-                self.saleDialog_ui.label_debtorSurname_feedback.setText(error_message)
-            
-            case 'debtor_phone_num':
-                self.VALID_FIELDS['DEBTOR_PHONE_NUMBER'] = False
-                self.saleDialog_ui.lineEdit_phoneNumber.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
-                self.saleDialog_ui.label_phoneNumber_feedback.show()
-                self.saleDialog_ui.label_phoneNumber_feedback.setText(error_message)
-            
-            case 'debtor_postal_code':
-                self.VALID_FIELDS['DEBTOR_POSTAL_CODE'] = False
-                self.saleDialog_ui.lineEdit_postalCode.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
-                self.saleDialog_ui.label_postalCode_feedback.show()
-                self.saleDialog_ui.label_postalCode_feedback.setText(error_message)
-        
-        self.verifyFieldsValidity()
         return None
 
 
     @Slot()
     def validateProductNameField(self) -> None:
         '''
-        Es llamado desde la señal 'currentIndexChanged' cuando el campo validado es el de nombre del producto.
-        
         Este método hace lo siguiente:
-        1. actualiza self.VALID_FIELDS['PRODUCT_NAME'] dependiendo de la validez del campo...
-        2. esconde/muestra y cambia el texto de 'label_productName_feedback' dependiendo de la validez...
-        3. cambia el estilo del QLabel de feedback asociado y del propio QComboBox...
-        4. coloca el stock disponible en 'label_productQuantity_feedback' con un estilo personalizado.
-        5. si el campo es válido obtiene el stock del producto y lo guarda en 'SaleQuantityValidator.AVAILABLE_STOCK'.
-        6. si el campo es válido comprueba si también lo es la cantidad y de ser ambos válidos llama a 
-        'self.onFieldsChange'.
-        
-        Este método llama a:
-        - SaleQuantityValidator.setsetAvailableStock: para almacenar en el validador de cantidad el 
-        stock disponible.
-        - functionutils.getCurrentProductStock: para actualizar el stock disponible en 'self.AVAILABLE_STOCK'.
-        - self.onFieldsChange: para actualizar los detalles y el costo total de la venta.
-        
-        Retorna None.
+        1. actualiza la validez del campo
+        2. esconde/muestra y cambia el texto de feedback
+        3. cambia el estilo del QLabel de feedback asociado y del QComboBox
+        4. coloca el stock disponible en 'label_productQuantity_feedback' con 
+        un estilo personalizado
+        5. si el campo es válido obtiene el stock del producto y lo guarda en 
+        'SaleQuantityValidator.AVAILABLE_STOCK'
+        6. si el campo es válido comprueba si también lo es la cantidad y de 
+        ser ambos válidos llama a 'self.onFieldsChange'
         '''
+        current_product:str
+        
         # si no se eligió el nombre del producto asigna el índice -1
         if self.saleDialog_ui.comboBox_productName.currentText().strip() == "":
-            self.VALID_FIELDS['PRODUCT_NAME'] = False
             self.saleDialog_ui.comboBox_productName.setCurrentIndex(-1)
         
         # si no hay un producto seleccionado (si índice es -1)...
         if self.saleDialog_ui.comboBox_productName.currentIndex() == -1:
-            self.VALID_FIELDS['PRODUCT_NAME'] = False
+            self.sale_values.setFieldValidity(SaleFields.PRODUCT_NAME, False)
+            self.sale_values.setProductName("")
             self.saleDialog_ui.label_productName_feedback.show()
-            self.saleDialog_ui.label_productName_feedback.setText("El campo de nombre del producto no puede estar vacío")
-            self.saleDialog_ui.comboBox_productName.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
+            self.saleDialog_ui.label_productName_feedback.setText(
+                "El campo de nombre del producto no puede estar vacío"
+            )
+            self.saleDialog_ui.comboBox_productName.setStyleSheet(
+                WidgetStyle.FIELD_INVALID_VAL.value
+            )
         
         # si el campo es válido...
         else:
-            self.VALID_FIELDS['PRODUCT_NAME'] = True
+            current_product:str = self.saleDialog_ui.comboBox_productName.itemText(
+                self.saleDialog_ui.comboBox_productName.currentIndex()
+            )
+            
+            self.sale_values.setFieldValidity(SaleFields.PRODUCT_NAME, True)
+            self.sale_values.setProductName(current_product)
+            
             self.saleDialog_ui.label_productName_feedback.hide()
-            self.saleDialog_ui.comboBox_productName.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
+            self.saleDialog_ui.comboBox_productName.setStyleSheet(
+                WidgetStyle.FIELD_VALID_VAL.value
+            )
             
             # guarda el stock del producto en el validador de cantidad
-            self.quantity_validator.setAvailableStock(getCurrentProductStock(
-                self.saleDialog_ui.comboBox_productName.itemText(self.saleDialog_ui.comboBox_productName.currentIndex()) ))
+            self.quantity_validator.setAvailableStock(
+                getCurrentProductStock(current_product)
+            )
             
             # coloca el stock en 'label_productQuantity_feedback'
             self.saleDialog_ui.label_productQuantity_feedback.show()
-            self.saleDialog_ui.label_productQuantity_feedback.setStyleSheet(WidgetStyle.LABEL_NEUTRAL_VAL.value)
-            self.saleDialog_ui.label_productQuantity_feedback.setText(f"El stock disponible es de {self.quantity_validator.AVAILABLE_STOCK[0]} {self.quantity_validator.AVAILABLE_STOCK[1]}")
+            self.saleDialog_ui.label_productQuantity_feedback.setStyleSheet(
+                WidgetStyle.LABEL_NEUTRAL_VAL.value
+            )
+            self.saleDialog_ui.label_productQuantity_feedback.setText(
+                f"El stock disponible es de {self.quantity_validator.AVAILABLE_STOCK[0]} {self.quantity_validator.AVAILABLE_STOCK[1]}"
+            )
             
             #? llama a validar la cantidad porque, si se modificó primero la cantidad y el válida, y luego 
             #? se elige un nombre de producto que es válido pero no tiene esa cantidad en stock entonces 
             #? el campo de cantidad devuelve un "falso positivo"... de ésta forma se arregla
-            self.quantity_validator.validate(self.saleDialog_ui.lineEdit_productQuantity.text(), 0)
-            
-            # si también la cantidad es válida, actualiza los detalles de venta y el costo total...
-            if self.VALID_FIELDS['PRODUCT_QUANTITY']:
-                self.onFieldsChange()
-            
+            self.quantity_validator.validate(
+                self.saleDialog_ui.lineEdit_productQuantity.text(), 0
+            )
         return None
 
 
-    #¡ campos
-    @Slot()
-    def onFieldsChange(self) -> None:
+    @Slot(bool)
+    def onPriceCheckboxEnabled(self, is_enabled:bool) -> None:
         '''
-        Es llamado desde:
-        - self.validateProductNameField: cuando el índice de 'comboBox_productName' cambia.
-        - self.validatorOnValidationSucceded: cuando el valor de 'lineEdit_productQuantity' cambia.
-        - la señal 'checkBox_comercialPrice.clicked': cuando el estado de 'checkBox_comercialPrice' cambia.
-        
-        Cambia el texto del QLabel de precio total, coloca los detalles de la venta en su QLineEdit 
-        y crea un QCompleter para el campo de cantidad abonada.
-        Coloca el costo total en 'SalePaidValidator.TOTAL_COST' y llama a su método 'validate()'.
-        Por último, al finalizar llama a 'self.verifyFieldsValidity'.
-        
-        Este método llama a:
-        - self.__setDetailsAndCost: para actualizar los detalles de venta y el costo total.
-        - SalePaidValidator.validate: para revalidar el campo de 'lineEdit_totalPaid'.
-        - self.verifyFieldsValidity: para revisar el estado de validez de los campos y cambiar el estado 
-        de visibilidad de 'debtor_data'.
-        
-        Retorna None.
+        Habilita/deshabita el QCheckBox de precio comercial si el producto 
+        elegido tiene o no precio comercial
+
+        Parámetros
+        ----------
+        is_enabled : bool
+            flag que determina si activar o no el QCheckBox
         '''
-        # cambia los detalles de venta y el label con el costo total
-        self.__setDetailsAndCost()
-        
-        # coloca el costo total en el validador 'SalePaidValidator.TOTAL_COST' y llama a validate()
-        self.total_paid_validator.TOTAL_COST = self.TOTAL_COST
-        self.total_paid_validator.validate(self.saleDialog_ui.lineEdit_totalPaid.text(), 0)
-        
-        # coloca un completer en self.lineEdit_totalPaid
-        if self.TOTAL_COST:
-            total_paid_completer = QCompleter([ str(self.TOTAL_COST).replace(".",",") ])
-            total_paid_completer.setCompletionMode(QCompleter.CompletionMode.InlineCompletion)
-            
-            self.saleDialog_ui.lineEdit_totalPaid.setCompleter(total_paid_completer)
-            
-            # establece el modo de completado a medida que se escribe
-            self.saleDialog_ui.lineEdit_totalPaid.textChanged.connect(total_paid_completer.setCompletionPrefix)
-        
-        # verifica otra vez la validez de los campos y cambia la visiblidad de debtor_data
-        self.verifyFieldsValidity(TOGGLE_DEBTOR_DATA=True)
+        if not is_enabled:
+            self.saleDialog_ui.checkBox_comercialPrice.setCheckState(
+                Qt.CheckState.Unchecked
+            )
+        self.saleDialog_ui.checkBox_comercialPrice.setEnabled(is_enabled)
         return None
     
     
-    def __setDetailsAndCost(self) -> None:
+    @Slot(Qt.CheckState)
+    def onCheckboxChanged(self, checkstate:Qt.CheckState) -> None:
         '''
-        Es llamado desde 'self.onFieldsChange'.
-        
-        Obtiene el precio normal ó comercial dependiendo de si 'checkBox_comercialPrice' está checkeada, luego 
-        obtiene el costo desde la base de datos y lo calcula a partir de la cantidad ingresada y cambia el texto 
-        de 'label_productTotalCost' de acuerdo al costo total.
-        Luego coloca la cantidad del producto vendido, el nombre y el tipo de precio aplicado en 'lineEdit_saleDetail'.
-        
-        Retorna None.
-        '''
-        total_cost:float|str # si existe el float, sino un str con "NO DISPONIBLE"
-        pattern:Pattern = compile(
-            pattern="[0-9]{1,8}(\.|,)?[0-9]{0,2}\sde .{1,}\s(\([\s]*P[\s]*\.[\s]*NORMAL[\s]*\)|\([\s]*P[\s]*\.[\s]*COMERCIAL[\s]*\))$",
-            flags=IGNORECASE)
-        re:Match | str
-        new_text:str
-        
-        # ======== PRECIO ====================================================
-        # obtiene el precio normal/comercial
-        conn = createConnection("database/inventario.db")
-        cursor = conn.cursor()
-        
-        if self.saleDialog_ui.checkBox_comercialPrice.isChecked():
-            sql = "SELECT ? * precio_comerc FROM Productos WHERE nombre = ?;"
-        else:
-            sql = "SELECT ? * precio_unit FROM Productos WHERE nombre = ?;"
-        params = (
-            float(self.saleDialog_ui.lineEdit_productQuantity.text().replace(",",".")),
-            self.saleDialog_ui.comboBox_productName.itemText(self.saleDialog_ui.comboBox_productName.currentIndex()),)
-        
-        # obtiene el costo total
-        total_cost = cursor.execute(sql, params).fetchone()[0]
-        
-        # si el valor no existe en base de datos devuelve TypeError
-        try:
-            if total_cost == 0 or total_cost == 0.0:
-                total_cost = "NO DISPONIBLE"
-            
-            else:
-                total_cost = f"$ {round(float(total_cost), 2)}"
-                total_cost = total_cost.replace(".",",")
-            
-        except TypeError: # no puede convertir None a float
-            total_cost = "NO DISPONIBLE"
-        
-        # coloca el precio total
-        self.saleDialog_ui.label_productTotalCost.setText(f"<html><head/><body><p><span style=\" font-size:20px; color: #111;\">COSTO TOTAL </span><span style=\" font-size: 20px; color: #22577a;\">{total_cost}</span></p></body></html>")
-        
-        # guarda en una variable global el costo total
-        self.TOTAL_COST = float(total_cost.lstrip("$").replace(" ","").replace(",",".")) if total_cost != "NO DISPONIBLE" else None
-        
-        # ======== DETALLES DE LA VENTA ======================================
-        
-        # obtiene los valores de cantidad, nombre del producto y tipo de precio (normal ó comercial)
-        quantity = self.saleDialog_ui.lineEdit_productQuantity.text()
-        product_name = self.saleDialog_ui.comboBox_productName.currentText()
-        price_type = "P. COMERCIAL" if self.saleDialog_ui.checkBox_comercialPrice.isChecked() else "P. NORMAL"
+        Actualiza el valor del estado del QCheckbox en el pseudo-modelo de 
+        datos.
 
-        re = match(pattern, self.saleDialog_ui.lineEdit_saleDetail.text())
-        re = re.group() if re else None
-        # verifica si 'pattern' coincide, y si coincide reemplaza el texto (significa que no lo escribió el usuario)
-        if self.saleDialog_ui.lineEdit_saleDetail.text().strip() == re or self.saleDialog_ui.lineEdit_saleDetail.text().strip() == "":
-            self.saleDialog_ui.lineEdit_saleDetail.setText(f"{quantity} de {product_name} ({price_type})")
-        
-        # si no coincide es porque lo escribió el usuario (sólo reemplaza el tipo de precio)
-        else:
-            new_text = self.saleDialog_ui.lineEdit_saleDetail.text()
-            new_text = sub(
-                pattern="(\([\s]*P[\s]*\.[\s]*NORMAL[\s]*\)|\([\s]*P[\s]*\.[\s]*COMERCIAL[\s]*\))$",
-                repl="",
-                string=self.saleDialog_ui.lineEdit_saleDetail.text(),
-                flags=IGNORECASE)
-            new_text = f"{new_text.strip()} ({price_type})"
+        Parámetros
+        ----------
+        checkstate : Qt.CheckState
+            el nuevo estado del QCheckbox
+        '''
+        match checkstate:
+            case Qt.CheckState.Checked:
+                self.sale_values.setPriceType(InventoryPriceType.COMERCIAL)
             
-            self.saleDialog_ui.lineEdit_saleDetail.setText(new_text)
+            case Qt.CheckState.Unchecked:
+                self.sale_values.setPriceType(InventoryPriceType.NORMAL)
         
         return None
+    
+    
+    @Slot(str)
+    def onSaleDetailChanged(self, sale_detail:str) -> None:
+        '''
+        Actualiza el detalle de la venta en el QLineEdit.
 
+        Parámetros
+        ----------
+        sale_detail : str
+            el nuevo detalle de venta
+        '''
+        self.saleDialog_ui.lineEdit_saleDetail.setText(sale_detail)
+        return None
+    
     
     @Slot()
-    def onTotalPaidEditingFinished(self) -> None:
+    def onTotalCostChanged(self) -> None:
         '''
-        Es llamado desde la señal 'editingFinished' de 'lineEdit_totalPaid'.
-        
-        Llama a 'self.formatField' para formatear el valor del QLineEdit y luego llama a 'self.verifyFieldsValidity'.
-        
-        Retorna None.
+        Cambia el texto del QLabel de precio total y crea un QCompleter para 
+        el campo de cantidad abonada.
         '''
-        self.formatField(field_to_format='product_total_paid')
+        total_cost:str | None = self.sale_values.getTotalCost()
+        total_paid_completer:QCompleter
         
-        self.verifyFieldsValidity(TOGGLE_DEBTOR_DATA=True)
-        
+        if total_cost:
+            # coloca un completer en self.lineEdit_totalPaid
+            total_cost = total_cost.replace(".",",")
+            
+            total_paid_completer = QCompleter([total_cost])
+            total_paid_completer.setCompletionMode(
+                QCompleter.CompletionMode.InlineCompletion
+            )
+            self.saleDialog_ui.lineEdit_totalPaid.setCompleter(
+                total_paid_completer
+            )
+            
+            self.saleDialog_ui.lineEdit_totalPaid.textChanged.connect(
+                total_paid_completer.setCompletionPrefix
+            )
+            
+            # actualiza el label de costo total
+            self.saleDialog_ui.label_productTotalCost.setText(
+                f'''<html>
+                        <head/>
+                        <body>
+                            <p>
+                                <span style={WidgetStyle.LABEL_RICHTEXT_NEUTRAL.value}>COSTO TOTAL </span>
+                                <span style={WidgetStyle.LABEL_RICHTEXT_CONTENT.value}>$ {total_cost}</span>
+                            </p>
+                        </body>
+                    </html>'''
+            )
         return None
-
-
+    
+    
     @Slot()
-    def __updateSurnames(self, current_name:str) -> None:
+    def onDebtorNameTextChanged(self, current_name:str) -> None:
         '''
-        Al elegirse el nombre, actualiza los datos del combobox de apellido 
-        para mostrar los apellidos coincidentes.
+        Reinicia los apellidos del QComboBox de apellidos y actualiza el nombre 
+        de la cuenta corriente y su validez en SaleValues. Si el nombre no es 
+        válido guarda una cadena vacía.
         
         Parámetros
         ----------
@@ -1018,28 +1421,83 @@ class SaleDialog(QDialog):
         self.saleDialog_ui.cb_debtor_surname.clear()
         
         if current_name in self.DEBTORS_FULL_NAMES:
-            self.saleDialog_ui.cb_debtor_surname.addItems(self.DEBTORS_FULL_NAMES[current_name])
+            self.sale_values.setDebtorName(debtor_name=current_name)
+            self.sale_values.setFieldValidity(
+                field=SaleFields.DEBTOR_NAME,
+                validity=True
+            )
+        
+        else:
+            self.sale_values.setDebtorName(debtor_name='')
+            self.sale_values.setFieldValidity(
+                field=SaleFields.DEBTOR_NAME,
+                validity=False
+            )
         return None
     
+    
+    @Slot(str)
+    def onDebtorNameChanged(self, debtor_name:str) -> None:
+        '''
+        Actualiza los datos del combobox de apellido para mostrar los apellidos 
+        coincidentes.
+
+        Parámetros
+        ----------
+        debtor_name : str
+            el nombre ingresado
+        '''
+        if debtor_name:
+            self.saleDialog_ui.cb_debtor_surname.addItems(
+                self.DEBTORS_FULL_NAMES[debtor_name]
+            )
+        return None
+    
+    
+    @Slot(int)
+    def onDebtorSurnameIndexChanged(self, index:int) -> None:
+        '''
+        Actualiza el apeliido de la cuenta corriente y su validez en 
+        SaleValues. Si el apellido no es válido guarda una cadena vacía.
+
+        Parámetros
+        ----------
+        index : int
+            el índice actual del QComboBox
+        '''
+        # si el índice es -1 es porque la combobox está vacía
+        if index != -1:
+            self.sale_values.setDebtorSurname(
+                debtor_surname=self.saleDialog_ui.cb_debtor_surname.itemText(index)
+            )
+            self.sale_values.setFieldValidity(
+                field=SaleFields.DEBTOR_SURNAME,
+                validity=True)
+        
+        else:
+            self.sale_values.setDebtorSurname(debtor_surname='')
+            self.sale_values.setFieldValidity(
+                field=SaleFields.DEBTOR_SURNAME,
+                validity=False)
+        return None
 
 
     @Slot(str)
-    def formatField(self, field_to_format:str) -> None:
+    def formatField(self, field_to_format:SaleFields) -> None:
         '''
-        Dependiendo del campo 'field_to_format' formatea el texto y lo asigna 
-        en el campo correspondiente.
+        Formatea el texto del campo y lo asigna nuevamente en el campo.
         
         Parámetros
         ----------
-        field_to_format: str
+        field_to_format: SaleFields
             el campo a formatear, admite los siguientes valores:
-            - product_quantity: formatea el campo de cantidad del producto
-            - product_total_paid: formatea el campo de total abonado del producto
+            - SaleFields.QUANTITY: campo de cantidad del producto
+            - SaleFields.TOTAL_PAID: campo de total abonado del producto
         '''
         field_text:str
         
         match field_to_format:
-            case 'product_quantity': # cambia puntos por comas, si termina con "." ó "," lo saca
+            case SaleFields.QUANTITY:
                 field_text = self.saleDialog_ui.lineEdit_productQuantity.text()
                 if field_text.endswith((",",".")):
                     field_text = field_text.rstrip(",")
@@ -1047,7 +1505,7 @@ class SaleDialog(QDialog):
                 field_text = field_text.replace(".",",")
                 self.saleDialog_ui.lineEdit_productQuantity.setText(field_text)
             
-            case 'product_total_paid': # cambia puntos por comas, si termina con "." ó "," lo saca
+            case SaleFields.TOTAL_PAID:
                 field_text = self.saleDialog_ui.lineEdit_totalPaid.text()
                 if field_text.endswith((",",".")):
                     field_text = field_text.rstrip(",")
@@ -1058,85 +1516,54 @@ class SaleDialog(QDialog):
         return None
 
 
-    def verifyFieldsValidity(self, TOGGLE_DEBTOR_DATA:bool=None) -> None:
+    def toggleOkButton(self) -> None:
         '''
-        Es llamado desde los métodos 'self.validatorOnValidationSucceded'|'self.validatorOnValidationFailed'|
-        'onTotalPaidEditingFinished'|'self.onFieldsChange'.
-        
-        Revisa si todos los campos tienen valores válidos y activa/desactiva el botón "Aceptar" dependiendo del caso, 
-        y además muestra/esconde 'debtor_data' dependiendo del parámetro 'TOGGLE_DEBTOR_DATA'. Para actualizar el estado 
-        de visibilidad y activar/desactivar 'debtor_data' llama a 'self.__updateDebtorDataVisibility'.
-        
-        PARAMS:
-        - TOGGLE_DEBTOR_DATA: flag que determina si mostrar/ocultar 'debtor_data'. Por defecto es None. Es enviado 
-        cuando el método es llamado desde 'onTotalPaidEditingFinished'|'self.onFieldsChange'.
-        
-        Retorna None.
+        Activa/desactiva el botón "Aceptar" dependiendo de si todos los campos 
+        son válidos.
         '''
-        pos_to_check:int = self.__updateDebtorDataVisibility(TOGGLE_DEBTOR_DATA) #? si debtor_data está escondido no hay 
-                                                                                 #? cantidad que vaya a cuenta corriente, y 
-                                                                                 #? no necesita verificar si los datos del 
-                                                                                 #? deudor son válidos, por lo que verifica 
-                                                                                 #? si el nombre del producto, la cantidad y 
-                                                                                 #? lo abonado son válidos.
-        fields_validity:list
-        
-        # toma los valores de self.VALID_FIELDS y los guarda en una lista (para luego aplicar 'list slicing')
-        fields_validity = [value for value in self.VALID_FIELDS.values()]
-        
-        # verifica si todos los valores de self.VALID_FIELDS son True y activa o desactiva el botón...
-        if self.TOTAL_COST and all(fields_validity[:pos_to_check]):
+        if self.sale_values.isAllValid():
             self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
         
-        # si lo abonado es diferente al costo total desactiva el botón "Aceptar"
         else:
             self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
-        
         return None
 
 
-    def __updateDebtorDataVisibility(self, TOGGLE_DEBTOR_DATA:bool=None) -> int:
+    @Slot(bool)
+    def onCostIsDifferentThanPaid(self, is_different:bool) -> None:
         '''
-        Es llamado desde 'self.verifyFieldsValidity'.
-        
-        Cambia la visibilidad y activa/desactiva todos los widgets de 'debtor_data' según el valor de 
-        'lineEdit_totalPaid'. Para eso llama a 'self.__setSaleDialogSize'.
-        
-        Retorna un int con la cantidad de posiciones de 'self.VALID_FIELDS' de las que verificar su validez.
+        Si hay diferencia entre el costo total y lo que abona el cliente éste 
+        método amplía el QDialog y muestra campos para elegir la cuenta 
+        corriente a la que asignar la diferencia.
+
+        Parámetros
+        ----------
+        is_different : bool
+            flag que determina si hay diferencia entre el costo total y lo 
+            abonado
         '''
-        pos_to_check:int = 3
-        # verifica si el costo total fue calculado y si lineEdit_totalPaid tiene texto...
-        if self.TOTAL_COST and self.saleDialog_ui.lineEdit_totalPaid.text().strip():
-            try:
-                # ...luego ve si lo abonado es igual al costo total
-                if float(self.saleDialog_ui.lineEdit_totalPaid.text().replace(",",".")) == self.TOTAL_COST:
-                    self.__setSaleDialogSize(
-                        min_width=SaleDialogHeights.WIDTH.value,
-                        min_height=SaleDialogHeights.HEIGHT_NO_DEBT.value,
-                        hide_debtor_data=True) if TOGGLE_DEBTOR_DATA else None
+        match is_different:
+            case True:
+                self.__setSaleDialogSize(
+                    min_width=SaleDialogDimensions.WIDTH.value,
+                    min_height=SaleDialogDimensions.HEIGHT_WITH_DEBT.value,
+                    hide_debtor_data=False
+                )
             
-                else:
-                    self.__setSaleDialogSize(
-                        min_width=SaleDialogHeights.WIDTH.value,
-                        min_height=SaleDialogHeights.HEIGHT_WITH_DEBT.value,
-                        hide_debtor_data=False) if TOGGLE_DEBTOR_DATA else None
-                    pos_to_check = 7
-            
-            except ValueError as err: # salta este error más que nada cuando se intenta escribir "-" en lineEdit_totalPaid
-                logging.error(err)
-            
-        return pos_to_check
-
-
-    #¡ funciones generales
+            case False:
+                self.__setSaleDialogSize(
+                    min_width=SaleDialogDimensions.WIDTH.value,
+                    min_height=SaleDialogDimensions.HEIGHT_NO_DEBT.value,
+                    hide_debtor_data=True
+                )
+        return None
+    
+    
     def __setSaleDialogSize(self, min_width:int, min_height:int, hide_debtor_data:bool) -> None:
         '''
-        Es llamado desde 'self.__updateDebtorDataVisibility'.
-        
-        Muestra/oculta 'debtor_data', declara el nuevo tamaño mínimo del SaleDialog y redimensiona la ventana 
-        al tamaño.
-        
-        Retorna None.
+        Muestra/oculta 'debtor_data', declara el nuevo tamaño mínimo del 
+        SaleDialog y redimensiona la ventana al tamaño.
+        Emite la señal 'minHeightChanged'.
         '''
         self.setMinimumSize(min_width, min_height)
         
@@ -1150,14 +1577,22 @@ class SaleDialog(QDialog):
         self.saleDialog_ui.cb_debtor_name.setEnabled(not hide_debtor_data)
         self.saleDialog_ui.cb_debtor_surname.setEnabled(not hide_debtor_data)
         
-        if not self.saleDialog_ui.debtor_data.isHidden():
-            # desactiva el botón "Aceptar"
-            self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
-        
-        else:
-            # activa el botón "Aceptar"
-            self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
-        
+        self.minHeightChanged.emit(self.minimumHeight())
+        return None
+
+
+    @Slot(int)
+    def onDialogSizeChanged(self) -> None:
+        '''
+        Cuando cambia el tamaño del QDialog verifica nuevamente si todos los 
+        valores son válidos.
+
+        Parámetros
+        ----------
+        new_min_height : int
+            la nueva altura mínima del QDialog
+        '''
+        self.toggleOkButton()
         return None
 
 
@@ -1436,8 +1871,8 @@ class ListItemValues(QObject):
         
         # validez de los datos
         self.__FIELDS_VALIDITY:dict[str, bool | None] = { #? guarda valores True | False | None, siendo el valor de verdad 
-            ListItemFields.PRODUCT_NAME.value: None, #? en realidad triestado, True y False representan la validez del 
-            ListItemFields.QUANTITY.value: None      #? del valor en el campo, si es None es porque está vacío el campo.
+            SaleFields.PRODUCT_NAME.value: None, #? en realidad triestado, True y False representan la validez del 
+            SaleFields.QUANTITY.value: None      #? del valor en el campo, si es None es porque está vacío el campo.
         }
         
         #* señales
@@ -1640,26 +2075,26 @@ class ListItemValues(QObject):
         return None
     
     
-    def setFieldValidity(self, field:ListItemFields, validity:bool) -> None:
+    def setFieldValidity(self, field:SaleFields, validity:bool) -> None:
         '''
         Guarda el valor de verdad del campo especificado.
         
         Parámetros
         ----------
-        field : ListItemFields
+        field : SaleFields
             campo al que asignarle el nuevo valor de verdad, debe ser 
-            'ListItemFields.PRODUCT_NAME' ó 'ListItemFields.QUANTITY'
+            'SaleFields.PRODUCT_NAME' ó 'SaleFields.QUANTITY'
         validity : bool | None
             nuevo valor de verdad del campo
         
         
         '''
         match field:
-            case ListItemFields.PRODUCT_NAME:
-                self.__FIELDS_VALIDITY[ListItemFields.PRODUCT_NAME.value] = validity
+            case SaleFields.PRODUCT_NAME:
+                self.__FIELDS_VALIDITY[SaleFields.PRODUCT_NAME.value] = validity
             
-            case ListItemFields.QUANTITY:
-                self.__FIELDS_VALIDITY[ListItemFields.QUANTITY.value] = validity
+            case SaleFields.QUANTITY:
+                self.__FIELDS_VALIDITY[SaleFields.QUANTITY.value] = validity
         
         return None
     
@@ -1748,7 +2183,7 @@ class ListItemValues(QObject):
             valor de verdad del campo de nombre del producto, si es None es 
             porque el nombre del producto aún no fue validado
         '''
-        return self.__FIELDS_VALIDITY[ListItemFields.PRODUCT_NAME.value]
+        return self.__FIELDS_VALIDITY[SaleFields.PRODUCT_NAME.value]
     
     
     def isQuantityValid(self) -> bool | None:
@@ -1762,7 +2197,7 @@ class ListItemValues(QObject):
             valor de verdad del campo de cantidad, si es None es porque la 
             cantidad del producto aún no fue validada
         '''
-        return self.__FIELDS_VALIDITY[ListItemFields.QUANTITY.value]
+        return self.__FIELDS_VALIDITY[SaleFields.QUANTITY.value]
     
     
     def isAllValid(self) -> bool:
@@ -1789,13 +2224,13 @@ class ListItemValues(QObject):
             valores
         '''
         return {
-            ListItemFields.PRODUCT_ID.name: self.getProductId(),
-            ListItemFields.PRODUCT_NAME.name: self.getProductName(),
-            ListItemFields.QUANTITY.name: self.getQuantity(),
-            ListItemFields.SUBTOTAL.name: self.getSubtotal(),
-            ListItemFields.IS_COMERCIAL_PRICE.name: self.isComercialPrice(),
-            ListItemFields.SALE_DETAILS.name: self.getSaleDetails(),
-            ListItemFields.IS_ALL_VALID.name: self.isAllValid()
+            SaleFields.PRODUCT_ID.name: self.getProductId(),
+            SaleFields.PRODUCT_NAME.name: self.getProductName(),
+            SaleFields.QUANTITY.name: self.getQuantity(),
+            SaleFields.SUBTOTAL.name: self.getSubtotal(),
+            SaleFields.IS_COMERCIAL_PRICE.name: self.isComercialPrice(),
+            SaleFields.SALE_DETAILS.name: self.getSaleDetails(),
+            SaleFields.IS_ALL_VALID.name: self.isAllValid()
         }
     
     
@@ -1820,7 +2255,7 @@ class ListItemWidget(QWidget):
     la cantidad vendida, el tipo de precio (comercial o normal) y darle 
     alguna descripción a la venta.
     '''
-    fieldsValuesChanged = Signal(object) # emite un dict[ListItemFields, Any] 
+    fieldsValuesChanged = Signal(object) # emite un dict[SaleFields, Any] 
                                          # con todos los valores de los campos.
     deleteItem = Signal(str) # emite el 'objectName' del item.
     
@@ -1953,7 +2388,7 @@ class ListItemWidget(QWidget):
         _avail_stock:tuple[float, str] # stock disponible
         
         # actualiza la validez y la cantidad
-        self.field_values.setFieldValidity(ListItemFields.QUANTITY, True)
+        self.field_values.setFieldValidity(SaleFields.QUANTITY, True)
             
         # cambia el estilo de los campos
         self.listItem.lineEdit_productQuantity.setStyleSheet(
@@ -1993,7 +2428,7 @@ class ListItemWidget(QWidget):
         
         
         '''
-        self.field_values.setFieldValidity(ListItemFields.QUANTITY, False)
+        self.field_values.setFieldValidity(SaleFields.QUANTITY, False)
         
         # actualiza la cantidad aunque sea el valor inválido
         self.field_values.setQuantity(
@@ -2026,7 +2461,7 @@ class ListItemWidget(QWidget):
         '''
         # si no hay un producto seleccionado...
         if self.listItem.comboBox_productName.currentIndex() == -1:
-            self.field_values.setFieldValidity(ListItemFields.PRODUCT_NAME, False)
+            self.field_values.setFieldValidity(SaleFields.PRODUCT_NAME, False)
             
             self.listItem.label_nameFeedback.show()
             self.listItem.label_nameFeedback.setText("Se debe seleccionar un producto")
@@ -2036,7 +2471,7 @@ class ListItemWidget(QWidget):
         
         # si el campo es válido...
         else:
-            self.field_values.setFieldValidity(ListItemFields.PRODUCT_NAME, True)
+            self.field_values.setFieldValidity(SaleFields.PRODUCT_NAME, True)
             
             self.listItem.label_nameFeedback.hide()
             self.listItem.comboBox_productName.setStyleSheet(
