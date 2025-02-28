@@ -1146,7 +1146,7 @@ class SaleDialog(QDialog):
         self.saleDialog_ui.dateTimeEdit.dateTimeChanged.connect(self.sale_values.setDatetime)
         
         # señal de cambio de tamaño del dialog
-        self.minHeightChanged.connect(self.onDialogSizeChanged)
+        self.minHeightChanged.connect(self.toggleOkButton)
         
         # señales del pseudo-modelo de datos
         self.sale_values.totalCostChanged.connect(self.onTotalCostChanged)
@@ -1579,22 +1579,7 @@ class SaleDialog(QDialog):
         
         self.minHeightChanged.emit(self.minimumHeight())
         return None
-
-
-    @Slot(int)
-    def onDialogSizeChanged(self) -> None:
-        '''
-        Cuando cambia el tamaño del QDialog verifica nuevamente si todos los 
-        valores son válidos.
-
-        Parámetros
-        ----------
-        new_min_height : int
-            la nueva altura mínima del QDialog
-        '''
-        self.toggleOkButton()
-        return None
-
+    
 
     def __getFieldsData(self) -> tuple:
         '''
