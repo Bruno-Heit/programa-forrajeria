@@ -170,10 +170,12 @@ class SaleFields(IntEnum):
     SUBTOTAL = 3
     IS_COMERCIAL_PRICE = 4
     SALE_DETAILS = 5
-    IS_ALL_VALID = 6
-    TOTAL_PAID = 7
-    DEBTOR_NAME = 8
-    DEBTOR_SURNAME = 9
+    DATETIME = 6
+    IS_ALL_VALID = 7
+    TOTAL_COST = 8
+    TOTAL_PAID = 9
+    DEBTOR_NAME = 10
+    DEBTOR_SURNAME = 11
 
 
 
