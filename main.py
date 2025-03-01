@@ -1071,10 +1071,6 @@ class MainWindow(QMainWindow):
             QTableView al que se refencia
         data_to_insert : dict[Any]
             datos con los que actualizar el MODELO DE DATOS correspondiente
-
-        Retorna
-        -------
-        None
         '''
         match table_viewID.name:
             case 'INVEN_TABLE_VIEW':

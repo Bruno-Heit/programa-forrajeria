@@ -826,6 +826,10 @@ class SaleValues(QObject):
     
     
     # getters
+    def getSaleDetail(self) -> str:
+        return self.__sale_detail
+    
+    
     def getProductName(self) -> str:
         return str(self.__product_name)
     
@@ -836,6 +840,10 @@ class SaleValues(QObject):
     
     def getPriceType(self) -> InventoryPriceType:
         return InventoryPriceType.NORMAL if not self.__is_comercial_price else InventoryPriceType.COMERCIAL
+    
+    
+    def getDatetime(self) -> str:
+        return str(self.__datetime)
     
     
     def isProductNameValid(self) -> bool:
@@ -939,13 +947,52 @@ class SaleValues(QObject):
         return str(self.__total_paid) if self.__total_paid else None
 
 
+    def getDebtorName(self) -> str:
+        return self.__debtor_name
+    
+    
+    def getDebtorSurname(self) -> str:
+        return self.__debtor_surname
 
-# TODO: CORREGIR LA UNIDAD DE MEDIDA QUE DEVUELVE CUANDO ES NULL, DEVUELVE None, DEBERÍA DEVOLVER '' EN ESOS CASOS
+
+    def getData(self) -> dict[str, Any]:
+        '''
+        Retorna todos los valores formateados.
+
+        Retorna
+        -------
+        dict[SaleFields.name, Any]
+            dict[SaleFields.name, Any] con todos los valores formateados
+        '''
+        return {
+            SaleFields.SALE_DETAILS.name: self.getSaleDetail(),
+            SaleFields.PRODUCT_NAME.name: self.getProductName(),
+            SaleFields.QUANTITY.name: float(self.getQuantity()),
+            SaleFields.IS_COMERCIAL_PRICE.name: self.__is_comercial_price,
+            SaleFields.TOTAL_COST.name: float(self.getTotalCost()),
+            SaleFields.TOTAL_PAID.name: float(self.getTotalPaid()),
+            SaleFields.DATETIME.name: self.getDatetime(),
+            SaleFields.DEBTOR_NAME.name: self.getDebtorName() if self.thereIsDebt() else None,
+            SaleFields.DEBTOR_SURNAME.name: self.getDebtorSurname() if self.thereIsDebt() else None
+        }
+
+
+
+
+
+# TODO: ya que no se altera el stock de Productos, no necesito mostrar el stock disponible... sacar esa función
 # Dialog con datos de la venta -y del deudor si se debe algo/hay algo a favor-
 class SaleDialog(QDialog):
-    '''QDialog creado al presionar el botón 'MainWindow.btn_add_product_sales'. Sirve para crear un nuevo registro 
-    de venta en la tabla "Ventas", de detalles de venta en "Detalle_Ventas", de deuda en "Deudas" (si hay diferencia 
-    entre lo abonado y el costo total) y de deudor en "Deudores" (si hay deuda) en la base de datos.'''
+    '''
+    QDialog creado al presionar el botón 'MainWindow.btn_add_product_sales'. 
+    Sirve para crear un nuevo registro de venta en la tabla "Ventas", de 
+    detalles de venta en "Detalle_Ventas" y de deuda en "Deudas" (si hay 
+    diferencia entre lo abonado y el costo total) en la base de datos.
+
+    Éste QDialog, una vez presionado el botón "Aceptar", emite mediante la 
+    señal 'dataFilled' un dict[str, Any] con los valores necesarios a 
+    'MainWindow' para actualizar desde allí el MODELO DE DATOS de la tabla.
+    '''
     minHeightChanged:Signal = Signal(int) # emite el nuevo minimumHeight, sirve para activar/desactivar el botón Ok.
     dataFilled:Signal = Signal(object) # emite un dict con todos los datos introducidos a MainWindow.
     
@@ -971,7 +1018,8 @@ class SaleDialog(QDialog):
         
         self.setup_signals()
         
-        #? por alguna razón, si desactivo antes el botón "Aceptar" no lo desactiva, así que lo hago al final
+        #? por alguna razón, si desactivo antes el botón "Aceptar" no lo 
+        #? desactiva, así que lo hago al final
         self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
         return None
     
@@ -993,6 +1041,7 @@ class SaleDialog(QDialog):
         self.saleDialog_ui.comboBox_productName.addItems(getProductNames())
         
         self.saleDialog_ui.dateTimeEdit.setDateTime(QDateTime.currentDateTime())
+        self.sale_values.setDatetime(self.saleDialog_ui.dateTimeEdit.dateTime())
 
         # esconde widgets
         self.saleDialog_ui.label_productName_feedback.hide()
@@ -1579,207 +1628,145 @@ class SaleDialog(QDialog):
         
         self.minHeightChanged.emit(self.minimumHeight())
         return None
-    
-
-    def __getFieldsData(self) -> tuple:
-        '''
-        Es llamado desde 'self.handleOkClicked'.
-        
-        Obtiene todos los datos de los campos y formatea los valores.
-        
-        Retorna un tuple.
-        '''
-        total_paid:float
-        values:tuple
-
-        # pasa a float el valor abonado
-        try:
-            total_paid:float = float(self.saleDialog_ui.lineEdit_totalPaid.text().replace(",","."))
-        
-        except ValueError:
-            total_paid = self.saleDialog_ui.lineEdit_totalPaid.text()
-
-        # si debtor_data está oculto es porque la cantidad abonada es igual o mayor al total a pagar...
-        if self.saleDialog_ui.debtor_data.isHidden():
-            values = (
-                self.saleDialog_ui.lineEdit_saleDetail.text().strip(), # 0, detalle de venta
-                self.saleDialog_ui.comboBox_productName.currentText(), # 1, nombre del producto
-                self.saleDialog_ui.lineEdit_productQuantity.text(), # 2, cantidad
-                self.saleDialog_ui.checkBox_comercialPrice.isChecked(), # 3, precio comercial
-                self.TOTAL_COST, # 4, costo total
-                total_paid, # 5, total abonado
-                self.saleDialog_ui.dateTimeEdit.text() # 6, fecha y hora
-                )
-        
-        # sino, es porque la cantidad abonada es menor al total a pagar...
-        else:
-            values = (
-                self.saleDialog_ui.lineEdit_saleDetail.text().strip(), # 0
-                self.saleDialog_ui.comboBox_productName.currentText(), # 1
-                self.saleDialog_ui.lineEdit_productQuantity.text(), # 2
-                self.saleDialog_ui.checkBox_comercialPrice.isChecked(), # 3
-                self.TOTAL_COST, # 4
-                total_paid, # 5
-                self.saleDialog_ui.dateTimeEdit.text(), # 6
-                # title() hace que cada palabra comience con mayúsculas...
-                self.saleDialog_ui.cb_debtor_name.itemText(
-                    self.saleDialog_ui.cb_debtor_name.currentIndex()), # 7
-                self.saleDialog_ui.cb_debtor_surname.itemText(
-                    self.saleDialog_ui.cb_debtor_surname.currentIndex()), # 8
-                )
-        return values
 
 
     @Slot()
     def handleOkClicked(self) -> None:
         '''
-        Obtiene los datos formateados de los campos, hace las consultas INSERT a la base 
-        de datos y actualiza el stock en la tabla "Productos".
-        NOTA: las consultas se hacen sin llamar a otra función, y tampoco usando 
-        MULTITHREADING, esto es es así para garantizar la atomicidad e integridad de los 
-        datos.
-        
-        
+        Hace las consultas INSERT a la base de datos con los valores 
+        insertados, luego emite la señal 'dataFilled' con los valores que 
+        necesita MainWindow para actualizar el MODELO DE DATOS de la tabla 
+        de Ventas.
+        NOTA: ni en éste dialog ni en la sección de la tabla de Ventas se 
+        realizan UPDATES al stock de los productos.
         '''
-        #? siempre se insertan datos en Ventas y Detalle_Ventas, pero si el "total abonado" no es igual 
-        #? al "costo total" entonces se insertan datos también en Deudas y Deudores.
-
-        # obtiene los valores formateados de los campos...
-        values:tuple = self.__getFieldsData()
-
-        #! hago las consultas sin llamar funciones porque necesito tratarlas como una transacción, es decir, 
-        #! se hacen todas las consultas INSERT o ninguna...
-        conn = createConnection("database/inventario.db")
-        if not conn:
-            return None
-        cursor = conn.cursor()
-        
-        #! lo pongo entre un try-except porque si falla algo necesito hacer un rollback
-        try:
-            # declara la consulta sql y params de Ventas y hace la consulta...
-            sql_sales:str = '''INSERT INTO Ventas(fecha_hora, detalles_venta) 
-                               VALUES(?,?);'''
-            params_sales:tuple = (values[6], values[0],)
-            cursor.execute(sql_sales, params_sales)
-            conn.commit()
-
-            # si el largo de 'values' es de 8, es porque hay una deuda/cantidad a favor dentro de la compra...
-            if len(values) == 8:
-                # verifica si el deudor en Deudores existe
-                sql_verify:str = '''SELECT COUNT(*) 
-                                    FROM Deudores 
-                                    WHERE nombre = ? 
-                                        AND apellido = ?;'''
-                params_verify:tuple = (values[7], values[8],)
-                verify_query = makeReadQuery(sql_verify, params_verify)[0][0]
-
-                # si no existe ese deudor, lo agrega...
-                if not verify_query:
-                    # declara la consulta sql y params de Deudores y hace la consulta...
-                    sql_debtor:str = '''INSERT INTO Deudores(
-                                            nombre, apellido, 
-                                            num_telefono, direccion, 
-                                            codigo_postal) 
-                                        VALUES(?, ?, ?, ?, ?);'''
-                    params_debtor:tuple = (values[7], values[8], 
-                                           values[9], values[10], 
-                                           values[11],)
-                    cursor.execute(sql_debtor, params_debtor)
-                    conn.commit()
-                
-                # declara la consutla sql y params de Deudas y hace la consulta...
-                sql_debt:str = '''INSERT INTO Deudas(
-                                    fecha_hora, total_adeudado, 
-                                    IDdeudor, eliminado) 
-                                  VALUES(?, ?, (SELECT IDdeudor 
+        with DatabaseRepository() as db_repo:
+            # Ventas
+            db_repo.insertRegister(
+                ins_sql= '''INSERT INTO Ventas(fecha_hora, detalles_venta) 
+                            VALUES(?,?);''',
+                ins_params=(
+                    self.sale_values.getDatetime(),
+                    self.sale_values.getSaleDetail()
+                )
+            )
+           
+            #? siempre se insertan datos en Ventas y Detalle_Ventas, pero si el 
+            #? total abonado no es igual al "costo total" entonces se insertan 
+            #? datos también en Deudas y Deudores...
+            if self.sale_values.thereIsDebt():
+                # Deudas
+                db_repo.insertRegister(
+                    ins_sql= '''INSERT INTO Deudas(
+                                fecha_hora,
+                                total_adeudado,
+                                IDdeudor,
+                                eliminado) 
+                                VALUES(
+                                    ?,
+                                    ?,
+                                    (SELECT IDdeudor 
                                         FROM Deudores 
                                         WHERE nombre = ? 
-                                            AND apellido = ?), 
-                                        0);'''
-                params_debt:tuple = (values[6], round(values[4] - values[5],2), values[7], values[8],)
-                cursor.execute(sql_debt, params_debt)
-                conn.commit()
-
-                # al final, declara la consulta y los parámetros para Detalle_Ventas...
-                sql_saleDetail:str = '''INSERT INTO Detalle_Ventas(
-                                            cantidad, costo_total, IDproducto, 
-                                            IDventa, abonado, IDdeuda) 
-                                        VALUES(?,?,(
-                                            SELECT IDproducto 
-                                            FROM Productos 
-                                            WHERE nombre = ?), 
-                                            (SELECT IDventa 
-                                            FROM Ventas 
-                                            WHERE fecha_hora = ? 
-                                                AND detalles_venta = ?),
-                                            ?, (
-                                            SELECT IDdeuda 
-                                            FROM Deudas 
-                                            WHERE fecha_hora = ? 
-                                            AND IDdeudor = (
-                                                SELECT IDdeudor 
-                                                FROM Deudores 
-                                                WHERE nombre = ? 
-                                                AND apellido = ?) 
-                                                ) 
-                                            );'''
-                params_saleDetail:tuple = (values[2], values[4], values[1], 
-                                           values[6], values[0], values[5], 
-                                           values[6], values[7], values[8],)
+                                        AND apellido = ?), 
+                                    0);''',
+                    ins_params=(
+                        self.sale_values.getDatetime(),
+                        round(
+                            float(self.sale_values.getTotalCost()) - float(self.sale_values.getTotalPaid()),
+                            2
+                        ),
+                        self.sale_values.getDebtorName(),
+                        self.sale_values.getDebtorSurname()
+                        )
+                )
+                
+                # Detalle_Ventas
+                db_repo.insertRegister(
+                    ins_sql= '''INSERT INTO Detalle_Ventas(
+                                    cantidad,
+                                    costo_total,
+                                    IDproducto, 
+                                    IDventa,
+                                    abonado,
+                                    IDdeuda) 
+                                VALUES(
+                                    ?,
+                                    ?,
+                                    (SELECT IDproducto 
+                                     FROM Productos 
+                                     WHERE nombre = ?),
+                                    (SELECT IDventa 
+                                     FROM Ventas 
+                                     WHERE fecha_hora = ? 
+                                     AND detalles_venta = ?),
+                                    ?,
+                                    (SELECT IDdeuda 
+                                        FROM Deudas 
+                                        WHERE fecha_hora = ? 
+                                        AND IDdeudor = (
+                                            SELECT IDdeudor 
+                                            FROM Deudores 
+                                            WHERE nombre = ? 
+                                            AND apellido = ?))
+                                    );''',
+                    ins_params=(
+                        float(self.sale_values.getQuantity()),
+                        float(self.sale_values.getTotalCost()),
+                        self.sale_values.getProductName(),
+                        self.sale_values.getDatetime(),
+                        self.sale_values.getSaleDetail(),
+                        float(self.sale_values.getTotalPaid()),
+                        self.sale_values.getDatetime(),
+                        self.sale_values.getDebtorName(),
+                        self.sale_values.getDebtorSurname()
+                    )
+                )
             
             # si lo abonado es igual al total...
             else:
-                # declara la consulta sql y los params de Detalle_Ventas (solamente de esa tabla)...
-                sql_saleDetail:str = '''INSERT INTO Detalle_Ventas(
-                                            cantidad, costo_total, IDproducto, 
-                                            IDventa, abonado, IDdeuda) 
-                                        VALUES(?, ?, (
-                                            SELECT IDproducto 
-                                            FROM Productos 
-                                            WHERE nombre = ?), (
-                                            SELECT IDventa 
-                                            FROM Ventas 
-                                            WHERE fecha_hora = ? 
-                                            AND detalles_venta = ?), 
-                                            ?, NULL);'''
-                params_saleDetail:tuple = (values[2], values[4], values[1], 
-                                           values[6], values[0], values[5],)
+                # Detalle_Ventas
+                db_repo.insertRegister(
+                    ins_sql= '''INSERT INTO Detalle_Ventas(
+                                    cantidad,
+                                    costo_total,
+                                    IDproducto,
+                                    IDventa,
+                                    abonado,
+                                    IDdeuda)
+                                VALUES(
+                                    ?,
+                                    ?,
+                                    (SELECT IDproducto 
+                                     FROM Productos 
+                                     WHERE nombre = ?),
+                                    (SELECT IDventa 
+                                     FROM Ventas 
+                                     WHERE fecha_hora = ? 
+                                     AND detalles_venta = ?),
+                                    ?,
+                                    NULL);''',
+                ins_params=(
+                    float(self.sale_values.getQuantity()),
+                    float(self.sale_values.getTotalCost()),
+                    self.sale_values.getProductName(),
+                    self.sale_values.getDatetime(),
+                    self.sale_values.getSaleDetail(),
+                    float(self.sale_values.getTotalPaid())
+                    )
+                )
             
-            # hace la consulta a Detalle_Ventas
-            cursor.execute(sql_saleDetail, params_saleDetail)
-            conn.commit()
-            
-            # antes de terminar, actualiza el stock en Productos (resta al stock la cantidad vendida)
-            sql_product:str = '''UPDATE Productos 
-                                 SET stock = stock - ? 
-                                 WHERE nombre = ?;'''
-            params_product:tuple = (values[2], values[1],)
-            cursor.execute(sql_product, params_product)
-            conn.commit()
-            
-            self.__emitDataFilled(values=values)
-            
-        except sqlite3Error as err:
-            conn.rollback()
-            logging.critical(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+            # self.__emitDataFilled(values=values)
         
-        finally:
-            conn.close()
+        self.__emitDataFilled()
         return None
     
     
-    def __emitDataFilled(self, values:tuple[Any]) -> None:
+    def __emitDataFilled(self) -> None:
         '''
-        Convierte los datos recibidos en un diccionario y los emite por medio de 
-        la señal 'dataFilled' a MainWindow para, desde ahí, actualizar el MODELO 
-        de datos.
-
-        Parámetros
-        ----------
-        values : tuple[Any]
-            datos a emitir a MainWindow
-
-        
+        Convierte los datos recibidos en un diccionario y los emite por medio 
+        de la señal 'dataFilled' a MainWindow para, desde ahí, actualizar el 
+        MODELO DE DATOS.
         '''
         values_to_dict:dict[str, Any] = {}
         
@@ -1790,35 +1777,21 @@ class SaleDialog(QDialog):
                                 FROM Detalle_Ventas 
                                 ORDER BY ID_detalle_venta DESC 
                                 LIMIT 1;''')[0][0],
-                'sale_detail': values[0],
-                'product_quantity': values[2],
+                'sale_detail': self.sale_values.getSaleDetail(),
+                'product_quantity': float(self.sale_values.getQuantity()),
                 'product_measurement_unit': db_repo.selectRegisters(
-                    data_sql='''SELECT unidad_medida 
+                    data_sql='''SELECT 
+                                COALESCE(unidad_medida, '')
                                 FROM Productos 
                                 WHERE nombre = ?;''',
-                    data_params=(values[1],) )[0][0],
-                'product_name': values[1],
-                'total_cost': values[4],
-                'total_paid': values[5],
-                'datetime': values[6],
+                    data_params=(self.sale_values.getProductName(),) )[0][0],
+                'product_name': self.sale_values.getProductName(),
+                'total_cost': float(self.sale_values.getTotalCost()),
+                'total_paid': float(self.sale_values.getTotalPaid()),
+                'datetime': self.sale_values.getDatetime(),
             }
-            
-            # si el largo de la tupla es de 12 es porque hay deuda
-            if len(values) == 8:
-                values_to_dict.update({
-                    'IDdebt': db_repo.selectRegisters(
-                        data_sql='''SELECT IDdeuda 
-                                    FROM Deudas 
-                                    ORDER BY IDdeuda DESC
-                                    LIMIT 1;''')[0][0],
-                    'debtor_name': values[7],
-                    'debtor_surname': values[8],
-                    'debtor_phone_number': values[9],
-                    'debtor_direction': values[10],
-                    'debtor_postal_code': values[11],
-                })
-                
-            self.dataFilled.emit(values_to_dict)
+        
+        self.dataFilled.emit(values_to_dict)
         return None
 
 
