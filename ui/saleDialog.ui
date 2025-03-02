@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>555</width>
-    <height>422</height>
+    <height>428</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>555</width>
-    <height>422</height>
+    <height>428</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>555</width>
-    <height>422</height>
+    <height>428</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -129,8 +129,10 @@ QPushButton {
 	border: none;
 	border-radius: 4px;
 	width: 220px;
+	height: 30px;
 }
-QPushButton:hover {
+QPushButton:hover,
+QPushButton:focus {
 	background-color: #3b66ab;
 }
 QPushButton:pressed {
@@ -923,13 +925,13 @@ QScrollBar::handle:horizontal {
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>26</height>
+       <height>30</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>26</height>
+       <height>30</height>
       </size>
      </property>
      <property name="orientation">

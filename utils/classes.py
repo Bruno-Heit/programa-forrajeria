@@ -1039,25 +1039,20 @@ class SaleDialog(QDialog):
         self.cancel_icon = QIcon() # botón "Cancelar"
         
         # TODO: ver si está toda la parte visual bien, si estoy contento con eso, tengo que seguir la parte de Deudas en model_classes
-        
-        # botón "Aceptar"
-        self.cancel_icon.addFile(":/icons/accept.svg", QSize())
-        self.saleDialog_ui.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setIcon(self.accept_icon)
-        # botón "Cancelar"
-        self.cancel_icon.addFile(":/icons/cancel.svg", QSize())
-        self.saleDialog_ui.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setIcon(self.cancel_icon)
-        
         # flecha del combobox
         self.saleDialog_ui.sale_data.setStyleSheet(WidgetStyle.DEF_COMBOBOX_ARROW_ICON.value)
         self.saleDialog_ui.debtor_data.setStyleSheet(WidgetStyle.DEF_COMBOBOX_ARROW_ICON.value)
         
         self.saleDialog_ui.buttonBox.setStyleSheet(
             ''' QDialogButtonBox QPushButton[text='Cancelar'] {
-                    background-color: #ff4949;
+                    background-color: #fff;
+                    color: #111;
+                    border: 1px solid #aaa;
                 }
                 QDialogButtonBox QPushButton[text='Cancelar']:hover,
-                QDialogButtonBox QPushButton[text='Cancelar']:pressed {
-                    background-color: #faa;
+                QDialogButtonBox QPushButton[text='Cancelar']:pressed,
+                QDialogButtonBox QPushButton[text='Cancelar']:focus {
+                    background-color: #ccc;
                 }''')
         
         self.saleDialog_ui.dateTimeEdit.setStyleSheet(
