@@ -545,16 +545,20 @@ class SaleValues(QObject):
             el nuevo detalle de la venta, si es None es porque se actualiza 
             de forma programática, sino es porque el usuario lo escribió
         '''
-        price_type:str = None
+        price_type:str = "P. COMERCIAL" if self.__is_comercial_price else "P. PÚBLICO"
+        _quantity:str = "..."
+        _product_name:str = "..."
         new_sale_detail:str = None
         _pattern:Pattern
         
         match sale_detail:
             case None: # generado programáticamente
-                price_type = "P. COMERCIAL" if self.__is_comercial_price else "P. PÚBLICO"
-                self.__sale_detail = f"{self.__quantity} de {self.__product_name} ({price_type})"
+                _quantity = _quantity if not self.__quantity else self.__quantity
+                _product_name = _product_name if not self.__product_name else self.__product_name
+                self.__sale_detail = f"{_quantity} de {_product_name} ({price_type})"
             
             case _: # lo escribió el usuario
+                print(sale_detail)
                 _pattern = compile(
                     Regex.SALES_DETAILS_PRICE_TYPE.value,
                     flags=IGNORECASE)
@@ -708,7 +712,7 @@ class SaleValues(QObject):
     def setTotalCost(self) -> None:
         '''
         Calcula el total a partir del precio del producto y la cantidad, y 
-        emite laseñal 'totalCostChanged'.
+        emite la señal 'totalCostChanged'.
         
         Nota: El precio es obtenido desde la base de datos en este método.
         '''
@@ -955,28 +959,6 @@ class SaleValues(QObject):
         return self.__debtor_surname
 
 
-    def getData(self) -> dict[str, Any]:
-        '''
-        Retorna todos los valores formateados.
-
-        Retorna
-        -------
-        dict[SaleFields.name, Any]
-            dict[SaleFields.name, Any] con todos los valores formateados
-        '''
-        return {
-            SaleFields.SALE_DETAILS.name: self.getSaleDetail(),
-            SaleFields.PRODUCT_NAME.name: self.getProductName(),
-            SaleFields.QUANTITY.name: float(self.getQuantity()),
-            SaleFields.IS_COMERCIAL_PRICE.name: self.__is_comercial_price,
-            SaleFields.TOTAL_COST.name: float(self.getTotalCost()),
-            SaleFields.TOTAL_PAID.name: float(self.getTotalPaid()),
-            SaleFields.DATETIME.name: self.getDatetime(),
-            SaleFields.DEBTOR_NAME.name: self.getDebtorName() if self.thereIsDebt() else None,
-            SaleFields.DEBTOR_SURNAME.name: self.getDebtorSurname() if self.thereIsDebt() else None
-        }
-
-
 
 
 
@@ -1064,6 +1046,8 @@ class SaleDialog(QDialog):
         self.accept_icon = QIcon() # botón "Aceptar"
         self.cancel_icon = QIcon() # botón "Cancelar"
         
+        # TODO: ver si está toda la parte visual bien, si estoy contento con eso, tengo que seguir la parte de Deudas en model_classes
+        
         # botón "Aceptar"
         self.cancel_icon.addFile(":/icons/accept.svg", QSize())
         self.saleDialog_ui.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setIcon(self.accept_icon)
@@ -1140,7 +1124,7 @@ class SaleDialog(QDialog):
     def setup_signals(self) -> None:
         # detalles de venta
         self.saleDialog_ui.lineEdit_saleDetail.editingFinished.connect(
-            self.sale_values.setSaleDetail(
+            lambda: self.sale_values.setSaleDetail(
                 self.saleDialog_ui.lineEdit_saleDetail.text()
             )
         )
