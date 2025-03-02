@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>556</width>
-    <height>470</height>
+    <height>475</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>556</width>
-    <height>470</height>
+    <height>475</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>556</width>
-    <height>470</height>
+    <height>575</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -60,14 +60,8 @@ QFrame, QWidget {
 #frame_middle,
 #frame_lower {
 	background-color: #fff;
-	padding: 5px 3px;
+	padding: 0px 3px;
 	border-radius: 10px;
-}
-
-
-#frame_productDescription,
-#frame_measurementUnit {
-	margin-bottom: 10px;
 }
 
 
@@ -111,8 +105,10 @@ QPushButton {
 	border: none;
 	border-radius: 4px;
 	width: 220px;
+	height: 30px;
 }
-QPushButton:hover {
+QPushButton:hover,
+QPushButton:focus {
 	background-color: #3b66ab;
 }
 QPushButton:pressed {
@@ -224,7 +220,7 @@ QScrollBar::add-page:vertical {
    <item>
     <widget class="QFrame" name="mainForm">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -232,7 +228,13 @@ QScrollBar::add-page:vertical {
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>425</height>
+       <height>435</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>435</height>
       </size>
      </property>
      <property name="frameShape">
@@ -260,7 +262,7 @@ QScrollBar::add-page:vertical {
       <item>
        <widget class="QFrame" name="frame_upper">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -268,6 +270,12 @@ QScrollBar::add-page:vertical {
         <property name="minimumSize">
          <size>
           <width>0</width>
+          <height>160</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
           <height>160</height>
          </size>
         </property>
@@ -625,7 +633,7 @@ QScrollBar::add-page:vertical {
       <item>
        <widget class="QFrame" name="frame_middle">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -633,6 +641,12 @@ QScrollBar::add-page:vertical {
         <property name="minimumSize">
          <size>
           <width>0</width>
+          <height>110</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
           <height>110</height>
          </size>
         </property>
@@ -888,7 +902,7 @@ QScrollBar::add-page:vertical {
       <item>
        <widget class="QFrame" name="frame_lower">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -896,6 +910,12 @@ QScrollBar::add-page:vertical {
         <property name="minimumSize">
          <size>
           <width>0</width>
+          <height>125</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
           <height>125</height>
          </size>
         </property>
@@ -1114,10 +1134,22 @@ QScrollBar::add-page:vertical {
             </item>
             <item row="1" column="0" colspan="2" alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
              <widget class="QLabel" name="label_comercialPriceWarning">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>0</width>
                 <height>18</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
                </size>
               </property>
               <property name="font">
@@ -1165,13 +1197,13 @@ QScrollBar::add-page:vertical {
      <property name="minimumSize">
       <size>
        <width>556</width>
-       <height>26</height>
+       <height>30</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
        <width>556</width>
-       <height>26</height>
+       <height>30</height>
       </size>
      </property>
      <property name="orientation">

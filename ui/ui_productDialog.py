@@ -24,14 +24,14 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(556, 470)
+        Dialog.resize(556, 475)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Dialog.sizePolicy().hasHeightForWidth())
         Dialog.setSizePolicy(sizePolicy)
-        Dialog.setMinimumSize(QSize(556, 470))
-        Dialog.setMaximumSize(QSize(556, 470))
+        Dialog.setMinimumSize(QSize(556, 475))
+        Dialog.setMaximumSize(QSize(556, 575))
         Dialog.setStyleSheet(u"* {\n"
 "	color: #111;\n"
 "	font-family: \"Futura\", \"Verdana\", \"Sans-Serif\";\n"
@@ -60,14 +60,8 @@ class Ui_Dialog(object):
 "#frame_middle,\n"
 "#frame_lower {\n"
 "	background-color: #fff;\n"
-"	padding: 5px 3px;\n"
+"	padding: 0px 3px;\n"
 "	border-radius: 10px;\n"
-"}\n"
-"\n"
-"\n"
-"#frame_productDescription,\n"
-"#frame_measurementUnit {\n"
-"	margin-bottom: 10px;\n"
 "}\n"
 "\n"
 "\n"
@@ -94,13 +88,13 @@ class Ui_Dialog(object):
 "	background-color: #e0e1dd;\n"
 "	color: #0d1b2a;\n"
 "	border: none;\n"
-""
-                        "	border-radius: 10px;\n"
+"	border-radius: 10px;\n"
 "	padding-left: 3px;\n"
 "	padding-right: 3px;\n"
 "}\n"
 "QLineEdit:focus {\n"
-"	background-color: #3b66ab;\n"
+""
+                        "	background-color: #3b66ab;\n"
 "	color: #fff;\n"
 "}\n"
 "\n"
@@ -112,8 +106,10 @@ class Ui_Dialog(object):
 "	border: none;\n"
 "	border-radius: 4px;\n"
 "	width: 220px;\n"
+"	height: 30px;\n"
 "}\n"
-"QPushButton:hover {\n"
+"QPushButton:hover,\n"
+"QPushButton:focus {\n"
 "	background-color: #3b66ab;\n"
 "}\n"
 "QPushButton:pressed {\n"
@@ -145,10 +141,10 @@ class Ui_Dialog(object):
 "	subcontrol-origin: padding;\n"
 "	subcontrol-position: top right;\n"
 "	width: 20px;\n"
-"	pa"
-                        "dding-right: 3px;\n"
+"	padding-right: 3px;\n"
 "	border-left: none;\n"
-"	border-top-right-radius: 5px;\n"
+"	border-top-rig"
+                        "ht-radius: 5px;\n"
 "	border-bottom-right-radius: 5px;\n"
 "}\n"
 "QComboBox::down-arrow:on {\n"
@@ -197,11 +193,11 @@ class Ui_Dialog(object):
 "QScrollBar::handle:vertical {\n"
 "	min-height: 15px;\n"
 "}\n"
-"QScrollB"
-                        "ar::sub-page:vertical {\n"
+"QScrollBar::sub-page:vertical {\n"
 "	background: none;\n"
 "}\n"
-"QScrollBar::add-page:vertical {\n"
+"QScr"
+                        "ollBar::add-page:vertical {\n"
 "	background: none;\n"
 "}")
         Dialog.setSizeGripEnabled(False)
@@ -211,12 +207,13 @@ class Ui_Dialog(object):
         self.dialog_Vlayout.setContentsMargins(0, 0, 0, 0)
         self.mainForm = QFrame(Dialog)
         self.mainForm.setObjectName(u"mainForm")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.mainForm.sizePolicy().hasHeightForWidth())
         self.mainForm.setSizePolicy(sizePolicy1)
-        self.mainForm.setMinimumSize(QSize(0, 425))
+        self.mainForm.setMinimumSize(QSize(0, 435))
+        self.mainForm.setMaximumSize(QSize(16777215, 435))
         self.mainForm.setFrameShape(QFrame.Shape.NoFrame)
         self.mainForm.setFrameShadow(QFrame.Shadow.Raised)
         self.mainForm_Vlayout = QVBoxLayout(self.mainForm)
@@ -228,6 +225,7 @@ class Ui_Dialog(object):
         sizePolicy1.setHeightForWidth(self.frame_upper.sizePolicy().hasHeightForWidth())
         self.frame_upper.setSizePolicy(sizePolicy1)
         self.frame_upper.setMinimumSize(QSize(0, 160))
+        self.frame_upper.setMaximumSize(QSize(16777215, 160))
         self.frame_upper.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_upper.setFrameShadow(QFrame.Shadow.Raised)
         self.verticalLayout = QVBoxLayout(self.frame_upper)
@@ -236,8 +234,11 @@ class Ui_Dialog(object):
         self.verticalLayout.setContentsMargins(5, 5, 5, 5)
         self.frame_productName = QFrame(self.frame_upper)
         self.frame_productName.setObjectName(u"frame_productName")
-        sizePolicy1.setHeightForWidth(self.frame_productName.sizePolicy().hasHeightForWidth())
-        self.frame_productName.setSizePolicy(sizePolicy1)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.frame_productName.sizePolicy().hasHeightForWidth())
+        self.frame_productName.setSizePolicy(sizePolicy2)
         self.frame_productName.setMaximumSize(QSize(16777215, 16777215))
 #if QT_CONFIG(tooltip)
         self.frame_productName.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">El nombre del producto.</span></p><p><span style=\" font-size:12pt; font-weight:600;\">CONSEJO:</span><span style=\" font-size:12pt;\"> mantener el nombre simple, usando marcas de los productos y el tipo como nombre (ejemplo: Dog-Chow razas peque\u00f1as).</span></p></body></html>")
@@ -291,8 +292,8 @@ class Ui_Dialog(object):
 
         self.frame_productCategory = QFrame(self.frame_upper)
         self.frame_productCategory.setObjectName(u"frame_productCategory")
-        sizePolicy1.setHeightForWidth(self.frame_productCategory.sizePolicy().hasHeightForWidth())
-        self.frame_productCategory.setSizePolicy(sizePolicy1)
+        sizePolicy2.setHeightForWidth(self.frame_productCategory.sizePolicy().hasHeightForWidth())
+        self.frame_productCategory.setSizePolicy(sizePolicy2)
         self.frame_productCategory.setMinimumSize(QSize(0, 0))
         self.frame_productCategory.setMaximumSize(QSize(16777215, 16777215))
 #if QT_CONFIG(tooltip)
@@ -344,8 +345,8 @@ class Ui_Dialog(object):
 
         self.frame_productDescription = QFrame(self.frame_upper)
         self.frame_productDescription.setObjectName(u"frame_productDescription")
-        sizePolicy1.setHeightForWidth(self.frame_productDescription.sizePolicy().hasHeightForWidth())
-        self.frame_productDescription.setSizePolicy(sizePolicy1)
+        sizePolicy2.setHeightForWidth(self.frame_productDescription.sizePolicy().hasHeightForWidth())
+        self.frame_productDescription.setSizePolicy(sizePolicy2)
         self.frame_productDescription.setMinimumSize(QSize(0, 0))
         self.frame_productDescription.setMaximumSize(QSize(16777215, 16777215))
 #if QT_CONFIG(tooltip)
@@ -367,11 +368,11 @@ class Ui_Dialog(object):
 
         self.lineedit_productDescription = QLineEdit(self.frame_productDescription)
         self.lineedit_productDescription.setObjectName(u"lineedit_productDescription")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.lineedit_productDescription.sizePolicy().hasHeightForWidth())
-        self.lineedit_productDescription.setSizePolicy(sizePolicy2)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.lineedit_productDescription.sizePolicy().hasHeightForWidth())
+        self.lineedit_productDescription.setSizePolicy(sizePolicy3)
         self.lineedit_productDescription.setMinimumSize(QSize(0, 24))
         self.lineedit_productDescription.setMaximumSize(QSize(16777215, 24))
         self.lineedit_productDescription.setText(u"")
@@ -395,6 +396,7 @@ class Ui_Dialog(object):
         sizePolicy1.setHeightForWidth(self.frame_middle.sizePolicy().hasHeightForWidth())
         self.frame_middle.setSizePolicy(sizePolicy1)
         self.frame_middle.setMinimumSize(QSize(0, 110))
+        self.frame_middle.setMaximumSize(QSize(16777215, 110))
         self.frame_middle.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_middle.setFrameShadow(QFrame.Shadow.Raised)
         self.verticalLayout_2 = QVBoxLayout(self.frame_middle)
@@ -403,8 +405,8 @@ class Ui_Dialog(object):
         self.verticalLayout_2.setContentsMargins(5, 5, 5, 5)
         self.frame_productStock = QFrame(self.frame_middle)
         self.frame_productStock.setObjectName(u"frame_productStock")
-        sizePolicy1.setHeightForWidth(self.frame_productStock.sizePolicy().hasHeightForWidth())
-        self.frame_productStock.setSizePolicy(sizePolicy1)
+        sizePolicy2.setHeightForWidth(self.frame_productStock.sizePolicy().hasHeightForWidth())
+        self.frame_productStock.setSizePolicy(sizePolicy2)
         self.frame_productStock.setMinimumSize(QSize(0, 0))
         self.frame_productStock.setMaximumSize(QSize(16777215, 16777215))
 #if QT_CONFIG(tooltip)
@@ -441,11 +443,11 @@ class Ui_Dialog(object):
         self.label_stockWarning = QLabel(self.frame_productStock)
         self.label_stockWarning.setObjectName(u"label_stockWarning")
         self.label_stockWarning.setEnabled(True)
-        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.label_stockWarning.sizePolicy().hasHeightForWidth())
-        self.label_stockWarning.setSizePolicy(sizePolicy3)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.label_stockWarning.sizePolicy().hasHeightForWidth())
+        self.label_stockWarning.setSizePolicy(sizePolicy4)
         self.label_stockWarning.setMinimumSize(QSize(0, 18))
         self.label_stockWarning.setMaximumSize(QSize(16777215, 16777215))
         self.label_stockWarning.setText(u"")
@@ -463,8 +465,8 @@ class Ui_Dialog(object):
 
         self.frame_measurementUnit = QFrame(self.frame_middle)
         self.frame_measurementUnit.setObjectName(u"frame_measurementUnit")
-        sizePolicy1.setHeightForWidth(self.frame_measurementUnit.sizePolicy().hasHeightForWidth())
-        self.frame_measurementUnit.setSizePolicy(sizePolicy1)
+        sizePolicy2.setHeightForWidth(self.frame_measurementUnit.sizePolicy().hasHeightForWidth())
+        self.frame_measurementUnit.setSizePolicy(sizePolicy2)
         self.frame_measurementUnit.setMinimumSize(QSize(0, 0))
         self.frame_measurementUnit.setMaximumSize(QSize(16777215, 16777215))
 #if QT_CONFIG(tooltip)
@@ -511,6 +513,7 @@ class Ui_Dialog(object):
         sizePolicy1.setHeightForWidth(self.frame_lower.sizePolicy().hasHeightForWidth())
         self.frame_lower.setSizePolicy(sizePolicy1)
         self.frame_lower.setMinimumSize(QSize(0, 125))
+        self.frame_lower.setMaximumSize(QSize(16777215, 125))
         self.frame_lower.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_lower.setFrameShadow(QFrame.Shadow.Raised)
         self.verticalLayout_3 = QVBoxLayout(self.frame_lower)
@@ -519,8 +522,8 @@ class Ui_Dialog(object):
         self.verticalLayout_3.setContentsMargins(5, 5, 5, 5)
         self.frame_unitPrice = QFrame(self.frame_lower)
         self.frame_unitPrice.setObjectName(u"frame_unitPrice")
-        sizePolicy1.setHeightForWidth(self.frame_unitPrice.sizePolicy().hasHeightForWidth())
-        self.frame_unitPrice.setSizePolicy(sizePolicy1)
+        sizePolicy2.setHeightForWidth(self.frame_unitPrice.sizePolicy().hasHeightForWidth())
+        self.frame_unitPrice.setSizePolicy(sizePolicy2)
         self.frame_unitPrice.setMinimumSize(QSize(0, 0))
         self.frame_unitPrice.setMaximumSize(QSize(16777215, 16777215))
         self.frame_unitPrice.setFrameShape(QFrame.Shape.NoFrame)
@@ -568,8 +571,8 @@ class Ui_Dialog(object):
 
         self.frame_comercialPrice = QFrame(self.frame_lower)
         self.frame_comercialPrice.setObjectName(u"frame_comercialPrice")
-        sizePolicy1.setHeightForWidth(self.frame_comercialPrice.sizePolicy().hasHeightForWidth())
-        self.frame_comercialPrice.setSizePolicy(sizePolicy1)
+        sizePolicy2.setHeightForWidth(self.frame_comercialPrice.sizePolicy().hasHeightForWidth())
+        self.frame_comercialPrice.setSizePolicy(sizePolicy2)
         self.frame_comercialPrice.setMaximumSize(QSize(16777215, 16777215))
 #if QT_CONFIG(tooltip)
         self.frame_comercialPrice.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">El precio que se le cobra a los comercios.</span></p></body></html>")
@@ -600,7 +603,10 @@ class Ui_Dialog(object):
 
         self.label_comercialPriceWarning = QLabel(self.frame_comercialPrice)
         self.label_comercialPriceWarning.setObjectName(u"label_comercialPriceWarning")
+        sizePolicy4.setHeightForWidth(self.label_comercialPriceWarning.sizePolicy().hasHeightForWidth())
+        self.label_comercialPriceWarning.setSizePolicy(sizePolicy4)
         self.label_comercialPriceWarning.setMinimumSize(QSize(0, 18))
+        self.label_comercialPriceWarning.setMaximumSize(QSize(16777215, 16777215))
         font = QFont()
         font.setFamilies([u"Futura"])
         font.setBold(False)
@@ -629,8 +635,8 @@ class Ui_Dialog(object):
         self.buttonBox.setObjectName(u"buttonBox")
         sizePolicy.setHeightForWidth(self.buttonBox.sizePolicy().hasHeightForWidth())
         self.buttonBox.setSizePolicy(sizePolicy)
-        self.buttonBox.setMinimumSize(QSize(556, 26))
-        self.buttonBox.setMaximumSize(QSize(556, 26))
+        self.buttonBox.setMinimumSize(QSize(556, 30))
+        self.buttonBox.setMaximumSize(QSize(556, 30))
         self.buttonBox.setOrientation(Qt.Orientation.Horizontal)
         self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
         self.buttonBox.setCenterButtons(True)
