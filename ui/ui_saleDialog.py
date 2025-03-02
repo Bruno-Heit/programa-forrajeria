@@ -24,14 +24,14 @@ class Ui_saleDialog(object):
     def setupUi(self, saleDialog):
         if not saleDialog.objectName():
             saleDialog.setObjectName(u"saleDialog")
-        saleDialog.resize(555, 422)
+        saleDialog.resize(555, 428)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(saleDialog.sizePolicy().hasHeightForWidth())
         saleDialog.setSizePolicy(sizePolicy)
-        saleDialog.setMinimumSize(QSize(555, 422))
-        saleDialog.setMaximumSize(QSize(555, 422))
+        saleDialog.setMinimumSize(QSize(555, 428))
+        saleDialog.setMaximumSize(QSize(555, 428))
         saleDialog.setStyleSheet(u"* {\n"
 "	color: #111;\n"
 "	border-color: #0b7e7f;\n"
@@ -130,8 +130,10 @@ class Ui_saleDialog(object):
 "	border: none;\n"
 "	border-radius: 4px;\n"
 "	width: 220px;\n"
+"	height: 30px;\n"
 "}\n"
-"QPushButton:hover {\n"
+"QPushButton:hover,\n"
+"QPushButton:focus {\n"
 "	background-color: #3b66ab;\n"
 "}\n"
 "QPushButton:pressed {\n"
@@ -139,10 +141,10 @@ class Ui_saleDialog(object):
 "	border: 1px inset #778da9;\n"
 "}\n"
 "QPushButton:disabled {\n"
-"	background-color: rgb(103, 115, 122);\n"
+"	background-color:"
+                        " rgb(103, 115, 122);\n"
 "	color: #999;\n"
-""
-                        "}\n"
+"}\n"
 "\n"
 "\n"
 "/* combobox */\n"
@@ -188,9 +190,9 @@ class Ui_saleDialog(object):
 "QDateTimeEdit {\n"
 "	background-color: #fff;\n"
 "}\n"
-"QCalendarWidget QAbstractItemView {\n"
-"	background-"
-                        "color: #fff;\n"
+"QCalendar"
+                        "Widget QAbstractItemView {\n"
+"	background-color: #fff;\n"
 "	selection-background-color: #38a3a5;\n"
 "}\n"
 "QCalendarWidget QToolButton {\n"
@@ -239,9 +241,9 @@ class Ui_saleDialog(object):
 "QScrollBar::handle:vertical {\n"
 "	min-height: 15px;\n"
 "}\n"
-"QScrollBar::sub-page:vertical {\n"
-"	backgroun"
-                        "d: none;\n"
+"QSc"
+                        "rollBar::sub-page:vertical {\n"
+"	background: none;\n"
 "}\n"
 "QScrollBar::add-page:vertical {\n"
 "	background: none;\n"
@@ -555,8 +557,8 @@ class Ui_saleDialog(object):
 
         self.buttonBox = QDialogButtonBox(saleDialog)
         self.buttonBox.setObjectName(u"buttonBox")
-        self.buttonBox.setMinimumSize(QSize(0, 26))
-        self.buttonBox.setMaximumSize(QSize(16777215, 26))
+        self.buttonBox.setMinimumSize(QSize(0, 30))
+        self.buttonBox.setMaximumSize(QSize(16777215, 30))
         self.buttonBox.setOrientation(Qt.Orientation.Horizontal)
         self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
         self.buttonBox.setCenterButtons(True)
