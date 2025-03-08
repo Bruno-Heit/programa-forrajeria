@@ -954,7 +954,6 @@ class SaleValues(QObject):
 
 
 
-# TODO: ya que no se altera el stock de Productos, no necesito mostrar el stock disponible... sacar esa función
 # Dialog con datos de la venta -y del deudor si se debe algo/hay algo a favor-
 class SaleDialog(QDialog):
     '''
@@ -1038,7 +1037,6 @@ class SaleDialog(QDialog):
         self.accept_icon = QIcon() # botón "Aceptar"
         self.cancel_icon = QIcon() # botón "Cancelar"
         
-        # TODO: ver si está toda la parte visual bien, si estoy contento con eso, tengo que seguir la parte de Deudas en model_classes
         # flecha del combobox
         self.saleDialog_ui.sale_data.setStyleSheet(WidgetStyle.DEF_COMBOBOX_ARROW_ICON.value)
         self.saleDialog_ui.debtor_data.setStyleSheet(WidgetStyle.DEF_COMBOBOX_ARROW_ICON.value)
@@ -1203,22 +1201,12 @@ class SaleDialog(QDialog):
         '''
         match field_validated:
             case SaleFields.QUANTITY:
-                # sólo puedo validar completamente la cantidad cuando el nombre sea válido
-                if self.sale_values.isProductNameValid():
-                    self.sale_values.setFieldValidity(SaleFields.QUANTITY, True)
-                    self.sale_values.setQuantity(
-                        quantity=self.saleDialog_ui.lineEdit_productQuantity.text().replace(",",".")
-                    )
-                    
-                    self.saleDialog_ui.label_productQuantity_feedback.setText(
-                        f"El stock disponible es de {self.quantity_validator.AVAILABLE_STOCK[0]} {self.quantity_validator.AVAILABLE_STOCK[1]}"
-                    )
-                
-                # sea el nombre válido o no, igualmente cambia los estilos del label y el lineedit
-                self.saleDialog_ui.label_productQuantity_feedback.setStyleSheet(WidgetStyle.LABEL_NEUTRAL_VAL.value)
+                self.sale_values.setFieldValidity(SaleFields.QUANTITY, True)
+                self.sale_values.setQuantity(
+                    quantity=self.saleDialog_ui.lineEdit_productQuantity.text().replace(",",".")
+                )
                 self.saleDialog_ui.lineEdit_productQuantity.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
-                if not "El stock disponible" in self.saleDialog_ui.label_productQuantity_feedback.text():
-                    self.saleDialog_ui.label_productQuantity_feedback.setText("")
+                self.saleDialog_ui.label_productQuantity_feedback.hide()
             
             case SaleFields.TOTAL_PAID:
                 self.sale_values.setFieldValidity(SaleFields.TOTAL_PAID, True)
@@ -1251,7 +1239,6 @@ class SaleDialog(QDialog):
                 self.saleDialog_ui.lineEdit_productQuantity.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
                 # resetea el estilo del campo (por defecto es rojo, igual que los otros de feedback)
                 self.saleDialog_ui.label_productQuantity_feedback.show()
-                self.saleDialog_ui.label_productQuantity_feedback.setStyleSheet("")
                 self.saleDialog_ui.label_productQuantity_feedback.setText(error_message)
             
             case SaleFields.TOTAL_PAID:
@@ -1307,27 +1294,6 @@ class SaleDialog(QDialog):
             self.saleDialog_ui.label_productName_feedback.hide()
             self.saleDialog_ui.comboBox_productName.setStyleSheet(
                 WidgetStyle.FIELD_VALID_VAL.value
-            )
-            
-            # guarda el stock del producto en el validador de cantidad
-            self.quantity_validator.setAvailableStock(
-                getCurrentProductStock(current_product)
-            )
-            
-            # coloca el stock en 'label_productQuantity_feedback'
-            self.saleDialog_ui.label_productQuantity_feedback.show()
-            self.saleDialog_ui.label_productQuantity_feedback.setStyleSheet(
-                WidgetStyle.LABEL_NEUTRAL_VAL.value
-            )
-            self.saleDialog_ui.label_productQuantity_feedback.setText(
-                f"El stock disponible es de {self.quantity_validator.AVAILABLE_STOCK[0]} {self.quantity_validator.AVAILABLE_STOCK[1]}"
-            )
-            
-            #? llama a validar la cantidad porque, si se modificó primero la cantidad y el válida, y luego 
-            #? se elige un nombre de producto que es válido pero no tiene esa cantidad en stock entonces 
-            #? el campo de cantidad devuelve un "falso positivo"... de ésta forma se arregla
-            self.quantity_validator.validate(
-                self.saleDialog_ui.lineEdit_productQuantity.text(), 0
             )
         return None
 
