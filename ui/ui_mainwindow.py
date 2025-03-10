@@ -1004,7 +1004,9 @@ class Ui_MainWindow(object):
 "	border-radius: 10px;\n"
 "}\n"
 "QListWidget::item {\n"
+"/*\n"
 "	background-color: qlineargradient(spread:pad, x1:0, y1:0.273, x2:1, y2:0.835, stop:0 rgba(144, 205, 171, 255), stop:1 rgba(187, 255, 154, 255));\n"
+"*/\n"
 "	margin-left: 7px;\n"
 "	margin-right: 7px;\n"
 "	padding: 2px;\n"
@@ -1216,7 +1218,7 @@ class Ui_MainWindow(object):
         self.tab2_toolBox.addItem(self.box1_sales_form, u"Formulario de venta")
         self.box2_sales_table = QWidget()
         self.box2_sales_table.setObjectName(u"box2_sales_table")
-        self.box2_sales_table.setGeometry(QRect(0, 0, 756, 517))
+        self.box2_sales_table.setGeometry(QRect(0, 0, 374, 187))
         self.box2_sales_table.setStyleSheet(u"#box2_sales_table {\n"
 "	background-color: #e0e1dd;\n"
 "}\n"

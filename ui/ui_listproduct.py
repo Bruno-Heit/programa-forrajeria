@@ -23,94 +23,127 @@ class Ui_listProduct(object):
     def setupUi(self, listProduct):
         if not listProduct.objectName():
             listProduct.setObjectName(u"listProduct")
-        listProduct.resize(798, 110)
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        listProduct.resize(595, 110)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(listProduct.sizePolicy().hasHeightForWidth())
         listProduct.setSizePolicy(sizePolicy)
-        listProduct.setMinimumSize(QSize(580, 110))
+        listProduct.setMinimumSize(QSize(595, 110))
         listProduct.setStyleSheet(u"* {\n"
 "	color: #111;\n"
 "	border-color: #0b7e7f;\n"
-"	font-family: \"Tahoma\", \"Verdana\", \"Sans-Serif\";\n"
-"	font-size: 17px;\n"
+"	font-family: \"Verdana\", \"Sans-Serif\";\n"
+"	font-size: 16px;\n"
+"}\n"
+"\n"
+"\n"
+"#listProduct {\n"
+"	background-color: #fff;\n"
 "}\n"
 "\n"
 "\n"
 "QToolTip {\n"
 "	background-color: #fff;\n"
+"	color: #0d1b2a;\n"
 "}\n"
 "\n"
-"QFrame, QWidget {\n"
-"	border: none;\n"
-"}\n"
 "\n"
+"/* labels */\n"
+"QLabel {\n"
+"	padding-right: 2px;\n"
+"	padding-left: 2px;\n"
+"}\n"
 "\n"
 "#label_nameFeedback, \n"
 "#label_quantityFeedback {\n"
-"	font-size: 15px;\n"
-"	color: #dc2627;\n"
-"	border: 1px solid #dc2627;\n"
-"	background-color: rgba(224,164,164,0.7);\n"
+"	background-color: #F65755;\n"
+"	color: #fff;\n"
+"	border-radius: 5px;\n"
+"}\n"
+"\n"
+"#label_subtotal {\n"
+"	font-size: 19px;\n"
+"	font-weight: 900;\n"
+"	background-color: #0d1b2a;\n"
+"	color: #e0e1dd;\n"
 "}\n"
 "\n"
 "\n"
+"/* lineedits */\n"
 "QLineEdit {\n"
-"	background-color: rgba(241, 241, 241, 0.4);\n"
+"	background-color: #e0e1dd;\n"
+"	color: #0d1b2a;\n"
 "	border: none;\n"
-"	border-top: 1px solid;\n"
-"	border-bottom: 1px solid;\n"
-"	border-color: #0b7e7f;\n"
+"	border-radius: 10px;\n"
+"	padding-left: 3px;\n"
+"	padding-right: 3px;\n"
 "}\n"
-"QLineEdit:focus,\n"
-"QComboBox:focus,\n"
-"QCheckBox:focus {\n"
-"	background-color: rgba(197, 255, 252, 150);\n"
-"	border: 1px solid;\n"
-"	border-color: #0b7e7f;\n"
-"	font-size: 18px;\n"
+"QLineEdit:focus {\n"
+"	background-color: #3b66ab;\n"
+"	color: #fff;\n"
 "}\n"
 "QLineEdit:disabled {\n"
-"	background-color: #bbb;\n"
-"	color: #555;\n"
+"	background-color: #e0e1dd;\n"
+"	color: #0d1b2a;\n"
 "}\n"
 "\n"
 "\n"
+"/* pushbutto"
+                        "ns */\n"
 "QPushButton {\n"
-"	background-color: #ff4949;\n"
-"	margin-left: 5px;\n"
-"	border: 1px solid #12476a;\n"
-"	borde"
-                        "r-radius: 2px;\n"
+"	background-color: #fff;\n"
+"	border-radius: 4px;\n"
 "}\n"
 "QPushButton:hover,\n"
+"QPushButton:focus {\n"
+"	background-color: #F68785;\n"
+"}\n"
 "QPushButton:pressed {\n"
-"	background-color: #faa;\n"
-"	color: #111;\n"
-"	border: 1px inset;\n"
-"	border-color: rgb(231, 66, 66);\n"
+"	background-color: #F68785;\n"
+"	border: 1px inset #A65755;\n"
 "}\n"
 "\n"
-"\n"
+"/* comboboxes */\n"
 "QComboBox {\n"
-"	background-color: rgb(255,255,255);\n"
-"	color: #111;\n"
-"	border: none;\n"
-"	border-top: 1px solid;\n"
-"	border-bottom: 1px solid;\n"
-"	border-color: #111;\n"
+"	background-color: #e0e1dd;\n"
+"	color: #0d1b2a;\n"
+"	border: 1px solid #3b66ab;\n"
+"	border-radius: 10px;\n"
+"	padding-left: 2px 0;\n"
 "}\n"
 "QComboBox:on {\n"
-"	background-color: rgb(197, 255, 252);\n"
-"	border: 1px solid;\n"
-"	border-color: rgb(11, 126, 127);\n"
-"	padding-top: 2px;\n"
+"	background-color: #3b66ab;\n"
+"	color: #fff;\n"
+"	border: none;\n"
+"	padding-top: 3px;\n"
 "	padding-left: 4px;\n"
 "}\n"
-"QComboBox QAbstractItemView {\n"
-"	background-color: rgba(170, 255, 127, 100);\n"
-"	selection-background-color: #38a3a5;\n"
+"QComboBox::drop-down {\n"
+"	subcontrol-origin: padding;\n"
+"	subcontrol-position: top right;\n"
+"	width: 20px;\n"
+"	padding-right: 3px;\n"
+"	border-left: none;\n"
+"	border-top-right-radius: 5px;\n"
+"	border-bottom-right-radius: 5px;\n"
+"}\n"
+"QComboBox::down-arrow:on {\n"
+"    top: 1px;\n"
+"    left: 1px;\n"
+"}\n"
+"QComboBox::down-arrow {\n"
+"	image: url(':/icons/chevron-down.svg');\n"
+"}\n"
+"QComboBox QAbstractItemView{\n"
+"	"
+                        "background-color: #778da9;\n"
+"	color: #fff;\n"
+"	selection-background-color: #3b66ab;\n"
+"}\n"
+"QComboBox:disabled {\n"
+"	background-color: rgb(103, 115, 122);\n"
+"	color: #999;\n"
 "}")
         self.gridLayout = QGridLayout(listProduct)
         self.gridLayout.setSpacing(4)
@@ -118,13 +151,13 @@ class Ui_listProduct(object):
         self.gridLayout.setContentsMargins(9, 4, 4, 4)
         self.comboBox_productName = QComboBox(listProduct)
         self.comboBox_productName.setObjectName(u"comboBox_productName")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.comboBox_productName.sizePolicy().hasHeightForWidth())
         self.comboBox_productName.setSizePolicy(sizePolicy1)
         self.comboBox_productName.setMinimumSize(QSize(70, 25))
-        self.comboBox_productName.setMaximumSize(QSize(350, 25))
+        self.comboBox_productName.setMaximumSize(QSize(16777215, 25))
 #if QT_CONFIG(tooltip)
         self.comboBox_productName.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">El nombre del producto vendido.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
@@ -140,7 +173,7 @@ class Ui_listProduct(object):
         sizePolicy.setHeightForWidth(self.frame_productQuantity.sizePolicy().hasHeightForWidth())
         self.frame_productQuantity.setSizePolicy(sizePolicy)
         self.frame_productQuantity.setMinimumSize(QSize(0, 0))
-        self.frame_productQuantity.setMaximumSize(QSize(450, 16777215))
+        self.frame_productQuantity.setMaximumSize(QSize(16777215, 16777215))
         self.frame_productQuantity.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_productQuantity.setFrameShadow(QFrame.Shadow.Raised)
         self.frame_productQuantity_Hlayout = QHBoxLayout(self.frame_productQuantity)
@@ -152,7 +185,7 @@ class Ui_listProduct(object):
         sizePolicy1.setHeightForWidth(self.lineEdit_productQuantity.sizePolicy().hasHeightForWidth())
         self.lineEdit_productQuantity.setSizePolicy(sizePolicy1)
         self.lineEdit_productQuantity.setMinimumSize(QSize(75, 25))
-        self.lineEdit_productQuantity.setMaximumSize(QSize(120, 16777215))
+        self.lineEdit_productQuantity.setMaximumSize(QSize(16777215, 16777215))
 #if QT_CONFIG(tooltip)
         self.lineEdit_productQuantity.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">La cantidad vendida del producto.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
@@ -169,7 +202,7 @@ class Ui_listProduct(object):
         self.label_productMeasurementUnit.setMaximumSize(QSize(16777215, 16777215))
         self.label_productMeasurementUnit.setText(u"")
         self.label_productMeasurementUnit.setTextFormat(Qt.TextFormat.PlainText)
-        self.label_productMeasurementUnit.setWordWrap(False)
+        self.label_productMeasurementUnit.setWordWrap(True)
         self.label_productMeasurementUnit.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
         self.frame_productQuantity_Hlayout.addWidget(self.label_productMeasurementUnit)
@@ -183,8 +216,8 @@ class Ui_listProduct(object):
         self.checkBox_comercialPrice.setObjectName(u"checkBox_comercialPrice")
         sizePolicy1.setHeightForWidth(self.checkBox_comercialPrice.sizePolicy().hasHeightForWidth())
         self.checkBox_comercialPrice.setSizePolicy(sizePolicy1)
-        self.checkBox_comercialPrice.setMinimumSize(QSize(145, 25))
-        self.checkBox_comercialPrice.setMaximumSize(QSize(150, 25))
+        self.checkBox_comercialPrice.setMinimumSize(QSize(160, 25))
+        self.checkBox_comercialPrice.setMaximumSize(QSize(16777215, 25))
 #if QT_CONFIG(tooltip)
         self.checkBox_comercialPrice.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Aplica el costo comercial al producto.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
@@ -200,11 +233,7 @@ class Ui_listProduct(object):
         sizePolicy1.setHeightForWidth(self.label_subtotal.sizePolicy().hasHeightForWidth())
         self.label_subtotal.setSizePolicy(sizePolicy1)
         self.label_subtotal.setMinimumSize(QSize(120, 30))
-        self.label_subtotal.setMaximumSize(QSize(350, 30))
-        self.label_subtotal.setStyleSheet(u"background-color: #b6b6b6;\n"
-"color: #555;\n"
-"border-top: 1px solid #111;\n"
-"border-right: 1px solid #111;")
+        self.label_subtotal.setMaximumSize(QSize(16777215, 30))
         self.label_subtotal.setText(u"SUBTOTAL")
         self.label_subtotal.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_subtotal.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
@@ -218,13 +247,13 @@ class Ui_listProduct(object):
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.btn_deleteCurrentProduct.sizePolicy().hasHeightForWidth())
         self.btn_deleteCurrentProduct.setSizePolicy(sizePolicy2)
-        self.btn_deleteCurrentProduct.setMinimumSize(QSize(30, 30))
-        self.btn_deleteCurrentProduct.setMaximumSize(QSize(35, 30))
+        self.btn_deleteCurrentProduct.setMinimumSize(QSize(32, 32))
+        self.btn_deleteCurrentProduct.setMaximumSize(QSize(32, 32))
 #if QT_CONFIG(tooltip)
         self.btn_deleteCurrentProduct.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Borra el producto de la venta actual (</span><span style=\" font-size:12pt; font-style:italic;\">Supr.</span><span style=\" font-size:12pt;\">)</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.btn_deleteCurrentProduct.setText(u"")
-        self.btn_deleteCurrentProduct.setIconSize(QSize(28, 28))
+        self.btn_deleteCurrentProduct.setIconSize(QSize(32, 32))
 #if QT_CONFIG(shortcut)
         self.btn_deleteCurrentProduct.setShortcut(u"Del")
 #endif // QT_CONFIG(shortcut)
@@ -236,7 +265,7 @@ class Ui_listProduct(object):
         sizePolicy.setHeightForWidth(self.label_nameFeedback.sizePolicy().hasHeightForWidth())
         self.label_nameFeedback.setSizePolicy(sizePolicy)
         self.label_nameFeedback.setMinimumSize(QSize(110, 20))
-        self.label_nameFeedback.setMaximumSize(QSize(350, 16777215))
+        self.label_nameFeedback.setMaximumSize(QSize(16777215, 16777215))
         self.label_nameFeedback.setText(u"")
         self.label_nameFeedback.setTextFormat(Qt.TextFormat.PlainText)
         self.label_nameFeedback.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -250,7 +279,7 @@ class Ui_listProduct(object):
         sizePolicy.setHeightForWidth(self.label_quantityFeedback.sizePolicy().hasHeightForWidth())
         self.label_quantityFeedback.setSizePolicy(sizePolicy)
         self.label_quantityFeedback.setMinimumSize(QSize(110, 20))
-        self.label_quantityFeedback.setMaximumSize(QSize(450, 16777215))
+        self.label_quantityFeedback.setMaximumSize(QSize(16777215, 16777215))
         self.label_quantityFeedback.setText(u"")
         self.label_quantityFeedback.setTextFormat(Qt.TextFormat.PlainText)
         self.label_quantityFeedback.setAlignment(Qt.AlignmentFlag.AlignCenter)

@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>798</width>
+    <width>595</width>
     <height>110</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>580</width>
+    <width>595</width>
     <height>110</height>
    </size>
   </property>
@@ -26,83 +26,115 @@
    <string notr="true">* {
 	color: #111;
 	border-color: #0b7e7f;
-	font-family: &quot;Tahoma&quot;, &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
-	font-size: 17px;
+	font-family: &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
+	font-size: 16px;
+}
+
+
+#listProduct {
+	background-color: #fff;
 }
 
 
 QToolTip {
 	background-color: #fff;
+	color: #0d1b2a;
 }
 
-QFrame, QWidget {
-	border: none;
-}
 
+/* labels */
+QLabel {
+	padding-right: 2px;
+	padding-left: 2px;
+}
 
 #label_nameFeedback, 
 #label_quantityFeedback {
-	font-size: 15px;
-	color: #dc2627;
-	border: 1px solid #dc2627;
-	background-color: rgba(224,164,164,0.7);
+	background-color: #F65755;
+	color: #fff;
+	border-radius: 5px;
+}
+
+#label_subtotal {
+	font-size: 19px;
+	font-weight: 900;
+	background-color: #0d1b2a;
+	color: #e0e1dd;
 }
 
 
+/* lineedits */
 QLineEdit {
-	background-color: rgba(241, 241, 241, 0.4);
+	background-color: #e0e1dd;
+	color: #0d1b2a;
 	border: none;
-	border-top: 1px solid;
-	border-bottom: 1px solid;
-	border-color: #0b7e7f;
+	border-radius: 10px;
+	padding-left: 3px;
+	padding-right: 3px;
 }
-QLineEdit:focus,
-QComboBox:focus,
-QCheckBox:focus {
-	background-color: rgba(197, 255, 252, 150);
-	border: 1px solid;
-	border-color: #0b7e7f;
-	font-size: 18px;
+QLineEdit:focus {
+	background-color: #3b66ab;
+	color: #fff;
 }
 QLineEdit:disabled {
-	background-color: #bbb;
-	color: #555;
+	background-color: #e0e1dd;
+	color: #0d1b2a;
 }
 
 
+/* pushbuttons */
 QPushButton {
-	background-color: #ff4949;
-	margin-left: 5px;
-	border: 1px solid #12476a;
-	border-radius: 2px;
+	background-color: #fff;
+	border-radius: 4px;
 }
 QPushButton:hover,
+QPushButton:focus {
+	background-color: #F68785;
+}
 QPushButton:pressed {
-	background-color: #faa;
-	color: #111;
-	border: 1px inset;
-	border-color: rgb(231, 66, 66);
+	background-color: #F68785;
+	border: 1px inset #A65755;
 }
 
-
+/* comboboxes */
 QComboBox {
-	background-color: rgb(255,255,255);
-	color: #111;
-	border: none;
-	border-top: 1px solid;
-	border-bottom: 1px solid;
-	border-color: #111;
+	background-color: #e0e1dd;
+	color: #0d1b2a;
+	border: 1px solid #3b66ab;
+	border-radius: 10px;
+	padding-left: 2px 0;
 }
 QComboBox:on {
-	background-color: rgb(197, 255, 252);
-	border: 1px solid;
-	border-color: rgb(11, 126, 127);
-	padding-top: 2px;
+	background-color: #3b66ab;
+	color: #fff;
+	border: none;
+	padding-top: 3px;
 	padding-left: 4px;
 }
-QComboBox QAbstractItemView {
-	background-color: rgba(170, 255, 127, 100);
-	selection-background-color: #38a3a5;
+QComboBox::drop-down {
+	subcontrol-origin: padding;
+	subcontrol-position: top right;
+	width: 20px;
+	padding-right: 3px;
+	border-left: none;
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
+}
+QComboBox::down-arrow:on {
+    top: 1px;
+    left: 1px;
+}
+QComboBox::down-arrow {
+	image: url(':/icons/chevron-down.svg');
+}
+QComboBox QAbstractItemView{
+	background-color: #778da9;
+	color: #fff;
+	selection-background-color: #3b66ab;
+}
+QComboBox:disabled {
+	background-color: rgb(103, 115, 122);
+	color: #999;
 }</string>
   </property>
   <layout class="QGridLayout" name="gridLayout" columnstretch="2,2,2,2,0" columnminimumwidth="0,0,0,0,0">
@@ -124,7 +156,7 @@ QComboBox QAbstractItemView {
    <item row="0" column="0">
     <widget class="QComboBox" name="comboBox_productName">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -137,7 +169,7 @@ QComboBox QAbstractItemView {
      </property>
      <property name="maximumSize">
       <size>
-       <width>350</width>
+       <width>16777215</width>
        <height>25</height>
       </size>
      </property>
@@ -164,7 +196,7 @@ QComboBox QAbstractItemView {
    <item row="0" column="1">
     <widget class="QFrame" name="frame_productQuantity">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -177,7 +209,7 @@ QComboBox QAbstractItemView {
      </property>
      <property name="maximumSize">
       <size>
-       <width>450</width>
+       <width>16777215</width>
        <height>16777215</height>
       </size>
      </property>
@@ -209,7 +241,7 @@ QComboBox QAbstractItemView {
       <item>
        <widget class="QLineEdit" name="lineEdit_productQuantity">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -222,7 +254,7 @@ QComboBox QAbstractItemView {
         </property>
         <property name="maximumSize">
          <size>
-          <width>120</width>
+          <width>16777215</width>
           <height>16777215</height>
          </size>
         </property>
@@ -240,7 +272,7 @@ QComboBox QAbstractItemView {
       <item>
        <widget class="QLabel" name="label_productMeasurementUnit">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -264,7 +296,7 @@ QComboBox QAbstractItemView {
          <enum>Qt::TextFormat::PlainText</enum>
         </property>
         <property name="wordWrap">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="textInteractionFlags">
          <set>Qt::TextInteractionFlag::NoTextInteraction</set>
@@ -277,20 +309,20 @@ QComboBox QAbstractItemView {
    <item row="0" column="2">
     <widget class="QCheckBox" name="checkBox_comercialPrice">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
      <property name="minimumSize">
       <size>
-       <width>145</width>
+       <width>160</width>
        <height>25</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>150</width>
+       <width>16777215</width>
        <height>25</height>
       </size>
      </property>
@@ -308,7 +340,7 @@ QComboBox QAbstractItemView {
    <item row="0" column="3">
     <widget class="QLabel" name="label_subtotal">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -321,15 +353,9 @@ QComboBox QAbstractItemView {
      </property>
      <property name="maximumSize">
       <size>
-       <width>350</width>
+       <width>16777215</width>
        <height>30</height>
       </size>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-color: #b6b6b6;
-color: #555;
-border-top: 1px solid #111;
-border-right: 1px solid #111;</string>
      </property>
      <property name="text">
       <string notr="true">SUBTOTAL</string>
@@ -352,14 +378,14 @@ border-right: 1px solid #111;</string>
      </property>
      <property name="minimumSize">
       <size>
-       <width>30</width>
-       <height>30</height>
+       <width>32</width>
+       <height>32</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>35</width>
-       <height>30</height>
+       <width>32</width>
+       <height>32</height>
       </size>
      </property>
      <property name="toolTip">
@@ -370,8 +396,8 @@ border-right: 1px solid #111;</string>
      </property>
      <property name="iconSize">
       <size>
-       <width>28</width>
-       <height>28</height>
+       <width>32</width>
+       <height>32</height>
       </size>
      </property>
      <property name="shortcut">
@@ -382,7 +408,7 @@ border-right: 1px solid #111;</string>
    <item row="1" column="0">
     <widget class="QLabel" name="label_nameFeedback">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -395,7 +421,7 @@ border-right: 1px solid #111;</string>
      </property>
      <property name="maximumSize">
       <size>
-       <width>350</width>
+       <width>16777215</width>
        <height>16777215</height>
       </size>
      </property>
@@ -419,7 +445,7 @@ border-right: 1px solid #111;</string>
    <item row="1" column="1">
     <widget class="QLabel" name="label_quantityFeedback">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -432,7 +458,7 @@ border-right: 1px solid #111;</string>
      </property>
      <property name="maximumSize">
       <size>
-       <width>450</width>
+       <width>16777215</width>
        <height>16777215</height>
       </size>
      </property>
@@ -456,7 +482,7 @@ border-right: 1px solid #111;</string>
    <item row="2" column="0" colspan="4">
     <widget class="QLineEdit" name="lineEdit_saleDetail">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>

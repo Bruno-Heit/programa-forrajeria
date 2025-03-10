@@ -1645,7 +1645,9 @@ QListWidget {
 	border-radius: 10px;
 }
 QListWidget::item {
+/*
 	background-color: qlineargradient(spread:pad, x1:0, y1:0.273, x2:1, y2:0.835, stop:0 rgba(144, 205, 171, 255), stop:1 rgba(187, 255, 154, 255));
+*/
 	margin-left: 7px;
 	margin-right: 7px;
 	padding: 2px;
@@ -2081,8 +2083,8 @@ border-right: 1px solid #111;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>756</width>
-                <height>517</height>
+                <width>374</width>
+                <height>187</height>
                </rect>
               </property>
               <property name="styleSheet">

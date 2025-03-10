@@ -38,6 +38,8 @@
         <file alias="prev-month.svg">../icons/arrowLeft.svg</file>
         <file alias="next-month.svg">../icons/arrowRight.svg</file>
 
+        <!-- #### (ListItemWidget) ####   ícono para eliminar el producto actual -->
+        <file alias="close.svg">../icons/xClose.svg</file>
 
     </qresource>
 </RCC>
