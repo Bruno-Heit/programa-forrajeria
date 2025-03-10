@@ -20,7 +20,7 @@ from utils.functionutils import *
 from utils.workerclasses import *
 from utils.dboperations import *
 from utils.enumclasses import (WidgetStyle, InventoryPriceType, 
-                               SaleFields, DebtsFields, 
+                               ProductFields, SaleFields, DebtsFields, 
                                ModelDataCols, ModelHeaders, 
                                LabelFeedbackStyle, TableViewColumns,
                                SaleDialogDimensions)
@@ -38,7 +38,211 @@ from phonenumbers import (parse, format_number, is_valid_number,
 # PRODUCTOS ====================================================================================================
 
 
-# TODO: corregir ProductDialog, no valida bien, sólo permite hacer click en "Aceptar" cuando se validaron todos los campos, y el campo de precio comercial es opcional
+class ProductValues(QObject):
+    '''
+    Clase que contiene los valores de los campos de ProductDialog. El principal 
+    uso de la clase es para "simular" un MODELO DE DATOS, ya que no usa 
+    exactamente la misma metodología para guardar los datos, y al mismo tiempo 
+    maneja mediante señales los cambios en los datos más relevantes.
+    '''
+    validityChanged:Signal = Signal() # se emite para activar/desactivar el botón 'Ok' del dialog
+    
+    
+    def __init__(self) -> None:
+        super(ProductValues, self).__init__()
+        self.__name:str = None
+        self.__category:str = None
+        self.__description:str = ""
+        self.__stock_quantity:float = None
+        self.__stock_unit:str = ""
+        self.__normal_price:float = None
+        self.__comercial_price:float = ""
+        
+        # validez de datos
+        self.__FIELDS_VALIDITY:dict[str, bool] = {
+            ProductFields.NAME.name: None,
+            ProductFields.CATEGORY.name: None,
+            ProductFields.STOCK_QUANTITY.name: None,
+            ProductFields.NORMAL_PRICE.name: None,
+            ProductFields.COMERCIAL_PRICE.name: True
+        }
+        return None
+    
+    
+    # setters
+    def setProductName(self, product_name:str) -> None:
+        '''
+        Guarda el nombre del producto.
+
+        Parámetros
+        ----------
+        product_name : str
+            el nuevo nombre de producto
+        '''
+        if self.__name != product_name:
+            self.__name = product_name
+        return None
+    
+    
+    def setCategory(self, category:str) -> None:
+        '''
+        Guarda la categoría.
+
+        Parámetros
+        ----------
+        category : str
+            la nueva categoría del producto
+        '''
+        if self.__category != category:
+            self.__category = category
+        return None
+    
+    
+    def setDescription(self, description:str) -> None:
+        '''
+        Guarda la descripción del producto.
+
+        Parámetros
+        ----------
+        description : str
+            la nueva descripción del producto
+        '''
+        self.__description = description
+        return None
+    
+    
+    def setStockQuantity(self, stock:str) -> None:
+        '''
+        Guarda el stock del producto.
+
+        Parámetros
+        ----------
+        stock : str
+            el nuevo stock del producto
+        '''
+        if self.__stock_quantity != stock:
+            self.__stock_quantity = stock
+        return None
+    
+    
+    def setStockUnit(self, stock_unit:str) -> None:
+        '''
+        Guarda la unidad de medida usada en el stock.
+
+        Parámetros
+        ----------
+        stock_unit : str
+            la nueva unidad de medida del stock
+        '''
+        self.__stock_unit = stock_unit
+        return None
+    
+    
+    def setNormalPrice(self, normal_price:str) -> None:
+        '''
+        Guarda el precio normal.
+
+        Parámetros
+        ----------
+        normal_price : str
+            el nuevo precio normal
+        '''
+        if self.__normal_price != normal_price:
+            self.__normal_price = normal_price
+        return None
+    
+    
+    def setComercialPrice(self, comercial_price:str) -> None:
+        '''
+        Guarda el precio comercial.
+
+        Parámetros
+        ----------
+        comercial_price : str
+            el nuevo precio comercial
+        '''
+        if self.__comercial_price != comercial_price:
+            self.__comercial_price = comercial_price
+        return None
+    
+    
+    def setFieldValidity(self, field:ProductFields, validity:bool) -> None:
+        '''
+        Guarda el valor de verdad del campo especificado. Emite la señal 
+        'validityChanged'.
+        
+        Parámetros
+        ----------
+        field : ProductFields
+            campo al que asignarle el nuevo valor de verdad
+        validity : bool
+            nuevo valor de verdad del campo
+        '''
+        match field:
+            case ProductFields.NAME:
+                self.__FIELDS_VALIDITY[ProductFields.NAME.name] = validity
+            
+            case ProductFields.CATEGORY:
+                self.__FIELDS_VALIDITY[ProductFields.CATEGORY.name] = validity
+            
+            case ProductFields.STOCK_QUANTITY:
+                self.__FIELDS_VALIDITY[ProductFields.STOCK_QUANTITY.name] = validity
+            
+            case ProductFields.NORMAL_PRICE:
+                self.__FIELDS_VALIDITY[ProductFields.NORMAL_PRICE.name] = validity
+            
+            case ProductFields.COMERCIAL_PRICE:
+                self.__FIELDS_VALIDITY[ProductFields.COMERCIAL_PRICE.name] = validity
+        
+        self.validityChanged.emit()
+        return None
+    
+    
+    # getters
+    def getProductName(self) -> str:
+        return self.__name
+    
+    
+    def getCategory(self) -> str:
+        return self.__category
+    
+    
+    def getDescription(self) -> str:
+        return self.__description
+    
+    
+    def getStockQuantity(self) -> str:
+        return str(self.__stock_quantity)
+    
+    
+    def getStockUnit(self) -> str:
+        return self.__stock_unit
+    
+    
+    def getNormalPrice(self) -> str:
+        return str(self.__normal_price)
+    
+    
+    def getComercialPrice(self) -> str:
+        return str(self.__comercial_price if self.__comercial_price else 0)
+    
+    
+    def isAllValid(self) -> bool:
+        '''
+        Devuelve un valor de verdad que determina si todos los campos tienen 
+        valores válidos.
+
+        Retorna
+        -------
+        bool
+            flag que determina si todos los campos son válidos
+        '''
+        return all(self.__FIELDS_VALIDITY.values())
+
+
+
+
+
 # Dialog con datos de un producto
 class ProductDialog(QDialog):
     '''QDialog creado al presionar el botón 'MainWindow.btn_add_product_inventory'. 
@@ -50,36 +254,56 @@ class ProductDialog(QDialog):
         self.productDialog_ui = Ui_Dialog()
         self.productDialog_ui.setupUi(self)
         
-        # validators
-        self.name_validator = ProductNameValidator(self.productDialog_ui.lineedit_productName)
-        self.stock_validator = ProductStockValidator(
-            pattern="\d{1,8}(\.|,)?\d{0,2}",
-            parent=self.productDialog_ui.lineedit_productStock)
-        self.unit_price_validator = ProductUnitPriceValidator(self.productDialog_ui.lineedit_productUnitPrice)
-        self.comerc_price_validator = ProductComercPriceValidator(self.productDialog_ui.lineedit_productComercialPrice)
+        self.product_values = ProductValues()
+        
+        self.setup_validators()
         
         self.setup_ui()
         
-        # completers
-        self.productDialog_ui.lineedit_productName.setCompleter(createCompleter(type=3))
-
-        # flags de validación
-        self.VALID_STOCK:bool = None
-        self.VALID_NAME:bool = None
-        self.VALID_CATEGORY:bool = None
-        self.VALID_UNIT_PRICE:bool = None
-        self.VALID_COMERCIAL_PRICE:bool = None
+        # completer
+        self.productDialog_ui.lineedit_productName.setCompleter(
+            createCompleter(type=3)
+        )
         
         self.setup_signals()
         return None
     
     
     #### MÉTODOS #####################################################
+    def setup_validators(self) -> None:
+        self.name_validator = ProductNameValidator(
+            self.productDialog_ui.lineedit_productName
+        )
+        self.description_validator = QRegularExpressionValidator(
+            Regex.GENERIC_CHARS_TO_AVOID.value,
+            self.productDialog_ui.lineedit_productDescription
+        )
+        self.stock_validator = ProductStockValidator(
+            pattern=Regex.PROD_STOCK_QUANTITY.value,
+            parent=self.productDialog_ui.lineedit_productStock
+        )
+        self.stock_unit_validator = QRegularExpressionValidator(
+            Regex.GENERIC_CHARS_TO_AVOID.value,
+            self.productDialog_ui.lineedit_measurementUnit
+        )
+        self.unit_price_validator = ProductUnitPriceValidator(
+            self.productDialog_ui.lineedit_productUnitPrice
+        )
+        self.comerc_price_validator = ProductComercPriceValidator(
+            self.productDialog_ui.lineedit_productComercialPrice
+        )
+        
+        self.productDialog_ui.lineedit_productName.setValidator(self.name_validator)
+        self.productDialog_ui.lineedit_productDescription.setValidator(self.description_validator)
+        self.productDialog_ui.lineedit_productStock.setValidator(self.stock_validator)
+        self.productDialog_ui.lineedit_measurementUnit.setValidator(self.stock_unit_validator)
+        self.productDialog_ui.lineedit_productUnitPrice.setValidator(self.unit_price_validator)
+        self.productDialog_ui.lineedit_productComercialPrice.setValidator(self.comerc_price_validator)
+        
+        return None
+    
+
     def setup_ui(self) -> None:
-        '''
-        Método que sirve para simplificar la lectura del método 'self.__init__'.
-        Contiene inicializaciones y ajustes de algunos Widgets.
-        '''
         self.productDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setText("Aceptar")
         self.__hideWidgets()
         # desactiva desde el principio el botón "Aceptar"
@@ -89,84 +313,6 @@ class ProductDialog(QDialog):
         self.productDialog_ui.cb_productCategory.addItems(comboBox_categories)
         
         self.__setInitialStyles()
-        
-        # validators
-        self.productDialog_ui.lineedit_productName.setValidator(self.name_validator)
-        self.productDialog_ui.lineedit_productStock.setValidator(self.stock_validator)
-        self.productDialog_ui.lineedit_productUnitPrice.setValidator(self.unit_price_validator)
-        self.productDialog_ui.lineedit_productComercialPrice.setValidator(self.comerc_price_validator)
-        
-        # completers
-        self.productDialog_ui.lineedit_productName.setCompleter(createCompleter(type=3))
-        
-        return None
-    
-    
-    def __setInitialStyles(self):
-        '''
-        Coloca íconos y establece stylesheets iniciales en los widgets.
-        '''
-        # flecha del combobox
-        self.productDialog_ui.frame_productCategory.setStyleSheet(WidgetStyle.DEF_COMBOBOX_ARROW_ICON.value)
-        
-        self.productDialog_ui.buttonBox.setStyleSheet(
-            ''' QDialogButtonBox QPushButton[text='Cancelar'] {
-                    background-color: #fff;
-                    color: #111;
-                    border: 1px solid #aaa;
-                }
-                QDialogButtonBox QPushButton[text='Cancelar']:hover,
-                QDialogButtonBox QPushButton[text='Cancelar']:pressed,
-                QDialogButtonBox QPushButton[text='Cancelar']:focus {
-                    background-color: #ccc;
-                }''')
-        return None
-    
-    
-    def setup_signals(self) -> None:
-        '''
-        Al igual que el método 'self.setup_ui', este método tiene el objeto 
-        de simplificar la lectura del método 'self.__init__'.
-        Contiene las declaraciones de señales/slots de Widgets ya existentes 
-        desde la instanciación del QDialog.
-        '''
-        self.name_validator.validationSucceeded.connect(
-            lambda: self.validatorOnValidationSucceded('name'))
-        self.stock_validator.validationSucceeded.connect(
-            lambda: self.validatorOnValidationSucceded('stock'))
-        self.unit_price_validator.validationSucceeded.connect(
-            lambda: self.validatorOnValidationSucceded('unit_price'))
-        self.comerc_price_validator.validationSucceeded.connect(
-            lambda: self.validatorOnValidationSucceded('comerc_price'))
-        
-        self.name_validator.validationFailed.connect(
-            lambda error_message: self.validatorOnValidationFailed(
-                field_validated='name',
-                error_message=error_message))
-        self.stock_validator.validationFailed.connect(
-            lambda error_message: self.validatorOnValidationFailed(
-                field_validated='stock',
-                error_message=error_message))
-        self.unit_price_validator.validationFailed.connect(
-            lambda error_message: self.validatorOnValidationFailed(
-                field_validated='unit_price',
-                error_message=error_message))
-        self.comerc_price_validator.validationFailed.connect(
-            lambda error_message: self.validatorOnValidationFailed(
-                field_validated='comerc_price',
-                error_message=error_message))
-        
-        self.productDialog_ui.cb_productCategory.currentIndexChanged.connect(
-            self.__checkProductCategoryValidity)
-        self.productDialog_ui.lineedit_productStock.editingFinished.connect(
-            lambda: self.formatField('stock'))
-        self.productDialog_ui.lineedit_productUnitPrice.editingFinished.connect(
-            lambda: self.formatField('unit_price'))
-        self.productDialog_ui.lineedit_productComercialPrice.editingFinished.connect(
-            lambda: self.formatField('comerc_price'))
-        
-        self.productDialog_ui.buttonBox.accepted.connect(self.addProductToDatabase)
-        
         return None
     
     
@@ -174,8 +320,6 @@ class ProductDialog(QDialog):
         '''
         Método simple que esconde los widgets iniciales al instanciarse 
         el QDialog.
-        
-        
         '''
         # esconde widgets
         self.productDialog_ui.label_nameWarning.hide()
@@ -186,137 +330,239 @@ class ProductDialog(QDialog):
         return None
     
     
-    @Slot(str)
-    def validatorOnValidationSucceded(self, field_validated:str) -> None:
+    def __setInitialStyles(self):
         '''
-        Cambia el valor del flag asociado al campo que fue validado 
-        'field_validated' a True, cambia el QSS del campo y esconde el QLabel 
-        asociado al campo. Al finalizar, comprueba si el resto de campos son 
-        válidos.
-        
-        Parámetros
-        ----------
-        field_validated: str
-            El campo que fue validado. Sus posibles valores son:
-            - name: se validó el campo de nombre del producto
-            - stock: se validó el campo de stock del producto
-            - unit_price: se validó el campo de precio unitario del producto
-            - comerc_price: se validó el campo de precio comercial del producto
-        
-        
+        Coloca íconos y establece stylesheets iniciales en los widgets.
         '''
-        match field_validated:
-            case 'name':
-                self.VALID_NAME = True
-                self.productDialog_ui.lineedit_productName.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
-                self.productDialog_ui.label_nameWarning.hide()
-            
-            case 'stock':
-                self.VALID_STOCK = True
-                self.productDialog_ui.lineedit_productStock.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
-                self.productDialog_ui.label_stockWarning.hide()
-            
-            case 'unit_price':
-                self.VALID_UNIT_PRICE = True
-                self.productDialog_ui.lineedit_productUnitPrice.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
-                self.productDialog_ui.label_unitPriceWarning.hide()
-            
-            case 'comerc_price':
-                self.VALID_COMERCIAL_PRICE = True
-                self.productDialog_ui.lineedit_productComercialPrice.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
-                self.productDialog_ui.label_comercialPriceWarning.hide()
+        # flecha del combobox
+        self.productDialog_ui.frame_productCategory.setStyleSheet(WidgetStyle.DEF_COMBOBOX_ARROW_ICON.value)
         
-        self.verifyFieldsValidity()
+        self.productDialog_ui.buttonBox.setStyleSheet(WidgetStyle.DIALOG_CANCEL_BTN_STYLE.value)
         return None
     
     
-    @Slot(str, str)
-    def validatorOnValidationFailed(self, field_validated:str, error_message:str) -> None:
-        '''
-        Cambia el valor del flag asociado al campo que fue validado 
-        'field_validated' a False, cambia el QSS del campo y muestra el QLabel 
-        asociado al campo con el mensaje 'error_message' con feedback.
+    def setup_signals(self) -> None:
+        # formateo de campos
+        self.productDialog_ui.lineedit_productName.editingFinished.connect(
+            lambda: self.formatField(ProductFields.NAME)
+        )
+        self.productDialog_ui.lineedit_productStock.editingFinished.connect(
+            lambda: self.formatField(ProductFields.STOCK_QUANTITY)
+        )
+        self.productDialog_ui.lineedit_measurementUnit.editingFinished.connect(
+            lambda: self.formatField(ProductFields.STOCK_UNIT)
+        )
+        self.productDialog_ui.lineedit_productUnitPrice.editingFinished.connect(
+            lambda: self.formatField(ProductFields.NORMAL_PRICE)
+        )
+        self.productDialog_ui.lineedit_productComercialPrice.editingFinished.connect(
+            lambda: self.formatField(ProductFields.COMERCIAL_PRICE)
+        )
         
-        Parámetros
-        ----------
-        field_validated: str
-            El campo que fue validado. Sus posibles valores son:
-            - name: se validó el campo de nombre del producto
-            - stock: se validó el campo de stock del producto
-            - unit_price: se validó el campo de precio unitario del producto
-            - comerc_price: se validó el campo de precio comercial del producto
-        error_message: str
-            El mensaje de error emitido por el validador
+        # validación
+        self.name_validator.validationSucceeded.connect(
+            lambda: self.validatorOnValidationSucceded(ProductFields.NAME)
+        )
+        self.stock_validator.validationSucceeded.connect(
+            lambda: self.validatorOnValidationSucceded(ProductFields.STOCK_QUANTITY)
+        )
+        self.unit_price_validator.validationSucceeded.connect(
+            lambda: self.validatorOnValidationSucceded(ProductFields.NORMAL_PRICE)
+        )
+        self.comerc_price_validator.validationSucceeded.connect(
+            lambda: self.validatorOnValidationSucceded(ProductFields.COMERCIAL_PRICE)
+        )
         
+        self.name_validator.validationFailed.connect(
+            lambda error_message: self.validatorOnValidationFailed(
+                field_validated=ProductFields.NAME,
+                error_message=error_message
+            )
+        )
+        self.stock_validator.validationFailed.connect(
+            lambda error_message: self.validatorOnValidationFailed(
+                field_validated=ProductFields.STOCK_QUANTITY,
+                error_message=error_message
+            )
+        )
+        self.unit_price_validator.validationFailed.connect(
+            lambda error_message: self.validatorOnValidationFailed(
+                field_validated=ProductFields.NORMAL_PRICE,
+                error_message=error_message
+            )
+        )
+        self.comerc_price_validator.validationFailed.connect(
+            lambda error_message: self.validatorOnValidationFailed(
+                field_validated=ProductFields.COMERCIAL_PRICE,
+                error_message=error_message
+            )
+        )
         
-        '''
-        match field_validated:
-            case 'name':
-                self.VALID_NAME = False
-                self.productDialog_ui.lineedit_productName.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
-                self.productDialog_ui.label_nameWarning.show()
-                self.productDialog_ui.label_nameWarning.setText(error_message)
-            
-            case 'stock':
-                self.VALID_STOCK = False
-                self.productDialog_ui.lineedit_productStock.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
-                self.productDialog_ui.label_stockWarning.show()
-                self.productDialog_ui.label_stockWarning.setText(error_message)
-            
-            case 'unit_price':
-                self.VALID_UNIT_PRICE = False
-                self.productDialog_ui.lineedit_productUnitPrice.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
-                self.productDialog_ui.label_unitPriceWarning.show()
-                self.productDialog_ui.label_unitPriceWarning.setText(error_message)
-            
-            case 'comerc_price':
-                self.VALID_COMERCIAL_PRICE = False
-                self.productDialog_ui.lineedit_productComercialPrice.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
-                self.productDialog_ui.label_comercialPriceWarning.show()
-                self.productDialog_ui.label_comercialPriceWarning.setText(error_message)
+        self.productDialog_ui.cb_productCategory.currentIndexChanged.connect(
+            self.__checkProductCategoryValidity)
+        
+        # pseudo-modelo de datos
+        self.product_values.validityChanged.connect(self.toggleOkButton)
+        
+        # otros
+        self.productDialog_ui.buttonBox.accepted.connect(self.addProductToDatabase)
         
         return None
     
     
-    @Slot(str)
-    def formatField(self, field_to_format:str) -> None:
+    @Slot(object)
+    def formatField(self, field_to_format:ProductFields) -> None:
         '''
-        Dependiendo del campo 'field_to_format' formatea el texto y lo asigna 
-        en el QLineEdit correspondiente.
+        Dependiendo del campo formatea el texto y lo asigna nuevamente en el 
+        QLineEdit correspondiente.
         
         Parámetros
         ----------
-        field_to_format: str
-            El campo que hay que formatear. Sus posibles valores son:
-            - stock: formatea el campo de stock del producto
-            - unit_price: formatea el campo de precio unitario del producto
-            - comerc_price: formatea el campo de precio comercial del producto
-        
-        
+        field_to_format: ProductFields
+            El campo que hay que formatear
         '''
         text:str
         
         match field_to_format:
-            case 'stock': # cambia puntos decimales por comas, los quita si son el último caracter
-                text = self.productDialog_ui.lineedit_productStock.text()
-                self.productDialog_ui.lineedit_productStock.setText(text.replace(".",","))
-                if text.endswith((".",",")):
-                    self.productDialog_ui.lineedit_productStock.setText(text.rstrip(",."))
+            case ProductFields.NAME:
+                self.productDialog_ui.lineedit_productName.setText(
+                    self.productDialog_ui.lineedit_productName.text().strip()
+                )
             
-            case 'unit_price': # cambia puntos decimales por comas, los quita si son el último caracter
-                text = self.productDialog_ui.lineedit_productUnitPrice.text()
-                self.productDialog_ui.lineedit_productUnitPrice.setText(text.replace(".",","))
-                if text.endswith((".",",")):
-                    self.productDialog_ui.lineedit_productUnitPrice.setText(text.rstrip(",."))
+            case ProductFields.STOCK_QUANTITY:
+                text = self.productDialog_ui.lineedit_productStock.text().replace(".",",")
+                if text.endswith(","):
+                    text = text.rstrip(",")
+                self.productDialog_ui.lineedit_productStock.setText(text)
             
-            case 'comerc_price': # cambia puntos decimales por comas, los quita si son el último caracter
-                text = self.productDialog_ui.lineedit_productComercialPrice.text()
-                self.productDialog_ui.lineedit_productComercialPrice.setText(text.replace(".",","))
-                if text.endswith((".",",")):
-                    self.productDialog_ui.lineedit_productComercialPrice.setText(text.rstrip(",."))
+            case ProductFields.STOCK_UNIT:
+                self.productDialog_ui.lineedit_measurementUnit.setText(
+                    self.productDialog_ui.lineedit_measurementUnit.text().strip()
+                )
+            
+            case ProductFields.NORMAL_PRICE:
+                text = self.productDialog_ui.lineedit_productUnitPrice.text().replace(".",",")
+                if text.endswith(","):
+                    text = text.rstrip(",")
+                self.productDialog_ui.lineedit_productUnitPrice.setText(text)
+            
+            case ProductFields.COMERCIAL_PRICE:
+                text = self.productDialog_ui.lineedit_productComercialPrice.text().replace(".",",")
+                if text.endswith(","):
+                    text = text.rstrip(",")
+                self.productDialog_ui.lineedit_productComercialPrice.setText(text)
         
         return None
     
+    
+    @Slot(object)
+    def validatorOnValidationSucceded(self, field_validated:ProductFields) -> None:
+        '''
+        Cambia el valor del flag asociado al campo que fue validado a True, 
+        cambia el QSS del campo y esconde el QLabel asociado al campo. 
+        
+        Parámetros
+        ----------
+        field_validated: ProductFields
+            El campo validado
+        '''
+        match field_validated:
+            case ProductFields.NAME:
+                self.product_values.setFieldValidity(field_validated, True)
+                self.product_values.setProductName(
+                    product_name=self.productDialog_ui.lineedit_productName.text()
+                )
+                
+                self.productDialog_ui.lineedit_productName.setStyleSheet(
+                    WidgetStyle.FIELD_VALID_VAL.value
+                )
+                self.productDialog_ui.label_nameWarning.hide()
+            
+            case ProductFields.STOCK_QUANTITY:
+                self.product_values.setFieldValidity(field_validated, True)
+                self.product_values.setStockQuantity(
+                    stock=self.productDialog_ui.lineedit_productStock.text().replace(",",".")
+                )
+                
+                self.productDialog_ui.lineedit_productStock.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
+                self.productDialog_ui.label_stockWarning.hide()
+            
+            case ProductFields.NORMAL_PRICE:
+                self.product_values.setFieldValidity(field_validated, True)
+                self.product_values.setNormalPrice(
+                    normal_price=self.productDialog_ui.lineedit_productUnitPrice.text().replace(",",".")
+                )
+                
+                self.productDialog_ui.lineedit_productUnitPrice.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
+                self.productDialog_ui.label_unitPriceWarning.hide()
+            
+            case ProductFields.COMERCIAL_PRICE:
+                self.product_values.setFieldValidity(field_validated, True)
+                self.product_values.setComercialPrice(
+                    comercial_price=self.productDialog_ui.lineedit_productComercialPrice.text().replace(",", ".")
+                )
+                
+                if not self.productDialog_ui.lineedit_productComercialPrice.text():
+                    self.productDialog_ui.lineedit_productComercialPrice.setStyleSheet("")
+                
+                else:
+                    self.productDialog_ui.lineedit_productComercialPrice.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
+                self.productDialog_ui.label_comercialPriceWarning.hide()
+        return None
+    
+    
+    @Slot(object, str)
+    def validatorOnValidationFailed(self, field_validated:ProductFields, error_message:str) -> None:
+        '''
+        Cambia el valor del flag asociado al campo que validado a False, 
+        cambia el QSS del campo y muestra el QLabel asociado al campo con el 
+        mensaje 'error_message' con feedback.
+        
+        Parámetros
+        ----------
+        field_validated: ProductFields
+            El campo que validado
+        error_message: str
+            El mensaje de error para mostrar como feedback
+        '''
+        match field_validated:
+            case ProductFields.NAME:
+                self.product_values.setFieldValidity(field_validated, False)
+                
+                self.productDialog_ui.lineedit_productName.setStyleSheet(
+                    WidgetStyle.FIELD_INVALID_VAL.value
+                )
+                self.productDialog_ui.label_nameWarning.show()
+                self.productDialog_ui.label_nameWarning.setText(error_message)
+            
+            case ProductFields.STOCK_QUANTITY:
+                self.product_values.setFieldValidity(field_validated, False)
+                
+                self.productDialog_ui.lineedit_productStock.setStyleSheet(
+                    WidgetStyle.FIELD_INVALID_VAL.value
+                )
+                self.productDialog_ui.label_stockWarning.show()
+                self.productDialog_ui.label_stockWarning.setText(error_message)
+            
+            case ProductFields.NORMAL_PRICE:
+                self.product_values.setFieldValidity(field_validated, False)
+                
+                self.productDialog_ui.lineedit_productUnitPrice.setStyleSheet(
+                    WidgetStyle.FIELD_INVALID_VAL.value
+                )
+                self.productDialog_ui.label_unitPriceWarning.show()
+                self.productDialog_ui.label_unitPriceWarning.setText(error_message)
+            
+            case ProductFields.COMERCIAL_PRICE:
+                self.product_values.setFieldValidity(field_validated, False)
+                
+                self.productDialog_ui.lineedit_productComercialPrice.setStyleSheet(
+                    WidgetStyle.FIELD_INVALID_VAL.value
+                )
+                self.productDialog_ui.label_comercialPriceWarning.show()
+                self.productDialog_ui.label_comercialPriceWarning.setText(error_message)
+        return None
+        
     
     @Slot()
     def __checkProductCategoryValidity(self) -> None:
@@ -327,134 +573,109 @@ class ProductDialog(QDialog):
         condiciones, y el estilo del campo.
         Al finalizar, si el campo es válido comprueba si el resto de campos 
         son válidos.
-        
-        
         '''
-        # reinicio la validez de la categoría
-        self.VALID_CATEGORY = True
-        current_text:str = self.productDialog_ui.cb_productCategory.currentText().strip()
-        # si no se eligió una categoría para el producto...
-        if current_text == "":
-            self.VALID_CATEGORY = False
+        if not self.productDialog_ui.cb_productCategory.currentText().strip():
             self.productDialog_ui.cb_productCategory.setCurrentIndex(-1)
+        
+        # verifica la validez del campo
         if self.productDialog_ui.cb_productCategory.currentIndex() == -1:
-            self.VALID_CATEGORY = False
-            self.productDialog_ui.label_categoryWarning.setText("Se debe seleccionar una categoría para el producto")
-            self.productDialog_ui.cb_productCategory.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
+            self.product_values.setFieldValidity(ProductFields.CATEGORY, False)
+            self.product_values.setCategory(category="")
+            
+            self.productDialog_ui.label_categoryWarning.setText(
+                "Se debe seleccionar una categoría para el producto"
+            )
+            self.productDialog_ui.cb_productCategory.setStyleSheet(
+                WidgetStyle.FIELD_INVALID_VAL.value
+            )
 
-        if current_text and self.VALID_CATEGORY:
-            self.productDialog_ui.label_categoryWarning.setText("")
-            self.productDialog_ui.cb_productCategory.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
-            self.verifyFieldsValidity()
         else:
-            self.productDialog_ui.cb_productCategory.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
+            self.product_values.setFieldValidity(ProductFields.CATEGORY, True)
+            self.product_values.setCategory(
+                self.productDialog_ui.cb_productCategory.itemText(
+                    self.productDialog_ui.cb_productCategory.currentIndex()
+                )
+            )
+            
+            self.productDialog_ui.label_categoryWarning.setText("")
+            self.productDialog_ui.cb_productCategory.setStyleSheet(
+                WidgetStyle.FIELD_VALID_VAL.value
+            )
         return None
 
 
-    def verifyFieldsValidity(self) -> None:
+    @Slot()
+    def toggleOkButton(self) -> None:
         '''
-        Verifica que todos los campos tengan valores válidos. Compara si todos 
-        son válidos y activa o desactiva el botón "Aceptar" dependiendo del caso.
-        
-        
+        Verifica si todos los valores son válidos y activa o desactiva el 
+        botón "Aceptar" dependiendo del caso.
         '''
-        valid:tuple[bool] = (
-            self.VALID_NAME,
-            self.VALID_CATEGORY,
-            self.VALID_STOCK,
-            self.VALID_UNIT_PRICE,
-            self.VALID_COMERCIAL_PRICE
-        )
-        # verifica si todos los valores de la tupla son True y activa o desactiva el botón...
-        if all(valid):
+        if self.product_values.isAllValid():
             self.productDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
         else:
             self.productDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
         return None
 
 
-    # funciones del botón Ok
-    def __getFieldsData(self) -> tuple[str]:
-        '''
-        Obtiene todos los datos introducidos en los campos y los devuelve como 
-        una tupla de strings.
-        
-        Retorna
-        -------
-        tuple[str]
-            todos los datos introducidos en los campos
-        '''
-        # obtengo los datos de los campos
-        data:tuple[str] = (
-            self.productDialog_ui.lineedit_productName.text().strip(),
-            self.productDialog_ui.lineedit_productDescription.text().strip(),
-            self.productDialog_ui.lineedit_productStock.text().replace(",","."),
-            self.productDialog_ui.lineedit_measurementUnit.text().strip(),
-            self.productDialog_ui.lineedit_productUnitPrice.text().replace(",",".").strip(),
-            self.productDialog_ui.lineedit_productComercialPrice.text().replace(",",".").strip(),
-            self.productDialog_ui.cb_productCategory.currentText()
-        )
-        return data
-
-
+    # botón "Aceptar"
     @Slot()
     def addProductToDatabase(self) -> None:
         '''
-        Es llamada cuando se presiona el botón "Aceptar".
-        Obtiene los datos de los campos y hace una consulta INSERT INTO a la 
-        base de datos, y emite la señal 'dataFilled' con los datos 
-        introducidos a MainWindow para poder actualizar el MODELO DE DATOS.
-        
-        
+        Obtiene los datos de los campos y hace una consulta INSERT a la base 
+        de datos.
+        Emite la señal 'dataFilled' con los datos introducidos a MainWindow 
+        para poder actualizar el MODELO DE DATOS.
         '''
-        data:tuple[str]
-        data_as_dict:dict[str]
-        
-        try:
-            conn = createConnection("database/inventario.db")
-            cursor = conn.cursor()
+        with DatabaseRepository() as db_repo:
+            db_repo.insertRegister(
+                ins_sql= '''INSERT INTO Productos(
+                                nombre,
+                                descripcion,
+                                stock,
+                                unidad_medida,
+                                precio_unit,
+                                precio_comerc,
+                                IDcategoria,
+                                eliminado) 
+                            VALUES(
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                (SELECT IDcategoria 
+                                 FROM Categorias 
+                                 WHERE nombre_categoria=?),
+                                0);''',
+                ins_params=(
+                    self.product_values.getProductName(),
+                    self.product_values.getDescription(),
+                    float(self.product_values.getStockQuantity()),
+                    self.product_values.getStockUnit(),
+                    float(self.product_values.getNormalPrice()),
+                    float(self.product_values.getComercialPrice()),
+                    self.product_values.getCategory()
+                )
+            )
             
-            if self.productDialog_ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled() == False:
-                return None
-            data = self.__getFieldsData()
-
-            cursor.execute(
-                '''INSERT INTO Productos
-                        (nombre,descripcion,stock,unidad_medida,precio_unit,
-                        precio_comerc,IDcategoria,eliminado) 
-                   VALUES(?,?,?,?,?,?,(
-                        SELECT IDcategoria 
-                        FROM Categorias 
-                        WHERE nombre_categoria=?)
-                        ,0
-                   );''', 
-                data)
-            conn.commit()
-            
-            # emite los datos a MainWindow para actualizar el MODELO DE DATOS
-            data_as_dict = {
-                'product_ID': makeReadQuery( # obtengo el último ID, es el del nuevo producto
-                    '''SELECT IDproducto 
-                    FROM Productos 
-                    ORDER BY IDproducto DESC 
-                    LIMIT 1;''')[0][0],
-                'product_name': data[0],
-                'product_description': data[1],
-                'product_stock': data[2],
-                'product_measurement_unit': data[3],
-                'product_unit_price': data[4],
-                'product_comercial_price': data[5],
-                'product_category': data[6]
+        # emite los datos a MainWindow
+        self.dataFilled.emit(
+            {
+                'product_ID': makeReadQuery( # obtengo el último ID, el del nuevo producto
+                    ''' SELECT IDproducto 
+                        FROM Productos 
+                        ORDER BY IDproducto DESC 
+                        LIMIT 1;''')[0][0],
+                'product_name': self.product_values.getProductName(),
+                'product_description': self.product_values.getDescription(),
+                'product_stock': float(self.product_values.getStockQuantity()),
+                'product_measurement_unit': self.product_values.getStockUnit(),
+                'product_unit_price': float(self.product_values.getNormalPrice()),
+                'product_comercial_price': float(self.product_values.getComercialPrice()),
+                'product_category': self.product_values.getCategory()
             }
-            self.dataFilled.emit(data_as_dict)
-            
-        except sqlite3Error as err:
-            conn.rollback()
-            logging.critical(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
-            
-        finally:
-            conn.close()
-        
+        )
         return None
 
 
@@ -1041,17 +1262,7 @@ class SaleDialog(QDialog):
         self.saleDialog_ui.sale_data.setStyleSheet(WidgetStyle.DEF_COMBOBOX_ARROW_ICON.value)
         self.saleDialog_ui.debtor_data.setStyleSheet(WidgetStyle.DEF_COMBOBOX_ARROW_ICON.value)
         
-        self.saleDialog_ui.buttonBox.setStyleSheet(
-            ''' QDialogButtonBox QPushButton[text='Cancelar'] {
-                    background-color: #fff;
-                    color: #111;
-                    border: 1px solid #aaa;
-                }
-                QDialogButtonBox QPushButton[text='Cancelar']:hover,
-                QDialogButtonBox QPushButton[text='Cancelar']:pressed,
-                QDialogButtonBox QPushButton[text='Cancelar']:focus {
-                    background-color: #ccc;
-                }''')
+        self.saleDialog_ui.buttonBox.setStyleSheet(WidgetStyle.DIALOG_CANCEL_BTN_STYLE.value)
         
         self.saleDialog_ui.dateTimeEdit.setStyleSheet(
             ''' QCalendarWidget QWidget#qt_calendar_prevmonth{
