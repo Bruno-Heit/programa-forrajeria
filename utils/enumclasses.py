@@ -115,6 +115,17 @@ class WidgetStyle(StrEnum):
     FIELD_VALID_VAL = "color: #fff; background-color: #9DD367;"
     FIELD_INVALID_VAL = "color: #fff; background-color: #F65755;"
     
+    DIALOG_CANCEL_BTN_STYLE ='''QDialogButtonBox QPushButton[text='Cancelar'] {
+                                    background-color: #fff;
+                                    color: #111;
+                                    border: 1px solid #aaa;
+                                }
+                                QDialogButtonBox QPushButton[text='Cancelar']:hover,
+                                QDialogButtonBox QPushButton[text='Cancelar']:pressed,
+                                QDialogButtonBox QPushButton[text='Cancelar']:focus {
+                                    background-color: #ccc;
+                                }'''
+    
     LABEL_RICHTEXT_NEUTRAL = "font-size:20px; color: #fff;"
     LABEL_RICHTEXT_CONTENT = "font-size: 20px; color: #415a77;"
     
@@ -305,10 +316,11 @@ class Regex(StrEnum):
     Clase StrEnum con expresiones regulares predefinidas, creadas principalmente para 
     usarse en 'utils.customvalidators.py', pero no exclusivamente.
     '''
-    SEARCH_BAR = "[^;\"']*"
+    GENERIC_CHARS_TO_AVOID = "[^;\"']*"
     
     PROD_NAME = "[^;\"']{1,50}"
-    PROD_STOCK = "(\d{1,8}(\.|,)?\d{0,2} {1}[a-zA-Z]{0,20})|(\d{1,8}(\.|,)?\d{0,2})"
+    PROD_STOCK_QUANTITY = "\d{1,8}(\.|,)?\d{0,2}"
+    PROD_STOCK_FULL = "(\d{1,8}(\.|,)?\d{0,2} {1}[a-zA-Z]{0,20})|(\d{1,8}(\.|,)?\d{0,2})"
     PROD_UNIT_PRICE = "\d{1,8}((\.|,){1}\d{0,2})?"
     PROD_COMERC_PRICE = "\d{0,8}((\.|,)\d{0,2})?"
     PERCENTAGE_CHANGE = "^([-+]?\d{0,4}((\.|,)\d{0,2})?)|(\d{1,8}((\.|,)\d{0,2})?)$"

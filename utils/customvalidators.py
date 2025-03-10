@@ -20,7 +20,7 @@ class SearchBarValidator(QValidator):
     '''Validador para las barras de búsquedas. A diferencia de otros validadores, este no emite señales.'''
     def __init__(self, parent=None):
         super(SearchBarValidator, self).__init__()
-        self.pattern:Pattern = compile(Regex.SEARCH_BAR.value, flags=IGNORECASE)
+        self.pattern:Pattern = compile(Regex.GENERIC_CHARS_TO_AVOID.value, flags=IGNORECASE)
     
     
     def validate(self, text: str, pos: int) -> object:
