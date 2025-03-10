@@ -2372,10 +2372,9 @@ class ListItemWidget(QWidget):
         
         self.setup_ui(obj_name=obj_name)
         
-        # instancia que contiene los valores de los campos (tomo como referencia 
-        # la programación MODELO-VISTA, siendo la clase ListItemValues algo similar 
-        # a un MODELO DE DATOS, pero mucho más simple y sencilla)
         self.field_values:ListItemValues = ListItemValues(object_name=self.objectName())
+        
+        self.setup_validators()
         
         self.setup_signals()
         return None
@@ -2403,24 +2402,30 @@ class ListItemWidget(QWidget):
         self.listItem.label_nameFeedback.hide()
         self.listItem.label_quantityFeedback.hide()
         
-        # asigno el ícono para el botón de borrar el item actual
-        icon:QIcon = QIcon()
-        icon.addFile(":/icons/x-white.svg")
-        self.listItem.btn_deleteCurrentProduct.setIcon(icon)
-        self.listItem.btn_deleteCurrentProduct.setIconSize(QSize(28, 28))
+        self.__setInitialStyles()
         
         # lleno el combobox de nombres
         self.listItem.comboBox_productName.addItems(getProductNames())
         self.listItem.comboBox_productName.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
-        
-        # quita del combobox el item inicial
-        self.listItem.comboBox_productName.setCurrentIndex(-1)
-
-        # validadores
+        return None
+    
+    
+    def __setInitialStyles(self):
+        '''
+        Coloca íconos y establece stylesheets iniciales en los widgets.
+        '''
+        # asigno el ícono para el botón de borrar el item actual
+        self.listItem.btn_deleteCurrentProduct.setIcon(QIcon(":/icons/close.svg"))
+        self.listItem.btn_deleteCurrentProduct.setIconSize(QSize(32, 32))
+        return None
+    
+    
+    def setup_validators(self) -> None:
         self.quantity_validator = SaleQuantityValidator(self.listItem.lineEdit_productQuantity)
         self.sale_detail_validator = SaleDetailsValidator(self.listItem.lineEdit_saleDetail)
         self.listItem.lineEdit_saleDetail.setValidator(self.sale_detail_validator)
         self.listItem.lineEdit_productQuantity.setValidator(self.quantity_validator)
+        
         return None
     
     
@@ -2472,8 +2477,6 @@ class ListItemWidget(QWidget):
         '''
         Emite la señal 'deletedItem' al QListWidget 'MainWindow.sales_input_list' 
         para eliminar éste item de la lista.
-        
-        
         '''
         self.deleteItem.emit(self.objectName())
         self.deleteLater()
@@ -2488,8 +2491,6 @@ class ListItemWidget(QWidget):
         campo de cantidad a True y cambia el QSS del campo.
         NOTA: redimensiona 'ListItemWidget' para que se pueda mostrar el mensaje 
         correctamente.
-        
-        
         '''
         _avail_stock:tuple[float, str] # stock disponible
         
@@ -2512,7 +2513,8 @@ class ListItemWidget(QWidget):
         
         # si no hay mensaje de stock disponible en el label lo pone en blanco
         if not "stock disponible" in self.listItem.label_quantityFeedback.text():
-            self.listItem.label_quantityFeedback.setText("")
+            self.listItem.label_quantityFeedback.setStyleSheet("")
+            self.listItem.label_quantityFeedback.hide()
         
         # ajusta el tamaño del label
         self.listItem.label_quantityFeedback.adjustSize()
@@ -2606,8 +2608,6 @@ class ListItemWidget(QWidget):
         ----------
         curr_name : str
             nombre actual del combobox
-        
-        
         '''
         # actualiza el stock disponible en el validador de cantidad...
         self.__updateAvailableStock()
@@ -2645,8 +2645,6 @@ class ListItemWidget(QWidget):
         '''
         Actualiza el stock disponible en el validador de cantidad a partir del 
         producto seleccionado.
-
-        
         '''
         self.quantity_validator.setAvailableStock(
                 getCurrentProductStock(
@@ -2661,8 +2659,6 @@ class ListItemWidget(QWidget):
     def __showAvailableStock(self) -> None:
         '''
         Muestra el stock disponible en un label debajo de la cantidad vendida.
-
-        
         '''
         # coloca el stock en 'label_quantityFeedback'
         self.listItem.label_quantityFeedback.show()
@@ -2687,8 +2683,6 @@ class ListItemWidget(QWidget):
         ----------
         curr_name : str
             nombre de producto seleccionado
-
-        
         '''
         registers:Any
         
@@ -2726,8 +2720,6 @@ class ListItemWidget(QWidget):
         ----------
         state : Qt.CheckState
             estado actual del checkbox
-
-        
         '''
         match state:
             case state.Unchecked:
@@ -2746,8 +2738,6 @@ class ListItemWidget(QWidget):
         '''
         Formatea el texto del campo y lo vuelve a asignar al campo de cantidad 
         y actualiza 'self.field_values'.
-        
-        
         '''
         # cambia puntos por comas, si termina con "." ó "," lo saca
         field_text = self.listItem.lineEdit_productQuantity.text()
@@ -2775,9 +2765,9 @@ class ListItemWidget(QWidget):
         subtotal : float | None
             el subtotal de la venta actual, será float si existe y es válido 
             sino None
-        
-        
         '''
+        _style:str
+        
         # si el valor es None devuelve TypeError
         try:
             match subtotal:
@@ -2787,17 +2777,21 @@ class ListItemWidget(QWidget):
                 case _: # intenta convertir el valor a float
                     subtotal = f"$ {round(float(subtotal), 2)}"
                     subtotal = subtotal.replace(".",",")
+                    _style = WidgetStyle.LABEL_RICHTEXT_CONTENT.value
+                    
             
         except TypeError: # no puede convertir None a float
             subtotal = "SUBTOTAL"
+            _style = WidgetStyle.LABEL_RICHTEXT_NEUTRAL.value
         
-        # coloca el precio total
+        # personaliza el texto del label del subtotal
+            
         self.listItem.label_subtotal.setText(
             f'''<html>
                     <head/>
                     <body>
                         <p>
-                            <span style=\" font-size: 20px; color: #22577a;\">{subtotal}</span>
+                            <span style={_style}>{subtotal}</span>
                         </p>
                     </body>
                 </html>'''
@@ -2814,9 +2808,6 @@ class ListItemWidget(QWidget):
         ----------
         text : str
             el detalle de la venta introducido
-
-        
-            _description_
         '''
         self.field_values.setSaleDetails(curr_sale_detail=text)
         return None
@@ -2831,8 +2822,6 @@ class ListItemWidget(QWidget):
         ----------
         text : str
             el detalle de la venta a mostrar
-        
-        
         '''
         self.listItem.lineEdit_saleDetail.setText(text)
         return None
@@ -2843,8 +2832,6 @@ class ListItemWidget(QWidget):
         '''
         Emite la señal 'fieldValuesChanged' con todos los valores de los campos 
         cuando algún campo de 'ListItemValues' cambia.
-
-        
         '''
         self.fieldsValuesChanged.emit(self.field_values.getValues())
         return None
