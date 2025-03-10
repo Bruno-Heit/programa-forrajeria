@@ -160,6 +160,23 @@ class TypeSideBar(IntEnum):
 
 
 
+# tipos de campos a validar para el dialog de Productos
+class ProductFields(IntEnum):
+    '''Clase de tipo 'IntEnum' con los campos de los cuales se guarda registro 
+    cuando se debe ingresar Ventas.'''
+    PRODUCT_ID = 0
+    NAME = 1
+    CATEGORY = 2
+    DESCRIPTION = 3
+    STOCK_QUANTITY = 4
+    STOCK_UNIT = 5
+    NORMAL_PRICE = 6
+    COMERCIAL_PRICE = 7
+
+
+
+
+
 # tipos de campos a validar para el formulario de Ventas
 class SaleFields(IntEnum):
     '''Clase de tipo 'IntEnum' con los campos de los cuales se guarda registro 
