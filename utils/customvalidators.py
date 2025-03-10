@@ -84,7 +84,7 @@ class ProductNameValidator(QValidator):
 class ProductStockValidator(QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar el stock y 
     la unidad de medida de un producto. Si no se especifica el 'pattern' se 
-    asigna automáticamente el valor de 'enumclasses.Regex.PROD_STOCK'.
+    asigna automáticamente el valor de 'enumclasses.Regex.PROD_STOCK_FULL'.
     
     Parámetros
     ----------
@@ -97,7 +97,7 @@ class ProductStockValidator(QRegularExpressionValidator):
     def __init__(self, pattern:Pattern | str=None, parent=None):
         super(ProductStockValidator, self).__init__()
         if not pattern:
-            self.pattern:Pattern = compile(Regex.PROD_STOCK.value, IGNORECASE)
+            self.pattern:Pattern = compile(Regex.PROD_STOCK_FULL.value, IGNORECASE)
         else:
             self.pattern:Pattern = compile(pattern, IGNORECASE)
     
