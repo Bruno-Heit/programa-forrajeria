@@ -388,8 +388,6 @@ class MainWindow(QMainWindow):
         self.delete_register_icon = QIcon() # eliminar registros
         self.end_sale_icon = QIcon() # terminar venta (formulario)
         
-        # TODO: añadir ícono de alerta a labels de feedback, y también cambiar su estilo en qt designer (elegir el de ProductDialog)
-        
         # sidebar de categorías
         self.sidebar_toggle_icon.addFile(":/icons/list-normal.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.sidebar_toggle_icon.addFile(":/icons/list-focus.svg", QSize(), QIcon.Mode.Active, QIcon.State.On)
