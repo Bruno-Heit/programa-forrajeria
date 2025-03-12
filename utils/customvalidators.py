@@ -421,7 +421,7 @@ class DebtorNameValidator(QRegularExpressionValidator):
     def validate(self, text: str, pos: int) -> object:
     
         if text.strip() == "":
-            self.validationFailed.emit("El campo del nombre no puede estar vacío")
+            self.validationFailed.emit("El nombre no puede estar vacío")
             return QRegularExpressionValidator.State.Intermediate, text, pos
         
         elif fullmatch(self.pattern, text):
@@ -448,7 +448,7 @@ class DebtorSurnameValidator(QRegularExpressionValidator):
     def validate(self, text: str, pos: int) -> object:
         
         if text.strip() == "":
-            self.validationFailed.emit("El campo del apellido no puede estar vacío")
+            self.validationFailed.emit("El apellido no puede estar vacío")
             return QRegularExpressionValidator.State.Intermediate, text, pos
         
         elif fullmatch(self.pattern, text):
