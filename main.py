@@ -385,6 +385,7 @@ class MainWindow(QMainWindow):
         self.percent_icon = QIcon() # lineedit de porcentajes
         self.search_bars_icon = QIcon() # searchbars
         self.add_register_icon = QIcon() # añadir registros
+        self.add_debtor_icon = QIcon() # añadir deudores
         self.delete_register_icon = QIcon() # eliminar registros
         self.end_sale_icon = QIcon() # terminar venta (formulario)
         
@@ -413,7 +414,10 @@ class MainWindow(QMainWindow):
         self.ui.btn_add_product_inventory.setIcon(self.add_register_icon)
         self.ui.btn_add_product.setIcon(self.add_register_icon)
         self.ui.btn_add_product_sales.setIcon(self.add_register_icon)
-        self.ui.btn_add_debtor.setIcon(self.add_register_icon)
+        
+        # botón para añadir deudores
+        self.add_debtor_icon.addFile(":/icons/add-debtor.svg", QSize())
+        self.ui.btn_add_debtor.setIcon(self.add_debtor_icon)
         
         # # botones para eliminar registros
         self.delete_register_icon.addFile(":/icons/minus-circle.svg", QSize())

@@ -25,6 +25,9 @@
         <!-- #### (MainWindow) ####   ícono para el botón de finalizar venta -->
         <file alias="check-circle.svg">../icons/checkCircle.svg</file>
 
+        <!-- #### (MainWindow) ####   ícono para agregar deudor -->
+        <file alias="add-debtor.svg">../icons/addDebtor.svg</file>
+
         <!-- #### (uso general) ####   flecha hacia abajo para comboboxes -->
         <file alias="chevron-down.svg">../icons/chevronDown.svg</file>
 
