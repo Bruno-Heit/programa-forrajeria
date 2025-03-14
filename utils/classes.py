@@ -1946,6 +1946,9 @@ class SaleDialog(QDialog):
 # FORMULARIO VENTAS ============================================================================================
 
 
+# TODO: HACER QUE SE PUEDA INGRESAR EL PRECIO PAGADO, Y DE AHÍ QUE SE CALCULE LA CANTIDAD DEL PRODUCTO (en lugar de hacer que la cantidad sea la única forma 
+# todo: de ingresar el dato de cuánto lleva... es decir, que se pueda ingresar la cantidad ó el total de lo que lleva de ese producto y se calcule el otro 
+# todo: campo, respectivamente)
 # valores de los campos de ListItemWidget
 class ListItemValues(QObject):
     '''
@@ -3900,17 +3903,22 @@ class ProductsBalanceDialog(QDialog):
     QDialog con formato Popup que contiene los productos en cuenta corriente 
     de la persona seleccionada en la tabla de Cuentas Corrientes en MainWindow.
     
+    Al cerrarse el dialog emite la señal 'balanceChanged' con el nuevo balance.
+    
     Éste QDialog admite las siguientes operaciones sobre la tabla que contiene:
         - READ: para mostrar los productos
         - UPDATE: para modificar campos de los productos
         - DELETE: para marcar como eliminadas las deudas de los productos
     '''
-    def __init__(self, debtor_id:int, table_view:QTableView) -> None:
+    balanceChanged:Signal = Signal(float)
+    
+    def __init__(self, debtor_id:int, curr_balance:float, table_view:QTableView) -> None:
         super(ProductsBalanceDialog, self).__init__()
         self.products_balance_dialog = Ui_ProductsBalance()
         self.products_balance_dialog.setupUi(self)
         
         self.debtor_id:int = debtor_id
+        self.balance:float = curr_balance
         self.__table_view:QTableView = table_view
         
         self.__products_balance_data:ndarray = self.__getDebtorProducts()
@@ -3945,6 +3953,10 @@ class ProductsBalanceDialog(QDialog):
         self.fade_in_anim.setStartValue(0)
         self.fade_in_anim.setEndValue(1)
         self.fade_in_anim.setEasingCurve(QEasingCurve.Type.InCubic)
+        
+        # coloca íconos y otros estilos
+        self.search_icon = QIcon(":/icons/search.svg")
+        self.products_balance_dialog.search_bar.addAction(self.search_icon, QLineEdit.ActionPosition.LeadingPosition)
         return None
     
     
@@ -4355,6 +4367,9 @@ class ProductsBalanceDialog(QDialog):
                 return super(ProductsBalanceDialog, self).keyPressEvent(event)
 
 
+    def closeEvent(self, event:QCloseEvent):
+        self.balanceChanged.emit(self.products_balance_model.getBalance())
+        return super(ProductsBalanceDialog, self).closeEvent(event)
 
 
 

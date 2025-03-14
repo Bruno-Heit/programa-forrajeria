@@ -16,8 +16,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractItemView, QAbstractScrollArea, QApplication, QCheckBox,
-    QDialog, QFrame, QHeaderView, QLineEdit,
-    QSizePolicy, QTableView, QVBoxLayout, QWidget)
+    QDialog, QFrame, QHBoxLayout, QHeaderView,
+    QLineEdit, QSizePolicy, QTableView, QVBoxLayout,
+    QWidget)
 
 class Ui_ProductsBalance(object):
     def setupUi(self, ProductsBalance):
@@ -34,102 +35,140 @@ class Ui_ProductsBalance(object):
         ProductsBalance.setWindowOpacity(1.000000000000000)
         ProductsBalance.setStyleSheet(u"* {\n"
 "	color: #111;\n"
-"	font-family: \"Verdana\", \"Sans-Serif\";\n"
+"	border-color: #0b7e7f;\n"
+"	font-family: \"Futura\", \"Verdana\", \"Sans-Serif\";\n"
 "	font-size: 14px;\n"
 "}\n"
 "\n"
 "\n"
 "#central_widget {\n"
-"	background-color: rgba(34, 87, 122, 190);\n"
+"	background-color: #415a77;\n"
 "	border-radius: 5px;\n"
 "}\n"
 "\n"
 "\n"
 "QToolTip {\n"
 "	background-color: #fff;\n"
+"	color: #0d1b2a;\n"
 "}\n"
 "\n"
 "\n"
+"/* checkbox */\n"
 "QCheckBox {\n"
-"	spacing: 5px;\n"
 "	color: #fff;\n"
+"	spacing: 5px;\n"
 "}\n"
 "\n"
 "\n"
+"/* tableview y headers */\n"
 "QTableView {\n"
-"	background-color: rgba(34, 87, 122, 240);\n"
-"	color: #fff;\n"
+"	color: #0d1b2a;\n"
+"	background-color: #fff;\n"
+"	border: None;\n"
+"	border-radius: 10px;\n"
 "}\n"
 "QTableView::item:hover {\n"
-"	background-color: #38a3a5;\n"
+"	background-color: #778da9;\n"
 "}\n"
 "QTableView::item:selected {\n"
-"	background-color: rgb(84,147,212);\n"
-"	color: #333;\n"
+"	background-color: #778da9;\n"
+"	border: 1px solid #fff;\n"
 "}\n"
-"QHeaderView:section {\n"
-"	background-color: #fff;\n"
+"/* QHeaderViews */\n"
+"QHeaderView::section {\n"
+"	background-color: #778da9;\n"
+"	color: #fff;\n"
 "	border: none;\n"
 "	border-right: 1px solid;\n"
 "	border-bottom: 1px solid;\n"
-"	border-color: #111;\n"
+"	border-color: #e0e1dd;\n"
 "}\n"
 "\n"
 "\n"
+"/* lineedits */\n"
 "QLineEdit {\n"
-"	color: #111;\n"
-"	background-color: rgba(255, 255, 255, 255);\n"
+"	background-color: #e0e1dd;\n"
+"	col"
+                        "or: #0d1b2a;\n"
 "	border: none;\n"
-"	border-radius: 3px;\n"
+"	border-radius: 10px;\n"
+"	padding-left: 3px;\n"
+"	padding-right: 3px;\n"
 "}\n"
 "QLineEdit:focus {\n"
-"	background-color: rgba(197, 255, 252, 255);\n"
-"	border: 1px solid;\n"
-"	border-color: #0b7e"
-                        "7f;\n"
+"	background-color: #3b66ab;\n"
+"	color: #fff;\n"
 "}\n"
 "\n"
 "\n"
-"#search_bar {\n"
-"	border-bottom: 1px solid;\n"
-"	border-bottom-color: #555;\n"
-"	border-bottom-color: #111;\n"
-"	margin-left: 30px;\n"
-"	margin-right: 30px;\n"
-"}\n"
-"\n"
-"\n"
-"#le_reduce_debt {\n"
-"	border-top: 1px solid;\n"
-"	border-bottom: 1px solid;\n"
-"	border-color: #fff;\n"
-"}\n"
-"\n"
-"\n"
-"/* estilos del QDateTimeEdit y del QCalendarWidget */\n"
+"/* QDateTimeEdit y del QCalendarWidget */\n"
 "QDateTimeEdit {\n"
-"	color: #333;\n"
 "	background-color: #fff;\n"
 "}\n"
-"\n"
-"\n"
 "QCalendarWidget QAbstractItemView {\n"
 "	background-color: #fff;\n"
 "	selection-background-color: #38a3a5;\n"
-"	color: #444;\n"
 "}\n"
 "QCalendarWidget QToolButton {\n"
 "	background-color: #22577a;\n"
 "	color: #fff;\n"
 "}\n"
-"QCalendarWidget QHeaderView {\n"
-"	background-color: #fff;\n"
-"	color: #fff;\n"
-"}\n"
 "QCalendarWidget QToolButton:hover,\n"
 "QCalendarWidget QToolButton:pressed {\n"
 "	background-color: #38a3a5;\n"
-"	color: #555;\n"
+"	color: #111;\n"
+"}\n"
+"\n"
+"\n"
+"/* scrollbars */\n"
+"QScrollBar {\n"
+"	background-color: #e0e1dd;\n"
+"	border: 1px solid transparent;\n"
+"	border-radius: 5px;\n"
+"}\n"
+"QScrollBar:groove {\n"
+"	border-radius: 5px;\n"
+"}\n"
+"QScrollBar::handle {\n"
+"	background-color:  #1b263b;\n"
+"	border-radius: 5px;\n"
+"}\n"
+"QScrollBar::handle:pressed {\n"
+"	background-color: #3b465b;\n"
+"}\n"
+"QScrollBar::s"
+                        "ub-line {\n"
+"	width: 0;\n"
+"	height: 0;\n"
+"	background: none;\n"
+"}\n"
+"QScrollBar::add-line {\n"
+"	width: 0;\n"
+"	height: 0;\n"
+"	background: none;\n"
+"}\n"
+"\n"
+"\n"
+"/*vertical scrollbars*/\n"
+"QScrollBar:vertical {\n"
+"	width: 13px;\n"
+"}\n"
+"QScrollBar::handle:vertical {\n"
+"	min-height: 15px;\n"
+"}\n"
+"QScrollBar::sub-page:vertical {\n"
+"	background: none;\n"
+"}\n"
+"QScrollBar::add-page:vertical {\n"
+"	background: none;\n"
+"}\n"
+"\n"
+"/*horizontal scrollbars*/\n"
+"QScrollBar:horizontal {\n"
+"	height: 13px;\n"
+"}\n"
+"QScrollBar::handle:horizontal {\n"
+"	min-width: 15px;\n"
 "}")
         self.verticalLayout = QVBoxLayout(ProductsBalance)
         self.verticalLayout.setSpacing(0)
@@ -138,10 +177,16 @@ class Ui_ProductsBalance(object):
         self.central_widget = QWidget(ProductsBalance)
         self.central_widget.setObjectName(u"central_widget")
         self.verticalLayout_2 = QVBoxLayout(self.central_widget)
-        self.verticalLayout_2.setSpacing(7)
+        self.verticalLayout_2.setSpacing(8)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.verticalLayout_2.setContentsMargins(5, 5, 5, 5)
-        self.search_bar = QLineEdit(self.central_widget)
+        self.header = QWidget(self.central_widget)
+        self.header.setObjectName(u"header")
+        self.horizontalLayout = QHBoxLayout(self.header)
+        self.horizontalLayout.setSpacing(0)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalLayout.setContentsMargins(30, 0, 30, 0)
+        self.search_bar = QLineEdit(self.header)
         self.search_bar.setObjectName(u"search_bar")
         sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
@@ -154,9 +199,18 @@ class Ui_ProductsBalance(object):
         self.search_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.search_bar.setClearButtonEnabled(True)
 
-        self.verticalLayout_2.addWidget(self.search_bar)
+        self.horizontalLayout.addWidget(self.search_bar)
 
-        self.tv_balance_products = QTableView(self.central_widget)
+
+        self.verticalLayout_2.addWidget(self.header)
+
+        self.body = QWidget(self.central_widget)
+        self.body.setObjectName(u"body")
+        self.verticalLayout_3 = QVBoxLayout(self.body)
+        self.verticalLayout_3.setSpacing(5)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.verticalLayout_3.setContentsMargins(0, 0, 0, 10)
+        self.tv_balance_products = QTableView(self.body)
         self.tv_balance_products.setObjectName(u"tv_balance_products")
         sizePolicy2 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Expanding)
         sizePolicy2.setHorizontalStretch(0)
@@ -177,10 +231,15 @@ class Ui_ProductsBalance(object):
         self.tv_balance_products.horizontalHeader().setHighlightSections(True)
         self.tv_balance_products.verticalHeader().setVisible(False)
 
-        self.verticalLayout_2.addWidget(self.tv_balance_products)
+        self.verticalLayout_3.addWidget(self.tv_balance_products)
 
-        self.checkbox_show_all_products = QCheckBox(self.central_widget)
+        self.checkbox_show_all_products = QCheckBox(self.body)
         self.checkbox_show_all_products.setObjectName(u"checkbox_show_all_products")
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.checkbox_show_all_products.sizePolicy().hasHeightForWidth())
+        self.checkbox_show_all_products.setSizePolicy(sizePolicy3)
         self.checkbox_show_all_products.setMinimumSize(QSize(0, 24))
         self.checkbox_show_all_products.setMaximumSize(QSize(16777215, 24))
 #if QT_CONFIG(tooltip)
@@ -188,15 +247,24 @@ class Ui_ProductsBalance(object):
 #endif // QT_CONFIG(tooltip)
         self.checkbox_show_all_products.setIconSize(QSize(24, 24))
 
-        self.verticalLayout_2.addWidget(self.checkbox_show_all_products)
+        self.verticalLayout_3.addWidget(self.checkbox_show_all_products)
 
-        self.le_reduce_debt = QLineEdit(self.central_widget)
+
+        self.verticalLayout_2.addWidget(self.body)
+
+        self.footer = QWidget(self.central_widget)
+        self.footer.setObjectName(u"footer")
+        self.horizontalLayout_2 = QHBoxLayout(self.footer)
+        self.horizontalLayout_2.setSpacing(0)
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.horizontalLayout_2.setContentsMargins(15, 0, 15, 0)
+        self.le_reduce_debt = QLineEdit(self.footer)
         self.le_reduce_debt.setObjectName(u"le_reduce_debt")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Fixed)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.le_reduce_debt.sizePolicy().hasHeightForWidth())
-        self.le_reduce_debt.setSizePolicy(sizePolicy3)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Fixed)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.le_reduce_debt.sizePolicy().hasHeightForWidth())
+        self.le_reduce_debt.setSizePolicy(sizePolicy4)
         self.le_reduce_debt.setMinimumSize(QSize(0, 24))
         self.le_reduce_debt.setMaximumSize(QSize(16777215, 24))
 #if QT_CONFIG(tooltip)
@@ -205,7 +273,10 @@ class Ui_ProductsBalance(object):
         self.le_reduce_debt.setFrame(False)
         self.le_reduce_debt.setClearButtonEnabled(True)
 
-        self.verticalLayout_2.addWidget(self.le_reduce_debt)
+        self.horizontalLayout_2.addWidget(self.le_reduce_debt)
+
+
+        self.verticalLayout_2.addWidget(self.footer)
 
 
         self.verticalLayout.addWidget(self.central_widget)
@@ -224,7 +295,7 @@ class Ui_ProductsBalance(object):
 #if QT_CONFIG(tooltip)
         self.search_bar.setToolTip(QCoreApplication.translate("ProductsBalance", u"<html><head/><body><p>Realiza b\u00fasquedas en la tabla de productos en cuenta corriente.</p></body></html>", None))
 #endif // QT_CONFIG(tooltip)
-        self.search_bar.setPlaceholderText(QCoreApplication.translate("ProductsBalance", u"Escribir t\u00e9rminos a buscar...", None))
+        self.search_bar.setPlaceholderText(QCoreApplication.translate("ProductsBalance", u"Buscar ventas por fecha, cantidad, etc...", None))
         self.checkbox_show_all_products.setText(QCoreApplication.translate("ProductsBalance", u"Mostrar historial de productos", None))
         self.le_reduce_debt.setPlaceholderText(QCoreApplication.translate("ProductsBalance", u"Descontar del saldo de productos seleccionados...", None))
     # retranslateUi

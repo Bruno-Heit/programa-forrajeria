@@ -879,7 +879,15 @@ class DebtsTableModel(QAbstractTableModel):
                     return True
                 
                 case TableViewColumns.DEBTS_BALANCE.value: # balance
-                    ...
+                    if value == self.data(index):
+                        return False
+                    self._data[index.row(), ModelDataCols.DEBTS_TOTAL_BALANCE.value] = value
+                    
+                    #? NO EMITE LA SEÑAL 'dataToUpdate' PORQUE LA ACTUALIZACIÓN EN LA BASE DE DATOS 
+                    #? YA ES HECHA DENTRO DEL DIALOG, SÓLO ES NECESARIO ACTUALIZAR LA VISTA...
+                    
+                    self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
+                    return True
         
         return False
     

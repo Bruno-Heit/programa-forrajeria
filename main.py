@@ -349,7 +349,8 @@ class MainWindow(QMainWindow):
         ...
         
         #* (UPDATE) modificar celdas de 'tv_sales_data'
-        ...
+        self.debts_delegate.balanceDialogFinished.connect(self.__onDebtsBalanceChanged)
+        
         #* delegado de deudas
         ...
         
@@ -1784,6 +1785,25 @@ class MainWindow(QMainWindow):
         return None
 
 
+    #¡¡ ....... deudas ............................................................................
+    @Slot(object)
+    def __onDebtsBalanceChanged(self, data:tuple[QModelIndex, float]) -> None:
+        '''
+        Actualiza el MODELO DE DATOS de Deudas con el nuevo balance de la 
+        cuenta corriente.
+
+        Parámetros
+        ----------
+        data : tuple[QModelIndex, float]
+            tupla con el índice del elemento seleccionado y el nuevo balance 
+            de la cuenta corriente
+        '''
+        self.debts_data_model.setData(
+            index=data[0], value=data[1], role=Qt.ItemDataRole.EditRole
+        )
+        return None
+    
+    
     #¡### INVENTARIO ##################################################
     # funciones de inventory_sideBar
     @Slot(QCheckBox)

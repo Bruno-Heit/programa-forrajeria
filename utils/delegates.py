@@ -360,8 +360,8 @@ class DebtsDelegate(QStyledItemDelegate):
     fieldIsInvalid:Signal = Signal(object) # extensión de 'validator.validationFailed',
                                         # emite hacia MainWindow tuple(TableViewId, 
                                         # feedback como str).
-    balanceDialogCreated:Signal = Signal()
-    balanceDialogFinished:Signal = Signal()
+    balanceDialogFinished:Signal = Signal(object) # extensión de 'ProductsBalanceDialog.balanceChanged', 
+                                        # emite hacia MainWindow tuple(index, nuevo balance como float).
     
 
     def createEditor(self, parent:QWidget, option: QStyleOptionViewItem, 
@@ -478,19 +478,19 @@ class DebtsDelegate(QStyledItemDelegate):
         
         if index.column() == TableViewColumns.DEBTS_BALANCE.value:
             if event.type() == QEvent.Type.MouseButtonDblClick:
-                debtor_id = model.getDebtorID(index)
                 balance_dialog = ProductsBalanceDialog(
-                    debtor_id=debtor_id,
+                    debtor_id=model.getDebtorID(index),
+                    curr_balance=model.data(index, Qt.ItemDataRole.DisplayRole),
                     table_view=self.parent() # le paso el table view para poder redimensionar 
                 )                            # el dialog cuando se crea y no se salga del 
                                              # rectángulo del table view.
                 
-                # TODO: EMITIR SEÑAL CUANDO SE CIERRE EL DIALOG A MAINWINDOW PARA ACTUALIZAR EL MODELO DE DATOS DE DEUDAS CON EL NUEVO BALANCE
-                #? emite el dialog a MainWindow para que se tenga una referencia, sino se cierra
-                self.balanceDialogCreated.emit(balance_dialog)
-                
                 # emite la señal "finished" hacia MainWindow, se usa para obtener el nuevo balance
-                balance_dialog.finished.connect(lambda: self.balanceDialogFinished.emit())
+                balance_dialog.balanceChanged.connect(
+                    lambda new_balance: self.balanceDialogFinished.emit(
+                        (model.mapToSource(index), new_balance)
+                    )
+                )
                 
                 balance_dialog.show()
                 balance_dialog.raise_()
