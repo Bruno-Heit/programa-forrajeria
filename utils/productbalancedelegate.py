@@ -126,6 +126,7 @@ class ProductsBalanceDelegate(QStyledItemDelegate):
                 value = editor.text().replace(",",".")
                 if value.endswith((",",".")):
                         value = value.rstrip(",.")
+                value = float(value)
         
         model.setData(index, value, Qt.ItemDataRole.EditRole)
         return None
