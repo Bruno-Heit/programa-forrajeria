@@ -1291,6 +1291,25 @@ class ProductsBalanceModel(QAbstractTableModel):
         return None
     
     
+    def getBalance(self) -> float:
+        '''
+        Retorna la sumatoria de todos los saldos, lo que representa el balance 
+        total de la cuenta corriente.
+
+        Retorna
+        -------
+        float
+            el balance de la cuenta corriente
+        '''
+        if self.modelHasData():
+            return round(
+                sum(list(self._data[:,ModelDataCols.PRODS_BAL_BALANCE.value]),
+                    start=0),
+                ndigits=2)
+        
+        return 0.0
+    
+    
     #¡ actualización del modelo
     def setModelData(self, data:Sequence[Sequence[Any]], headers:Sequence[str]) -> None:
         '''
