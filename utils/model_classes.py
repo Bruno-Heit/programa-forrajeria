@@ -1152,16 +1152,16 @@ class ProductsBalanceModel(QAbstractTableModel):
             flag que determina la existencia de datos en el modelo
         '''
         try:
-            if self._data.shape:
+            if self._data.shape and self._data.size:
                 return True
         
         except (NameError, AttributeError):
             return False
         
-        return True
+        return False
     
     
-    #¡ datos    
+    #¡ datos
     def setData(self, index:QModelIndex | QPersistentModelIndex, value:Any, 
                 role:Qt.ItemDataRole = Qt.ItemDataRole.EditRole) -> bool:
         '''
