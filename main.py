@@ -360,7 +360,8 @@ class MainWindow(QMainWindow):
         self.debts_delegate.balanceDialogFinished.connect(self.__updateViewOnDebtsBalanceChanged)
         
         #* delegado de deudas
-        ...
+        self.debts_delegate.fieldIsValid.connect(self.__onDelegateValidationSucceded)
+        self.debts_delegate.fieldIsInvalid.connect(self.__onDelegateValidationFailed)
         
         #* search bar
         self.ui.debts_searchBar.returnPressed.connect(
@@ -1878,6 +1879,7 @@ class MainWindow(QMainWindow):
                         upd_params=(new_val, ID_debtor,)
                         )
         return None
+    
     
     #¡### INVENTARIO ##################################################
     # funciones de inventory_sideBar
