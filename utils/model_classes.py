@@ -1227,8 +1227,7 @@ class ProductsBalanceModel(QAbstractTableModel):
     
     
     def data(self, index:QModelIndex | QPersistentModelIndex, 
-             role:Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole,
-             return_sale_detail_id:bool = False) -> Any:
+             role:Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole) -> Any:
         if not index.isValid():
             return None
         
@@ -1245,10 +1244,7 @@ class ProductsBalanceModel(QAbstractTableModel):
                         return f"{self._data[row, ModelDataCols.PRODS_BAL_DESCRIPTION.value]}"
                     
                     case TableViewColumns.PRODS_BAL_BALANCE.value:
-                        if not return_sale_detail_id:
-                            return self._data[row, ModelDataCols.PRODS_BAL_BALANCE.value]
-                        else:
-                            return self._data[row, ModelDataCols.PRODS_BAL_ID_SALES_DETAIL.value]
+                        return self._data[row, ModelDataCols.PRODS_BAL_BALANCE.value]
                             
             
             case Qt.ItemDataRole.BackgroundRole:
@@ -1290,6 +1286,23 @@ class ProductsBalanceModel(QAbstractTableModel):
                     case TableViewColumns.PRODS_BAL_BALANCE.value:
                         return Qt.AlignmentFlag.AlignRight
         return None
+    
+    
+    def getSaleDetailID(self, row:int) -> None:
+        '''
+        Retorna el ID_detalle_venta del producto especificado.
+
+        Parámetros
+        ----------
+        row : int
+            la fila seleccionada
+
+        Retorna
+        -------
+        int
+            el ID_detalle_venta del producto seleccionado
+        '''
+        return int(self._data[row, ModelDataCols.PRODS_BAL_ID_SALES_DETAIL.value])
     
     
     def headerData(self, section:int, orientation:Qt.Orientation, 
@@ -1347,8 +1360,6 @@ class ProductsBalanceModel(QAbstractTableModel):
         ----------
         selected_rows : Sequence
             secuencia con las filas seleccionadas
-        
-        
         '''
         blocks:list[tuple[int, int]] = []
         start_block:int = selected_rows[0] # puntero al primer elemento del bloque
