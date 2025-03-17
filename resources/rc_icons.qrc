@@ -44,5 +44,8 @@
         <!-- #### (ListItemWidget) ####   ícono para eliminar el producto actual -->
         <file alias="close.svg">../icons/xClose.svg</file>
 
+        <!-- #### (ProductsBalanceDialog) ####   ícono para eliminar la deuda actual -->
+        <file alias="trash-register.svg">../icons/trashRegister.svg</file>
+
     </qresource>
 </RCC>
