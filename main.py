@@ -349,7 +349,15 @@ class MainWindow(QMainWindow):
         ...
         
         #* (UPDATE) modificar celdas de 'tv_sales_data'
-        self.debts_delegate.balanceDialogFinished.connect(self.__onDebtsBalanceChanged)
+        self.debts_data_model.dataToUpdate.connect(
+            lambda params: self.__onDebtsModelDataToUpdate(
+                column=params['column'],
+                ID_debtor=params['IDdebtor'],
+                new_val=params['new_value']
+            )
+        )
+        
+        self.debts_delegate.balanceDialogFinished.connect(self.__updateViewOnDebtsBalanceChanged)
         
         #* delegado de deudas
         ...
@@ -1670,7 +1678,7 @@ class MainWindow(QMainWindow):
     
     
     #¡¡ ....... ventas ............................................................................
-    @Slot(int, int, object)
+    @Slot(int, int, object, object)
     def __onSalesModelDataToUpdate(self, column:int, IDsales_detail:int,
                                        new_val:Any, quantity_index:QModelIndex = None) -> None:
         '''
@@ -1685,7 +1693,7 @@ class MainWindow(QMainWindow):
         column : int
             Columna del item modificado
         IDsales_detail : int
-            IDproducto en la base de datos del item modificado
+            ID_detalle_venta en la base de datos del item modificado
         new_val : Any
             Valor nuevo del item
         quantity_index : QModelIndex, opcional
@@ -1787,7 +1795,7 @@ class MainWindow(QMainWindow):
 
     #¡¡ ....... deudas ............................................................................
     @Slot(object)
-    def __onDebtsBalanceChanged(self, data:tuple[QModelIndex, float]) -> None:
+    def __updateViewOnDebtsBalanceChanged(self, data:tuple[QModelIndex, float]) -> None:
         '''
         Actualiza el MODELO DE DATOS de Deudas con el nuevo balance de la 
         cuenta corriente.
@@ -1803,6 +1811,73 @@ class MainWindow(QMainWindow):
         )
         return None
     
+    
+    @Slot(int, int, object)
+    def __onDebtsModelDataToUpdate(self, column:int, ID_debtor:int,
+                                       new_val:Any) -> None:
+        '''
+        Actualiza la base de datos con el valor nuevo de la sección de Cuentas 
+        Corrientes. 
+        Además, si la columna modifica es la de "fecha y hora" actualiza 
+        el nuevo horario tanto en la tabla "Ventas" como en "Deudas".
+        NOTA: ÉSTE MÉTODO NO ACTUALIZA LA COLUMNA DE BALANCE, ESO ES HECHO 
+        DESDE EL DIALOG DE LOS DETALLES DE LOS BALANCES.
+        
+        Parámetros
+        ----------
+        column : int
+            Columna del item modificado
+        ID_debtor : int
+            IDdeudor en la base de datos del item modificado
+        new_val : Any
+            Valor nuevo del item
+        '''
+        match column:
+            case TableViewColumns.DEBTS_NAME.value:
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Deudores 
+                                   SET nombre = ? 
+                                   WHERE IDdeudor = ?;''',
+                        upd_params=(new_val, ID_debtor,)
+                        )
+            
+            case TableViewColumns.DEBTS_SURNAME.value:
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Deudores 
+                                   SET apellido = ? 
+                                   WHERE IDdeudor = ?;''',
+                        upd_params=(new_val, ID_debtor,)
+                        )
+            
+            case TableViewColumns.DEBTS_PHONE_NUMBER.value:
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Deudores 
+                                   SET num_telefono = ? 
+                                   WHERE IDdeudor = ?;''',
+                        upd_params=(new_val, ID_debtor,)
+                        )
+            
+            case TableViewColumns.DEBTS_DIRECTION.value:
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Deudores 
+                                   SET direccion = ? 
+                                   WHERE IDdeudor = ?;''',
+                        upd_params=(new_val, ID_debtor,)
+                        )
+            
+            case TableViewColumns.DEBTS_POSTAL_CODE.value:
+                with self._db_repo as db_repo:
+                    db_repo.updateRegisters(
+                        upd_sql='''UPDATE Deudores 
+                                   SET codigo_postal = ? 
+                                   WHERE IDdeudor = ?;''',
+                        upd_params=(new_val, ID_debtor,)
+                        )
+        return None
     
     #¡### INVENTARIO ##################################################
     # funciones de inventory_sideBar

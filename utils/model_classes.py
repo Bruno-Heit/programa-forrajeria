@@ -836,7 +836,7 @@ class DebtsTableModel(QAbstractTableModel):
                 case TableViewColumns.DEBTS_PHONE_NUMBER.value: # número de teléfono
                     if value == self.data(index):
                         return False
-                    self._data[index.row()][index.column() + 2] = value
+                    self._data[index.row(), ModelDataCols.DEBTS_PHONE_NUMBER.value] = value
 
                     # actualiza el número de teléfono en MainWindow
                     self.dataToUpdate.emit(
