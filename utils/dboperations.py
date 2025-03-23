@@ -22,6 +22,7 @@ from re import (Match, compile, search, IGNORECASE)
 
 # variables globales
 DATABASE_DIR:str = "database/inventario.db"
+DATABASE_MEMORY:str = ":memory:"
 
 
 # repositorio de base de datos
