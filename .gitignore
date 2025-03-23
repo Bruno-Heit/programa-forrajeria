@@ -1,5 +1,6 @@
 # carpetas
 __pycache__/
+db_tests
 
 # archivos .py
 test.py
