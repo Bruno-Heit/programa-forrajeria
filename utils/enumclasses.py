@@ -10,6 +10,45 @@ from resources import (rc_icons)
 from enum import (Enum, StrEnum, IntEnum)
 
 
+# (DEBUG) colores para la consola (colorama no es compatible con versiones de Python 
+# mayores a la 3.10)
+class ConsoleColor(StrEnum):
+    '''
+    Clase StrEnum con algunos colores ANSI personalizados para imprimir en 
+    pantalla.
+    '''
+    DEFAULT_ALL = "\033[0m"
+    
+    DEFAULT_BOLD_FG = "\033[22;1m"
+    RED_BOLD_FG = "\033[38;1;255;120;120m"
+    GREEN_BOLD_FG = "\033[38;1;120;255;120m"
+    BLUE_BOLD_FG = "\033[38;1;120;120;255m"
+    
+    DEFAULT_FAINT_FG = "\033[22;2m"
+    RED_FAINT_FG = "\033[38;2;255;120;120m"
+    GREEN_FAINT_FG = "\033[38;2;120;255;120m"
+    BLUE_FAINT_FG = "\033[38;2;120;120;255m"
+
+
+
+
+
+# (DEBUG) tablas de la base de datos
+class DatabaseTable(IntEnum):
+    '''
+    Clase IntEnum con todas las tablas de la base de datos.
+    '''
+    PRODUCTS = 0
+    CATEGORIES = 1
+    SALE_DETAILS = 2
+    SALES = 3
+    DEBTS = 4
+    DEBTORS = 5
+
+
+
+
+
 class LabelFeedbackStyle(StrEnum):
     '''Clase con StrEnum con estilos predefinidos para darle a los QLabel 
     dependiendo de si son válidos los datos del QTableView asociado o no.'''
