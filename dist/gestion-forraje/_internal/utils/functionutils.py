@@ -122,7 +122,7 @@ def createConnection(db_name:str) -> Connection | None:
 def getProductsCategories() -> list[str] | None:
     '''Hace una consulta SELECT a la base de datos y toma las categorías que hay. Devuelve una lista con las categorías. 
     Si hubo un error conectándose a la base  de datos devuelve 'None'.'''
-    connection = createConnection("database/inventario.db")
+    connection = createConnection(DATABASE_DIR)
     if not connection:
         return None
     cursor = connection.cursor()
@@ -136,7 +136,7 @@ def getProductsCategories() -> list[str] | None:
 def getProductNames() -> list[str]:
     '''Hace una consulta SELECT a la base de datos y obtiene todos los nombres de productos que hay. Retorna una 
     lista con los nombres.'''
-    conn = createConnection("database/inventario.db")
+    conn = createConnection(DATABASE_DIR)
     if not conn:
         return None
     cursor = conn.cursor()
@@ -151,7 +151,7 @@ def getProductNames() -> list[str]:
 def getCategoriesDescription() -> tuple[str] | None:
     '''Hace una consulta SELECT a la base de datos y toma las descripciones de las categorías que hay. Devuelve una tupla 
     con las categorías. Si hubo un error conectándose a la base  de datos devuelve 'None'.'''
-    connection = createConnection("database/inventario.db")
+    connection = createConnection(DATABASE_DIR)
     if not connection:
         return None
     cursor = connection.cursor()
@@ -191,7 +191,7 @@ def getTableWidgetRowCount(count_sql:str=None, count_params:tuple=None) -> int:
     '''Dependiendo del QTableWidget del parámetro, hace una consulta SELECT a la base de datos y obtiene la cantidad 
     de filas que debe tener la tabla. Retorna la cantidad como 'int'.'''
     row_count:int
-    conn = createConnection("database/inventario.db")
+    conn = createConnection(DATABASE_DIR)
     if not conn:
         return
     cursor = conn.cursor()
@@ -221,7 +221,7 @@ def getIDsFromTable() -> tuple:
 def makeReadQuery(sql:str, params:tuple = None) -> list:
     '''Hace la consulta SELECT a la base de datos y devuelve los valores de las filas seleccionadas. Retorna una 'list' 
     con los valores.'''
-    conn = createConnection("database/inventario.db")
+    conn = createConnection(DATABASE_DIR)
     if not conn:
         return
     cursor = conn.cursor()
@@ -319,7 +319,7 @@ def makeDeleteQuery(tableWidget:QTableWidget, rows_to_delete:tuple, ids:tuple, i
     seleccionadas. El parámetro 'items_to_delete' no es necesario, funciona como una "medida de seguridad", es otro 
     valor a tener en cuenta -además del ID del registro- para borrar un registro. Retorna 'None'.'''
     pos:int = 0
-    connection = createConnection("database/inventario.db")
+    connection = createConnection(DATABASE_DIR)
     if not connection:
         return None
     cursor = connection.cursor()
@@ -517,7 +517,7 @@ def makeUpdateQuery(sql:str, params:tuple, inv_prices:bool=None) -> None:
     'inv_prices' determina si hacer un UPDATE normal ó si es para actualizar los precios que fueron modificados de \n
     la tabla 'displayTable' usando porcentajes, en cuyo caso se usa la instrucción 'executemany()'.
     \nRetorna 'None'.'''
-    conn = createConnection("database/inventario.db")
+    conn = createConnection(DATABASE_DIR)
     if not conn:
         return None
     cursor = conn.cursor()
@@ -607,7 +607,7 @@ def createTableColumnLineEdit(tableWidget:QTableWidget, curr_index:QModelIndex) 
 # INSERT QUERY
 def makeInsertQuery(sql:str, params:tuple = None) -> None:
     '''Hace la consulta INSERT a la base de datos. Retorna 'None'.'''
-    conn = createConnection("database/inventario.db")
+    conn = createConnection(DATABASE_DIR)
     if not conn:
         return None
     cursor = conn.cursor()

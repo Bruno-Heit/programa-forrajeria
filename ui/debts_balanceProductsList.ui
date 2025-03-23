@@ -476,7 +476,7 @@ QScrollBar::handle:horizontal {
                </size>
               </property>
               <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Elimina la cantidad adeudada/a favor actualmente seleccionada en la tabla.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, se debe estar seguro de querer borrar un registro.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Elimina la cantidad adeudada/a favor del producto actualmente seleccionado en la tabla.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Éste método no elimina para siempre los productos, sino que considera la cantidad como saldada.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string/>

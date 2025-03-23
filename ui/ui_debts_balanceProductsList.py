@@ -355,7 +355,7 @@ class Ui_ProductsBalance(object):
         self.search_bar.setPlaceholderText(QCoreApplication.translate("ProductsBalance", u"Buscar ventas por fecha, cantidad, etc...", None))
         self.checkbox_show_all_products.setText(QCoreApplication.translate("ProductsBalance", u"Mostrar historial de productos", None))
 #if QT_CONFIG(tooltip)
-        self.btn_delete_debt.setToolTip(QCoreApplication.translate("ProductsBalance", u"<html><head/><body><p><span style=\" font-size:11pt;\">Elimina la cantidad adeudada/a favor actualmente seleccionada en la tabla.</span></p><p><span style=\" font-size:11pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:11pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, se debe estar seguro de querer borrar un registro.</span></p></body></html>", None))
+        self.btn_delete_debt.setToolTip(QCoreApplication.translate("ProductsBalance", u"<html><head/><body><p><span style=\" font-size:11pt;\">Elimina la cantidad adeudada/a favor del producto actualmente seleccionado en la tabla.</span></p><p><span style=\" font-size:11pt;\">\u00c9ste m\u00e9todo no elimina para siempre los productos, sino que considera la cantidad como saldada.</span></p></body></html>", None))
 #endif // QT_CONFIG(tooltip)
         self.btn_delete_debt.setText("")
         self.le_reduce_debt.setPlaceholderText(QCoreApplication.translate("ProductsBalance", u"Descontar del saldo de productos seleccionados...", None))
