@@ -1,11 +1,14 @@
 '''
-En este archivo están las operaciones a la base de datos sencillas, que no requieren 
+En este archivo están las operaciones a la base de datos sencillas que no requieren 
 de MULTITHREADING por tardar poco para ejecutarse... Son operaciones CRUD simples 
-que tienen la intención no generar resultados masivos. Además coloco la clase 
-'DatabaseRepository' que, usando el patrón de diseño de repositorio, contiene las 
-consultas a bases de datos generales.
+que tienen la intención de no generar resultados masivos.
 
-Además coloqué acá la función 'pyinstallerCompleteResourcePath' para evitar 
+También contiene la clase 'DatabaseRepository' que, usando el patrón de diseño de 
+repositorio, contiene las consultas a bases de datos generales.
+
+Contiene variables globales relacionadas con base de datos.
+
+Por último coloqué acá la función 'pyinstallerCompleteResourcePath' para evitar 
 'circular import' con 'utils/functionutils'.
 '''
 import os # para obtener el 'relative path' de algunos archivos cuando se ejecutan luego de empaquetarse con pyinstaller...
@@ -17,10 +20,15 @@ import logging
 from re import (Match, compile, search, IGNORECASE)
 
 
+# variables globales
+DATABASE_DIR:str = "database/inventario.db"
+
+
+# repositorio de base de datos
 class DatabaseRepository():
     '''Clase repositorio y "context manager" para realizar operaciones a la base de datos.'''
     
-    def __init__(self, db_path:str="database/inventario.db") -> None:
+    def __init__(self, db_path:str=DATABASE_DIR) -> None:
         self._db_path:str = db_path
         self._connection:Connection = None
     
@@ -246,6 +254,7 @@ class DatabaseRepository():
 
 
 
+# funciones generales
 #? La siguiente función sirve para ayudar a pyinstaller a completar el path completo a un archivo, 
 #? y se tiene que hacer esto porque tiene un error y a veces no puede hacerlo.
 def pyinstallerCompleteResourcePath(relative_path:str) -> str:
@@ -278,7 +287,7 @@ def makeReadQuery(sql:str, params:tuple = None) -> list[tuple]:
     
     Retorna una 'list[tuple]' con los valores.
     '''
-    conn = createConnection("database/inventario.db")
+    conn = createConnection(DATABASE_DIR)
     if not conn:
         return
     cursor = conn.cursor()
@@ -298,7 +307,7 @@ def makeUpdateQuery(sql:str, params:tuple) -> None:
     
     Retorna None.
     '''
-    conn = createConnection("database/inventario.db")
+    conn = createConnection(DATABASE_DIR)
     if not conn:
         return None
     cursor = conn.cursor()
@@ -323,7 +332,7 @@ def makeInsertQuery(sql:str, params:tuple = None) -> None:
     
     Retorna None.
     '''
-    conn = createConnection("database/inventario.db")
+    conn = createConnection(DATABASE_DIR)
     if not conn:
         return None
     cursor = conn.cursor()

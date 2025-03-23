@@ -239,7 +239,7 @@ def getProductsCategories() -> list[str] | None:
     Hace una consulta SELECT a la base de datos y toma las categorías que hay. Devuelve una lista con las 
     categorías. 
     '''
-    connection = createConnection("database/inventario.db")
+    connection = createConnection(DATABASE_DIR)
     if not connection:
         return None
     cursor = connection.cursor()
@@ -256,7 +256,7 @@ def getProductNames() -> list[str]:
     
     Retorna una lista con los nombres.
     '''
-    conn = createConnection("database/inventario.db")
+    conn = createConnection(DATABASE_DIR)
     if not conn:
         return None
     cursor = conn.cursor()
@@ -275,7 +275,7 @@ def getCategoriesDescription() -> tuple[str] | None:
     Hace una consulta SELECT a la base de datos y toma las descripciones de las categorías que hay. Devuelve una tupla 
     con las categorías.
     '''
-    connection = createConnection("database/inventario.db")
+    connection = createConnection(DATABASE_DIR)
     if not connection:
         return None
     cursor = connection.cursor()
@@ -361,7 +361,7 @@ def getCurrentProductStock(product_name:str) -> tuple[float,str]:
         stock:float
         measurement_unit:str
 
-        conn = createConnection("database/inventario.db")
+        conn = createConnection(DATABASE_DIR)
         if not conn:
             return None
         cursor = conn.cursor()

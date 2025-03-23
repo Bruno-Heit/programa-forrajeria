@@ -5,7 +5,7 @@ from PySide6.QtCore import (QObject, Signal, Slot)
 
 from utils.functionutils import (createConnection)
 from utils.enumclasses import (LoggingMessage, TableViewId)
-from utils.dboperations import (DatabaseRepository)
+from utils.dboperations import (DatabaseRepository, DATABASE_DIR)
 
 from sqlite3 import (Connection, Error as sqlite3Error)
 from typing import (Any, Iterable)
@@ -114,7 +114,7 @@ class WorkerDelete(QObject):
         -------
         None
         '''
-        conn = createConnection("database/inventario.db")
+        conn = createConnection(DATABASE_DIR)
         if not conn:
             self.finished.emit(0) #! error con la comunicación a la base de datos
         cursor = conn.cursor()
@@ -177,7 +177,7 @@ class WorkerInsert(QObject):
         - 1: si no hubo errores.
         - sqlite3.Error.sqlite_errorcode: si hubo un error concreto, emite el código de error de sqlite3.
         '''
-        conn = createConnection("database/inventario.db")
+        conn = createConnection(DATABASE_DIR)
         if not conn:
             self.finished.emit(0) #! error con la comunicación de la base de datos
         cursor = conn.cursor()
@@ -231,7 +231,7 @@ class WorkerUpdate(QObject):
         -------
         None
         '''
-        conn = createConnection("database/inventario.db")
+        conn = createConnection(DATABASE_DIR)
         if not conn:
             self.finished.emit(0) #! error con la comunicación de la base de datos
         cursor = conn.cursor()
