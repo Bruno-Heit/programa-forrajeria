@@ -4,7 +4,7 @@ from numpy import (ndarray, array)
 from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QLineEdit, QCompleter, 
                                QWidget, QGraphicsDropShadowEffect)
 from PySide6.QtCore import (Signal, QSize, QRect, QPropertyAnimation, QEasingCurve, 
-                            QPoint)
+                            QPoint, QItemSelection)
 from PySide6.QtGui import (QIcon, QShowEvent, QCursor, QKeyEvent, QColor, QCloseEvent, 
                            QStandardItemModel, QStandardItem)
 
@@ -3957,6 +3957,9 @@ class ProductsBalanceDialog(QDialog):
         # coloca íconos y otros estilos
         self.search_icon = QIcon(":/icons/search.svg")
         self.products_balance_dialog.search_bar.addAction(self.search_icon, QLineEdit.ActionPosition.LeadingPosition)
+        
+        self.delete_debt_icon = QIcon(":/icons/trash-register.svg")
+        self.products_balance_dialog.btn_delete_debt.setIcon(self.delete_debt_icon)
         return None
     
     
@@ -3997,6 +4000,9 @@ class ProductsBalanceDialog(QDialog):
         self.products_balance_dialog.tv_balance_products.setModel(self.products_balance_proxy_model)
         self.products_balance_dialog.tv_balance_products.setSortingEnabled(True)
         
+        # selection model
+        self.tv_selection_model = self.products_balance_dialog.tv_balance_products.selectionModel()
+        
         setTableViewPolitics(self.products_balance_dialog.tv_balance_products)
         return None
     
@@ -4014,7 +4020,7 @@ class ProductsBalanceDialog(QDialog):
     def setup_signals(self) -> None:
         # actualización del modelo de datos
         self.products_balance_model.dataToUpdate.connect(
-            lambda data: self.onProductsBalanceModelDataToUpdate(
+            lambda data: self.updateValuesInDatabase(
                 column=data['column'],
                 IDsales_detail=data['ID_sales_detail'],
                 new_val=data['new_value']
@@ -4060,6 +4066,20 @@ class ProductsBalanceDialog(QDialog):
         )
         self.products_balance_dialog.le_reduce_debt.returnPressed.connect(
             self.onLEReduceDebtReturnPressed
+        )
+        
+        # cambio de selección en la tabla
+        self.tv_selection_model.selectionChanged.connect(
+            self.toggleDeleteDebtButton
+        )
+        
+        # eliminación de deudas
+        self.products_balance_dialog.btn_delete_debt.clicked.connect(
+            self.onDeleteDebts
+        )
+        
+        self.products_balance_proxy_model.baseModelRowsSelected.connect(
+            self.__onProductsBalanceBaseModelRowsSelected
         )
         return None
 
@@ -4144,18 +4164,66 @@ class ProductsBalanceDialog(QDialog):
     
     
     # eliminar productos (DELETE)
-    # TODO: implementar la eliminación de filas (marcar como eliminadas las deudas seleccionadas)
-    def deleteDebts(self) -> None:
+    def toggleDeleteDebtButton(self) -> None:
         '''
-        Elimina de deudas los productos seleccionados.
+        Activa/desactiva el botón que permite eliminar registros de la tabla 
+        según haya o no registros seleccionados.
         '''
-        ...
+        self.products_balance_dialog.btn_delete_debt.setEnabled(
+            self.tv_selection_model.hasSelection()
+        )
+        return None
+    
+    
+    def onDeleteDebts(self) -> None:
+        '''
+        Marca como eliminadas las deudas de los productos seleccionados y al 
+        finalizar reinicia la selección de items en la tabla.
+        '''
+        selected_rows = getSelectedTableRows(
+            tableView=self.products_balance_dialog.tv_balance_products
+        )
+        
+        # elimina los registros del modelo de datos
+        self.products_balance_proxy_model.removeSelectedRows(selected_rows)
+        
+        self.tv_selection_model.clear()
+        return None
+    
+    
+    def __onProductsBalanceBaseModelRowsSelected(
+        self, base_model_rows_selected:tuple[int]) -> None:
+        '''
+        Marca como eliminadas las deudas seleccionadas.
+
+        Parámetros
+        ----------
+        base_model_rows_selected : tuple[int]
+            las filas mapeadas del MODELO BASE seleccionadas para eliminar en 
+            la base de datos
+        '''
+        ids_to_delete:list[int] = []
+        
+        # obtiene los ID_detalle_venta de los productos y los convierte en tuple[ID]
+        for row in base_model_rows_selected:
+            ids_to_delete.append(
+                self.products_balance_proxy_model.getSaleDetailID(row)
+            )
+        
+        # marca como eliminados los registros
+        for id in ids_to_delete:
+            self.updateValuesInDatabase(
+                column=TableViewColumns.PRODS_BAL_BALANCE.value,
+                IDsales_detail=id,
+                new_val=0
+            )
+        
         return None
 
 
     # actualizar productos (UPDATE)
     @Slot(int, int, object)
-    def onProductsBalanceModelDataToUpdate(self, column:int, IDsales_detail:int,
+    def updateValuesInDatabase(self, column:int, IDsales_detail:int,
                                        new_val:Any) -> None:
         '''
         Actualiza la base de datos con el valor nuevo de la sección de Deudas. 
