@@ -1190,7 +1190,6 @@ class MainWindow(QMainWindow):
         return None
 
 
-    # TODO: implementar la eliminación de deudores
     #¡ tablas (DELETE)
     @Slot(object)
     def toggleDeleteButton(self, table_viewID:TableViewId) -> None:
@@ -1222,6 +1221,7 @@ class MainWindow(QMainWindow):
         return None
     
     
+    # TODO: implementar la eliminación de deudores
     @Slot(QTableView)
     def handleTableDeleteRows(self, table_viewID:TableViewId) -> None:
         '''
@@ -1242,15 +1242,16 @@ class MainWindow(QMainWindow):
                 self.__deleteSalesRows()
 
             case TableViewId.DEBTS_TABLE_VIEW:
-                ...
+                self.__deleteDebtsRows()
             
         return None
     
     
+    # productos
     def __deleteInventoryRows(self) -> None:
         '''
-        Elimina los productos seleccionados en el MODELO de inventario, actualiza 
-        la VISTA y marca el producto en la base de datos como eliminado.
+        Elimina los productos seleccionados en el MODELO de inventario y actualiza 
+        la VISTA.
         '''
         selected_rows:tuple[int] = getSelectedTableRows(self.ui.tv_inventory_data)
         if not selected_rows:
@@ -1303,10 +1304,11 @@ class MainWindow(QMainWindow):
         return None
 
 
+    # ventas
     def __deleteSalesRows(self) -> None:
         '''
-        Elimina los productos seleccionados en el MODELO de ventas, actualiza 
-        la VISTA y marca las deudas (si hay) en la base de datos como eliminadas.
+        Elimina los productos seleccionados en el MODELO de ventas y actualiza 
+        la VISTA.
         '''
         # obtiene las filas seleccionadas
         selected_rows = getSelectedTableRows(self.ui.tv_sales_data)
