@@ -532,7 +532,6 @@ class ProductsBalanceProxyModel(QSortFilterProxyModel):
         super(ProductsBalanceProxyModel, self).__init__()
         self.invalidateFilter()
     
-    # TODO: implementar la eliminación de filas
     
     # eliminación de filas
     def removeSelectedRows(self, selected_rows:tuple[int]) -> None:

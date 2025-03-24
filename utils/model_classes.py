@@ -1131,7 +1131,6 @@ class ProductsBalanceModel(QAbstractTableModel):
         self._headers = headers
         self._parent = parent
     
-    # TODO: implementar los métodos removeSelectedModelRows, removeRows e insertRows
     
     #¡ dimensiones
     def rowCount(self, parent:QObject = ...) -> int:
