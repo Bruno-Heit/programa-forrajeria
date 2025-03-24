@@ -11,6 +11,7 @@ CAMBIOS A HACER/IMPLEMENTACIONES NUEVAS:
 
 	☑ Validar con 'phonenumbers' los números de teléfono introducidos.
 	☐ Hacer mención del uso del módulo 'phonenumbers' (tiene lincencia APACHE).
+	☐ Mostrar licencia en algún lugar.
 
 	☐ Guardar datos de hasta 5 años de antigüedad (por seguridad).
 	☐ Mostrar datos en tablas principalmente de los últimos 2 días, con posibilidad de expandir a los días deseados.
@@ -23,9 +24,12 @@ CAMBIOS A HACER/IMPLEMENTACIONES NUEVAS:
 	  debe modificar el stock total en la tabla donde se encuentra ese objeto.
 	☐ Al efectuarse una venta, si el cliente paga demás, se debe agregar también a cuentas corrientes (las 
 	  deudas ya se agregan).
+	☐ Al agregarse un producto al formulario, se debe permitir al usuario ingresar la cantidad del producto 
+	  ó el subtotal de ese producto, y dependiendo de cuál se elija el otro campo se complete teniendo en cuenta 
+	  lo que introdujo el usuario.
 	
 	☐ Implementar el sistema de deudas.
-	☐ Dentro de QDialog de productos en cuenta corriente, colocar un botón para mostrar todos los productos que 
+	☑ Dentro de QDialog de productos en cuenta corriente, colocar un botón para mostrar todos los productos que 
 	  el cliente ha comprado.
 
 	☑ Implementar sistema de búsqueda con search-bars para filtrar contenido de las tablas.
@@ -38,38 +42,8 @@ CAMBIOS A HACER/IMPLEMENTACIONES NUEVAS:
 
 	☐ Implementar copias de seguridad (idealmente 3 copias, 2 en disco, 1 en otro dispositivo (principio 321)).
 
-	☐ Crear constante con dirección de la base de datos, para acceder desde las funciones y clases 
+	☑ Crear constante con dirección de la base de datos, para acceder desde las funciones y clases 
 	  que lo necesiten.
-	
-################################################################################################################
-
-ORDEN DE INTRODUCCIÓN DE DATOS A BASE DE DATOS:
-
-	1. (INVENTARIO) LLENAR TABLA 'Categorias' (una vez llena, a no ser que se agreguen categorías nuevas, sólo 
-           		referenciar los productos de 'Productos' a esta tabla).
-	2.(INVENTARIO) INTRODUCIR PRODUCTOS EN TABLA 'Productos'.
-
-	3. (VENTA) INTRODUCIR VENTAS EN TABLA 'Ventas'.
-	4. (VENTA) INTRODUCIR DETALLES DE LAS VENTAS EN TABLA 'Detalle_Ventas'.
-	
-	5. (DEUDAS) INTRODUCIR DEUDORES EN TABLA 'Deudores' (sólo si en 'Detalle_Ventas' el registro tiene en la columna 
-		    'pagado != precio total', sino no)
-		    NOTA: ALGUNOS CAMPOS SON OPCIONALES, A DECISIÓN DEL VENDEDOR.
-	6. (DEUDAS) INTRODUCIR DEUDAS EN TABLA 'Deudas' (sólo si en 'Detalle_Ventas' el registro tiene en la columna 
-		    'pagado != precio total', sino no).
-
-
-	NOTAS:
-		.CUANDO SE HAGA UNA VENTA, RESTAR EN 'Productos.stock' LA CANTIDAD VENDIDA DE ESE PRODUCTO ESPECIFICADA 
-		 EN 'Detalle_Ventas.cantidad'.
-		.CUANDO EN UNA VENTA 'Detalle_Ventas.pagado=0', AÑADIR UN REGISTRO EN 'Deudores' CON INFORMACIÓN SOBRE 
-		 EL DEUDOR, Y EN 'DEUDAS' CON INFORMACIÓN SOBRE LA DEUDA.
-
-
-
-
-
-
 
 
 
