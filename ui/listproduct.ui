@@ -174,7 +174,7 @@ QComboBox:disabled {
       </size>
      </property>
      <property name="toolTip">
-      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;El nombre del producto vendido.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;El nombre del producto vendido.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="editable">
       <bool>true</bool>
@@ -214,7 +214,7 @@ QComboBox:disabled {
       </size>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;La cantidad vendida del producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;La cantidad vendida del producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::Shape::NoFrame</enum>
@@ -259,7 +259,7 @@ QComboBox:disabled {
          </size>
         </property>
         <property name="toolTip">
-         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;La cantidad vendida del producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;La cantidad vendida del producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="frame">
          <bool>false</bool>
@@ -327,7 +327,7 @@ QComboBox:disabled {
       </size>
      </property>
      <property name="toolTip">
-      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Aplica el costo comercial al producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Aplica el costo comercial al producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string notr="true">precio comercial</string>
@@ -389,7 +389,7 @@ QComboBox:disabled {
       </size>
      </property>
      <property name="toolTip">
-      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Borra el producto de la venta actual (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;Supr.&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Borra el producto de la venta actual (&lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-style:italic;&quot;&gt;Supr.&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string notr="true"/>
@@ -494,7 +494,7 @@ QComboBox:disabled {
       </size>
      </property>
      <property name="toolTip">
-      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Descripción adicional de la venta (opcional).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Si este campo se deja vacío se llenará con el producto vendido, la cantidad vendida, la unidad de medida usada para el producto y el tipo de precio que se pagó (comercial o normal).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Descripción adicional de la venta (opcional).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Si este campo se deja vacío se llenará con el producto vendido, la cantidad vendida, la unidad de medida usada para el producto y el tipo de precio que se pagó (comercial o normal).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="inputMask">
       <string notr="true"/>
