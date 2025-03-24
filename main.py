@@ -1253,6 +1253,8 @@ class MainWindow(QMainWindow):
         '''
         Instancia un Worker y un QThread para actualizar la base de datos con 
         los productos eliminados.
+        NOTA: Este método NO ELIMINA LOS REGISTROS DE LAS TABLAS "Productos" 
+        SINO QUE LOS MARCA COMO "ELIMINADOS" EN LA BASE DE DATOS.
 
         Parámetros
         ----------
@@ -1305,6 +1307,7 @@ class MainWindow(QMainWindow):
         '''
         Instancia un Worker y un QThread para actualizar la base de datos con 
         los productos eliminados.
+        NOTA: Este método SÍ ELIMINA LOS REGISTROS DE "Ventas" Y "Detalle_Ventas".
 
         Parámetros
         ----------
