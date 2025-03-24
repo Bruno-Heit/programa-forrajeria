@@ -19,7 +19,7 @@ from utils.dboperations import (DatabaseRepository)
 from utils.customvalidators import (SalePaidValidator)
 from utils.enumclasses import (LoggingMessage, ModelHeaders, TableViewId, 
                                LabelFeedbackStyle, InventoryPriceType, TypeSideBar, 
-                               TableViewColumns, ModelDataCols)
+                               TableViewColumns, ModelDataCols, ProgressBarStyle)
 from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxyModel)
 
 from resources import (rc_icons)
@@ -1259,17 +1259,9 @@ class MainWindow(QMainWindow):
         
         # cambia la progress-bar para representar las eliminaciones
         self.ui.inventory_progressbar.setMaximum(len(selected_rows))
-        self.ui.inventory_progressbar.setStyleSheet(
-            '''QProgressBar::chunk {
-                background-color: qlineargradient(spread:reflect, x1:0.119, y1:0.426, 
-                                                  x2:0.712045, y2:0.926, stop:0.0451977 
-                                                  rgba(255, 84, 87, 255), 
-                                                  stop:0.59887 rgba(255, 161, 71, 255));
-                }''')
+        self.ui.inventory_progressbar.setStyleSheet(ProgressBarStyle.DELETION.value)
         
-        # actualiza el MODELO de datos... el método siguiente emite la señal 
-        # 'baseModelRowsSelected' hacia acá para poder actualizar la base 
-        # de datos en el método 'self.__onInventoryBaseModelRowsSelected()'
+        # actualiza el MODELO de datos
         self.inventory_proxy_model.removeSelectedRows(selected_rows)
         return None
     
@@ -1318,12 +1310,7 @@ class MainWindow(QMainWindow):
         
         # cambia la progress-bar para representar las eliminaciones
         self.ui.sales_progressbar.setMaximum(len(selected_rows))
-        self.ui.sales_progressbar.setStyleSheet(
-            '''QProgressBar::chunk {
-                background-color: qlineargradient(spread:reflect, x1:0.119, y1:0.426, 
-                    x2:0.712045, y2:0.926, stop:0.0451977 rgba(255, 84, 87, 255), 
-                    stop:0.59887 rgba(255, 161, 71, 255));
-                }''')
+        self.ui.sales_progressbar.setStyleSheet(ProgressBarStyle.DELETION.value)
         
         self.sales_proxy_model.removeSelectedRows(selected_rows=selected_rows)
         return None

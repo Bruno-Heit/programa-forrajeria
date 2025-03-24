@@ -70,6 +70,20 @@ class LabelFeedbackStyle(StrEnum):
 
 
 
+class ProgressBarStyle(StrEnum):
+    '''
+    Clase StrEnum con estilos predeterminados para aplicar a las QProgressBars 
+    dependiendo de la operación que se lleva a cabo en la tabla asociada.
+    '''
+    DELETION =  ''' QProgressBar::chunk {
+                        background-color: qlineargradient(spread:reflect, x1:0.119, y1:0.426, 
+                        x2:0.712045, y2:0.926, stop:0.0451977 rgba(255, 84, 87, 255), 
+                        stop:0.59887 rgba(255, 161, 71, 255));
+                    }'''
+
+
+
+
 class TableViewId(IntEnum):
     '''Clase con IntEnum con "IDs" para cada uno de los QTableView.'''
     INVEN_TABLE_VIEW = 0
