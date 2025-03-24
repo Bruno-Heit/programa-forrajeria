@@ -24,13 +24,9 @@ from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxy
 
 from resources import (rc_icons)
 
-# TODO1: darle funcionalidad a los botones de Deudas
-# TODO1: falta hacer los UPDATE, DELETE e INSERT de Deudas
+# TODO1: falta hacer DELETE a Deudas
 
-# TODO2: luego, hay que crear un widget personalizado (texto + botón) para mostrar productos 
-# TODO2: que tiene anotados el deudor junto con sus precios
-
-# TODO3: en algún lugar se debe obtener la suma de las ventas del día y mostrarla.
+# TODO2: en algún lugar se debe obtener la suma de las ventas del día y mostrarla.
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -1230,14 +1226,8 @@ class MainWindow(QMainWindow):
         '''
         Elimina los productos seleccionados en el MODELO de inventario, actualiza 
         la VISTA y marca el producto en la base de datos como eliminado.
-
-        Retorna
-        -------
-        None
         '''
-        # obtiene las filas seleccionadas
         selected_rows:tuple[int] = getSelectedTableRows(self.ui.tv_inventory_data)
-        
         if not selected_rows:
             return None
         
