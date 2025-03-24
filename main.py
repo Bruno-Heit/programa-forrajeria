@@ -1251,7 +1251,7 @@ class MainWindow(QMainWindow):
     def __deleteInventoryRows(self) -> None:
         '''
         Elimina los productos seleccionados en el MODELO de inventario y actualiza 
-        la VISTA.
+        la VISTA, , además actualiza la progress-bar asociada.
         '''
         selected_rows:tuple[int] = getSelectedTableRows(self.ui.tv_inventory_data)
         if not selected_rows:
@@ -1308,7 +1308,7 @@ class MainWindow(QMainWindow):
     def __deleteSalesRows(self) -> None:
         '''
         Elimina los productos seleccionados en el MODELO de ventas y actualiza 
-        la VISTA.
+        la VISTA, además actualiza la progress-bar asociada.
         '''
         # obtiene las filas seleccionadas
         selected_rows = getSelectedTableRows(self.ui.tv_sales_data)
