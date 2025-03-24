@@ -228,6 +228,11 @@ class MainWindow(QMainWindow):
         )
         
         #* (DELETE) eliminar un producto de 'tv_inventory_data'
+        # cambios en la selección
+        self.ui.tv_inventory_data.selectionModel().selectionChanged.connect(
+            lambda: self.toggleDeleteButton(table_viewID=TableViewId.INVEN_TABLE_VIEW)
+        )
+        
         self.ui.btn_delete_product_inventory.clicked.connect(
             lambda: self.handleTableDeleteRows(TableViewId.INVEN_TABLE_VIEW)
         )
@@ -289,6 +294,11 @@ class MainWindow(QMainWindow):
         self.ui.btn_add_product_sales.clicked.connect(lambda: self.handleTableCreateRow(TableViewId.SALES_TABLE_VIEW))
         
         #* (DELETE) eliminar ventas de 'tv_sales_data'
+        # cambios en la selección
+        self.ui.tv_sales_data.selectionModel().selectionChanged.connect(
+            lambda: self.toggleDeleteButton(table_viewID=TableViewId.SALES_TABLE_VIEW)
+        )
+        
         self.ui.btn_delete_product_sales.clicked.connect(lambda: self.handleTableDeleteRows(TableViewId.SALES_TABLE_VIEW))
         
         self.sales_proxy_model.baseModelRowsSelected.connect(
@@ -346,7 +356,18 @@ class MainWindow(QMainWindow):
         )
         
         #* (DELETE) eliminar ventas de 'tv_sales_data'
-        ...
+        # cambios en la selección
+        self.ui.tv_debts_data.selectionModel().selectionChanged.connect(
+            lambda: self.toggleDeleteButton(table_viewID=TableViewId.DEBTS_TABLE_VIEW)
+        )
+        
+        self.ui.btn_delete_debtor.clicked.connect(
+            lambda: self.handleTableDeleteRows(TableViewId.DEBTS_TABLE_VIEW) # TODO: implementar la eliminación de deudores en éste método
+        )
+        
+        self.debts_proxy_model.baseModelRowsSelected.connect(
+            self.__onSalesBaseModelRowsSelected # TODO: implementar éste método
+        )
         
         #* (UPDATE) modificar celdas de 'tv_sales_data'
         self.debts_data_model.dataToUpdate.connect(
@@ -703,7 +724,7 @@ class MainWindow(QMainWindow):
     def fillTableView(self, table_viewID:TableViewId, ACCESSED_BY_LIST:bool=False, SHOW_ALL:bool=False) -> None:
         '''
         Este método hace lo siguiente:
-        - Limpia las variables de IDs asociadas con el QTableView.
+        - Limpia las variables de IDs asociadas con el QTableView y su selección.
         - Dependiendo del QTableView que se tenga que llenar, declara las consultas SELECT.
         - Instancia e inicializa un QThread y un worker para llenar el modelo de datos asociado 
         al QTableView.
@@ -731,6 +752,8 @@ class MainWindow(QMainWindow):
         # para llenar la tabla
         match table_viewID.name:
             case "INVEN_TABLE_VIEW":
+                self.ui.tv_inventory_data.selectionModel().clearSelection()
+                
                 # si se seleccionó una categoría desde 'tables_ListWidget', cambia 
                 # hacia la pestaña de inventario...
                 if ACCESSED_BY_LIST:
@@ -748,6 +771,8 @@ class MainWindow(QMainWindow):
 
 
             case "SALES_TABLE_VIEW":
+                self.ui.tv_sales_data.selectionModel().clearSelection()
+                
                 count_sql, data_sql = getTableViewsSqlQueries(
                     table_viewID=TableViewId.SALES_TABLE_VIEW
                 )
@@ -755,6 +780,8 @@ class MainWindow(QMainWindow):
 
 
             case "DEBTS_TABLE_VIEW":
+                self.ui.tv_debts_data.selectionModel().clearSelection()
+                
                 count_sql, data_sql = getTableViewsSqlQueries(
                     table_viewID=TableViewId.DEBTS_TABLE_VIEW
                 )

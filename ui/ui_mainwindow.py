@@ -383,6 +383,29 @@ class Ui_MainWindow(object):
 "	color: #999;\n"
 "}\n"
 "\n"
+"#btn_delete_product_inventory,\n"
+"#btn_delete_product_sales,\n"
+"#btn_delete_debtor {\n"
+"	background-color: #ff4949;\n"
+"}\n"
+"#btn_delete_product_inventory:hover,\n"
+"#btn_delete_product_sales:hover,\n"
+"#btn_delete_debtor:hover {\n"
+"	background-color: #faa;\n"
+"}\n"
+"#btn_delete_product_inventory:pressed,\n"
+"#btn_delete_product_sales:pressed,\n"
+"#btn_delete_debtor:pressed {\n"
+"	background-color: #3b66ab;\n"
+"	border: 1px inset #778da9;\n"
+"}\n"
+"#btn_delete_product_inventory:disabled,\n"
+"#btn_delete_product_sales:disabled,\n"
+"#btn_delete_debtor:disabled {\n"
+"	background-color: rgb(103, 115, 122);\n"
+"	color: #999;\n"
+"}\n"
+"\n"
 "\n"
 "QTabWidget::pane { /* selecciona la ventana, sin las pesta\u00f1as */\n"
 "	margin-top: -6px;\n"
@@ -391,7 +414,8 @@ class Ui_MainWindow(object):
 "	left: 15px;\n"
 "	background-color: #e0e1dd;\n"
 "}\n"
-"\n"
+""
+                        "\n"
 "QTabBar::tab { /* selecciona la barra de las pesta\u00f1as */\n"
 "	background-color: #415a77;\n"
 "	border: 1px solid #415a77;\n"
@@ -416,8 +440,7 @@ class Ui_MainWindow(object):
 "	border-top-color:  #778da9;\n"
 "	font-size: 20px;\n"
 "}\n"
-"QTabBar::ta"
-                        "b:!selected {\n"
+"QTabBar::tab:!selected {\n"
 "	color: #e0e1dd;\n"
 "	margin-top: 3px;\n"
 "	height: 22px;\n"
@@ -436,7 +459,8 @@ class Ui_MainWindow(object):
 "}\n"
 "QTableView::item:selected {\n"
 "	background-color: #778da9;\n"
-"	border: 1px solid #fff;\n"
+"	border: 1p"
+                        "x solid #fff;\n"
 "}\n"
 "/* QHeaderViews */\n"
 "QHeaderView::section {\n"
@@ -460,8 +484,7 @@ class Ui_MainWindow(object):
 "}\n"
 "QComboBox:on,\n"
 "QTableView QComboBox:on { /* estilos de comboboxes creados por los delegados para edici\u00f3n */\n"
-"	"
-                        "background-color: #3b66ab;\n"
+"	background-color: #3b66ab;\n"
 "	color: #fff;\n"
 "	border: none;\n"
 "	padding-top: 3px;\n"
@@ -473,7 +496,8 @@ class Ui_MainWindow(object):
 "	subcontrol-position: top right;\n"
 "	width: 20px;\n"
 "	padding-right: 3px;\n"
-"	border-left: none;\n"
+"	border-"
+                        "left: none;\n"
 "	border-top-right-radius: 5px;\n"
 "	border-bottom-right-radius: 5px;\n"
 "}\n"
@@ -492,8 +516,7 @@ class Ui_MainWindow(object):
 "\n"
 "/* estilos del QDateTimeEdit y del QCalendarWidget */\n"
 "QDateTimeEdit,\n"
-"QTableView QDateTimeEdit { /* "
-                        "estilos de datetimeedits creados por los delegados para edici\u00f3n */\n"
+"QTableView QDateTimeEdit { /* estilos de datetimeedits creados por los delegados para edici\u00f3n */\n"
 "	background-color: #fff;\n"
 "}\n"
 "QCalendarWidget QAbstractItemView,\n"
@@ -501,7 +524,8 @@ class Ui_MainWindow(object):
 "	background-color: #fff;\n"
 "	selection-background-color: #38a3a5;\n"
 "}\n"
-"QCalendarWidget QToolButton,\n"
+"QCalendarWidget QToolBut"
+                        "ton,\n"
 "QTableView QCalendarWidget QToolButton { /* estilos de datetimeedits creados por los delegados para edici\u00f3n */\n"
 "	background-color: #22577a;\n"
 "	color: #fff;\n"
@@ -519,8 +543,7 @@ class Ui_MainWindow(object):
 "/* estilos de QProgressBar */\n"
 "QProgressBar {\n"
 "	margin: 0 10px 0 10px;\n"
-"	background-color: rgba(255, 255, 255,"
-                        " 0.6);\n"
+"	background-color: rgba(255, 255, 255, 0.6);\n"
 "	border: None;\n"
 "	border-radius: 5px;\n"
 "}\n"
@@ -706,18 +729,13 @@ class Ui_MainWindow(object):
 
         self.btn_delete_product_inventory = QPushButton(self.tab1_buttons_2)
         self.btn_delete_product_inventory.setObjectName(u"btn_delete_product_inventory")
+        self.btn_delete_product_inventory.setEnabled(False)
         self.btn_delete_product_inventory.setMinimumSize(QSize(180, 23))
         self.btn_delete_product_inventory.setMaximumSize(QSize(250, 23))
 #if QT_CONFIG(tooltip)
         self.btn_delete_product_inventory.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Borra el producto actualmente seleccionado (</span><span style=\" font-size:12pt; font-style:italic;\">supr</span><span style=\" font-size:12pt;\">).</span></p><p><span style=\" font-size:12pt;\">\u00c9sta acci\u00f3n elimina la </span><span style=\" font-size:12pt; text-decoration: underline;\">referencia al producto</span><span style=\" font-size:12pt;\">, no el producto como tal.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:12pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer eliminar un producto.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        self.btn_delete_product_inventory.setStyleSheet(u"QPushButton {\n"
-"	background-color: #ff4949;\n"
-"}\n"
-"QPushButton:hover {\n"
-"	background-color: #faa;\n"
-"}\n"
-"")
+        self.btn_delete_product_inventory.setStyleSheet(u"")
         self.btn_delete_product_inventory.setText(u"Eliminar producto")
         self.btn_delete_product_inventory.setIconSize(QSize(24, 24))
 #if QT_CONFIG(shortcut)
@@ -1218,7 +1236,7 @@ class Ui_MainWindow(object):
         self.tab2_toolBox.addItem(self.box1_sales_form, u"Formulario de venta")
         self.box2_sales_table = QWidget()
         self.box2_sales_table.setObjectName(u"box2_sales_table")
-        self.box2_sales_table.setGeometry(QRect(0, 0, 374, 187))
+        self.box2_sales_table.setGeometry(QRect(0, 0, 756, 517))
         self.box2_sales_table.setStyleSheet(u"#box2_sales_table {\n"
 "	background-color: #e0e1dd;\n"
 "}\n"
@@ -1359,18 +1377,13 @@ class Ui_MainWindow(object):
 
         self.btn_delete_product_sales = QPushButton(self.sales_buttons)
         self.btn_delete_product_sales.setObjectName(u"btn_delete_product_sales")
+        self.btn_delete_product_sales.setEnabled(False)
         self.btn_delete_product_sales.setMinimumSize(QSize(180, 25))
         self.btn_delete_product_sales.setMaximumSize(QSize(250, 25))
 #if QT_CONFIG(tooltip)
         self.btn_delete_product_sales.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Borra la venta actualmente seleccionada y las deudas asociadas a ella (</span><span style=\" font-size:12pt; font-style:italic;\">supr</span><span style=\" font-size:12pt;\">).</span></p><p><span style=\" font-size:12pt;\">La </span><span style=\" font-size:12pt; text-decoration: underline;\">eliminaci\u00f3n de una venta</span><span style=\" font-size:12pt;\"> deber\u00eda ser realizada cuando se hagan </span><span style=\" font-size:12pt; text-decoration: underline;\">ventas</span><span style=\" font-size:12pt;\"> que al final </span><span style=\" font-size:12pt; text-decoration: underline;\">no son concretadas</span><span style=\" font-size:12pt;\">.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:12pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer eliminar una venta.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        self.btn_delete_product_sales.setStyleSheet(u"QPushButton {\n"
-"	background-color: #ff4949;\n"
-"}\n"
-"QPushButton:hover {\n"
-"	background-color: #faa;\n"
-"}\n"
-"")
+        self.btn_delete_product_sales.setStyleSheet(u"")
         self.btn_delete_product_sales.setIconSize(QSize(24, 24))
 #if QT_CONFIG(shortcut)
         self.btn_delete_product_sales.setShortcut(u"Del")
@@ -1543,18 +1556,13 @@ class Ui_MainWindow(object):
 
         self.btn_delete_debtor = QPushButton(self.debts_buttons)
         self.btn_delete_debtor.setObjectName(u"btn_delete_debtor")
+        self.btn_delete_debtor.setEnabled(False)
         self.btn_delete_debtor.setMinimumSize(QSize(180, 25))
         self.btn_delete_debtor.setMaximumSize(QSize(250, 25))
 #if QT_CONFIG(tooltip)
         self.btn_delete_debtor.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Elimina la cuenta corriente actualmente seleccionada en la tabla (</span><span style=\" font-size:12pt; font-style:italic;\">supr</span><span style=\" font-size:12pt;\">).</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:12pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer borrar una cuenta corriente.</span></p></body></html>")
 #endif // QT_CONFIG(tooltip)
-        self.btn_delete_debtor.setStyleSheet(u"QPushButton {\n"
-"	background-color: #ff4949;\n"
-"}\n"
-"QPushButton:hover {\n"
-"	background-color: #faa;\n"
-"}\n"
-"")
+        self.btn_delete_debtor.setStyleSheet(u"")
         self.btn_delete_debtor.setText(u"Eliminar cuenta corriente")
         self.btn_delete_debtor.setIconSize(QSize(24, 24))
 #if QT_CONFIG(shortcut)

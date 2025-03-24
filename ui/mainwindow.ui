@@ -571,6 +571,29 @@ QPushButton:disabled {
 	color: #999;
 }
 
+#btn_delete_product_inventory,
+#btn_delete_product_sales,
+#btn_delete_debtor {
+	background-color: #ff4949;
+}
+#btn_delete_product_inventory:hover,
+#btn_delete_product_sales:hover,
+#btn_delete_debtor:hover {
+	background-color: #faa;
+}
+#btn_delete_product_inventory:pressed,
+#btn_delete_product_sales:pressed,
+#btn_delete_debtor:pressed {
+	background-color: #3b66ab;
+	border: 1px inset #778da9;
+}
+#btn_delete_product_inventory:disabled,
+#btn_delete_product_sales:disabled,
+#btn_delete_debtor:disabled {
+	background-color: rgb(103, 115, 122);
+	color: #999;
+}
+
 
 QTabWidget::pane { /* selecciona la ventana, sin las pestañas */
 	margin-top: -6px;
@@ -1152,6 +1175,9 @@ QProgressBar::chunk {
                     </item>
                     <item>
                      <widget class="QPushButton" name="btn_delete_product_inventory">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
                       <property name="minimumSize">
                        <size>
                         <width>180</width>
@@ -1168,13 +1194,7 @@ QProgressBar::chunk {
                        <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Borra el producto actualmente seleccionado (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;supr&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Ésta acción elimina la &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;referencia al producto&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;, no el producto como tal.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, debe estar seguro de querer eliminar un producto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                       </property>
                       <property name="styleSheet">
-                       <string notr="true">QPushButton {
-	background-color: #ff4949;
-}
-QPushButton:hover {
-	background-color: #faa;
-}
-</string>
+                       <string notr="true"/>
                       </property>
                       <property name="text">
                        <string notr="true">Eliminar producto</string>
@@ -2083,8 +2103,8 @@ border-right: 1px solid #111;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>374</width>
-                <height>187</height>
+                <width>756</width>
+                <height>517</height>
                </rect>
               </property>
               <property name="styleSheet">
@@ -2433,6 +2453,9 @@ border-right: 1px solid #111;</string>
                   </item>
                   <item>
                    <widget class="QPushButton" name="btn_delete_product_sales">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
                     <property name="minimumSize">
                      <size>
                       <width>180</width>
@@ -2449,13 +2472,7 @@ border-right: 1px solid #111;</string>
                      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Borra la venta actualmente seleccionada y las deudas asociadas a ella (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;supr&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;La &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;eliminación de una venta&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; debería ser realizada cuando se hagan &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;ventas&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; que al final &lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;no son concretadas&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, debe estar seguro de querer eliminar una venta.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                     <property name="styleSheet">
-                     <string notr="true">QPushButton {
-	background-color: #ff4949;
-}
-QPushButton:hover {
-	background-color: #faa;
-}
-</string>
+                     <string notr="true"/>
                     </property>
                     <property name="text">
                      <string>Eliminar venta</string>
@@ -2858,6 +2875,9 @@ QPushButton:hover {
                  </item>
                  <item>
                   <widget class="QPushButton" name="btn_delete_debtor">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="minimumSize">
                     <size>
                      <width>180</width>
@@ -2874,13 +2894,7 @@ QPushButton:hover {
                     <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Elimina la cuenta corriente actualmente seleccionada en la tabla (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;supr&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; text-decoration: underline;&quot;&gt;IMPORTANTE&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;: esta acción no se puede deshacer, debe estar seguro de querer borrar una cuenta corriente.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
                    <property name="styleSheet">
-                    <string notr="true">QPushButton {
-	background-color: #ff4949;
-}
-QPushButton:hover {
-	background-color: #faa;
-}
-</string>
+                    <string notr="true"/>
                    </property>
                    <property name="text">
                     <string notr="true">Eliminar cuenta corriente</string>
