@@ -1190,35 +1190,60 @@ class MainWindow(QMainWindow):
         return None
 
 
+    # TODO: implementar la eliminación de deudores
     #¡ tablas (DELETE)
+    @Slot(object)
+    def toggleDeleteButton(self, table_viewID:TableViewId) -> None:
+        '''
+        Verifica si hay elementos seleccionados en el MODELO DE SELECCIÓN de 
+        la tabla especificada y habilita/deshabilita el botón de eliminar 
+        registros asociado.
+
+        Parámetros
+        ----------
+        table_viewID : TableViewId
+            QTableView al que se referencia
+        '''
+        match table_viewID:
+            case TableViewId.INVEN_TABLE_VIEW:
+                self.ui.btn_delete_product_inventory.setEnabled(
+                    self.ui.tv_inventory_data.selectionModel().hasSelection()
+                )
+            
+            case TableViewId.SALES_TABLE_VIEW:
+                self.ui.btn_delete_product_sales.setEnabled(
+                    self.ui.tv_sales_data.selectionModel().hasSelection()
+                )
+            
+            case TableViewId.DEBTS_TABLE_VIEW:
+                self.ui.btn_delete_debtor.setEnabled(
+                    self.ui.tv_debts_data.selectionModel().hasSelection()
+                )
+        return None
+    
+    
     @Slot(QTableView)
     def handleTableDeleteRows(self, table_viewID:TableViewId) -> None:
         '''
         Elimina los registros seleccionados en la VISTA correspondiente y 
-        modifica la base de datos, además actualiza el estado de la 
+        modifica el MODELO DE DATOS, además actualiza el estado de la 
         progress-bar relacionada con la VISTA.
-        NOTA: Este método NO ELIMINA LOS REGISTROS DE "Productos", LOS MARCA 
-        COMO "ELIMINADOS" EN LA BASE DE DATOS. EN CAMBIO SÍ ELIMINA LOS 
-        REGISTROS DE "Ventas", "Detalle_Ventas" Y "Deudas".
         
         Parámetros
         ----------
         table_viewID : TableViewId
             QTableView al que se refencia
-        
-        Retorna
-        -------
-        None
         '''
-        match table_viewID.name:
+        match TableViewId.INVEN_TABLE_VIEW:
             case "INVEN_TABLE_VIEW":
                 self.__deleteInventoryRows()
             
-            case "SALES_TABLE_VIEW":
+            case TableViewId.SALES_TABLE_VIEW:
                 self.__deleteSalesRows()
 
-            case "DEBTS_TABLE_VIEW":
-                pass
+            case TableViewId.DEBTS_TABLE_VIEW:
+                ...
+            
         return None
     
     
