@@ -28,6 +28,7 @@ from utils.model_classes import (ProductsBalanceModel)
 from utils.proxy_models import (ProductsBalanceProxyModel)
 from utils.productbalancedelegate import (ProductsBalanceDelegate)
 from utils.customvalidators import (SearchBarValidator, ProductReduceDebtValidator)
+from utils.eventfilters import (BackgroundEventFilter)
 
 from sqlite3 import (Error as sqlite3Error)
 from phonenumbers import (parse, format_number, is_valid_number, 
@@ -3960,6 +3961,10 @@ class ProductsBalanceDialog(QDialog):
         
         self.delete_debt_icon = QIcon(":/icons/trash-register.svg")
         self.products_balance_dialog.btn_delete_debt.setIcon(self.delete_debt_icon)
+        
+        # sobreescribe el evento Paint (mediante un filtro de eventos)
+        self.event_filter = BackgroundEventFilter(self.products_balance_dialog.tv_balance_products)
+        self.products_balance_dialog.tv_balance_products.viewport().installEventFilter(self.event_filter)
         return None
     
     

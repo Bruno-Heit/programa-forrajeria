@@ -5,8 +5,8 @@ from typing import (Any, Iterable)
 from PySide6.QtWidgets import (QApplication, QMainWindow, QTableView, 
                                QCheckBox, QAbstractItemView, QListWidgetItem, 
                                QLineEdit)
-from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot, QSize)
-from PySide6.QtGui import (QIcon, QAction)
+from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot, QSize, QEvent)
+from PySide6.QtGui import (QIcon, QPainter, QPixmap)
 
 from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemValues, 
                            DebtorDataDialog, WidgetStyle, SaleFields, ProductsBalanceDialog)
@@ -19,8 +19,10 @@ from utils.dboperations import (DatabaseRepository)
 from utils.customvalidators import (SalePaidValidator)
 from utils.enumclasses import (LoggingMessage, ModelHeaders, TableViewId, 
                                LabelFeedbackStyle, InventoryPriceType, TypeSideBar, 
-                               TableViewColumns, ModelDataCols, ProgressBarStyle)
+                               TableViewColumns, ModelDataCols, ProgressBarStyle, 
+                               TablesAndListsObjName)
 from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxyModel)
+from utils.eventfilters import (BackgroundEventFilter)
 
 from resources import (rc_icons)
 
@@ -36,6 +38,9 @@ class MainWindow(QMainWindow):
         
         # inicializa ajustes personalizados de widgets
         self.setup_ui()
+        
+        # instala event-filters
+        self.install_event_filters()
         
         # declara/instancia variables
         self.setup_variables()
@@ -88,6 +93,27 @@ class MainWindow(QMainWindow):
         # en el formulario de Ventas coloca el tiempo en que se inició el programa
         self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
         return None    
+
+
+    def install_event_filters(self) -> None:
+        '''
+        Instala los filtros de eventos en los widgets.
+        '''
+        # productos
+        self.inv_table_event_filter = BackgroundEventFilter(self.ui.tv_inventory_data)
+        self.ui.tv_inventory_data.viewport().installEventFilter(self.inv_table_event_filter)
+        
+        # ventas
+        self.sales_input_list_event_filter = BackgroundEventFilter(self.ui.sales_input_list)
+        self.ui.sales_input_list.viewport().installEventFilter(self.sales_input_list_event_filter)
+        
+        self.sales_table_event_filter = BackgroundEventFilter(self.ui.tv_sales_data)
+        self.ui.tv_sales_data.viewport().installEventFilter(self.sales_table_event_filter)
+        
+        # deudas
+        self.debts_table_event_filter = BackgroundEventFilter(self.ui.tv_debts_data)
+        self.ui.tv_debts_data.viewport().installEventFilter(self.debts_table_event_filter)
+        return None
 
 
     def setup_models(self) -> None:

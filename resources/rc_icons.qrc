@@ -47,5 +47,13 @@
         <!-- #### (ProductsBalanceDialog) ####   ícono para eliminar la deuda actual -->
         <file alias="trash-register.svg">../icons/trashRegister.svg</file>
 
+        <!-- #### (MainWindow) #### imágenes de fondo para las tablas cuando están vacías -->
+        <file alias="products-table-empty-bg.png">../icons/products_empty_table_icon.png</file>
+        <file alias="sales-table-empty-bg.png">../icons/sales_empty_table_icon.png</file>
+        <file alias="debts-table-empty-bg.png">../icons/debts_empty_table_icon.png</file>
+        <file alias="sales-empty-input-list-bg.png">../icons/sales_empty_input_list_icon.png</file>
+        <file alias="debts-empty-prods-balance-table-bg.png">../icons/debts_empty_prods_balance_table_icon.png</file>
+
+
     </qresource>
 </RCC>

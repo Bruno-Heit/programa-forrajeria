@@ -84,6 +84,21 @@ class ProgressBarStyle(StrEnum):
 
 
 
+
+class TablesAndListsObjName(StrEnum):
+    '''Clase StrEnum con los "object names" de las tablas y lista usadas en el 
+    programa. La principal razón del uso de esta clase es para usarse dentro 
+    de EventFilters y darle estilos a las tablas y listas.'''
+    INVEN_TABLE_VIEW = "tv_inventory_data"
+    SALES_TABLE_VIEW = "tv_sales_data"
+    SALES_INPUT_LIST = "sales_input_list"
+    DEBTS_TABLE_VIEW = "tv_debts_data"
+    BAL_PRODS_TABLE_VIEW = "tv_balance_products"
+
+
+
+
+
 class TableViewId(IntEnum):
     '''Clase con IntEnum con "IDs" para cada uno de los QTableView.'''
     INVEN_TABLE_VIEW = 0
