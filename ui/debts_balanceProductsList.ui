@@ -487,6 +487,12 @@ QScrollBar::handle:horizontal {
                 <height>24</height>
                </size>
               </property>
+              <property name="shortcut">
+               <string notr="true"/>
+              </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
               <property name="flat">
                <bool>false</bool>
               </property>

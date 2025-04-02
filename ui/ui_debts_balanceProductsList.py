@@ -295,6 +295,10 @@ class Ui_ProductsBalance(object):
         self.btn_delete_debt.setMinimumSize(QSize(24, 24))
         self.btn_delete_debt.setMaximumSize(QSize(24, 24))
         self.btn_delete_debt.setIconSize(QSize(24, 24))
+#if QT_CONFIG(shortcut)
+        self.btn_delete_debt.setShortcut(u"")
+#endif // QT_CONFIG(shortcut)
+        self.btn_delete_debt.setAutoDefault(False)
         self.btn_delete_debt.setFlat(False)
 
         self.horizontalLayout_3.addWidget(self.btn_delete_debt, 0, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter)

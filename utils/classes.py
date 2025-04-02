@@ -4180,6 +4180,7 @@ class ProductsBalanceDialog(QDialog):
         return None
     
     
+    @Slot()
     def onDeleteDebts(self) -> None:
         '''
         Marca como eliminadas las deudas de los productos seleccionados y al 
@@ -4188,6 +4189,8 @@ class ProductsBalanceDialog(QDialog):
         selected_rows = getSelectedTableRows(
             tableView=self.products_balance_dialog.tv_balance_products
         )
+        if not selected_rows:
+            return None
         
         # elimina los registros del modelo de datos
         self.products_balance_proxy_model.removeSelectedRows(selected_rows)
@@ -4433,7 +4436,7 @@ class ProductsBalanceDialog(QDialog):
                 self.reject()
             
             case Qt.Key.Key_Delete: # si se presiona "delete" se borran los 
-                self.deleteDebts()  # productos seleccionados
+                self.onDeleteDebts()  # productos seleccionados
             
             case _:
                 return super(ProductsBalanceDialog, self).keyPressEvent(event)
