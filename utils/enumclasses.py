@@ -199,6 +199,8 @@ class WidgetStyle(StrEnum):
     
     DEF_COMBOBOX_FILTER_ICON = "QComboBox::down-arrow {image: url(':/icons/filter.svg');}"
     DEF_COMBOBOX_ARROW_ICON = "QComboBox::down-arrow {image: url(':/icons/chevron-down.svg');}"
+    
+    DEF_DATEEDIT_ARROW_ICON = "QDateEdit::down-arrow {image: url(':/icons/chevron-down.svg');}"
 
 
 
