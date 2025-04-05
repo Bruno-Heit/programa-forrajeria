@@ -80,7 +80,7 @@ class DatabaseRepository():
                 
                 except sqlite3Error as err:
                     self._connection.rollback()
-                    logging.critical(f"{err.sqlite_errorcode}:{err.sqlite_errorname} / {err}")
+                    logging.critical(f"{err}")
             
             case True:
                 try:
@@ -93,7 +93,7 @@ class DatabaseRepository():
                 
                 except sqlite3Error as err:
                     self._connection.rollback()
-                    logging.critical(f"{err.sqlite_errorcode}:{err.sqlite_errorname} / {err}")
+                    logging.critical(f"{err}")
         
         return cursor
     
