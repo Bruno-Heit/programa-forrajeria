@@ -23,7 +23,7 @@ from utils.enumclasses import (WidgetStyle, InventoryPriceType,
                                ProductFields, SaleFields, DebtsFields, 
                                ModelDataCols, ModelHeaders, 
                                LabelFeedbackStyle, TableViewColumns,
-                               SaleDialogDimensions)
+                               SaleDialogDimensions, DateAndTimeFormat)
 from utils.model_classes import (ProductsBalanceModel)
 from utils.proxy_models import (ProductsBalanceProxyModel)
 from utils.productbalancedelegate import (ProductsBalanceDelegate)
@@ -1006,7 +1006,7 @@ class SaleValues(QObject):
         datetime : QDateTime
             la fecha y hora de la venta
         '''
-        self.__datetime = datetime.toString(DATETIME_FORMAT)
+        self.__datetime = datetime.toString(DateAndTimeFormat.DATETIME_FORMAT.value)
         self.datetimeChanged.emit(self.__datetime)
         return None
     

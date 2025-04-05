@@ -9,8 +9,7 @@ from PySide6.QtCore import (QSortFilterProxyModel, Qt, QModelIndex, Signal, QDat
 
 from utils.model_classes import (InventoryTableModel, SalesTableModel, DebtsTableModel, 
                                  ProductsBalanceModel)
-from utils.enumclasses import (ModelDataCols, TableViewColumns)
-from utils.functionutils import (DATETIME_FORMAT)
+from utils.enumclasses import (ModelDataCols, TableViewColumns, DateAndTimeFormat)
 from typing import (Any, Sequence)
 
 
@@ -301,8 +300,8 @@ class SalesProxyModel(QSortFilterProxyModel):
                 _left_value = str(_source_model._data[source_left.row(), ModelDataCols.SALES_DATETIME.value])
                 _right_value = str(_source_model._data[source_right.row(), ModelDataCols.SALES_DATETIME.value])
                 
-                _left_value = QDateTime.fromString(_left_value, DATETIME_FORMAT)
-                _right_value = QDateTime.fromString(_right_value, DATETIME_FORMAT)
+                _left_value = QDateTime.fromString(_left_value, DateAndTimeFormat.DATETIME_FORMAT.value)
+                _right_value = QDateTime.fromString(_right_value, DateAndTimeFormat.DATETIME_FORMAT.value)
                 
                 return _left_value < _right_value
 
@@ -561,8 +560,8 @@ class ProductsBalanceProxyModel(QSortFilterProxyModel):
                 _left_value = _source_model._data[source_left.row(), ModelDataCols.PRODS_BAL_DATETIME.value]
                 _right_value = _source_model._data[source_right.row(), ModelDataCols.PRODS_BAL_DATETIME.value]
                 
-                _left_value = QDateTime.fromString(_left_value, DATETIME_FORMAT)
-                _right_value = QDateTime.fromString(_right_value, DATETIME_FORMAT)
+                _left_value = QDateTime.fromString(_left_value, DateAndTimeFormat.DATETIME_FORMAT.value)
+                _right_value = QDateTime.fromString(_right_value, DateAndTimeFormat.DATETIME_FORMAT.value)
                 
                 return _left_value < _right_value
             

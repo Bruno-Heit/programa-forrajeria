@@ -49,6 +49,18 @@ class DatabaseTable(IntEnum):
 
 
 
+class DateAndTimeFormat(StrEnum):
+    '''
+    Clase StrEnum con los formatos de fecha y hora admitidos por el programa.
+    '''
+    DATE_FORMAT = "d/M/yyyy"
+    TIME_FORMAT = "HH:mm:ss"
+    DATETIME_FORMAT = "d/M/yyyy HH:mm:ss"
+
+
+
+
+
 class LabelFeedbackStyle(StrEnum):
     '''Clase con StrEnum con estilos predefinidos para darle a los QLabel 
     dependiendo de si son válidos los datos del QTableView asociado o no.'''
