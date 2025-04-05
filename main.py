@@ -2365,8 +2365,8 @@ class MainWindow(QMainWindow):
     def onSalesItemFieldsValuesChanged(self, values:dict[str, Any], object_name:str) -> None:
         '''
         Al cambiar los valores actualiza el registro de los valores en 
-        'MainWindow' y valida que todos los demás sean válidos para poder 
-        mostrar el total de la venta.
+        'MainWindow', la hora en el QDateTimeEdit del formulario y valida que 
+        todos los demás sean válidos para poder mostrar el total de la venta.
 
         Parámetros
         ----------
@@ -2380,6 +2380,8 @@ class MainWindow(QMainWindow):
         None
         '''
         self.DICT_ITEMS_VALUES[object_name] = values
+        
+        self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
         
         self.validateSalesItemsFields()
         return None
