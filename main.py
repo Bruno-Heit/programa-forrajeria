@@ -20,7 +20,7 @@ from utils.customvalidators import (SalePaidValidator)
 from utils.enumclasses import (LoggingMessage, ModelHeaders, TableViewId, 
                                LabelFeedbackStyle, InventoryPriceType, TypeSideBar, 
                                TableViewColumns, ModelDataCols, ProgressBarStyle, 
-                               TablesAndListsObjName)
+                               TablesAndListsObjName, DateAndTimeFormat)
 from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxyModel)
 from utils.eventfilters import (BackgroundEventFilter)
 
@@ -92,6 +92,9 @@ class MainWindow(QMainWindow):
         
         # en el formulario de Ventas coloca el tiempo en que se inició el programa
         self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
+        
+        # en el dateedit coloca la fecha de hoy
+        self.ui.dateEdit_show_collected_by_day.setDate(QDate.currentDate())
         return None    
 
 
@@ -355,6 +358,11 @@ class MainWindow(QMainWindow):
             )
         )
         
+        #* dateedit (mostrar ganancias por día)
+        self.ui.dateEdit_show_collected_by_day.dateChanged.connect(
+            self.showCollectedInDay
+        )
+        
         #* formulario de ventas
         self.ui.btn_add_product.clicked.connect(self.addSalesInputListItem)
         
@@ -499,6 +507,9 @@ class MainWindow(QMainWindow):
         self.ui.cb_inventory_colsFilter.setStyleSheet(WidgetStyle.DEF_COMBOBOX_FILTER_ICON.value)
         self.ui.cb_sales_colsFilter.setStyleSheet(WidgetStyle.DEF_COMBOBOX_FILTER_ICON.value)
         self.ui.cb_debts_colsFilter.setStyleSheet(WidgetStyle.DEF_COMBOBOX_FILTER_ICON.value)
+        
+        # dateedit para mostrar lo recaudado por fecha
+        self.ui.dateEdit_show_collected_by_day.setStyleSheet(WidgetStyle.DEF_DATEEDIT_ARROW_ICON.value)
         
         return None
 
@@ -2787,6 +2798,42 @@ class MainWindow(QMainWindow):
         self.ui.lineEdit_paid.setText("")
         
         self.ui.btn_end_sale.setEnabled(False)
+        return None
+    
+    
+    #* dateedit para mostrar recaudado por día
+    @Slot(QDate)
+    def showCollectedInDay(self, date:QDate) -> None:
+        '''
+        Muestra lo recaudado en el día seleccionado.
+
+        Parámetros
+        ----------
+        date : QDate
+            la fecha seleccionada
+        '''
+        collected:float
+        
+        with self._db_repo as db_repo:
+            collected = db_repo.selectRegisters(
+                data_sql='''SELECT COALESCE(ROUND(SUM(dv.costo_total), 2), 0) 
+                            FROM Detalle_Ventas AS dv
+                            INNER JOIN Ventas AS v ON dv.IDventa = v.IDventa 
+                            WHERE v.fecha_hora LIKE ?;''',
+                data_params=("%" + date.toString(DateAndTimeFormat.DATE_FORMAT.value) + "%",)
+            )[0][0]
+        
+        self.ui.label_show_collected_by_day.setText(
+            f'''<html>
+                    <head/>
+                    <body>
+                        <p>
+                            <span style='{WidgetStyle.LABEL_RICHTEXT_NEUTRAL.value}'> TOTAL=</span>
+                            <span style='{WidgetStyle.LABEL_RICHTEXT_CONTENT.value}'>{str(collected).replace(".",",")}</span>
+                        </p>
+                    </body>
+                </html>'''
+            )
         return None
     
     
