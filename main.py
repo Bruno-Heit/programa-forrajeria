@@ -28,13 +28,17 @@ from resources import (rc_icons)
 
 # TODO1: falta hacer DELETE a Deudas
 
-# TODO2: en algún lugar se debe obtener la suma de las ventas del día y mostrarla.
+# TODO2: permitir al usuario crear categorías personalizadas, y borrar categorías existentes. Si se borran categorías, colocar en cada producto que tenía la categoría asignada 
+# TODO2: una categoría "desconocido" o "varios", o algo por el estilo.
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        
+        # repositorio de base de datos
+        self._db_repo:DatabaseRepository = DatabaseRepository()
         
         # inicializa ajustes personalizados de widgets
         self.setup_ui()
@@ -44,9 +48,6 @@ class MainWindow(QMainWindow):
         
         # declara/instancia variables
         self.setup_variables()
-        
-        # repositorio de base de datos
-        self._db_repo:DatabaseRepository = DatabaseRepository()
         
         self.setup_models()
 
@@ -73,7 +74,8 @@ class MainWindow(QMainWindow):
         '''
         self.setWindowTitle("herramienta de gestión - Forrajería Torres")
         
-        set_tables_ListWidgetItemsTooltip(self.ui.tables_ListWidget, getCategoriesDescription())
+        # set_tables_ListWidgetItemsTooltip(self.ui.tables_ListWidget, getCategoriesDescription())
+        self.__setTablesListWidgetItems()
         
         self.__hideWidgets() # esconde algunos widgets inicialmente
         
@@ -205,8 +207,6 @@ class MainWindow(QMainWindow):
         #? y la base de datos en "batches" y mejorar el rendimiento de la aplicación en general
         self._inv_model_data_acc:ndarray[Any] = None #? acumulador temporal de datos para modelo de Inventario.
         self._UPD_BATCH_SIZE:int = None # al modificar precios en porcentajes, sirve para hacerlo en batches.
-        self.__upd_reg_count:int = 0 # se usa con 'self._UPD_BATCH_SIZE' y 'self._inv_model_data_acc', 
-                                        # cuenta por qué registro va pasando desde el modelo a MainWindow.
         
         #¡ variables de ventas
         self._sales_model_data_acc:ndarray[Any] = None #? acumulador temp. de datos para modelo de Ventas.
@@ -431,6 +431,57 @@ class MainWindow(QMainWindow):
     
     
     #¡ === FIN SEÑALES ============================================================================
+    
+    def __setTablesListWidgetItems(self) -> None:
+        '''
+        Coloca las categorías de productos en el QListWidget del sidebar y le 
+        asigna a cada item un tooltip con su descripción.
+        '''
+        categories:list[tuple[str, str]] # list[tuple(categoría, descripción)]
+        
+        # obtiene las categorías y descripciones
+        with self._db_repo as db_repo:
+            categories = db_repo.selectRegisters(
+                data_sql='''SELECT nombre_categoria,
+                                   descripcion 
+                            FROM Categorias;'''
+            )
+        
+        if not categories:
+            return None
+        
+        # ordena las categorías
+        categories = sorted(categories, key=lambda x: x[0])
+        
+        # coloca las categorías y sus descripciones en la lista
+        for count, cat_desc in enumerate(categories):
+            self.ui.tables_ListWidget.addItem(f"{cat_desc[0]}")
+            self.ui.tables_ListWidget.item(count).setToolTip(
+                f'''<html>
+                        <head/>
+                        <body>
+                            <p>
+                                <span style=\" font-size:11pt; color: #111;\">{cat_desc[1]}</span>
+                            </p>
+                        </body>
+                    </html>'''
+            )
+        
+        # por último, agrega un item para mostrar todos
+        self.ui.tables_ListWidget.addItem("MOSTRAR TODOS")
+        self.ui.tables_ListWidget.item(self.ui.tables_ListWidget.count() - 1).setToolTip(
+            ''' <html>
+                    <head/>
+                    <body>
+                        <p>
+                            <span style=\" font-size:11pt; color: #111;\">Muestra todos los productos disponibles</span>
+                        </p>
+                    </body>
+                </html>'''
+        )
+        
+        return None
+    
     
     def __setInitialIconsToWidgets(self) -> None:
         '''
@@ -1271,8 +1322,8 @@ class MainWindow(QMainWindow):
         table_viewID : TableViewId
             QTableView al que se refencia
         '''
-        match TableViewId.INVEN_TABLE_VIEW:
-            case "INVEN_TABLE_VIEW":
+        match table_viewID:
+            case TableViewId.INVEN_TABLE_VIEW:
                 self.__deleteInventoryRows()
             
             case TableViewId.SALES_TABLE_VIEW:
