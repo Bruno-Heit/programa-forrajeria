@@ -207,7 +207,7 @@ class WidgetStyle(StrEnum):
                                 }'''
     
     LABEL_RICHTEXT_NEUTRAL = "font-size:20px; color: #fff;"
-    LABEL_RICHTEXT_CONTENT = "font-size: 20px; color: #415a77;"
+    LABEL_RICHTEXT_CONTENT = "font-size:20px; color: #415a77;"
     
     DEF_COMBOBOX_FILTER_ICON = "QComboBox::down-arrow {image: url(':/icons/filter.svg');}"
     DEF_COMBOBOX_ARROW_ICON = "QComboBox::down-arrow {image: url(':/icons/chevron-down.svg');}"
@@ -406,6 +406,9 @@ class Regex(StrEnum):
     PROD_UNIT_PRICE = "\d{1,8}((\.|,){1}\d{0,2})?"
     PROD_COMERC_PRICE = "\d{0,8}((\.|,)\d{0,2})?"
     PERCENTAGE_CHANGE = "^([-+]?\d{0,4}((\.|,)\d{0,2})?)|(\d{1,8}((\.|,)\d{0,2})?)$"
+    
+    CATEGORY_NAME = "[^;\"']{1,41}"
+    CATEGORY_DESC = "[^;\"']{0,256}"
     
     SALES_DETAILS_PRICE_TYPE = "(\([\s]*P[\s]*\.[\s]*PÚBLICO[\s]*\)|\([\s]*P[\s]*\.[\s]*COMERCIAL[\s]*\))$"
     SALES_DETAILS_FULL = "[0-9]{1,8}(\.|,)?[0-9]{0,2}\sde .{1,}\s(\([\s]*P[\s]*\.[\s]*PÚBLICO[\s]*\)|\([\s]*P[\s]*\.[\s]*COMERCIAL[\s]*\))$"
