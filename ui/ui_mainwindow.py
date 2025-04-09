@@ -17,12 +17,12 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
 from PySide6.QtWidgets import (QAbstractItemView, QAbstractScrollArea, QAbstractSpinBox, QApplication,
-    QButtonGroup, QCheckBox, QComboBox, QDateTimeEdit,
-    QFrame, QGridLayout, QHBoxLayout, QHeaderView,
-    QLabel, QLineEdit, QListView, QListWidget,
-    QListWidgetItem, QMainWindow, QProgressBar, QPushButton,
-    QSizePolicy, QSpacerItem, QTabWidget, QTableView,
-    QToolBox, QVBoxLayout, QWidget)
+    QButtonGroup, QCheckBox, QComboBox, QDateEdit,
+    QDateTimeEdit, QFrame, QGridLayout, QHBoxLayout,
+    QHeaderView, QLabel, QLineEdit, QListView,
+    QListWidget, QListWidgetItem, QMainWindow, QProgressBar,
+    QPushButton, QSizePolicy, QSpacerItem, QTabWidget,
+    QTableView, QToolBox, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -155,10 +155,16 @@ class Ui_MainWindow(object):
 "}\n"
 "\n"
 "\n"
+"/* pushbuttons */\n"
 "QPushButton {\n"
 "	border: none;\n"
 "}\n"
-"QPushButton:hover {\n"
+"QPushButton:disabled {\n"
+"	background-color: rgb(103, 115, 122);\n"
+"	color: #999;\n"
+"}\n"
+"\n"
+"#btn_side_barToggle:hover {\n"
 "	border: 2px solid #3b66ab;\n"
 "	border-radius: 3px;\n"
 "	border-bottom-right-radius: 10px;\n"
@@ -166,12 +172,48 @@ class Ui_MainWindow(object):
 "	padding-bottom: 4px;\n"
 "}\n"
 "\n"
+"#btn_sidebar_list_add_item {\n"
+"	background-color: #778da9;\n"
+"}\n"
+"#btn_sidebar_list_add_item:hover {\n"
+"	background-color: #3b66ab;\n"
+"}\n"
+"#btn_sidebar_list_add_item:pressed {\n"
+"	background-color: #3b66ab;\n"
+"	border: 1px inset #778da9;\n"
+"}\n"
 "\n"
+"#btn_sidebar_list_add_item,\n"
+"#btn_sidebar_list_delete_item {\n"
+"	border-radius: 3px;\n"
+"}\n"
+"\n"
+"#btn_sidebar_list_delete_item {\n"
+"	color: #111;\n"
+"	background-color: #"
+                        "e0e1dd;\n"
+"	border: 1px solid #111;\n"
+"}\n"
+"#btn_sidebar_list_delete_item:hover {\n"
+"	background-color: #faa;\n"
+"}\n"
+"#btn_sidebar_list_delete_item:pressed {\n"
+"	background-color: #faa;\n"
+"	border: 1px inset #778da9;\n"
+"}\n"
+"#btn_sidebar_list_delete_item:disabled {\n"
+"	background-color: rgb(103, 115, 122);\n"
+"	color: #999;\n"
+"}\n"
+"\n"
+"\n"
+"/* scrollbar */\n"
 "QScrollBar {\n"
 "	background-color: #fff;\n"
 "}\n"
 "\n"
 "\n"
+"/* listwidget */\n"
 "QListWidget {\n"
 "	margin-bottom: 15px;\n"
 "	border: none;\n"
@@ -182,11 +224,13 @@ class Ui_MainWindow(object):
 "}\n"
 "QListWidget::item:selected {\n"
 "	font-size: 15pt;\n"
-"	background-color: 3b66ab;\n"
+"	background-color: #3b66ab;\n"
+"	color: #111;\n"
 "	border-radius: 3px;\n"
 "}\n"
 "\n"
 "\n"
+"/* label */\n"
 "QLabel {\n"
 "	font-family: \"Arial\", \"Calibri\", \"Sans-Serif\";\n"
 "	font-size: 18px;\n"
@@ -246,47 +290,6 @@ class Ui_MainWindow(object):
         self.side_bar_body_Vlayout.addWidget(self.label_categories)
 
         self.tables_ListWidget = QListWidget(self.side_bar_body)
-        __qlistwidgetitem = QListWidgetItem(self.tables_ListWidget)
-        __qlistwidgetitem.setText(u"Alimentos dom\u00e9sticos");
-        __qlistwidgetitem1 = QListWidgetItem(self.tables_ListWidget)
-        __qlistwidgetitem1.setText(u"Alimentos de granja");
-        __qlistwidgetitem2 = QListWidgetItem(self.tables_ListWidget)
-        __qlistwidgetitem2.setText(u"Cereales/arroz");
-        __qlistwidgetitem3 = QListWidgetItem(self.tables_ListWidget)
-        __qlistwidgetitem3.setText(u"Limpieza/qu\u00edmica");
-        __qlistwidgetitem4 = QListWidgetItem(self.tables_ListWidget)
-        __qlistwidgetitem4.setText(u"Accesorios de pesca");
-        __qlistwidgetitem5 = QListWidgetItem(self.tables_ListWidget)
-        __qlistwidgetitem5.setText(u"Accesorios para mascotas");
-        __qlistwidgetitem6 = QListWidgetItem(self.tables_ListWidget)
-        __qlistwidgetitem6.setText(u"Accesorios para boyeros");
-        __qlistwidgetitem7 = QListWidgetItem(self.tables_ListWidget)
-        __qlistwidgetitem7.setText(u"Accesorios para jardiner\u00eda");
-        __qlistwidgetitem8 = QListWidgetItem(self.tables_ListWidget)
-        __qlistwidgetitem8.setText(u"Accesorios para piletas");
-        __qlistwidgetitem9 = QListWidgetItem(self.tables_ListWidget)
-        __qlistwidgetitem9.setText(u"Electrodom\u00e9sticos");
-        __qlistwidgetitem10 = QListWidgetItem(self.tables_ListWidget)
-        __qlistwidgetitem10.setText(u"Electr\u00f3nicos");
-        __qlistwidgetitem11 = QListWidgetItem(self.tables_ListWidget)
-        __qlistwidgetitem11.setText(u"Herramientas");
-        __qlistwidgetitem12 = QListWidgetItem(self.tables_ListWidget)
-        __qlistwidgetitem12.setText(u"Indumentaria");
-        __qlistwidgetitem13 = QListWidgetItem(self.tables_ListWidget)
-        __qlistwidgetitem13.setText(u"Arenas");
-        __qlistwidgetitem14 = QListWidgetItem(self.tables_ListWidget)
-        __qlistwidgetitem14.setText(u"Gas");
-        __qlistwidgetitem15 = QListWidgetItem(self.tables_ListWidget)
-        __qlistwidgetitem15.setText(u"Venenos");
-        __qlistwidgetitem15.setFlags(Qt.ItemIsSelectable|Qt.ItemIsUserCheckable|Qt.ItemIsEnabled);
-        __qlistwidgetitem16 = QListWidgetItem(self.tables_ListWidget)
-        __qlistwidgetitem16.setText(u"Varios");
-        font1 = QFont()
-        font1.setBold(True)
-        font1.setUnderline(False)
-        __qlistwidgetitem17 = QListWidgetItem(self.tables_ListWidget)
-        __qlistwidgetitem17.setText(u"MOSTRAR TODOS");
-        __qlistwidgetitem17.setFont(font1);
         self.tables_ListWidget.setObjectName(u"tables_ListWidget")
         self.tables_ListWidget.setFrameShape(QFrame.Shape.NoFrame)
         self.tables_ListWidget.setFrameShadow(QFrame.Shadow.Plain)
@@ -302,6 +305,24 @@ class Ui_MainWindow(object):
         self.tables_ListWidget.setSortingEnabled(False)
 
         self.side_bar_body_Vlayout.addWidget(self.tables_ListWidget)
+
+        self.side_bar_list_buttons = QFrame(self.side_bar_body)
+        self.side_bar_list_buttons.setObjectName(u"side_bar_list_buttons")
+        self.verticalLayout_2 = QVBoxLayout(self.side_bar_list_buttons)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.btn_sidebar_list_add_item = QPushButton(self.side_bar_list_buttons)
+        self.btn_sidebar_list_add_item.setObjectName(u"btn_sidebar_list_add_item")
+
+        self.verticalLayout_2.addWidget(self.btn_sidebar_list_add_item)
+
+        self.btn_sidebar_list_delete_item = QPushButton(self.side_bar_list_buttons)
+        self.btn_sidebar_list_delete_item.setObjectName(u"btn_sidebar_list_delete_item")
+        self.btn_sidebar_list_delete_item.setEnabled(False)
+
+        self.verticalLayout_2.addWidget(self.btn_sidebar_list_delete_item)
+
+
+        self.side_bar_body_Vlayout.addWidget(self.side_bar_list_buttons)
 
 
         self.side_bar_VLayout.addWidget(self.side_bar_body)
@@ -994,6 +1015,25 @@ class Ui_MainWindow(object):
 "	background-color: #3b66ab;\n"
 "	color: #fff;\n"
 "	border-top-color:  #778da9;\n"
+"}\n"
+"\n"
+"\n"
+"/* QDateEdit */\n"
+"QDateEdit {\n"
+"	background-color: #e0e1dd;\n"
+"	color: #0d1b2a;\n"
+"	border: 1px solid #3b66ab;\n"
+"	border-radius: 5px;\n"
+"	padding-left: 2px 0;\n"
+"}\n"
+"QDateEdit::drop-down {\n"
+"	subcontrol-origin: padding;\n"
+"	subcontrol-position: top right;\n"
+"	width: 20px;\n"
+"	padding-right: 3px;\n"
+"	border-left: none;\n"
+"	border-top-right-radius: 5px;\n"
+"	border-bottom-right-radius: 5px;\n"
 "}")
         self.tab2_sales_Vlayout = QVBoxLayout(self.tab2_sales)
         self.tab2_sales_Vlayout.setSpacing(4)
@@ -1016,15 +1056,28 @@ class Ui_MainWindow(object):
 "}\n"
 "\n"
 "\n"
+"QLabel,\n"
+"#lineEdit_paid {\n"
+"	font-size: 21px;\n"
+"}\n"
+"\n"
+"\n"
+"#label_total_change {\n"
+"	color: #dc2627;\n"
+"}\n"
+"\n"
+"\n"
+"#dateTimeEdit_sale {\n"
+"	font-size: 18px;\n"
+"}\n"
+"\n"
+"\n"
 "/* list widget de productos */\n"
 "QListWidget {\n"
 "	background-color: #fff;\n"
 "	border-radius: 10px;\n"
 "}\n"
 "QListWidget::item {\n"
-"/*\n"
-"	background-color: qlineargradient(spread:pad, x1:0, y1:0.273, x2:1, y2:0.835, stop:0 rgba(144, 205, 171, 255), stop:1 rgba(187, 255, 154, 255));\n"
-"*/\n"
 "	margin-left: 7px;\n"
 "	margin-right: 7px;\n"
 "	padding: 2px;\n"
@@ -1110,20 +1163,6 @@ class Ui_MainWindow(object):
 
         self.sale_info = QFrame(self.main_form)
         self.sale_info.setObjectName(u"sale_info")
-        self.sale_info.setStyleSheet(u"QLabel,\n"
-"#lineEdit_paid {\n"
-"	font-size: 21px;\n"
-"}\n"
-"\n"
-"\n"
-"#label_total_change {\n"
-"	color: #dc2627;\n"
-"}\n"
-"\n"
-"\n"
-"#dateTimeEdit_sale {\n"
-"	font-size: 18px;\n"
-"}")
         self.sale_info.setFrameShape(QFrame.Shape.NoFrame)
         self.sale_info.setFrameShadow(QFrame.Shadow.Raised)
         self.gridLayout = QGridLayout(self.sale_info)
@@ -1236,13 +1275,14 @@ class Ui_MainWindow(object):
         self.tab2_toolBox.addItem(self.box1_sales_form, u"Formulario de venta")
         self.box2_sales_table = QWidget()
         self.box2_sales_table.setObjectName(u"box2_sales_table")
-        self.box2_sales_table.setGeometry(QRect(0, 0, 756, 517))
+        self.box2_sales_table.setGeometry(QRect(0, 0, 535, 224))
         self.box2_sales_table.setStyleSheet(u"#box2_sales_table {\n"
 "	background-color: #e0e1dd;\n"
 "}\n"
 "\n"
 "\n"
-"#sales_table_header {\n"
+"#sales_table_header,\n"
+"#sales_table_footer {\n"
 "	background-color: #fff;\n"
 "	border-radius: 10px;\n"
 "}")
@@ -1340,6 +1380,46 @@ class Ui_MainWindow(object):
         self.tv_sales_data.verticalHeader().setVisible(False)
 
         self.box2_sales_Vlayout.addWidget(self.tv_sales_data)
+
+        self.sales_table_footer = QFrame(self.box2_sales_table)
+        self.sales_table_footer.setObjectName(u"sales_table_footer")
+        self.sales_table_footer.setFrameShape(QFrame.Shape.NoFrame)
+        self.sales_table_footer.setFrameShadow(QFrame.Shadow.Plain)
+        self.horizontalLayout = QHBoxLayout(self.sales_table_footer)
+        self.horizontalLayout.setSpacing(7)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalLayout.setContentsMargins(10, 5, 10, 5)
+        self.label_collected_by_day = QLabel(self.sales_table_footer)
+        self.label_collected_by_day.setObjectName(u"label_collected_by_day")
+        self.label_collected_by_day.setTextFormat(Qt.TextFormat.PlainText)
+
+        self.horizontalLayout.addWidget(self.label_collected_by_day)
+
+        self.dateEdit_show_collected_by_day = QDateEdit(self.sales_table_footer)
+        self.dateEdit_show_collected_by_day.setObjectName(u"dateEdit_show_collected_by_day")
+        self.dateEdit_show_collected_by_day.setFrame(False)
+        self.dateEdit_show_collected_by_day.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
+        self.dateEdit_show_collected_by_day.setProperty("showGroupSeparator", False)
+        self.dateEdit_show_collected_by_day.setCalendarPopup(True)
+        self.dateEdit_show_collected_by_day.setTimeSpec(Qt.TimeSpec.LocalTime)
+
+        self.horizontalLayout.addWidget(self.dateEdit_show_collected_by_day)
+
+        self.label_show_collected_by_day = QLabel(self.sales_table_footer)
+        self.label_show_collected_by_day.setObjectName(u"label_show_collected_by_day")
+        self.label_show_collected_by_day.setStyleSheet(u"font-weight: 500;\n"
+"background-color: #bbb;\n"
+"border-top: 1px solid #111;\n"
+"border-right: 1px solid #111;")
+        self.label_show_collected_by_day.setTextFormat(Qt.TextFormat.RichText)
+
+        self.horizontalLayout.addWidget(self.label_show_collected_by_day)
+
+        self.horizontalLayout.setStretch(0, 1)
+        self.horizontalLayout.setStretch(1, 1)
+        self.horizontalLayout.setStretch(2, 2)
+
+        self.box2_sales_Vlayout.addWidget(self.sales_table_footer)
 
         self.label_feedbackSales = QLabel(self.box2_sales_table)
         self.label_feedbackSales.setObjectName(u"label_feedbackSales")
@@ -1442,10 +1522,10 @@ class Ui_MainWindow(object):
         self.debts_searchBar.setSizePolicy(sizePolicy4)
         self.debts_searchBar.setMinimumSize(QSize(150, 25))
         self.debts_searchBar.setMaximumSize(QSize(1000, 25))
-        font2 = QFont()
-        font2.setFamilies([u"Verdana"])
-        font2.setStyleStrategy(QFont.PreferDefault)
-        self.debts_searchBar.setFont(font2)
+        font1 = QFont()
+        font1.setFamilies([u"Verdana"])
+        font1.setStyleStrategy(QFont.PreferDefault)
+        self.debts_searchBar.setFont(font1)
         self.debts_searchBar.setAcceptDrops(False)
 #if QT_CONFIG(tooltip)
         self.debts_searchBar.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Buscar propietario de cuenta corriente seg\u00fan nombre, caracter\u00edsticas, palabras claves, etc.</span></p></body></html>")
@@ -1631,11 +1711,14 @@ class Ui_MainWindow(object):
         self.actionSobre_el_programa.setText(QCoreApplication.translate("MainWindow", u"Sobre el programa...", None))
         self.actionLicencia.setText(QCoreApplication.translate("MainWindow", u"Licencia", None))
         self.btn_side_barToggle.setText("")
-
-        __sortingEnabled = self.tables_ListWidget.isSortingEnabled()
-        self.tables_ListWidget.setSortingEnabled(False)
-        self.tables_ListWidget.setSortingEnabled(__sortingEnabled)
-
+#if QT_CONFIG(tooltip)
+        self.btn_sidebar_list_add_item.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:11pt;\">Crea una categor\u00eda nueva</span></p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.btn_sidebar_list_add_item.setText(QCoreApplication.translate("MainWindow", u"Nueva categor\u00eda", None))
+#if QT_CONFIG(tooltip)
+        self.btn_sidebar_list_delete_item.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:11pt;\">Elimina la categor\u00eda seleccionada.</span></p><p><span style=\" font-size:11pt;\">Los productos pertenecientes a una categor\u00eda borrada pasan a ser de la categor\u00eda &quot;varios&quot;.</span></p><p><span style=\" font-size:11pt; font-weight:700;\">Nota: </span><span style=\" font-size:11pt;\">esta acci\u00f3n es </span><span style=\" font-size:11pt; font-weight:700;\">permanente</span><span style=\" font-size:11pt;\"> e </span><span style=\" font-size:11pt; font-weight:700;\">irreversible</span><span style=\" font-size:11pt;\">, debe estar seguro de querer eliminar una categor\u00eda.</span></p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.btn_sidebar_list_delete_item.setText(QCoreApplication.translate("MainWindow", u"Borrar categor\u00eda", None))
 
         self.btn_inventory_sideBarToggle.setText("")
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab1_inventory), QCoreApplication.translate("MainWindow", u"Inventario", None))
@@ -1653,6 +1736,8 @@ class Ui_MainWindow(object):
         self.cb_sales_colsFilter.setItemText(5, QCoreApplication.translate("MainWindow", u"Abonado", None))
         self.cb_sales_colsFilter.setItemText(6, QCoreApplication.translate("MainWindow", u"Fecha y hora", None))
 
+        self.label_collected_by_day.setText(QCoreApplication.translate("MainWindow", u"Recaudado en la fecha:", None))
+        self.label_show_collected_by_day.setText(QCoreApplication.translate("MainWindow", u"TOTAL DE LA FECHA", None))
         self.btn_delete_product_sales.setText(QCoreApplication.translate("MainWindow", u"Eliminar venta", None))
         self.tab2_toolBox.setItemText(self.tab2_toolBox.indexOf(self.box2_sales_table), QCoreApplication.translate("MainWindow", u"Tabla de ventas", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab2_sales), QCoreApplication.translate("MainWindow", u"Ventas", None))

@@ -165,10 +165,16 @@ QToolTip {
 }
 
 
+/* pushbuttons */
 QPushButton {
 	border: none;
 }
-QPushButton:hover {
+QPushButton:disabled {
+	background-color: rgb(103, 115, 122);
+	color: #999;
+}
+
+#btn_side_barToggle:hover {
 	border: 2px solid #3b66ab;
 	border-radius: 3px;
 	border-bottom-right-radius: 10px;
@@ -176,12 +182,47 @@ QPushButton:hover {
 	padding-bottom: 4px;
 }
 
+#btn_sidebar_list_add_item {
+	background-color: #778da9;
+}
+#btn_sidebar_list_add_item:hover {
+	background-color: #3b66ab;
+}
+#btn_sidebar_list_add_item:pressed {
+	background-color: #3b66ab;
+	border: 1px inset #778da9;
+}
 
+#btn_sidebar_list_add_item,
+#btn_sidebar_list_delete_item {
+	border-radius: 3px;
+}
+
+#btn_sidebar_list_delete_item {
+	color: #111;
+	background-color: #e0e1dd;
+	border: 1px solid #111;
+}
+#btn_sidebar_list_delete_item:hover {
+	background-color: #faa;
+}
+#btn_sidebar_list_delete_item:pressed {
+	background-color: #faa;
+	border: 1px inset #778da9;
+}
+#btn_sidebar_list_delete_item:disabled {
+	background-color: rgb(103, 115, 122);
+	color: #999;
+}
+
+
+/* scrollbar */
 QScrollBar {
 	background-color: #fff;
 }
 
 
+/* listwidget */
 QListWidget {
 	margin-bottom: 15px;
 	border: none;
@@ -192,11 +233,13 @@ QListWidget::item {
 }
 QListWidget::item:selected {
 	font-size: 15pt;
-	background-color: 3b66ab;
+	background-color: #3b66ab;
+	color: #111;
 	border-radius: 3px;
 }
 
 
+/* label */
 QLabel {
 	font-family: &quot;Arial&quot;, &quot;Calibri&quot;, &quot;Sans-Serif&quot;;
 	font-size: 18px;
@@ -355,114 +398,35 @@ QLabel {
             <property name="sortingEnabled">
              <bool>false</bool>
             </property>
-            <item>
-             <property name="text">
-              <string notr="true">Alimentos domésticos</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">Alimentos de granja</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">Cereales/arroz</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">Limpieza/química</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">Accesorios de pesca</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">Accesorios para mascotas</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">Accesorios para boyeros</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">Accesorios para jardinería</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">Accesorios para piletas</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">Electrodomésticos</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">Electrónicos</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">Herramientas</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">Indumentaria</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">Arenas</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">Gas</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">Venenos</string>
-             </property>
-             <property name="flags">
-              <set>ItemIsSelectable|ItemIsUserCheckable|ItemIsEnabled</set>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">Varios</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">MOSTRAR TODOS</string>
-             </property>
-             <property name="toolTip">
-              <string notr="true"/>
-             </property>
-             <property name="statusTip">
-              <string notr="true"/>
-             </property>
-             <property name="whatsThis">
-              <string notr="true"/>
-             </property>
-             <property name="font">
-              <font>
-               <bold>true</bold>
-               <underline>false</underline>
-              </font>
-             </property>
-            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="side_bar_list_buttons">
+            <layout class="QVBoxLayout" name="verticalLayout_2">
+             <item>
+              <widget class="QPushButton" name="btn_sidebar_list_add_item">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Crea una categoría nueva&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>Nueva categoría</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_sidebar_list_delete_item">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Elimina la categoría seleccionada.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Los productos pertenecientes a una categoría borrada pasan a ser de la categoría &amp;quot;varios&amp;quot;.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:700;&quot;&gt;Nota: &lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;esta acción es &lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-weight:700;&quot;&gt;permanente&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt; e &lt;/span&gt;&lt;span style=&quot; font-size:11pt; font-weight:700;&quot;&gt;irreversible&lt;/span&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;, debe estar seguro de querer eliminar una categoría.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>Borrar categoría</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
          </layout>
@@ -1605,6 +1569,25 @@ QToolBox::tab:selected {
 	background-color: #3b66ab;
 	color: #fff;
 	border-top-color:  #778da9;
+}
+
+
+/* QDateEdit */
+QDateEdit {
+	background-color: #e0e1dd;
+	color: #0d1b2a;
+	border: 1px solid #3b66ab;
+	border-radius: 5px;
+	padding-left: 2px 0;
+}
+QDateEdit::drop-down {
+	subcontrol-origin: padding;
+	subcontrol-position: top right;
+	width: 20px;
+	padding-right: 3px;
+	border-left: none;
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
 }</string>
           </property>
           <attribute name="title">
@@ -1659,15 +1642,28 @@ QToolBox::tab:selected {
 }
 
 
+QLabel,
+#lineEdit_paid {
+	font-size: 21px;
+}
+
+
+#label_total_change {
+	color: #dc2627;
+}
+
+
+#dateTimeEdit_sale {
+	font-size: 18px;
+}
+
+
 /* list widget de productos */
 QListWidget {
 	background-color: #fff;
 	border-radius: 10px;
 }
 QListWidget::item {
-/*
-	background-color: qlineargradient(spread:pad, x1:0, y1:0.273, x2:1, y2:0.835, stop:0 rgba(144, 205, 171, 255), stop:1 rgba(187, 255, 154, 255));
-*/
 	margin-left: 7px;
 	margin-right: 7px;
 	padding: 2px;
@@ -1861,22 +1857,6 @@ QListWidget::item:selected {
                   </item>
                   <item>
                    <widget class="QFrame" name="sale_info">
-                    <property name="styleSheet">
-                     <string notr="true">QLabel,
-#lineEdit_paid {
-	font-size: 21px;
-}
-
-
-#label_total_change {
-	color: #dc2627;
-}
-
-
-#dateTimeEdit_sale {
-	font-size: 18px;
-}</string>
-                    </property>
                     <property name="frameShape">
                      <enum>QFrame::Shape::NoFrame</enum>
                     </property>
@@ -2103,8 +2083,8 @@ border-right: 1px solid #111;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>756</width>
-                <height>517</height>
+                <width>535</width>
+                <height>224</height>
                </rect>
               </property>
               <property name="styleSheet">
@@ -2113,7 +2093,8 @@ border-right: 1px solid #111;</string>
 }
 
 
-#sales_table_header {
+#sales_table_header,
+#sales_table_footer {
 	background-color: #fff;
 	border-radius: 10px;
 }</string>
@@ -2121,7 +2102,7 @@ border-right: 1px solid #111;</string>
               <attribute name="label">
                <string>Tabla de ventas</string>
               </attribute>
-              <layout class="QVBoxLayout" name="box2_sales_Vlayout" stretch="0,0,0,0,0">
+              <layout class="QVBoxLayout" name="box2_sales_Vlayout" stretch="0,0,0,0,0,0">
                <property name="spacing">
                 <number>4</number>
                </property>
@@ -2372,6 +2353,78 @@ border-right: 1px solid #111;</string>
                  <attribute name="verticalHeaderVisible">
                   <bool>false</bool>
                  </attribute>
+                </widget>
+               </item>
+               <item>
+                <widget class="QFrame" name="sales_table_footer">
+                 <property name="frameShape">
+                  <enum>QFrame::Shape::NoFrame</enum>
+                 </property>
+                 <property name="frameShadow">
+                  <enum>QFrame::Shadow::Plain</enum>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1,2">
+                  <property name="spacing">
+                   <number>7</number>
+                  </property>
+                  <property name="leftMargin">
+                   <number>10</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>5</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>10</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>5</number>
+                  </property>
+                  <item>
+                   <widget class="QLabel" name="label_collected_by_day">
+                    <property name="text">
+                     <string>Recaudado en la fecha:</string>
+                    </property>
+                    <property name="textFormat">
+                     <enum>Qt::TextFormat::PlainText</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QDateEdit" name="dateEdit_show_collected_by_day">
+                    <property name="frame">
+                     <bool>false</bool>
+                    </property>
+                    <property name="buttonSymbols">
+                     <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+                    </property>
+                    <property name="showGroupSeparator" stdset="0">
+                     <bool>false</bool>
+                    </property>
+                    <property name="calendarPopup">
+                     <bool>true</bool>
+                    </property>
+                    <property name="timeSpec">
+                     <enum>Qt::TimeSpec::LocalTime</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="label_show_collected_by_day">
+                    <property name="styleSheet">
+                     <string notr="true">font-weight: 500;
+background-color: #bbb;
+border-top: 1px solid #111;
+border-right: 1px solid #111;</string>
+                    </property>
+                    <property name="text">
+                     <string>TOTAL DE LA FECHA</string>
+                    </property>
+                    <property name="textFormat">
+                     <enum>Qt::TextFormat::RichText</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </widget>
                </item>
                <item>

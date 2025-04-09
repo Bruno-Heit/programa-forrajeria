@@ -18,6 +18,7 @@
         <!-- #### (uso general) ####   íconos para los botones que se usan para agregar o borrar registros -->
         <file alias="plus.svg">../icons/plus.svg</file>
         <file alias="minus-circle.svg">../icons/minusCircle.svg</file>
+        <file alias="minus-circle-alt.svg">../icons/minusCircleAlt.svg</file>
 
         <!-- #### (MainWindow) ####   íconos para porcentajes -->
         <file alias="percent.svg">../icons/percent.svg</file>
