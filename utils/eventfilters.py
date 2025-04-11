@@ -1,13 +1,10 @@
 '''
     Éste archivo contiene las declaraciones de los filtros de eventos 
     personalizados usados en el programa.
-    El principal uso de esos eventos es para recibir los eventos tipo 
-    "Paint" y pintar sobre las tablas o listas dependiendo de si están 
-    vacías o no.
 '''
 
-from PySide6.QtWidgets import (QTableView, QListWidget)
-from PySide6.QtCore import (QObject, QEvent, Qt, QSize)
+from PySide6.QtWidgets import (QTableView, QListWidget, QListWidgetItem, QLineEdit)
+from PySide6.QtCore import (QObject, QEvent, Qt, QSize, Signal, Slot)
 from PySide6.QtGui import (QPainter, QPixmap)
 
 from resources import (rc_icons)
@@ -98,3 +95,75 @@ class BackgroundEventFilter(QObject):
                 painter.drawPixmap(x, y, scaled)
             return result
         return super().eventFilter(watched, event)
+
+
+
+
+class CategoryItemFocusOutFilter(QObject):
+    '''
+    Filtro de eventos que sobreescribe el funcionamiento del evento FocusOut 
+    del QLineEdit creado cuando se añade un item nuevo a la QTableList de 
+    categorías.
+    '''
+    itemToDelete:Signal = Signal(QListWidgetItem)
+    
+    def __init__(self, lineedit:QLineEdit, item:QListWidgetItem):
+        '''
+        Capta el evento FocusOut y verifica si el campo es inválido. Emite la 
+        señal 'itemToDelete' en caso de que el campo sea inválido y se deba 
+        quitar del QListWidget.
+
+        Parámetros
+        ----------
+        lineedit : QLineEdit
+            el QLineEdit al que modificar su evento FocusOut
+        item : QListWidgetItem
+            el item que borrar en caso de que el campo sea inválido
+        '''
+        super().__init__()
+        self.lineedit:QLineEdit = lineedit
+        self.item:QListWidgetItem = item
+        self.validity:bool = None
+        return None
+    
+    
+    @Slot(bool)
+    def setValidity(self, validity:bool | None) -> None:
+        '''
+        Determina la validez del campo de acuerdo a los validadores.
+
+        Parámetros
+        ----------
+        validity : bool | None
+            validez del campo, el valor es triestado: **True**, **False** o 
+            **None**.
+            - si es **True**: el campo es válido, el comportamiento del evento 
+            es el por defecto
+            - si es **False**: el campo es inválido, se sobreescribe el evento
+            - si es **None**: el campo es inválido y está vacío, se 
+            sobreescribe el evento
+        '''
+        self.validity = validity
+        return None
+
+
+    def fieldIsValid(self) -> bool:
+        '''
+        Devuelve la validez del campo.
+
+        Retorna
+        -------
+        bool
+            la validez del campo, **True** si el campo es válido o **False** 
+            si el campo es inválido (es decir, si es **False** o **None**)
+        '''
+        return True if self.validity else False
+
+
+    def eventFilter(self, watched:QLineEdit, event:QEvent):
+        if event.type() == QEvent.Type.FocusOut:
+            if not self.fieldIsValid():
+                self.itemToDelete.emit(self.item)
+            
+        return super().eventFilter(watched, event)
+

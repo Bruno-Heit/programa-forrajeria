@@ -215,6 +215,53 @@ class PercentageValidator(QRegularExpressionValidator):
 
 
 
+#¡ tabla CATEGORÍAS ==============================================================================
+class CategoryNameValidator(QRegularExpressionValidator):
+    '''Validador para los campos donde el usuario pueda modificar el nombre de 
+    una categoría.'''
+    validationSucceeded = Signal()
+    validationFailed = Signal(str)
+    isEmpty = Signal()
+    
+    def __init__(self, parent:QWidget=None):
+        super(CategoryNameValidator, self).__init__()
+        self.pattern:Pattern = compile(Regex.CATEGORY_NAME.value, flags=IGNORECASE)
+    
+    
+    def validate(self, text: str, pos: int) -> object:
+        # verifica si el nombre existe
+        name_exists:bool = makeReadQuery(
+            sql= '''SELECT EXISTS (
+                        SELECT 1 
+                        FROM Categorias 
+                        WHERE nombre_categoria = ?
+                        COLLATE NOCASE
+                    );''',
+            params=(text,)
+            )[0][0]
+        
+        # si el nombre ya existe devuelve Intermediate
+        if name_exists or text.upper() == "MOSTRAR TODOS":
+            self.validationFailed.emit("El nombre de la categoría ya existe")
+            return QValidator.State.Intermediate, text, pos
+        
+        # si el campo está vacío devuelve Intermediate
+        elif text.strip() == "":
+            self.isEmpty.emit()
+            return QValidator.State.Acceptable, text, pos
+        
+        # # si coincide el patrón devuelve Acceptable
+        elif fullmatch(self.pattern, text):
+            self.validationSucceeded.emit()
+            return QValidator.State.Acceptable, text, pos
+        
+        # en cualquier otro caso devuelve Invalid
+        else:
+            self.validationFailed.emit("El nombre de la categoría es inválida")
+            return QValidator.State.Invalid, text, pos
+
+
+
 
 
 #¡ tabla VENTAS ===================================================================================

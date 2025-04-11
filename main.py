@@ -16,20 +16,27 @@ from utils.model_classes import (InventoryTableModel, SalesTableModel, DebtsTabl
 from utils.delegates import (InventoryDelegate, SalesDelegate, DebtsDelegate)
 from utils.workerclasses import (WorkerSelect, WorkerUpdate, WorkerDelete)
 from utils.dboperations import (DatabaseRepository)
-from utils.customvalidators import (SalePaidValidator)
+from utils.customvalidators import (SalePaidValidator, CategoryNameValidator)
 from utils.enumclasses import (LoggingMessage, ModelHeaders, TableViewId, 
                                LabelFeedbackStyle, InventoryPriceType, TypeSideBar, 
                                TableViewColumns, ModelDataCols, ProgressBarStyle, 
                                TablesAndListsObjName, DateAndTimeFormat)
 from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxyModel)
-from utils.eventfilters import (BackgroundEventFilter)
+from utils.eventfilters import (BackgroundEventFilter, CategoryItemFocusOutFilter)
 
 from resources import (rc_icons)
+
+# TODO: falta implementar LAZY-LOADING
 
 # TODO1: falta hacer DELETE a Deudas
 
 # TODO2: permitir al usuario crear categorías personalizadas, y borrar categorías existentes. Si se borran categorías, colocar en cada producto que tenía la categoría asignada 
 # TODO2: una categoría "desconocido" o "varios", o algo por el estilo.
+# TODO2: además, creo que es mejor cambiar la señal cuando se hace click sobre un elemento en la lista del sidebar, hacer que se muestren los productos de esa categoría cuando 
+# TODO2: se hace doble click, y si se hace un click solo se active un botón que permita borrar esa categoría de la base de datos.
+# TODO2: tengo que hacer que cuando se hace doble click sobre un item de la lista de categorías se muestre el menú contextual y desde ahí poder modificar el nombre de la categoría 
+# TODO2: y su descripción.
+# TODO2: permitir borrar cualquier categoría, excepto la de "MOSTRAR TODOS"
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -305,6 +312,8 @@ class MainWindow(QMainWindow):
                 tableViewID=TableViewId.INVEN_TABLE_VIEW
             )
         )
+        
+        self.ui.btn_sidebar_list_add_item.clicked.connect(self.addNewCategory)
         return None
     
     
@@ -761,6 +770,111 @@ class MainWindow(QMainWindow):
                 # cambia la selección/deselección de las checkboxes
                 self.ui.inventory_checkbuttons_buttonGroup.setExclusive(True)
             
+        return None
+    
+    
+    def addNewCategory(self) -> None:
+        '''
+        Agrega un elemento editable a la lista de categorías para que el 
+        usuario pueda crear una nueva, y conecta las señales del editor, de 
+        su validador y de su filtro de eventos.
+        '''
+        item = QListWidgetItem()
+        self.ui.tables_ListWidget.addItem(item)
+        
+        # crea editor y validador para poder ingresar el nombre de la categoría
+        editor = QLineEdit()
+        validator = CategoryNameValidator(editor)
+        
+        editor.setValidator(validator)
+        editor.setPlaceholderText("Escribir el nombre de la categoría")
+        self.ui.tables_ListWidget.setItemWidget(item, editor)
+        editor.setFocus()
+        
+        # coloca en el editor un event-filter
+        filter_event:CategoryItemFocusOutFilter = CategoryItemFocusOutFilter(
+            lineedit=editor,
+            item=item
+        )
+        editor.installEventFilter(filter_event)
+        
+        # conecta señales
+        editor.editingFinished.connect(
+            lambda: self.__categoryEditorOnConfirmedName(item, editor)
+        )
+        
+        validator.validationSucceeded.connect(
+            lambda: filter_event.setValidity(validity=True)
+        )
+        validator.validationSucceeded.connect(
+            lambda: editor.setStyleSheet(WidgetStyle.FIELD_VALID_VAL.value)
+        )
+        validator.validationFailed.connect(
+            lambda: filter_event.setValidity(validity=False)
+        )
+        validator.validationFailed.connect(
+            lambda: editor.setStyleSheet(WidgetStyle.FIELD_INVALID_VAL.value)
+        )
+        validator.isEmpty.connect(
+            lambda: filter_event.setValidity(validity=None)
+        )
+        validator.isEmpty.connect(
+            lambda: editor.setStyleSheet("")
+        )
+        
+        filter_event.itemToDelete.connect(
+            lambda item: self.ui.tables_ListWidget.takeItem(
+                self.ui.tables_ListWidget.row(item)
+            )
+        )
+        return None
+    
+    
+    def __categoryEditorOnConfirmedName(self, item:QListWidgetItem, editor:QLineEdit) -> None:
+        '''
+        Agrega la categoría a la base de datos si el usuario ingresó una y 
+        actualiza el contenido del QListWidgetItem.
+
+        Parámetros
+        ----------
+        item : QListWidgetItem
+            el item de la lista
+        editor : QLineEdit
+            el editor del item
+        '''
+        name:str = editor.text().strip()
+        _item_show_all:list[QListWidgetItem] | QListWidgetItem # var. auxiliar, sirve 
+            # para colocar "MOSTRAR TODOS" al final luego de ordenar la lista.
+        
+        if name:
+            with self._db_repo as db_repo:
+                db_repo.insertRegister(
+                    ins_sql= '''INSERT INTO Categorias (nombre_categoria, descripcion)
+                                VALUES (?, ?);''',
+                    ins_params=(name, "",)
+                )
+            
+            item.setText(name)
+            self.ui.tables_ListWidget.setItemWidget(item, None) # quita el editor del widget
+            
+            # ordena la lista
+            self.ui.tables_ListWidget.sortItems(Qt.SortOrder.AscendingOrder)
+            
+            # coloca como último item el de "MOSTRAR TODOS"
+            _item_show_all = self.ui.tables_ListWidget.findItems(
+                "MOSTRAR TODOS",
+                Qt.MatchFlag.MatchExactly
+            )
+            if _item_show_all:
+                _item_show_all = _item_show_all[0]
+                self.ui.tables_ListWidget.takeItem(
+                    self.ui.tables_ListWidget.row(_item_show_all)
+                )
+                self.ui.tables_ListWidget.addItem(_item_show_all)
+        
+        else:
+            # si está vacío borra el item
+            self.ui.tables_ListWidget.takeItem(self.ui.tables_ListWidget.row(item))
         return None
     
     
