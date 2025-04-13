@@ -30,13 +30,8 @@ from resources import (rc_icons)
 
 # TODO1: falta hacer DELETE a Deudas
 
-# TODO2: permitir al usuario borrar categorías existentes, y colocar en cada producto que tenía la categoría asignada 
-# TODO2: una categoría "desconocido" o "varios", o algo por el estilo.
-# TODO2: además, creo que es mejor cambiar la señal cuando se hace click sobre un elemento en la lista del sidebar, hacer que se muestren los productos de esa categoría cuando 
-# TODO2: se hace doble click, y si se hace un click solo se active un botón que permita borrar esa categoría de la base de datos.
-# TODO2: tengo que hacer que cuando se hace doble click sobre un item de la lista de categorías se muestre el menú contextual y desde ahí poder modificar el nombre de la categoría 
-# TODO2: y su descripción.
-# TODO2: permitir borrar cualquier categoría, excepto la de "MOSTRAR TODOS"
+# TODO2: cuando se haga click derecho sobre un item de la lista de categorías se muestre un menú contextual y desde ahí 
+# TODO2: poder modificar el nombre de la categoría y su descripción.
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -313,6 +308,11 @@ class MainWindow(QMainWindow):
         # TODO: crear método para mostrar el boton de borrar categorias cuando cambie la seleccion en la lista, y luego implementar la funcionalidad de borrar la categoria
         self.ui.tables_ListWidget.selectionModel().selectionChanged.connect(
             lambda: self.toggleCategoryDeleteButton(
+                selected_items=self.ui.tables_ListWidget.selectedItems()
+            )
+        )
+        self.ui.btn_sidebar_list_delete_item.clicked.connect(
+            lambda: self.deleteCategory(
                 selected_items=self.ui.tables_ListWidget.selectedItems()
             )
         )
@@ -913,6 +913,66 @@ class MainWindow(QMainWindow):
             self.ui.btn_sidebar_list_delete_item.setEnabled(False)
             
         
+        return None
+    
+    
+    @Slot(object)
+    def deleteCategory(self, selected_items:list[QListWidgetItem]) -> None:
+        '''
+        Elimina la categoría seleccionada. Los productos pertenecientes a 
+        categorías que son eliminadas pasan a ser considerados de categoría 
+        **"Varios"** para evitar conflictos de referencia.
+        Al finalizar, quita el item del QListView y desactiva el botón de 
+        borrar categorías.
+
+        Parámetros
+        ----------
+        selected_items : list[QListWidgetItem]
+            los items seleccionados, debido a que 'tables_listWidget' permite 
+            la selección simple la lista siempre tendrá ninguno o un solo item
+        '''
+        _selected_item:QListWidgetItem
+        
+        if not selected_items:
+            return None
+        
+        _selected_item = selected_items[0]
+        
+        with self._db_repo as db_repo:
+            # antes de eliminar la categoría, relaciona todos los productos 
+            # de la categoría a borrar con la categoría "Varios"
+            db_repo.updateRegisters(
+                upd_sql= '''UPDATE Productos
+                            SET IDcategoria = (
+                                SELECT IDcategoria 
+                                FROM Categorias 
+                                WHERE nombre_categoria = 'Varios'
+                            )
+                            WHERE IDcategoria = (
+                                SELECT IDcategoria 
+                                FROM Categorias 
+                                WHERE nombre_categoria = ?
+                            );''',
+                upd_params=(_selected_item.text(),)
+            )
+            
+            db_repo.deleteRegisters(
+                del_sql= '''DELETE FROM Categorias
+                            WHERE IDcategoria = (
+                                SELECT IDcategoria 
+                                FROM Categorias 
+                                WHERE nombre_categoria = ?
+                            );''',
+                del_params=(_selected_item.text(),)
+            )
+        
+        # quita el item de la lista
+        self.ui.tables_ListWidget.takeItem(
+            self.ui.tables_ListWidget.row(_selected_item)
+        )
+        
+        # desactiva el botón de borrar categorías
+        self.ui.btn_sidebar_list_delete_item.setEnabled(False)
         return None
     
     
