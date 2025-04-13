@@ -99,10 +99,10 @@ class BackgroundEventFilter(QObject):
 
 
 
-class CategoryItemFocusOutFilter(QObject):
+class CategoryItemEventFilter(QObject):
     '''
     Filtro de eventos que sobreescribe el funcionamiento del evento FocusOut 
-    del QLineEdit creado cuando se añade un item nuevo a la QTableList de 
+    del QLineEdit creado cuando se añade un item nuevo al QListWidget de 
     categorías.
     '''
     itemToDelete:Signal = Signal(QListWidgetItem)
@@ -161,9 +161,8 @@ class CategoryItemFocusOutFilter(QObject):
 
 
     def eventFilter(self, watched:QLineEdit, event:QEvent):
-        if event.type() == QEvent.Type.FocusOut:
-            if not self.fieldIsValid():
-                self.itemToDelete.emit(self.item)
-            
+        if event.type() == QEvent.Type.FocusOut and not self.fieldIsValid():
+            self.itemToDelete.emit(self.item)
+        
         return super().eventFilter(watched, event)
 

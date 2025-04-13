@@ -22,7 +22,7 @@ from utils.enumclasses import (LoggingMessage, ModelHeaders, TableViewId,
                                TableViewColumns, ModelDataCols, ProgressBarStyle, 
                                TablesAndListsObjName, DateAndTimeFormat)
 from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxyModel)
-from utils.eventfilters import (BackgroundEventFilter, CategoryItemFocusOutFilter)
+from utils.eventfilters import (BackgroundEventFilter, CategoryItemEventFilter)
 
 from resources import (rc_icons)
 
@@ -30,7 +30,7 @@ from resources import (rc_icons)
 
 # TODO1: falta hacer DELETE a Deudas
 
-# TODO2: permitir al usuario crear categorías personalizadas, y borrar categorías existentes. Si se borran categorías, colocar en cada producto que tenía la categoría asignada 
+# TODO2: permitir al usuario borrar categorías existentes, y colocar en cada producto que tenía la categoría asignada 
 # TODO2: una categoría "desconocido" o "varios", o algo por el estilo.
 # TODO2: además, creo que es mejor cambiar la señal cuando se hace click sobre un elemento en la lista del sidebar, hacer que se muestren los productos de esa categoría cuando 
 # TODO2: se hace doble click, y si se hace un click solo se active un botón que permita borrar esa categoría de la base de datos.
@@ -241,13 +241,7 @@ class MainWindow(QMainWindow):
             TypeSideBar.PERCENTAGES_SIDEBAR))
         
         #* (READ) cargar con productos 'tv_inventory_data'
-        self.ui.tables_ListWidget.itemClicked.connect(lambda item: self.fillTableView(
-            table_viewID=TableViewId.INVEN_TABLE_VIEW,
-            ACCESSED_BY_LIST=True,
-            SHOW_ALL=True if item.text() == "MOSTRAR TODOS" else False
-            )
-        )
-        self.ui.tables_ListWidget.itemActivated.connect(lambda item: self.fillTableView(
+        self.ui.tables_ListWidget.itemDoubleClicked.connect(lambda item: self.fillTableView(
             table_viewID=TableViewId.INVEN_TABLE_VIEW,
             ACCESSED_BY_LIST=True,
             SHOW_ALL=True if item.text() == "MOSTRAR TODOS" else False
@@ -313,7 +307,10 @@ class MainWindow(QMainWindow):
             )
         )
         
+        #* sidebar de categorías
         self.ui.btn_sidebar_list_add_item.clicked.connect(self.addNewCategory)
+        
+        # TODO: crear método para mostrar el boton de borrar categorias cuando cambie la seleccion en la lista, y luego implementar la funcionalidad de borrar la categoria
         return None
     
     
@@ -792,7 +789,7 @@ class MainWindow(QMainWindow):
         editor.setFocus()
         
         # coloca en el editor un event-filter
-        filter_event:CategoryItemFocusOutFilter = CategoryItemFocusOutFilter(
+        filter_event:CategoryItemEventFilter = CategoryItemEventFilter(
             lineedit=editor,
             item=item
         )
