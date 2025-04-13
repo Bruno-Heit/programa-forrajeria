@@ -20,7 +20,7 @@ from utils.customvalidators import (SalePaidValidator, CategoryNameValidator)
 from utils.enumclasses import (LoggingMessage, ModelHeaders, TableViewId, 
                                LabelFeedbackStyle, InventoryPriceType, TypeSideBar, 
                                TableViewColumns, ModelDataCols, ProgressBarStyle, 
-                               TablesAndListsObjName, DateAndTimeFormat)
+                               TablesAndListsObjName, DateAndTimeFormat, CommonCategories)
 from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxyModel)
 from utils.eventfilters import (BackgroundEventFilter, CategoryItemEventFilter)
 
@@ -244,7 +244,7 @@ class MainWindow(QMainWindow):
         self.ui.tables_ListWidget.itemDoubleClicked.connect(lambda item: self.fillTableView(
             table_viewID=TableViewId.INVEN_TABLE_VIEW,
             ACCESSED_BY_LIST=True,
-            SHOW_ALL=True if item.text() == "MOSTRAR TODOS" else False
+            SHOW_ALL=True if item.text() == CommonCategories.SHOW_ALL.value else False
             )
         )
 
@@ -479,7 +479,7 @@ class MainWindow(QMainWindow):
             )
         
         # por último, agrega un item para mostrar todos
-        self.ui.tables_ListWidget.addItem("MOSTRAR TODOS")
+        self.ui.tables_ListWidget.addItem(CommonCategories.SHOW_ALL.value)
         self.ui.tables_ListWidget.item(self.ui.tables_ListWidget.count() - 1).setToolTip(
             ''' <html>
                     <head/>
@@ -865,7 +865,7 @@ class MainWindow(QMainWindow):
             
             # coloca como último item el de "MOSTRAR TODOS"
             _item_show_all = self.ui.tables_ListWidget.findItems(
-                "MOSTRAR TODOS",
+                CommonCategories.SHOW_ALL.value,
                 Qt.MatchFlag.MatchExactly
             )
             if _item_show_all:
@@ -904,7 +904,7 @@ class MainWindow(QMainWindow):
         # sólo admite la selección de un solo item (es 'single-selection')
         _selected_item = selected_items[0]
         
-        if _selected_item.text().strip().upper() != "MOSTRAR TODOS":
+        if _selected_item.text().strip().upper() not in (CommonCategories.MISC.value.upper(), CommonCategories.SHOW_ALL.value):
             self.ui.btn_sidebar_list_delete_item.setEnabled(
                 self.ui.tables_ListWidget.selectionModel().hasSelection()
             )

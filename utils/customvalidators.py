@@ -9,7 +9,7 @@ from PySide6.QtGui import (QValidator, QRegularExpressionValidator,
                            QIntValidator, QDoubleValidator)
 
 from utils.dboperations import (makeReadQuery)
-from utils.enumclasses import (Regex)
+from utils.enumclasses import (Regex, CommonCategories)
 
 from re import (fullmatch, compile, Pattern, IGNORECASE)
 import logging
@@ -241,7 +241,7 @@ class CategoryNameValidator(QRegularExpressionValidator):
             )[0][0]
         
         # si el nombre ya existe devuelve Intermediate
-        if name_exists or text.upper() == "MOSTRAR TODOS":
+        if name_exists or text.upper() == CommonCategories.SHOW_ALL.value:
             self.validationFailed.emit("El nombre de la categoría ya existe")
             return QValidator.State.Intermediate, text, pos
         

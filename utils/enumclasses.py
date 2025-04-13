@@ -188,6 +188,19 @@ class DBQueries(IntEnum):
 
 
 
+class CommonCategories(StrEnum):
+    '''
+    StrEnum con categorías comunes. Estas categorías no se pueden eliminar de 
+    la base de datos o sirven para mostrar todos los productos de todas las 
+    categorías al mismo tiempo.
+    '''
+    SHOW_ALL = "MOSTRAR TODOS"
+    MISC = "Varios"
+
+
+
+
+
 # estilos generales para widgets
 class WidgetStyle(StrEnum):
     '''Clase de tipo 'strEnum' con estilos generales para aplicar a los widgets.'''
