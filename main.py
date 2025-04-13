@@ -311,6 +311,11 @@ class MainWindow(QMainWindow):
         self.ui.btn_sidebar_list_add_item.clicked.connect(self.addNewCategory)
         
         # TODO: crear método para mostrar el boton de borrar categorias cuando cambie la seleccion en la lista, y luego implementar la funcionalidad de borrar la categoria
+        self.ui.tables_ListWidget.selectionModel().selectionChanged.connect(
+            lambda: self.toggleCategoryDeleteButton(
+                selected_items=self.ui.tables_ListWidget.selectedItems()
+            )
+        )
         return None
     
     
@@ -770,6 +775,7 @@ class MainWindow(QMainWindow):
         return None
     
     
+    @Slot()
     def addNewCategory(self) -> None:
         '''
         Agrega un elemento editable a la lista de categorías para que el 
@@ -872,6 +878,41 @@ class MainWindow(QMainWindow):
         else:
             # si está vacío borra el item
             self.ui.tables_ListWidget.takeItem(self.ui.tables_ListWidget.row(item))
+        return None
+    
+    
+    @Slot(object)
+    def toggleCategoryDeleteButton(self, selected_items:list[QListWidgetItem]) -> None:
+        '''
+        Habilita/inhabilita el botón para eliminar categorías dependiendo de 
+        la selección de items del QListWidget de categorías. Si el item 
+        seleccionado es el de **"MOSTRAR TODOS"** entonces desactiva el botón 
+        de borrar categorías.
+        
+        Parámetros
+        ----------
+        selected_items : list[QListWidgetItem]
+            los items seleccionados, debido a que 'tables_listWidget' permite 
+            la selección simple la lista siempre tendrá ninguno o un solo item
+        '''
+        _selected_item:QListWidgetItem
+        
+        if not selected_items:
+            return None
+        
+        # si hay selección, la lista siempre tendrá 1 item, porque 'tables_listWidget' 
+        # sólo admite la selección de un solo item (es 'single-selection')
+        _selected_item = selected_items[0]
+        
+        if _selected_item.text().strip().upper() != "MOSTRAR TODOS":
+            self.ui.btn_sidebar_list_delete_item.setEnabled(
+                self.ui.tables_ListWidget.selectionModel().hasSelection()
+            )
+        
+        else:
+            self.ui.btn_sidebar_list_delete_item.setEnabled(False)
+            
+        
         return None
     
     
