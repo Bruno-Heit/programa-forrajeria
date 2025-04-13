@@ -1,4 +1,7 @@
-# SQLITE3
+'''
+    Éste archivo contiene algunas funciones de uso general, la mayoría son 
+    funciones que son compartidas en varias partes del programa.
+'''
 
 from typing import (Any)
 
