@@ -39,6 +39,13 @@ class Ui_debtorDataDialog(object):
 "}\n"
 "\n"
 "\n"
+"QMenu {\n"
+"	background-color: #fff;\n"
+"	color: #111;\n"
+"	font-size: 14px;\n"
+"}\n"
+"\n"
+"\n"
 "QToolTip {\n"
 "	background-color: #fff;\n"
 "	color: #0d1b2a;\n"
@@ -81,15 +88,15 @@ class Ui_debtorDataDialog(object):
 "#label_debtor_header {\n"
 "	font-family: \"Arial\", \"Calibri\", \"Sans-Serif\";\n"
 "	font-size: 18px;\n"
-"	font-weight: 600px;\n"
+"	font-weight: 60"
+                        "0px;\n"
 "}\n"
 "\n"
 "\n"
 "/* lineedits */\n"
 "QLineEdit {\n"
 "	background-color: #e0e1dd;\n"
-"	col"
-                        "or: #0d1b2a;\n"
+"	color: #0d1b2a;\n"
 "	border: none;\n"
 "	border-radius: 10px;\n"
 "	padding-left: 3px;\n"
@@ -364,7 +371,7 @@ class Ui_debtorDataDialog(object):
     # setupUi
 
     def retranslateUi(self, debtorDataDialog):
-        debtorDataDialog.setWindowTitle(QCoreApplication.translate("debtorDataDialog", u"Dialog", None))
+        debtorDataDialog.setWindowTitle(QCoreApplication.translate("debtorDataDialog", u"Nueva cuenta corriente", None))
         self.label_phoneNumber.setText(QCoreApplication.translate("debtorDataDialog", u"N\u00fam. de tel\u00e9fono", None))
         self.label_direction.setText(QCoreApplication.translate("debtorDataDialog", u"Direcci\u00f3n", None))
         self.label_postalCode.setText(QCoreApplication.translate("debtorDataDialog", u"C\u00f3digo postal", None))

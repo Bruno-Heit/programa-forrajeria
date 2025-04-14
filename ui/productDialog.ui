@@ -39,6 +39,13 @@
 }
 
 
+QMenu {
+	background-color: #fff;
+	color: #111;
+	font-size: 14px;
+}
+
+
 QToolTip {
 	background-color: #fff;
 	color: #0d1b2a;

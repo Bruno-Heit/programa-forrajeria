@@ -41,6 +41,13 @@ class Ui_ProductsBalance(object):
 "}\n"
 "\n"
 "\n"
+"QMenu {\n"
+"	background-color: #fff;\n"
+"	color: #111;\n"
+"	font-size: 14px;\n"
+"}\n"
+"\n"
+"\n"
 "#central_widget {\n"
 "	background-color: #415a77;\n"
 "	border-radius: 5px;\n"
@@ -86,12 +93,12 @@ class Ui_ProductsBalance(object):
 "	border: None;\n"
 "	border-radius: 10px;\n"
 "}\n"
-"QTableView::item:hover {\n"
+"QTableView::item:"
+                        "hover {\n"
 "	background-color: #778da9;\n"
 "}\n"
 "QTableView::item:selected {\n"
-"	background-col"
-                        "or: #778da9;\n"
+"	background-color: #778da9;\n"
 "	border: 1px solid #fff;\n"
 "}\n"
 "/* QHeaderViews */\n"
@@ -133,15 +140,15 @@ class Ui_ProductsBalance(object):
 "	color: #fff;\n"
 "}\n"
 "QCalendarWidget QToolButton:hover,\n"
-"QCalendarWidget QToolButton:pressed {\n"
+"QCalendarWidget QToolButton:"
+                        "pressed {\n"
 "	background-color: #38a3a5;\n"
 "	color: #111;\n"
 "}\n"
 "\n"
 "\n"
 "/* scrollbars */\n"
-""
-                        "QScrollBar {\n"
+"QScrollBar {\n"
 "	background-color: #e0e1dd;\n"
 "	border: 1px solid transparent;\n"
 "	border-radius: 5px;\n"
@@ -187,7 +194,8 @@ class Ui_ProductsBalance(object):
 "	height: 13px;\n"
 "}\n"
 "QScrollBar::handle:horizontal {\n"
-"	min-width: 15px;\n"
+"	min-width: 15"
+                        "px;\n"
 "}")
         self.horizontalLayout_4 = QHBoxLayout(ProductsBalance)
         self.horizontalLayout_4.setSpacing(0)
@@ -349,7 +357,7 @@ class Ui_ProductsBalance(object):
     # setupUi
 
     def retranslateUi(self, ProductsBalance):
-        ProductsBalance.setWindowTitle(QCoreApplication.translate("ProductsBalance", u"Dialog", None))
+        ProductsBalance.setWindowTitle("")
 #if QT_CONFIG(tooltip)
         ProductsBalance.setToolTip("")
 #endif // QT_CONFIG(tooltip)

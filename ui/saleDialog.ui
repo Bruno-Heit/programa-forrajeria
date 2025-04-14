@@ -29,7 +29,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Nueva venta</string>
   </property>
   <property name="styleSheet">
    <string notr="true">* {
@@ -37,6 +37,13 @@
 	border-color: #0b7e7f;
 	font-family: &quot;Futura&quot;, &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
 	font-size: 16px;
+}
+
+
+QMenu {
+	background-color: #fff;
+	color: #111;
+	font-size: 14px;
 }
 
 

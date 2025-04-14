@@ -42,7 +42,14 @@ class Ui_MainWindow(object):
 "\n"
 "QToolTip {\n"
 "	background-color: #fff;\n"
-"	color: #0d1b2a;\n"
+"	color: #111;\n"
+"}\n"
+"\n"
+"\n"
+"QMenu {\n"
+"	background-color: #fff;\n"
+"	color: #111;\n"
+"	font-size: 14px;\n"
 "}\n"
 "\n"
 "\n"
@@ -1702,7 +1709,7 @@ class Ui_MainWindow(object):
     # setupUi
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
+        MainWindow.setWindowTitle("")
         self.actionNuevo.setText(QCoreApplication.translate("MainWindow", u"Nuevo...", None))
         self.actionAbrir.setText(QCoreApplication.translate("MainWindow", u"Abrir...", None))
         self.actionGuardar.setText(QCoreApplication.translate("MainWindow", u"Guardar", None))
