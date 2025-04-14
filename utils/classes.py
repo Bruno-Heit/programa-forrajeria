@@ -1,3 +1,12 @@
+'''
+    Este archivo contiene todas las subclases de QDialogs, de widgets con 
+    interfaces gráficas o modelos de datos simples (que no heredan de 
+    QAbstractItemModel).
+    Los modelos de datos simples mencionados son principalmente usados 
+    dentro de las propias subclases declaradas en este archivo, pero no 
+    necesariamente exclusivos de ellas, y el principal uso es para facilitar 
+    la validación de datos.
+'''
 
 from numpy import (ndarray, array)
 
