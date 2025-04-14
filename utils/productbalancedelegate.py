@@ -7,15 +7,13 @@
     CircularImport, por lo que decidí mover la clase 
     delegado del dialog a su propio archivo separado.
 '''
-
-
 from PySide6.QtWidgets import (QWidget, QStyledItemDelegate, QStyleOptionViewItem, 
                                QComboBox, QLineEdit, QDateTimeEdit)
 from PySide6.QtCore import (Qt, QModelIndex, QSize, QPersistentModelIndex, 
                             QAbstractItemModel, Slot, QDateTime)
 
-from utils.enumclasses import (LabelFeedbackStyle, TableViewColumns, Regex)
-from utils.functionutils import (DATETIME_FORMAT)
+from utils.enumclasses import (LabelFeedbackStyle, TableViewColumns, Regex, 
+                               DateAndTimeFormat)
 from utils.customvalidators import (ProductBalanceValidator, SaleDetailsValidator)
 
 from re import (compile, IGNORECASE, search, sub)
@@ -32,7 +30,7 @@ class ProductsBalanceDelegate(QStyledItemDelegate):
         match index.column():
             case TableViewColumns.PRODS_BAL_DATETIME.value:
                 editor = QDateTimeEdit(parent)
-                editor.setDisplayFormat(DATETIME_FORMAT)
+                editor.setDisplayFormat(DateAndTimeFormat.DATETIME_FORMAT.value)
                 editor.setCalendarPopup(True)
             
             case TableViewColumns.PRODS_BAL_DESCRIPTION.value:
@@ -82,7 +80,7 @@ class ProductsBalanceDelegate(QStyledItemDelegate):
         if isinstance(editor, QDateTimeEdit):
             cell_datetime = QDateTime.fromString(
                     index.data(Qt.ItemDataRole.DisplayRole),
-                    DATETIME_FORMAT
+                    DateAndTimeFormat.DATETIME_FORMAT.value
             )
             editor.setDateTime(cell_datetime)
         
