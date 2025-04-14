@@ -5,8 +5,9 @@ from typing import (Any, Iterable)
 from PySide6.QtWidgets import (QApplication, QMainWindow, QTableView, 
                                QCheckBox, QAbstractItemView, QListWidgetItem, 
                                QLineEdit)
-from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot, QSize, QEvent)
-from PySide6.QtGui import (QIcon, QPainter, QPixmap)
+from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot, QSize, QTranslator, 
+                            QLibraryInfo, QLocale)
+from PySide6.QtGui import (QIcon)
 
 from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemValues, 
                            DebtorDataDialog, WidgetStyle, SaleFields, ProductsBalanceDialog)
@@ -19,8 +20,8 @@ from utils.dboperations import (DatabaseRepository)
 from utils.customvalidators import (SalePaidValidator, CategoryNameValidator)
 from utils.enumclasses import (LoggingMessage, ModelHeaders, TableViewId, 
                                LabelFeedbackStyle, InventoryPriceType, TypeSideBar, 
-                               TableViewColumns, ModelDataCols, ProgressBarStyle, 
-                               TablesAndListsObjName, DateAndTimeFormat, CommonCategories)
+                               TableViewColumns, ProgressBarStyle, DateAndTimeFormat, 
+                               CommonCategories)
 from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxyModel)
 from utils.eventfilters import (BackgroundEventFilter, CategoryItemEventFilter)
 
@@ -3114,6 +3115,14 @@ def main():
         datefmt='%A %d/%m/%Y %H:%M:%S')
     
     app = QApplication(sys.argv)
+    
+    # traducción al español
+    translator = QTranslator()
+    path = QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)
+    translator.load("qtbase_es", path)
+    app.installTranslator(translator)
+    
+    
     mainWindow = MainWindow()
     mainWindow.show()
     sys.exit(app.exec())
