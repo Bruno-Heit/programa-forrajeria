@@ -31,8 +31,9 @@ from resources import (rc_icons)
 
 # TODO1: falta hacer DELETE a Deudas
 
-# TODO2: cuando se haga click derecho sobre un item de la lista de categorías se muestre un menú contextual y desde ahí 
-# TODO2: poder modificar el nombre de la categoría y su descripción.
+# TODO2: cuando se haga click derecho sobre un item de la lista de categorías que 
+# TODO2: se muestre un menú contextual y desde ahí poder modificar el nombre de la 
+# TODO2: categoría y su descripción.
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -306,7 +307,6 @@ class MainWindow(QMainWindow):
         #* sidebar de categorías
         self.ui.btn_sidebar_list_add_item.clicked.connect(self.addNewCategory)
         
-        # TODO: crear método para mostrar el boton de borrar categorias cuando cambie la seleccion en la lista, y luego implementar la funcionalidad de borrar la categoria
         self.ui.tables_ListWidget.selectionModel().selectionChanged.connect(
             lambda: self.toggleCategoryDeleteButton(
                 selected_items=self.ui.tables_ListWidget.selectedItems()
@@ -779,21 +779,50 @@ class MainWindow(QMainWindow):
     @Slot()
     def addNewCategory(self) -> None:
         '''
-        Agrega un elemento editable a la lista de categorías para que el 
-        usuario pueda crear una nueva, y conecta las señales del editor, de 
-        su validador y de su filtro de eventos.
+        Agrega un item editable a la lista de categorías para que el usuario 
+        pueda crear una nueva categoría.
         '''
         item = QListWidgetItem()
         self.ui.tables_ListWidget.addItem(item)
         
+        # crea editor y validador para poder ingresar el nombre de la categoría
+        editor:QLineEdit = self.__createCategoryEditor(item=item)
+        
+        self.ui.tables_ListWidget.setItemWidget(item, editor)
+        editor.setFocus()
+                
+        # conecta señal 'editingFinished' del editor
+        editor.editingFinished.connect(
+            lambda: self.__categoryEditorOnConfirmedName(item, editor.text())
+        )
+        return None
+    
+    
+    def __createCategoryEditor(self, item:QListWidgetItem) -> QLineEdit:
+        '''
+        Crea un editor con su validador y un filtro de eventos para editar los 
+        items de *tables_listWidget* y lo retorna.
+        
+        **NOTA:** éste método conecta la señal *editingFinished* a una función 
+        que formatea el campo, pero lo ideal es extender su comportamiento 
+        conectando nuevamente la señal a otra función.
+
+        Parámetros
+        ----------
+        item : QListWidgetItem
+            el item al cual colocarle un editor
+        
+        Retorna
+        -------
+        QLineEdit
+            editor para los items del QListWidget
+        '''
         # crea editor y validador para poder ingresar el nombre de la categoría
         editor = QLineEdit()
         validator = CategoryNameValidator(editor)
         
         editor.setValidator(validator)
         editor.setPlaceholderText("Escribir el nombre de la categoría")
-        self.ui.tables_ListWidget.setItemWidget(item, editor)
-        editor.setFocus()
         
         # coloca en el editor un event-filter
         filter_event:CategoryItemEventFilter = CategoryItemEventFilter(
@@ -804,7 +833,9 @@ class MainWindow(QMainWindow):
         
         # conecta señales
         editor.editingFinished.connect(
-            lambda: self.__categoryEditorOnConfirmedName(item, editor)
+            lambda: editor.setText(
+                editor.text().strip()
+            )
         )
         
         validator.validationSucceeded.connect(
@@ -831,10 +862,10 @@ class MainWindow(QMainWindow):
                 self.ui.tables_ListWidget.row(item)
             )
         )
-        return None
+        return editor
     
     
-    def __categoryEditorOnConfirmedName(self, item:QListWidgetItem, editor:QLineEdit) -> None:
+    def __categoryEditorOnConfirmedName(self, item:QListWidgetItem, name:str) -> None:
         '''
         Agrega la categoría a la base de datos si el usuario ingresó una y 
         actualiza el contenido del QListWidgetItem.
@@ -843,13 +874,9 @@ class MainWindow(QMainWindow):
         ----------
         item : QListWidgetItem
             el item de la lista
-        editor : QLineEdit
-            el editor del item
+        name : str
+            el nombre de la categoría
         '''
-        name:str = editor.text().strip()
-        _item_show_all:list[QListWidgetItem] | QListWidgetItem # var. auxiliar, sirve 
-            # para colocar "MOSTRAR TODOS" al final luego de ordenar la lista.
-        
         if name:
             with self._db_repo as db_repo:
                 db_repo.insertRegister(
@@ -861,24 +888,35 @@ class MainWindow(QMainWindow):
             item.setText(name)
             self.ui.tables_ListWidget.setItemWidget(item, None) # quita el editor del widget
             
-            # ordena la lista
-            self.ui.tables_ListWidget.sortItems(Qt.SortOrder.AscendingOrder)
-            
-            # coloca como último item el de "MOSTRAR TODOS"
-            _item_show_all = self.ui.tables_ListWidget.findItems(
-                CommonCategories.SHOW_ALL.value,
-                Qt.MatchFlag.MatchExactly
-            )
-            if _item_show_all:
-                _item_show_all = _item_show_all[0]
-                self.ui.tables_ListWidget.takeItem(
-                    self.ui.tables_ListWidget.row(_item_show_all)
-                )
-                self.ui.tables_ListWidget.addItem(_item_show_all)
+            self.__makeCategoryListLastsConfigs()
         
         else:
             # si está vacío borra el item
             self.ui.tables_ListWidget.takeItem(self.ui.tables_ListWidget.row(item))
+        return None
+    
+    
+    def __makeCategoryListLastsConfigs(self) -> None:
+        '''
+        Ordena la lista *tables_listWidget* y coloca como último item el de 
+        **MOSTRAR TODOS**.
+        '''
+        _item_show_all:list[QListWidgetItem] | QListWidgetItem # var. auxiliar, sirve 
+            # para colocar "MOSTRAR TODOS" al final luego de ordenar la lista.
+        
+        self.ui.tables_ListWidget.sortItems(Qt.SortOrder.AscendingOrder)
+        
+        _item_show_all = self.ui.tables_ListWidget.findItems(
+            CommonCategories.SHOW_ALL.value,
+            Qt.MatchFlag.MatchExactly
+        )
+        
+        if _item_show_all:
+            _item_show_all = _item_show_all[0]
+            self.ui.tables_ListWidget.takeItem(
+                self.ui.tables_ListWidget.row(_item_show_all)
+            )
+            self.ui.tables_ListWidget.addItem(_item_show_all)
         return None
     
     
