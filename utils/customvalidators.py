@@ -237,11 +237,11 @@ class CategoryNameValidator(QRegularExpressionValidator):
                         WHERE nombre_categoria = ?
                         COLLATE NOCASE
                     );''',
-            params=(text,)
+            params=(text.strip(),)
             )[0][0]
         
         # si el nombre ya existe devuelve Intermediate
-        if name_exists or text.upper() == CommonCategories.SHOW_ALL.value:
+        if name_exists or text.upper().strip() == CommonCategories.SHOW_ALL.value:
             self.validationFailed.emit("El nombre de la categoría ya existe")
             return QValidator.State.Intermediate, text, pos
         
