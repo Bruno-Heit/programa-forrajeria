@@ -4,10 +4,10 @@ from typing import (Any, Iterable)
 
 from PySide6.QtWidgets import (QApplication, QMainWindow, QTableView, 
                                QCheckBox, QAbstractItemView, QListWidgetItem, 
-                               QLineEdit)
+                               QLineEdit, QMenu)
 from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot, QSize, QTranslator, 
-                            QLibraryInfo, QLocale)
-from PySide6.QtGui import (QIcon)
+                            QLibraryInfo)
+from PySide6.QtGui import (QIcon, QAction)
 
 from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemValues, 
                            DebtorDataDialog, WidgetStyle, SaleFields, ProductsBalanceDialog)
@@ -23,7 +23,8 @@ from utils.enumclasses import (LoggingMessage, ModelHeaders, TableViewId,
                                TableViewColumns, ProgressBarStyle, DateAndTimeFormat, 
                                CommonCategories)
 from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxyModel)
-from utils.eventfilters import (BackgroundEventFilter, CategoryItemEventFilter)
+from utils.eventfilters import (BackgroundEventFilter, CategoryItemEventFilter, 
+                                CategoryListEventFilter)
 
 from resources import (rc_icons)
 
@@ -108,6 +109,10 @@ class MainWindow(QMainWindow):
         '''
         Instala los filtros de eventos en los widgets.
         '''
+        # categorías
+        self.category_list_event_filter = CategoryListEventFilter(self.ui.tables_ListWidget)
+        self.ui.tables_ListWidget.installEventFilter(self.category_list_event_filter)
+        
         # productos
         self.inv_table_event_filter = BackgroundEventFilter(self.ui.tv_inventory_data)
         self.ui.tv_inventory_data.viewport().installEventFilter(self.inv_table_event_filter)

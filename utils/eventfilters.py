@@ -3,13 +3,14 @@
     personalizados usados en el programa.
 '''
 
-from PySide6.QtWidgets import (QTableView, QListWidget, QListWidgetItem, QLineEdit)
+from PySide6.QtWidgets import (QTableView, QListWidget, QListWidgetItem, 
+                               QLineEdit, QMenu)
 from PySide6.QtCore import (QObject, QEvent, Qt, QSize, Signal, Slot)
-from PySide6.QtGui import (QPainter, QPixmap)
+from PySide6.QtGui import (QPainter, QPixmap, QAction)
 
 from resources import (rc_icons)
 
-from utils.enumclasses import (TablesAndListsObjName)
+from utils.enumclasses import (TablesAndListsObjName, CommonCategories)
 
 
 class BackgroundEventFilter(QObject):
@@ -168,7 +169,54 @@ class CategoryItemEventFilter(QObject):
 
     def eventFilter(self, watched:QLineEdit, event:QEvent):
         if event.type() == QEvent.Type.FocusOut and not self.fieldIsValid():
-            self.itemToDelete.emit(self.item)
+            match self.edit_mode:
+                case True:
+                    self.itemToReset.emit(self.item)
+                
+                case False:
+                    self.itemToDelete.emit(self.item)
         
         return super().eventFilter(watched, event)
+
+
+
+
+
+class CategoryListEventFilter(QObject):
+    '''
+    Filtro de eventos usado para mostrar un menú contextual personalizado que 
+    permite al usuario cambiar el nombre de la categoría o su descripción.
+    '''
+    nameAboutToChange:Signal = Signal(QListWidgetItem)
+    descAboutToChange:Signal = Signal(QListWidgetItem)
+    
+    def eventFilter(self, watched:QListWidget, event:QEvent):
+        if event.type() == QEvent.Type.ContextMenu:
+            menu:QMenu = QMenu()
+            
+            change_name:QAction = menu.addAction("cambiar nombre...")
+            change_desc:QAction = menu.addAction("cambiar descripción...")
+            
+            curr_item:QListWidgetItem = watched.itemAt(event.pos())
+            
+            change_name.triggered.connect(
+                lambda: self.nameAboutToChange.emit(curr_item)
+            )
+            change_desc.triggered.connect(
+                lambda: self.descAboutToChange.emit(curr_item)
+            )
+            
+            if (watched.indexAt(event.pos()).isValid() and 
+                curr_item.text() not in (CommonCategories.SHOW_ALL.value, CommonCategories.MISC.value)):
+                change_name.setEnabled(True)
+                change_desc.setEnabled(True)
+            
+            else:
+                change_name.setEnabled(False)
+                change_desc.setEnabled(False)
+            
+            menu.exec(event.globalPos())
+            
+        return super().eventFilter(watched, event)
+
 
