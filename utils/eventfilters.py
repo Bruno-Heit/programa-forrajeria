@@ -106,12 +106,13 @@ class CategoryItemEventFilter(QObject):
     categorías.
     '''
     itemToDelete:Signal = Signal(QListWidgetItem)
+    itemToReset:Signal = Signal(QListWidgetItem)
     
-    def __init__(self, lineedit:QLineEdit, item:QListWidgetItem):
+    def __init__(self, lineedit:QLineEdit, item:QListWidgetItem, edit_mode:bool=False):
         '''
         Capta el evento FocusOut y verifica si el campo es inválido. Emite la 
-        señal 'itemToDelete' en caso de que el campo sea inválido y se deba 
-        quitar del QListWidget.
+        señal *itemToDelete* en caso de que el campo sea inválido y se deba 
+        quitar del QListWidget, si el item se está editando emite *itemToReset*.
 
         Parámetros
         ----------
@@ -119,11 +120,16 @@ class CategoryItemEventFilter(QObject):
             el QLineEdit al que modificar su evento FocusOut
         item : QListWidgetItem
             el item que borrar en caso de que el campo sea inválido
+        edit_mode : bool, por defecto False
+            flag que determina si el item se está modificando en lugar de ser 
+            creado desde cero, si es True emite la señal *itemToReset* en 
+            lugar de *itemToDelete* cuando el campo está vacío o es inválido
         '''
         super().__init__()
         self.lineedit:QLineEdit = lineedit
         self.item:QListWidgetItem = item
         self.validity:bool = None
+        self.edit_mode:bool = edit_mode
         return None
     
     

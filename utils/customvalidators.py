@@ -223,42 +223,89 @@ class CategoryNameValidator(QRegularExpressionValidator):
     validationFailed = Signal(str)
     isEmpty = Signal()
     
-    def __init__(self, parent:QWidget=None):
+    def __init__(self, parent:QWidget=None, prev_name:str=None):
+        '''
+        Valida el campo del nombre de la categoría.
+
+        Parámetros
+        ----------
+        parent : QWidget, opcional
+            el widget padre, por defecto None
+        prev_name : bool, opcional
+            el nombre anterior de la categoría, por defecto None; se usa 
+            cuando el nombre está siendo modificado
+        '''
         super(CategoryNameValidator, self).__init__()
         self.pattern:Pattern = compile(Regex.CATEGORY_NAME.value, flags=IGNORECASE)
+        self.__prev_name:str = prev_name
     
     
-    def validate(self, text: str, pos: int) -> object:
-        # verifica si el nombre existe
-        name_exists:bool = makeReadQuery(
+    def prevName(self) -> str:
+        '''
+        Devuelve el nombre de categoría anterior.
+
+        Retorna
+        -------
+        str
+            el nombre de categoría anterior como *str*, incluso si no hay un 
+            nombre anterior declarado y se esté creando una nueva categoría, 
+            en ese caso será una cadena con valor ***None***
+        '''
+        return str(self.__prev_name)
+    
+    
+    def nameExists(self, name:str) -> bool:
+        '''
+        Verifica si el nombre existe en la base de datos
+        '''
+        return makeReadQuery(
             sql= '''SELECT EXISTS (
                         SELECT 1 
                         FROM Categorias 
                         WHERE nombre_categoria = ?
                         COLLATE NOCASE
                     );''',
-            params=(text.strip(),)
+            params=(name,)
             )[0][0]
+    
+    
+    def validate(self, text: str, pos: int) -> object:
+        #? si el nombre es igual al anterior no valida, lo considera válido
+        if text.strip().upper() != self.prevName().upper():
+            # verifica si el nombre existe
+            name_exists:bool = makeReadQuery(
+                sql= '''SELECT EXISTS (
+                            SELECT 1 
+                            FROM Categorias 
+                            WHERE nombre_categoria = ?
+                            COLLATE NOCASE
+                        );''',
+                params=(text.strip(),)
+                )[0][0]
+            
+            # si el nombre ya existe devuelve Intermediate
+            if name_exists or text.strip().upper() == CommonCategories.SHOW_ALL.value:
+                self.validationFailed.emit("El nombre de la categoría ya existe")
+                return QValidator.State.Intermediate, text, pos
+            
+            # si el campo está vacío devuelve Intermediate
+            elif text.strip() == "":
+                self.isEmpty.emit()
+                return QValidator.State.Acceptable, text, pos
+            
+            # # si coincide el patrón devuelve Acceptable
+            elif fullmatch(self.pattern, text):
+                self.validationSucceeded.emit()
+                return QValidator.State.Acceptable, text, pos
+            
+            # en cualquier otro caso devuelve Invalid
+            else:
+                self.validationFailed.emit("El nombre de la categoría es inválida")
+                return QValidator.State.Invalid, text, pos
         
-        # si el nombre ya existe devuelve Intermediate
-        if name_exists or text.upper().strip() == CommonCategories.SHOW_ALL.value:
-            self.validationFailed.emit("El nombre de la categoría ya existe")
-            return QValidator.State.Intermediate, text, pos
-        
-        # si el campo está vacío devuelve Intermediate
-        elif text.strip() == "":
-            self.isEmpty.emit()
-            return QValidator.State.Acceptable, text, pos
-        
-        # # si coincide el patrón devuelve Acceptable
-        elif fullmatch(self.pattern, text):
+        else:
             self.validationSucceeded.emit()
             return QValidator.State.Acceptable, text, pos
-        
-        # en cualquier otro caso devuelve Invalid
-        else:
-            self.validationFailed.emit("El nombre de la categoría es inválida")
-            return QValidator.State.Invalid, text, pos
 
 
 

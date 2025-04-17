@@ -317,6 +317,10 @@ class MainWindow(QMainWindow):
                 selected_items=self.ui.tables_ListWidget.selectedItems()
             )
         )
+        
+        # TODO: implementar menú contextual personalizado para cambiar nombre de categoría o su descripción
+        self.category_list_event_filter.nameAboutToChange.connect(self.setEditableCategoryName)
+        self.category_list_event_filter.descAboutToChange.connect(self.setEditableCategoryDesc)
         return None
     
     
@@ -798,7 +802,7 @@ class MainWindow(QMainWindow):
         return None
     
     
-    def __createCategoryEditor(self, item:QListWidgetItem) -> QLineEdit:
+    def __createCategoryEditor(self, item:QListWidgetItem, edit_mode:bool=False) -> QLineEdit:
         '''
         Crea un editor con su validador y un filtro de eventos para editar los 
         items de *tables_listWidget* y lo retorna.
@@ -811,6 +815,10 @@ class MainWindow(QMainWindow):
         ----------
         item : QListWidgetItem
             el item al cual colocarle un editor
+        edit_mode : bool, por defecto False
+            flag que determina si el editor está en modo edición o no; si es 
+            True el validador compara el nuevo nombre con el anterior, sino no 
+            lo hace
         
         Retorna
         -------
@@ -819,7 +827,10 @@ class MainWindow(QMainWindow):
         '''
         # crea editor y validador para poder ingresar el nombre de la categoría
         editor = QLineEdit()
-        validator = CategoryNameValidator(editor)
+        validator = CategoryNameValidator(
+            parent=editor,
+            prev_name=item.text() if edit_mode else None
+        )
         
         editor.setValidator(validator)
         editor.setPlaceholderText("Escribir el nombre de la categoría")
@@ -827,7 +838,8 @@ class MainWindow(QMainWindow):
         # coloca en el editor un event-filter
         filter_event:CategoryItemEventFilter = CategoryItemEventFilter(
             lineedit=editor,
-            item=item
+            item=item,
+            edit_mode=edit_mode
         )
         editor.installEventFilter(filter_event)
         
@@ -857,11 +869,17 @@ class MainWindow(QMainWindow):
             lambda: editor.setStyleSheet("")
         )
         
-        filter_event.itemToDelete.connect(
+        filter_event.itemToDelete.connect( # si está en modo edición nunca se ejecuta este Slot...
             lambda item: self.ui.tables_ListWidget.takeItem(
                 self.ui.tables_ListWidget.row(item)
             )
         )
+        filter_event.itemToReset.connect( # ... alternativamente, si NO está en modo edición 
+            lambda item: self.ui.tables_ListWidget.setItemWidget( # no se ejecuta este otro Slot.
+                item, None
+            )
+        )
+        
         return editor
     
     
@@ -1012,6 +1030,81 @@ class MainWindow(QMainWindow):
         
         # desactiva el botón de borrar categorías
         self.ui.btn_sidebar_list_delete_item.setEnabled(False)
+        return None
+    
+    
+    @Slot(QListWidgetItem)
+    def setEditableCategoryName(self, item:QListWidgetItem) -> None:
+        '''
+        Coloca un QLineEdit en el item seleccionado para editar el nombre de 
+        la categoría.
+
+        Parámetros
+        ----------
+        item : QListWidgetItem
+            el item al cual hacer editable
+        '''
+        # crea editor
+        editor:QLineEdit = self.__createCategoryEditor(
+            item=item,
+            edit_mode=True
+        )
+        
+        self.ui.tables_ListWidget.setItemWidget(item, editor)
+        editor.setFocus()
+        
+        # conecta señal 'editingFinished' del editor
+        editor.editingFinished.connect(
+            lambda: self.__onCategoryNameUpdate(item=item, new_name=editor.text())
+        )
+        return None
+    
+    
+    @Slot(str, str)
+    def __onCategoryNameUpdate(self, item:QListWidgetItem, new_name:str) -> None:
+        '''
+        Modifica el nombre de categoría en la base de datos y actualiza el 
+        contenido del QListWidgetItem.
+        **NOTA:** en caso que el nuevo nombre sea igual al anterior o que el 
+        campo esté vacío, el campo conservará el nombre anterior
+
+        Parámetros
+        ----------
+        item : QListWidgetItem
+            el item de la lista
+        new_name : str
+            el nombre nuevo de la categoría
+        '''
+        prev_name:str = item.text()
+        
+        if not new_name:
+            new_name = prev_name
+        
+        else:
+            with self._db_repo as db_repo:
+                db_repo.updateRegisters(
+                    upd_sql= '''UPDATE Categorias 
+                                SET nombre_categoria = ? 
+                                WHERE IDcategoria = (
+                                    SELECT IDcategoria 
+                                    FROM Categorias 
+                                    WHERE nombre_categoria = ?
+                                )''',
+                    upd_params=(new_name, prev_name,)
+                )
+        
+        item.setText(new_name)
+        self.__makeCategoryListLastsConfigs()
+        
+        # quita el editor del widget
+        self.ui.tables_ListWidget.setItemWidget(item, None)
+        return None
+    
+    
+    @Slot(QListWidgetItem)
+    def setEditableCategoryDesc(self, item:QListWidgetItem) -> None:
+        ...
+        # todo: mostrar un qdialog no modal con un textedit, poner el foco ahí y permitir al usuario cambiar la descripción de la categoría
         return None
     
     
