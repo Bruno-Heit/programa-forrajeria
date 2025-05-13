@@ -11,17 +11,18 @@
 from numpy import (ndarray, array)
 
 from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QLineEdit, QCompleter, 
-                               QWidget, QGraphicsDropShadowEffect)
+                               QWidget, QGraphicsDropShadowEffect, QListWidgetItem)
 from PySide6.QtCore import (Signal, QSize, QRect, QPropertyAnimation, QEasingCurve, 
-                            QPoint, QItemSelection)
+                            QPoint, QSignalBlocker)
 from PySide6.QtGui import (QIcon, QShowEvent, QCursor, QKeyEvent, QColor, QCloseEvent, 
-                           QStandardItemModel, QStandardItem)
+                           QTextCursor, QMouseEvent)
 
 from ui.ui_productDialog import Ui_Dialog
 from ui.ui_saleDialog import Ui_saleDialog
 from ui.ui_listproduct import Ui_listProduct
 from ui.ui_debtorDataDialog import Ui_debtorDataDialog
 from ui.ui_debts_balanceProductsList import Ui_ProductsBalance
+from ui.ui_categoriesDescEditDialog import Ui_CategoryDescEditDialog
 
 from resources import (rc_icons)
 
@@ -36,13 +37,15 @@ from utils.enumclasses import (WidgetStyle, InventoryPriceType,
 from utils.model_classes import (ProductsBalanceModel)
 from utils.proxy_models import (ProductsBalanceProxyModel)
 from utils.productbalancedelegate import (ProductsBalanceDelegate)
-from utils.customvalidators import (SearchBarValidator, ProductReduceDebtValidator)
-from utils.eventfilters import (BackgroundEventFilter)
+from utils.customvalidators import (SearchBarValidator, ProductReduceDebtValidator, 
+                                    CategoryDescValidator)
+from utils.eventfilters import (BackgroundEventFilter, CategoryDescTextEditEventFilter)
 
 from sqlite3 import (Error as sqlite3Error)
 from phonenumbers import (parse, format_number, is_valid_number, 
                           PhoneNumber, PhoneNumberFormat, 
                           NumberParseException)
+from re import (sub)
 
 
 # PRODUCTOS ====================================================================================================
@@ -687,6 +690,262 @@ class ProductDialog(QDialog):
             }
         )
         return None
+
+
+# CATEGORÍAS ===================================================================================================
+
+
+class CategoryDescDialog(QDialog):
+    '''
+    **QDialog** que permite modificar la descripción de la categoría 
+    seleccionada desde MainWindow.
+    
+    Al cerrarse el dialog emite la señal *descriptionChanged* con la nueva 
+    descripción.
+    
+    Éste **QDialog** sólo admite la operación UPDATE para actualizar en base 
+    de datos la descripción de la categoría.
+    '''
+    descriptionChanged:Signal = Signal(str)
+    
+    def __init__(self, list_item:QListWidgetItem) -> None:
+        super(CategoryDescDialog, self).__init__()
+        self.categ_desc_dialog = Ui_CategoryDescEditDialog()
+        self.categ_desc_dialog.setupUi(self)
+        
+        self.__list_item:QListWidgetItem = list_item
+        
+        self.text_edit_event_filter = CategoryDescTextEditEventFilter(
+            self.categ_desc_dialog.te_category_desc
+        )
+        
+        self.MAX_TEXT_LENGTH:int = 256 # longitud máxima que quiero que tenga 
+            # el texto, así no ocupa tanto espacio en base de datos
+        
+        self.valid_category:bool = True
+        
+        self.setup_ui()
+        self.setup_editor()
+        self.setup_validators()
+        self.setup_signals()
+        return None
+    
+    
+    def setup_ui(self) -> None:
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
+        self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating, False)
+        
+        # configura los botones
+        self.categ_desc_dialog.buttonBox.button(
+            QDialogButtonBox.StandardButton.Save).setDefault(False)
+        
+        self.categ_desc_dialog.buttonBox.button(
+            QDialogButtonBox.StandardButton.Save).setEnabled(False)
+        self.categ_desc_dialog.buttonBox.button(
+            QDialogButtonBox.StandardButton.Discard).setEnabled(True)
+        
+        return None
+    
+    
+    def setup_editor(self) -> None:
+        self.categ_desc_dialog.te_category_desc.setText(
+            self.__list_item.toolTip() if self.__list_item.toolTip() else ""
+        )
+        
+        # instala filtro de eventos en el textedit
+        self.categ_desc_dialog.te_category_desc.installEventFilter(
+            self.text_edit_event_filter
+        )
+        
+        # coloca cantidad de caracteres en el label
+        _text = self.categ_desc_dialog.te_category_desc.document(
+            ).toPlainText()
+        self.categ_desc_dialog.label_show_character_count.setText(
+            self.categ_desc_dialog.label_show_character_count.text(
+                ).replace("x", f"{len(_text)}")
+        )
+        
+        self.categ_desc_dialog.te_category_desc.setAcceptRichText(False)
+        self.categ_desc_dialog.te_category_desc.setAcceptDrops(False)
+        self.categ_desc_dialog.te_category_desc.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        return None
+    
+    
+    def setup_validators(self) -> None:
+        self.categ_validator = CategoryDescValidator(
+            MAX_LENGTH=self.MAX_TEXT_LENGTH,
+            parent=self.categ_desc_dialog.te_category_desc
+        )
+        return None
+    
+    
+    def setup_signals(self) -> None:
+        # textedit
+        self.categ_desc_dialog.te_category_desc.textChanged.connect(self.onTextChanged)
+        
+        self.text_edit_event_filter.focusedOut.connect(
+            lambda: self.validateTextEdit(focus_out=True)
+        )
+        
+        # botones
+        self.categ_desc_dialog.buttonBox.button(
+            QDialogButtonBox.StandardButton.Discard
+        ).clicked.connect(self.close)
+        self.categ_desc_dialog.buttonBox.button(
+            QDialogButtonBox.StandardButton.Discard
+        ).clicked.connect(self.reject)
+        
+        self.categ_desc_dialog.buttonBox.button(
+            QDialogButtonBox.StandardButton.Save
+        ).clicked.connect(self.onSaveClicked)
+        return None
+    
+    
+    @Slot()
+    def onTextChanged(self) -> None:
+        '''
+        A medida que cambia el texto valida el contenido y actualiza el 
+        **QLabel** que muestra los caracteres.
+        '''
+        self.validateTextEdit()
+        self.__updateCharCountLabel( len(self.__getDocumentText()) )
+        return None
+    
+    
+    def __updateCharCountLabel(self, char_count:int) -> None:
+        '''
+        Actualiza el **QLabel** que muestra la cantidad de caracteres escritos 
+        por el usuario y el máximo permitido.
+        
+        Parámetros
+        ----------
+        char_count : int
+            cantidad de caracteres escritos por el usuario
+        '''
+        self.categ_desc_dialog.label_show_character_count.setText(
+            f"cantidad de caracteres: {char_count}/{self.MAX_TEXT_LENGTH}"
+        )
+        return None
+    
+    
+    @Slot(bool)
+    def validateTextEdit(self, focus_out:bool=False) -> None:
+        '''
+        Valida el contenido del **QTextEdit** y formatea el texto para ignorar 
+        caracteres no permitidos. Si el contenido es válido activa el botón 
+        *Guardar* del **QDialog** sino lo desactiva.
+        
+        Parámetros
+        ----------
+        focus_out : bool, opcional
+            flag que determina si el **QTextEdit** está fuera de foco, en ese 
+            caso si es válido asigna el estilo por defecto.
+        '''
+        text:str = self.__getDocumentText()
+        state, _, _ = self.categ_validator.validate(text, len(text))
+        style:WidgetStyle
+        
+        match state:
+            case QValidator.State.Acceptable:
+                self.valid_category = True
+                style = WidgetStyle.FIELD_VALID_VAL.value if not focus_out else ""
+                
+                self.categ_desc_dialog.te_category_desc.setStyleSheet(style)
+            
+            case QValidator.State.Invalid:
+                self.valid_category = False
+                style = WidgetStyle.FIELD_INVALID_VAL.value
+                
+                self.categ_desc_dialog.te_category_desc.setStyleSheet(
+                    style
+                )
+                
+                with QSignalBlocker(self.categ_desc_dialog.te_category_desc):
+                    self.categ_desc_dialog.te_category_desc.setPlainText(
+                        text[:-1] if len(text) <= self.MAX_TEXT_LENGTH else text[:self.MAX_TEXT_LENGTH]
+                    )
+                    self.categ_desc_dialog.te_category_desc.moveCursor(
+                        QTextCursor.MoveOperation.End, QTextCursor.MoveMode.MoveAnchor
+                    )
+        
+        self.__toggleSaveButton(field_valid=self.valid_category)
+        return None
+    
+    
+    def __getDocumentText(self) -> str:
+        '''
+        Obtiene el texto del documento del **QTextEdit** y lo devuelve como un 
+        *str*.
+
+        Retorna
+        -------
+        str
+            el texto del documento interno del editor
+        '''
+        return self.categ_desc_dialog.te_category_desc.document().toPlainText()
+
+
+    def __toggleSaveButton(self, field_valid:bool) -> None:
+        '''
+        Activa/desactiva el botón *Guardar* del **QDialog**.
+        
+        Parámetros
+        ----------
+        field_valid : bool, opcional
+            flag que determina si el campo es válido, si lo es activa el botón 
+            sino lo desactiva
+        '''
+        self.categ_desc_dialog.buttonBox.button(
+            QDialogButtonBox.StandardButton.Save).setEnabled(field_valid)
+        return None
+
+    
+    @Slot()
+    def onSaveClicked(self) -> None:
+        '''
+        Obtiene la nueva descripción de la categoría y actualiza la base de 
+        datos.
+        Emite la señal *descriptionChanged* hacia **MainWindow** con la nueva 
+        descripción.
+        '''
+        text:str = self.__getDocumentText()
+        
+        with DatabaseRepository() as db_repo:
+            db_repo.updateRegisters(
+                upd_sql= '''UPDATE Categorias 
+                            SET descripcion = ? 
+                            WHERE IDcategoria = (
+                                SELECT IDcategoria 
+                                FROM Categorias 
+                                WHERE nombre_categoria = ?);''',
+                upd_params=(text, self.__list_item.text(),)
+            )
+        
+        self.descriptionChanged.emit(text)
+        return None
+    
+    
+    # eventos
+    def keyPressEvent(self, event:QKeyEvent):
+        match event.key():
+            case Qt.Key.Key_Escape: # si se presiona "esc" se cierra 
+                self.close()        # el dialog y se rechaza el input
+                self.reject()
+            
+            case _:
+                return super(CategoryDescDialog, self).keyPressEvent(event)
+    
+    
+    def mousePressEvent(self, event:QMouseEvent):
+        '''
+        Sobreescribe el método *MousePressEvent* original.
+        Captura los *clicks* fuera del **QTextEdit** y le quita el foco.
+        '''
+        if not self.categ_desc_dialog.te_category_desc.geometry().contains(event.pos()):
+            self.categ_desc_dialog.te_category_desc.clearFocus()
+            self.setFocus(Qt.FocusReason.MouseFocusReason)
+        
+        return super().mousePressEvent(event)
 
 
 # TABLA VENTAS =================================================================================================

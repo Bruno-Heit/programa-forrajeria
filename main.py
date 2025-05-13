@@ -4,13 +4,13 @@ from typing import (Any, Iterable)
 
 from PySide6.QtWidgets import (QApplication, QMainWindow, QTableView, 
                                QCheckBox, QAbstractItemView, QListWidgetItem, 
-                               QLineEdit, QMenu)
+                               QLineEdit)
 from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot, QSize, QTranslator, 
                             QLibraryInfo)
 from PySide6.QtGui import (QIcon, QAction)
 
 from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemValues, 
-                           DebtorDataDialog, WidgetStyle, SaleFields, ProductsBalanceDialog)
+                           DebtorDataDialog, WidgetStyle, SaleFields, CategoryDescDialog)
 from ui.ui_mainwindow import (Ui_MainWindow)
 from utils.functionutils import *
 from utils.model_classes import (InventoryTableModel, SalesTableModel, DebtsTableModel)
@@ -33,8 +33,7 @@ from resources import (rc_icons)
 # TODO1: falta hacer DELETE a Deudas
 
 # TODO2: cuando se haga click derecho sobre un item de la lista de categorías que 
-# TODO2: se muestre un menú contextual y desde ahí poder modificar el nombre de la 
-# TODO2: categoría y su descripción.
+# TODO2: se muestre un menú contextual y poder modificar la descripción de una categoría.
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -325,7 +324,7 @@ class MainWindow(QMainWindow):
         
         # TODO: implementar menú contextual personalizado para cambiar nombre de categoría o su descripción
         self.category_list_event_filter.nameAboutToChange.connect(self.setEditableCategoryName)
-        self.category_list_event_filter.descAboutToChange.connect(self.setEditableCategoryDesc)
+        self.category_list_event_filter.descAboutToChange.connect(self.showCategoryEditDialog)
         return None
     
     
@@ -795,7 +794,7 @@ class MainWindow(QMainWindow):
         self.ui.tables_ListWidget.addItem(item)
         
         # crea editor y validador para poder ingresar el nombre de la categoría
-        editor:QLineEdit = self.__createCategoryEditor(item=item)
+        editor:QLineEdit = self.__createCategoryNameEditor(item=item)
         
         self.ui.tables_ListWidget.setItemWidget(item, editor)
         editor.setFocus()
@@ -807,7 +806,7 @@ class MainWindow(QMainWindow):
         return None
     
     
-    def __createCategoryEditor(self, item:QListWidgetItem, edit_mode:bool=False) -> QLineEdit:
+    def __createCategoryNameEditor(self, item:QListWidgetItem, edit_mode:bool=False) -> QLineEdit:
         '''
         Crea un editor con su validador y un filtro de eventos para editar los 
         items de *tables_listWidget* y lo retorna.
@@ -1050,7 +1049,7 @@ class MainWindow(QMainWindow):
             el item al cual hacer editable
         '''
         # crea editor
-        editor:QLineEdit = self.__createCategoryEditor(
+        editor:QLineEdit = self.__createCategoryNameEditor(
             item=item,
             edit_mode=True
         )
@@ -1107,9 +1106,36 @@ class MainWindow(QMainWindow):
     
     
     @Slot(QListWidgetItem)
-    def setEditableCategoryDesc(self, item:QListWidgetItem) -> None:
-        ...
-        # todo: mostrar un qdialog no modal con un textedit, poner el foco ahí y permitir al usuario cambiar la descripción de la categoría
+    def showCategoryEditDialog(self, item:QListWidgetItem) -> None:
+        '''
+        Crea y muestra un *QDialog* para editar la descripción de la categoría 
+        seleccionada.
+
+        Parámetros
+        ----------
+        item : QListWidgetItem
+            el item al cual referencia el *QDialog*
+        '''
+        # crea dialog
+        category_dialog = CategoryDescDialog(
+            list_item=item)
+        
+        category_dialog.categ_desc_dialog.te_category_desc.setFocus()
+        
+        category_dialog.descriptionChanged.connect(
+            lambda desc: item.setToolTip(
+                f''' <html>
+                        <head/>
+                        <body>
+                            <p>
+                                <span style=" font-size:12pt;">{desc}</span>
+                            </p>
+                        </body>
+                    </html>'''
+            )
+        )
+        
+        category_dialog.exec()
         return None
     
     

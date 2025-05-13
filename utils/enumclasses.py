@@ -421,7 +421,7 @@ class Regex(StrEnum):
     PERCENTAGE_CHANGE = "^([-+]?\d{0,4}((\.|,)\d{0,2})?)|(\d{1,8}((\.|,)\d{0,2})?)$"
     
     CATEGORY_NAME = "[^;\"']{1,41}"
-    CATEGORY_DESC = "[^;\"']{0,256}"
+    CATEGORY_DESC = "[^\"'\{\}\[\]]{0,256}"
     
     SALES_DETAILS_PRICE_TYPE = "(\([\s]*P[\s]*\.[\s]*PÚBLICO[\s]*\)|\([\s]*P[\s]*\.[\s]*COMERCIAL[\s]*\))$"
     SALES_DETAILS_FULL = "[0-9]{1,8}(\.|,)?[0-9]{0,2}\sde .{1,}\s(\([\s]*P[\s]*\.[\s]*PÚBLICO[\s]*\)|\([\s]*P[\s]*\.[\s]*COMERCIAL[\s]*\))$"

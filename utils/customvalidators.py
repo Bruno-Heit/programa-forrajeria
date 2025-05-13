@@ -215,6 +215,8 @@ class PercentageValidator(QRegularExpressionValidator):
 
 
 
+
+
 #¡ tabla CATEGORÍAS ==============================================================================
 class CategoryNameValidator(QRegularExpressionValidator):
     '''Validador para los campos donde el usuario pueda modificar el nombre de 
@@ -306,6 +308,29 @@ class CategoryNameValidator(QRegularExpressionValidator):
         else:
             self.validationSucceeded.emit()
             return QValidator.State.Acceptable, text, pos
+
+
+
+
+
+class CategoryDescValidator(QRegularExpressionValidator):
+    '''Validador para los campos donde el usuario pueda modificar la 
+    descripción de una categoría.'''
+    def __init__(self, MAX_LENGTH:int, parent:QWidget=None):
+        super(CategoryDescValidator, self).__init__()
+        self.pattern:Pattern = compile(Regex.CATEGORY_DESC.value, flags=IGNORECASE)
+        self._MAX_LENGTH:int = MAX_LENGTH
+    
+    
+    def validate(self, text: str, pos: int) -> object:
+        if len(text) > self._MAX_LENGTH:
+            return QRegularExpressionValidator.State.Invalid, text, pos
+        
+        if not fullmatch(self.pattern, text):
+            return QRegularExpressionValidator.State.Invalid, text, pos
+        
+        else:
+            return QRegularExpressionValidator.State.Acceptable, text, pos
 
 
 

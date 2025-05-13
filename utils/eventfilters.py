@@ -4,7 +4,7 @@
 '''
 
 from PySide6.QtWidgets import (QTableView, QListWidget, QListWidgetItem, 
-                               QLineEdit, QMenu)
+                               QLineEdit, QMenu, QTextEdit)
 from PySide6.QtCore import (QObject, QEvent, Qt, QSize, Signal, Slot)
 from PySide6.QtGui import (QPainter, QPixmap, QAction)
 
@@ -217,6 +217,25 @@ class CategoryListEventFilter(QObject):
             
             menu.exec(event.globalPos())
             
+        return super().eventFilter(watched, event)
+
+
+
+
+
+class CategoryDescTextEditEventFilter(QObject):
+    '''
+    Filtro de eventos usado para capturar los cambios de foco en el 
+    **QTextEdit** del **QDialog** que permite al usuario cambiar la 
+    descripción de la categoría.
+    Al salir del foco emite la señal *focusedOut*.
+    '''
+    focusedOut:Signal = Signal()
+    
+    def eventFilter(self, watched:QTextEdit, event:QEvent):
+        if event.type() == QEvent.Type.FocusOut:
+            self.focusedOut.emit()
+        
         return super().eventFilter(watched, event)
 
 
