@@ -4,14 +4,15 @@ from typing import (Any, Iterable)
 
 from PySide6.QtWidgets import (QApplication, QMainWindow, QTableView, 
                                QCheckBox, QAbstractItemView, QListWidgetItem, 
-                               QLineEdit)
+                               QLineEdit, QDateTimeEdit)
 from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot, QSize, QTranslator, 
-                            QLibraryInfo)
-from PySide6.QtGui import (QIcon, QAction)
+                            QLibraryInfo, QSignalBlocker)
+from PySide6.QtGui import (QIcon)
 
 from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemValues, 
                            DebtorDataDialog, WidgetStyle, SaleFields, CategoryDescDialog)
 from ui.ui_mainwindow import (Ui_MainWindow)
+from ui.customCalendars import (CustomCalendar)
 from utils.functionutils import *
 from utils.model_classes import (InventoryTableModel, SalesTableModel, DebtsTableModel)
 from utils.delegates import (InventoryDelegate, SalesDelegate, DebtsDelegate)
@@ -28,12 +29,11 @@ from utils.eventfilters import (BackgroundEventFilter, CategoryItemEventFilter,
 
 from resources import (rc_icons)
 
-# TODO: falta implementar LAZY-LOADING
+# TODO: falta implementar timeedits en ventas para mostrar un rango de resultados (no voy a hacer Lazy-loading, afecta negativamente al filtrado con proxy models)
+# TODO: falta conectar señales de timeedits, y corregir las consultas SELECT para mostrar ventas entre esas fechas,
+# TODO: además tengo que cambiar el search-bar de ventas para que busque en base de datos directamente, sin usar el filtrado del proxy model
 
 # TODO1: falta hacer DELETE a Deudas
-
-# TODO2: cuando se haga click derecho sobre un item de la lista de categorías que 
-# TODO2: se muestre un menú contextual y poder modificar la descripción de una categoría.
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -99,8 +99,25 @@ class MainWindow(QMainWindow):
         # en el formulario de Ventas coloca el tiempo en que se inició el programa
         self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
         
-        # en el dateedit coloca la fecha de hoy
-        self.ui.dateEdit_show_collected_by_day.setDate(QDate.currentDate())
+        # TODO: cuando se modifique la fecha en el "dateedit_from_date" se tiene que modificar el mínimo de "dateedit_to_date", y 
+        # todo: si se modifica en "dateedit_to_date" se tiene que actualizar el máximo en "dateedit_from_date".
+        # TODO2: a todos los datetimeedit y dateedit que muestren calendario ponerles el calendario personalizado que creé.
+        # en los dateedit coloca la fecha de hoy
+        _today:QDate = QDate.currentDate()
+        
+        self.__setInitDateWidgets(
+            widget=self.ui.dateEdit_from_date,
+            date= _today.addDays( - (_today.dayOfWeek() - 1) )
+        )
+        self.__setInitDateWidgets(
+            widget=self.ui.dateEdit_to_date,
+            date=_today
+        )
+        self.__setInitDateWidgets(
+            widget=self.ui.dateEdit_show_collected_by_day,
+            date=_today
+        )
+            
         return None    
 
 
@@ -322,7 +339,6 @@ class MainWindow(QMainWindow):
             )
         )
         
-        # TODO: implementar menú contextual personalizado para cambiar nombre de categoría o su descripción
         self.category_list_event_filter.nameAboutToChange.connect(self.setEditableCategoryName)
         self.category_list_event_filter.descAboutToChange.connect(self.showCategoryEditDialog)
         return None
@@ -579,9 +595,29 @@ class MainWindow(QMainWindow):
         self.ui.cb_sales_colsFilter.setStyleSheet(WidgetStyle.DEF_COMBOBOX_FILTER_ICON.value)
         self.ui.cb_debts_colsFilter.setStyleSheet(WidgetStyle.DEF_COMBOBOX_FILTER_ICON.value)
         
-        # dateedit para mostrar lo recaudado por fecha
+        # dateedits
+        self.ui.dateEdit_from_date.setStyleSheet(WidgetStyle.DEF_DATEEDIT_ARROW_ICON.value)
+        self.ui.dateEdit_to_date.setStyleSheet(WidgetStyle.DEF_DATEEDIT_ARROW_ICON.value)
         self.ui.dateEdit_show_collected_by_day.setStyleSheet(WidgetStyle.DEF_DATEEDIT_ARROW_ICON.value)
         
+        return None
+    
+
+    def __setInitDateWidgets(self, widget:type[QDateTimeEdit], date:QDate) -> None:
+        '''
+        Reemplaza el calendario interactivo del *widget* por uno personalizado 
+        y le coloca la fecha especificada.
+        
+        Parámetros
+        ----------
+        widget : type[QDateTimeEdit]
+            subclase de **QDateTimeEdit** que configurar
+        date : QDate
+            la fecha que colocarle al *widget*
+        '''
+        with QSignalBlocker(widget):
+            widget.setCalendarWidget(CustomCalendar(widget))
+            widget.setDate(date)
         return None
 
 

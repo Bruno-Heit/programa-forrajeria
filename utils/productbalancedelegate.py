@@ -15,6 +15,7 @@ from PySide6.QtCore import (Qt, QModelIndex, QSize, QPersistentModelIndex,
 from utils.enumclasses import (LabelFeedbackStyle, TableViewColumns, Regex, 
                                DateAndTimeFormat)
 from utils.customvalidators import (ProductBalanceValidator, SaleDetailsValidator)
+from ui.customCalendars import (CustomCalendar)
 
 from re import (compile, IGNORECASE, search, sub)
 
@@ -32,6 +33,9 @@ class ProductsBalanceDelegate(QStyledItemDelegate):
                 editor = QDateTimeEdit(parent)
                 editor.setDisplayFormat(DateAndTimeFormat.DATETIME_FORMAT.value)
                 editor.setCalendarPopup(True)
+                editor.setCalendarWidget(
+                    CustomCalendar(editor)
+                )
             
             case TableViewColumns.PRODS_BAL_DESCRIPTION.value:
                 editor = QLineEdit(parent)

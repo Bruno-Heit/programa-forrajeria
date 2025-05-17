@@ -28,7 +28,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(800, 615)
+        MainWindow.resize(1160, 605)
         MainWindow.setMinimumSize(QSize(750, 500))
 #if QT_CONFIG(tooltip)
         MainWindow.setToolTip(u"")
@@ -619,7 +619,7 @@ class Ui_MainWindow(object):
         self.inventory_display.setFrameShape(QFrame.Shape.StyledPanel)
         self.inventory_display.setFrameShadow(QFrame.Shadow.Raised)
         self.inventory_display_Vlayout = QVBoxLayout(self.inventory_display)
-        self.inventory_display_Vlayout.setSpacing(4)
+        self.inventory_display_Vlayout.setSpacing(6)
         self.inventory_display_Vlayout.setObjectName(u"inventory_display_Vlayout")
         self.inventory_display_Vlayout.setContentsMargins(0, 6, 10, 0)
         self.inventory_header = QFrame(self.inventory_display)
@@ -1050,7 +1050,7 @@ class Ui_MainWindow(object):
         self.tab2_toolBox.setObjectName(u"tab2_toolBox")
         self.box1_sales_form = QWidget()
         self.box1_sales_form.setObjectName(u"box1_sales_form")
-        self.box1_sales_form.setGeometry(QRect(0, 0, 756, 517))
+        self.box1_sales_form.setGeometry(QRect(0, 0, 1116, 507))
         self.box1_sales_form.setStyleSheet(u"#box1_sales_form {\n"
 "	background-color: #e0e1dd;\n"
 "}\n"
@@ -1111,7 +1111,7 @@ class Ui_MainWindow(object):
         self.frame_list.setFrameShape(QFrame.Shape.StyledPanel)
         self.frame_list.setFrameShadow(QFrame.Shadow.Raised)
         self.box1_frame_list_Vlayout = QVBoxLayout(self.frame_list)
-        self.box1_frame_list_Vlayout.setSpacing(4)
+        self.box1_frame_list_Vlayout.setSpacing(6)
         self.box1_frame_list_Vlayout.setObjectName(u"box1_frame_list_Vlayout")
         self.box1_frame_list_Vlayout.setContentsMargins(0, 0, 0, 0)
         self.add_products = QFrame(self.frame_list)
@@ -1282,7 +1282,7 @@ class Ui_MainWindow(object):
         self.tab2_toolBox.addItem(self.box1_sales_form, u"Formulario de venta")
         self.box2_sales_table = QWidget()
         self.box2_sales_table.setObjectName(u"box2_sales_table")
-        self.box2_sales_table.setGeometry(QRect(0, 0, 535, 224))
+        self.box2_sales_table.setGeometry(QRect(0, 0, 1116, 507))
         self.box2_sales_table.setStyleSheet(u"#box2_sales_table {\n"
 "	background-color: #e0e1dd;\n"
 "}\n"
@@ -1294,7 +1294,7 @@ class Ui_MainWindow(object):
 "	border-radius: 10px;\n"
 "}")
         self.box2_sales_Vlayout = QVBoxLayout(self.box2_sales_table)
-        self.box2_sales_Vlayout.setSpacing(4)
+        self.box2_sales_Vlayout.setSpacing(6)
         self.box2_sales_Vlayout.setObjectName(u"box2_sales_Vlayout")
         self.box2_sales_Vlayout.setContentsMargins(0, 6, 10, 0)
         self.sales_table_header = QFrame(self.box2_sales_table)
@@ -1325,7 +1325,7 @@ class Ui_MainWindow(object):
         self.sales_searchBar.setCursorMoveStyle(Qt.CursorMoveStyle.LogicalMoveStyle)
         self.sales_searchBar.setClearButtonEnabled(True)
 
-        self.horizontalLayout_2.addWidget(self.sales_searchBar)
+        self.horizontalLayout_2.addWidget(self.sales_searchBar, 0, Qt.AlignmentFlag.AlignVCenter)
 
         self.cb_sales_colsFilter = QComboBox(self.sales_table_header)
         self.cb_sales_colsFilter.addItem("")
@@ -1348,7 +1348,65 @@ class Ui_MainWindow(object):
         self.cb_sales_colsFilter.setIconSize(QSize(24, 24))
         self.cb_sales_colsFilter.setFrame(False)
 
-        self.horizontalLayout_2.addWidget(self.cb_sales_colsFilter, 0, Qt.AlignmentFlag.AlignLeft)
+        self.horizontalLayout_2.addWidget(self.cb_sales_colsFilter, 0, Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
+
+        self.date_range_picker = QFrame(self.sales_table_header)
+        self.date_range_picker.setObjectName(u"date_range_picker")
+        sizePolicy4.setHeightForWidth(self.date_range_picker.sizePolicy().hasHeightForWidth())
+        self.date_range_picker.setSizePolicy(sizePolicy4)
+        self.date_range_picker.setMinimumSize(QSize(0, 0))
+        self.date_range_picker.setFrameShape(QFrame.Shape.NoFrame)
+        self.date_range_picker.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_3 = QHBoxLayout(self.date_range_picker)
+        self.horizontalLayout_3.setSpacing(5)
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.horizontalLayout_3.setContentsMargins(15, 0, 0, 0)
+        self.label_from_date = QLabel(self.date_range_picker)
+        self.label_from_date.setObjectName(u"label_from_date")
+        sizePolicy4.setHeightForWidth(self.label_from_date.sizePolicy().hasHeightForWidth())
+        self.label_from_date.setSizePolicy(sizePolicy4)
+        self.label_from_date.setMinimumSize(QSize(75, 0))
+
+        self.horizontalLayout_3.addWidget(self.label_from_date, 0, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter)
+
+        self.dateEdit_from_date = QDateEdit(self.date_range_picker)
+        self.dateEdit_from_date.setObjectName(u"dateEdit_from_date")
+        sizePolicy4.setHeightForWidth(self.dateEdit_from_date.sizePolicy().hasHeightForWidth())
+        self.dateEdit_from_date.setSizePolicy(sizePolicy4)
+        self.dateEdit_from_date.setMinimumSize(QSize(130, 0))
+        self.dateEdit_from_date.setMaximumSize(QSize(16777215, 16777215))
+        self.dateEdit_from_date.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
+        self.dateEdit_from_date.setAccelerated(True)
+        self.dateEdit_from_date.setKeyboardTracking(True)
+        self.dateEdit_from_date.setProperty("showGroupSeparator", False)
+        self.dateEdit_from_date.setCalendarPopup(True)
+
+        self.horizontalLayout_3.addWidget(self.dateEdit_from_date, 0, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter)
+
+        self.label_to_date = QLabel(self.date_range_picker)
+        self.label_to_date.setObjectName(u"label_to_date")
+        sizePolicy4.setHeightForWidth(self.label_to_date.sizePolicy().hasHeightForWidth())
+        self.label_to_date.setSizePolicy(sizePolicy4)
+        self.label_to_date.setMinimumSize(QSize(75, 0))
+
+        self.horizontalLayout_3.addWidget(self.label_to_date, 0, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter)
+
+        self.dateEdit_to_date = QDateEdit(self.date_range_picker)
+        self.dateEdit_to_date.setObjectName(u"dateEdit_to_date")
+        sizePolicy4.setHeightForWidth(self.dateEdit_to_date.sizePolicy().hasHeightForWidth())
+        self.dateEdit_to_date.setSizePolicy(sizePolicy4)
+        self.dateEdit_to_date.setMinimumSize(QSize(130, 0))
+        self.dateEdit_to_date.setMaximumSize(QSize(16777215, 16777215))
+        self.dateEdit_to_date.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
+        self.dateEdit_to_date.setAccelerated(True)
+        self.dateEdit_to_date.setKeyboardTracking(True)
+        self.dateEdit_to_date.setProperty("showGroupSeparator", False)
+        self.dateEdit_to_date.setCalendarPopup(True)
+
+        self.horizontalLayout_3.addWidget(self.dateEdit_to_date, 0, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter)
+
+
+        self.horizontalLayout_2.addWidget(self.date_range_picker, 0, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter)
 
 
         self.box2_sales_Vlayout.addWidget(self.sales_table_header)
@@ -1510,7 +1568,7 @@ class Ui_MainWindow(object):
         self.debts_info.setFrameShape(QFrame.Shape.StyledPanel)
         self.debts_info.setFrameShadow(QFrame.Shadow.Raised)
         self.debts_info_Vlayout = QVBoxLayout(self.debts_info)
-        self.debts_info_Vlayout.setSpacing(4)
+        self.debts_info_Vlayout.setSpacing(6)
         self.debts_info_Vlayout.setObjectName(u"debts_info_Vlayout")
         self.debts_info_Vlayout.setContentsMargins(0, 8, 0, 0)
         self.debts_header = QFrame(self.debts_info)
@@ -1743,7 +1801,24 @@ class Ui_MainWindow(object):
         self.cb_sales_colsFilter.setItemText(5, QCoreApplication.translate("MainWindow", u"Abonado", None))
         self.cb_sales_colsFilter.setItemText(6, QCoreApplication.translate("MainWindow", u"Fecha y hora", None))
 
+#if QT_CONFIG(tooltip)
+        self.date_range_picker.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:12pt;\">Muestra las ventas en un rango de fechas espec\u00edfico</span></p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.label_from_date.setText(QCoreApplication.translate("MainWindow", u"Desde:", None))
+#if QT_CONFIG(tooltip)
+        self.dateEdit_from_date.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:12pt;\">Fecha inicial desde la que mostrar ventas</span></p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.label_to_date.setText(QCoreApplication.translate("MainWindow", u"Hasta:", None))
+#if QT_CONFIG(tooltip)
+        self.dateEdit_to_date.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:12pt;\">Fecha final hasta la que mostrar ventas</span></p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+#if QT_CONFIG(tooltip)
+        self.sales_table_footer.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:12pt;\">Muestra lo recaudado en una fecha espec\u00edfica</span></p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
         self.label_collected_by_day.setText(QCoreApplication.translate("MainWindow", u"Recaudado en la fecha:", None))
+#if QT_CONFIG(tooltip)
+        self.label_show_collected_by_day.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:12pt;\">El total recaudado del d\u00eda especificado</span></p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
         self.label_show_collected_by_day.setText(QCoreApplication.translate("MainWindow", u"TOTAL DE LA FECHA", None))
         self.btn_delete_product_sales.setText(QCoreApplication.translate("MainWindow", u"Eliminar venta", None))
         self.tab2_toolBox.setItemText(self.tab2_toolBox.indexOf(self.box2_sales_table), QCoreApplication.translate("MainWindow", u"Tabla de ventas", None))

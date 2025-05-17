@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>615</height>
+    <width>1160</width>
+    <height>605</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -807,7 +807,7 @@ QProgressBar::chunk {
                 </property>
                 <layout class="QVBoxLayout" name="inventory_display_Vlayout">
                  <property name="spacing">
-                  <number>4</number>
+                  <number>6</number>
                  </property>
                  <property name="leftMargin">
                   <number>0</number>
@@ -1632,8 +1632,8 @@ QDateEdit::drop-down {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>756</width>
-                <height>517</height>
+                <width>1116</width>
+                <height>507</height>
                </rect>
               </property>
               <property name="styleSheet">
@@ -1734,7 +1734,7 @@ QListWidget::item:selected {
                     </property>
                     <layout class="QVBoxLayout" name="box1_frame_list_Vlayout" stretch="0,10">
                      <property name="spacing">
-                      <number>4</number>
+                      <number>6</number>
                      </property>
                      <property name="leftMargin">
                       <number>0</number>
@@ -2090,8 +2090,8 @@ border-right: 1px solid #111;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>535</width>
-                <height>224</height>
+                <width>1116</width>
+                <height>507</height>
                </rect>
               </property>
               <property name="styleSheet">
@@ -2111,7 +2111,7 @@ border-right: 1px solid #111;</string>
               </attribute>
               <layout class="QVBoxLayout" name="box2_sales_Vlayout" stretch="0,0,0,0,0,0">
                <property name="spacing">
-                <number>4</number>
+                <number>6</number>
                </property>
                <property name="leftMargin">
                 <number>0</number>
@@ -2139,7 +2139,7 @@ border-right: 1px solid #111;</string>
                  <property name="frameShadow">
                   <enum>QFrame::Shadow::Raised</enum>
                  </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0">
+                 <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0">
                   <property name="spacing">
                    <number>7</number>
                   </property>
@@ -2155,7 +2155,7 @@ border-right: 1px solid #111;</string>
                   <property name="bottomMargin">
                    <number>20</number>
                   </property>
-                  <item>
+                  <item alignment="Qt::AlignmentFlag::AlignVCenter">
                    <widget class="QLineEdit" name="sales_searchBar">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -2204,7 +2204,7 @@ border-right: 1px solid #111;</string>
                     </property>
                    </widget>
                   </item>
-                  <item alignment="Qt::AlignmentFlag::AlignLeft">
+                  <item alignment="Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter">
                    <widget class="QComboBox" name="cb_sales_colsFilter">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -2277,6 +2277,166 @@ border-right: 1px solid #111;</string>
                       <string>Fecha y hora</string>
                      </property>
                     </item>
+                   </widget>
+                  </item>
+                  <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignVCenter">
+                   <widget class="QFrame" name="date_range_picker">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Muestra las ventas en un rango de fechas específico&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="frameShape">
+                     <enum>QFrame::Shape::NoFrame</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Shadow::Raised</enum>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_3">
+                     <property name="spacing">
+                      <number>5</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>15</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignVCenter">
+                      <widget class="QLabel" name="label_from_date">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>75</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>Desde:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignVCenter">
+                      <widget class="QDateEdit" name="dateEdit_from_date">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>130</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>16777215</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Fecha inicial desde la que mostrar ventas&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="buttonSymbols">
+                        <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+                       </property>
+                       <property name="accelerated">
+                        <bool>true</bool>
+                       </property>
+                       <property name="keyboardTracking">
+                        <bool>true</bool>
+                       </property>
+                       <property name="showGroupSeparator" stdset="0">
+                        <bool>false</bool>
+                       </property>
+                       <property name="calendarPopup">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignVCenter">
+                      <widget class="QLabel" name="label_to_date">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>75</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>Hasta:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignVCenter">
+                      <widget class="QDateEdit" name="dateEdit_to_date">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>130</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>16777215</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Fecha final hasta la que mostrar ventas&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="buttonSymbols">
+                        <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+                       </property>
+                       <property name="accelerated">
+                        <bool>true</bool>
+                       </property>
+                       <property name="keyboardTracking">
+                        <bool>true</bool>
+                       </property>
+                       <property name="showGroupSeparator" stdset="0">
+                        <bool>false</bool>
+                       </property>
+                       <property name="calendarPopup">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
                    </widget>
                   </item>
                  </layout>
@@ -2364,6 +2524,9 @@ border-right: 1px solid #111;</string>
                </item>
                <item>
                 <widget class="QFrame" name="sales_table_footer">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Muestra lo recaudado en una fecha específica&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
                  <property name="frameShape">
                   <enum>QFrame::Shape::NoFrame</enum>
                  </property>
@@ -2417,6 +2580,9 @@ border-right: 1px solid #111;</string>
                   </item>
                   <item>
                    <widget class="QLabel" name="label_show_collected_by_day">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;El total recaudado del día especificado&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
                     <property name="styleSheet">
                      <string notr="true">font-weight: 500;
 background-color: #bbb;
@@ -2604,7 +2770,7 @@ border-right: 1px solid #111;</string>
              </property>
              <layout class="QVBoxLayout" name="debts_info_Vlayout" stretch="0,0,0,0,0">
               <property name="spacing">
-               <number>4</number>
+               <number>6</number>
               </property>
               <property name="leftMargin">
                <number>0</number>

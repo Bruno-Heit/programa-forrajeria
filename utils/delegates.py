@@ -18,6 +18,7 @@ from utils.customvalidators import (ProductNameValidator, ProductStockValidator,
                                     DebtorDirectionValidator, DebtorPostalCodeValidator)
 from utils.classes import (ProductsBalanceDialog)
 from utils.proxy_models import (DebtsProxyModel)
+from ui.customCalendars import (CustomCalendar)
 
 from re import (compile, IGNORECASE, search, sub)
 
@@ -235,6 +236,9 @@ class SalesDelegate(QStyledItemDelegate):
                 editor = QDateTimeEdit(parent)
                 editor.setDisplayFormat(self._datetime_format)
                 editor.setCalendarPopup(True)
+                editor.setCalendarWidget(
+                    CustomCalendar(editor)
+                )
         return editor
     
     

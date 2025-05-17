@@ -29,8 +29,9 @@
         <!-- #### (MainWindow) ####   ícono para agregar deudor -->
         <file alias="add-debtor.svg">../icons/addDebtor.svg</file>
 
-        <!-- #### (uso general) ####   flecha hacia abajo para comboboxes -->
+        <!-- #### (uso general) ####   flechas para comboboxes -->
         <file alias="chevron-down.svg">../icons/chevronDown.svg</file>
+        <file alias="chevron-up.svg">../icons/chevronUp.svg</file>
 
         <!-- #### (Dialogs) ####   ícono para cancelar una operación -->
         <file alias="cancel.svg">../icons/xCircle.svg</file>
