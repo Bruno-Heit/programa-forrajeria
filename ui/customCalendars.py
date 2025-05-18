@@ -8,9 +8,9 @@
     de este archivo.
 '''
 
-from PySide6.QtWidgets import (QCalendarWidget, QSpinBox, QToolButton)
+from PySide6.QtWidgets import (QCalendarWidget)
 from PySide6.QtCore import (Qt, QObject, QRect, QDate)
-from PySide6.QtGui import (QPainter, QColor, QTextCharFormat)
+from PySide6.QtGui import (QPainter, QColor, QTextCharFormat, QBrush)
 
 from resources import (rc_icons)
 
@@ -127,27 +127,69 @@ class CustomCalendar(QCalendarWidget):
         return None
     
     
+    def dateIsValid(self, date:QDate) -> bool:
+        '''
+        Determina si la fecha está dentro del rango permitido.
+
+        Parámetros
+        ----------
+        date : QDate
+            la fecha actual
+
+        Retorna
+        -------
+        bool
+            flag que determina la validez de la fecha
+        '''
+        return self.minimumDate() <= date <= self.maximumDate()
+    
+    
     def paintCell(self, painter:QPainter, rect:QRect, date:QDate):
-        match date.dayOfWeek():
-            case 7: # domingo
-                painter.save()
-                painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
-                painter.setRenderHint(QPainter.RenderHint.TextAntialiasing, True)
-                
-                # pinta el background
-                painter.setBrush(QColor(224, 225, 221))
-                painter.setPen(Qt.PenStyle.NoPen) # sin borde
-                painter.drawRect(rect)
-                
-                # pinta el texto
-                painter.setPen(QColor(246, 87, 85))
-                painter.drawText(
-                    rect,
-                    Qt.TextFlag.TextSingleLine | Qt.AlignmentFlag.AlignCenter,
-                    f"{date.day()}"
-                )
-                
-                painter.restore()
+        _text_color:QColor = QColor(246, 87, 85)
         
-            case _:
-                return super().paintCell(painter, rect, date)
+        if not self.dateIsValid(date):
+            painter.save()
+            
+            # pinta el background
+            painter.fillRect(rect, QBrush(QColor(200, 200, 200)))
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.drawRect(rect)
+            
+            # pinta el texto
+            painter.setPen(_text_color)
+            painter.drawText(
+                rect,
+                Qt.TextFlag.TextSingleLine | Qt.AlignmentFlag.AlignCenter,
+                f"{date.day()}"
+            )
+            
+            painter.restore()
+        
+        else:
+            match date.dayOfWeek():
+                case 7: # domingo
+                    painter.save()
+                    painter.setRenderHint(
+                        QPainter.RenderHint.Antialiasing, True
+                    )
+                    painter.setRenderHint(
+                        QPainter.RenderHint.TextAntialiasing, True
+                    )
+                    
+                    # pinta el background
+                    painter.setBrush(QColor(224, 225, 221))
+                    painter.setPen(Qt.PenStyle.NoPen) # sin borde
+                    painter.drawRect(rect)
+                    
+                    # pinta el texto
+                    painter.setPen(_text_color)
+                    painter.drawText(
+                        rect,
+                        Qt.TextFlag.TextSingleLine | Qt.AlignmentFlag.AlignCenter,
+                        f"{date.day()}"
+                    )
+                    
+                    painter.restore()
+            
+                case _:
+                    return super().paintCell(painter, rect, date)
