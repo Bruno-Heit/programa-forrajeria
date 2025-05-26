@@ -10,8 +10,11 @@ from PySide6.QtCore import (QAbstractTableModel, Qt, QModelIndex, QPersistentMod
 from PySide6.QtGui import (QBrush, QColor)
 
 from utils.enumclasses import (TableBgColors, TableFontColor, ModelDataCols, 
-                               TableViewColumns)
+                               TableViewColumns, DateAndTimeFormat)
 from utils.dboperations import (DatabaseRepository)
+from utils.functionutils import (ISO8601_to_local)
+
+from datetime import datetime
 
 
 #¡ == MODELO DE PRODUCTOS =========================================================================
@@ -349,9 +352,10 @@ class InventoryTableModel(QAbstractTableModel):
 
 class SalesTableModel(QAbstractTableModel):
     '''
-    Clase MODELO que contiene los datos de las ventas para la VISTA 'tv_sales_data'.
+    Clase MODELO que contiene los datos de las ventas para la VISTA 
+    *tv_sales_data*.
     Esta clase no maneja operaciones a bases de datos.
-    Los datos son guardados en la variable 'self._data'.
+    Las fechas y horas son guardadas como objetos *datetime* en formato local.
     
     ### datos en self._data:
         (posición ┇ dato de base de datos)
@@ -365,12 +369,15 @@ class SalesTableModel(QAbstractTableModel):
         7 ┇ v.fecha_hora
     
     ### columnas:
-        0 detalle de venta
-        1: cantidad (+ unidad de medida)
-        2: producto
-        3: costo total
-        4: abonado
-        5: fecha y hora
+        0: *detalle de venta*
+        1: *cantidad (+ unidad de medida)*
+        2: *producto*
+        3: *costo total*
+        4: *abonado*
+        5: *fecha y hora (formato local)*
+    
+    **NOTA**: el método *data* intenta devolver la fecha formateada al formato 
+    local.
     '''
     # señal para actualizar datos en MainWindow
     dataToUpdate:Signal = Signal(object) # emite dict[columna, IDdetalle_venta, nuevo valor], 
@@ -440,10 +447,10 @@ class SalesTableModel(QAbstractTableModel):
             match index.column():
                 case 0: # detalle de venta
                     #? no modifica el modelo si el nuevo dato es igual al anterior
-                    if str(value) == str(self._data[index.row()][index.column() + 1]):
+                    if str(value) == str(self._data[index.row()][ModelDataCols.SALES_DETAIL.value]):
                         return False
                     
-                    self._data[index.row()][index.column() + 1] = value
+                    self._data[index.row()][ModelDataCols.SALES_DETAIL.value] = value
                     
                     # actualiza detalles de venta en MainWindow
                     self.dataToUpdate.emit(
@@ -457,10 +464,10 @@ class SalesTableModel(QAbstractTableModel):
         
                 case 1: # cantidad
                     value = str(value).replace(",", ".").strip()
-                    if value == str(self._data[index.row()][index.column() + 1]):
+                    if value == str(self._data[index.row()][ModelDataCols.SALES_QUANTITY.value]):
                         return False
                     
-                    self._data[index.row()][index.column() + 1] = float(value)
+                    self._data[index.row()][ModelDataCols.SALES_QUANTITY.value] = float(value)
                     
                     # actualiza cantidad en MainWindow
                     self.dataToUpdate.emit(
@@ -473,10 +480,10 @@ class SalesTableModel(QAbstractTableModel):
                     return True
                     
                 case 2: # producto
-                    if value == str(self._data[index.row()][index.column() + 2]):
+                    if value == str(self._data[index.row()][ModelDataCols.SALES_PRODUCT_NAME.value]):
                         return False
                     
-                    self._data[index.row()][index.column() + 2] = value
+                    self._data[index.row()][ModelDataCols.SALES_PRODUCT_NAME.value] = value
 
                     # actualiza producto en MainWindow
                     self.dataToUpdate.emit(
@@ -491,12 +498,29 @@ class SalesTableModel(QAbstractTableModel):
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
                     return True
                 
-                case 3 | 4: # costo total | abonado
+                case 3: # costo total
                     value = str(value).replace(",", ".")
-                    if str(value) == str(self._data[index.row()][index.column() + 2]):
+                    if str(value) == str(self._data[index.row()][ModelDataCols.SALES_TOTAL_COST.value]):
                         return False
                     
-                    self._data[index.row()][index.column() + 2] = value
+                    self._data[index.row()][ModelDataCols.SALES_TOTAL_COST.value] = value
+                    
+                    # actualiza costo total | abonado en MainWindow
+                    self.dataToUpdate.emit(
+                        {'column': index.column(),
+                         'IDsales_detail': self._data[index.row()][0],
+                         'new_value': value}
+                        )
+                    
+                    self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
+                    return True
+                
+                case 4: # abonado
+                    value = str(value).replace(",", ".")
+                    if str(value) == str(self._data[index.row()][ModelDataCols.SALES_TOTAL_PAID.value]):
+                        return False
+                    
+                    self._data[index.row()][ModelDataCols.SALES_TOTAL_PAID.value] = value
                     
                     # actualiza costo total | abonado en MainWindow
                     self.dataToUpdate.emit(
@@ -509,10 +533,17 @@ class SalesTableModel(QAbstractTableModel):
                     return True
                 
                 case 5: # fecha y hora
-                    if str(value) == str(self._data[index.row()][index.column() + 2]):
+                    if value == self._data[index.row()][ModelDataCols.SALES_DATETIME.value]:
                         return False
                     
-                    self._data[index.row()][index.column() + 2] = value
+                    # intenta convertir la fecha y hora de la vista al 'datetime'
+                    try:
+                        value:datetime = datetime.strptime(value, DateAndTimeFormat.DIR_LOCAL_DATETIME_FORMAT.value)
+                        value = value.strftime(DateAndTimeFormat.DIR_LOCAL_DATETIME_FORMAT.value).replace("-", "/")
+                        self._data[index.row()][ModelDataCols.SALES_DATETIME.value] = value
+                    
+                    except ValueError as err:
+                        return False
                     
                     # actualiza fecha y hora en MainWindow
                     self.dataToUpdate.emit(
@@ -537,22 +568,28 @@ class SalesTableModel(QAbstractTableModel):
             case Qt.ItemDataRole.DisplayRole:
                 match col:
                     case 0: # detalle de venta
-                        return self._data[row, 1]
+                        return self._data[row, ModelDataCols.SALES_DETAIL.value]
                     
                     case 1: # cantidad (+ unidad de medida)
-                        return f"{self._data[row, 2]} {self._data[row, 3]}".replace(".", ",")
+                        return (f"{self._data[row, ModelDataCols.SALES_QUANTITY.value]} " +
+                                f"{self._data[row, ModelDataCols.SALES_MEASUREMENT_UNIT.value]}"
+                                .replace(".", ","))
                     
                     case 2: # producto
-                        return self._data[row, 4]
+                        return self._data[row, ModelDataCols.SALES_PRODUCT_NAME.value]
                     
                     case 3: # costo total
-                        return str(self._data[row, 5]).replace(".", ",")
+                        return str(
+                            self._data[row, ModelDataCols.SALES_TOTAL_COST.value]
+                            ).replace(".", ",")
                     
                     case 4: # abonado
-                        return str(self._data[row, 6]).replace(".", ",")
+                        return str(
+                            self._data[row, ModelDataCols.SALES_TOTAL_PAID.value]
+                            ).replace(".", ",")
                     
                     case 5: # fecha y hora
-                        return self._data[row, 7]
+                        return self._data[row, ModelDataCols.SALES_DATETIME.value]
             
             case Qt.ItemDataRole.BackgroundRole:
                 match col:

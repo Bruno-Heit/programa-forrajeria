@@ -186,9 +186,9 @@ class SalesDelegate(QStyledItemDelegate):
     #* 1: cantidad (+ unidad de medida) | 2: producto | 
     #* 3: costo total | 4: abonado | 5: fecha y hora
     
-    def __init__(self, datetime_format:str) -> None:
+    def __init__(self, LOCAL_DATETIME_FORMAT:str) -> None:
         super(SalesDelegate, self).__init__()
-        self._datetime_format = datetime_format
+        self._datetime_format = LOCAL_DATETIME_FORMAT
     
     
     def createEditor(self, parent:QWidget, option: QStyleOptionViewItem, 
@@ -217,6 +217,9 @@ class SalesDelegate(QStyledItemDelegate):
                 editor.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
                 editor.setFrame(False)
                 editor.addItems(getProductNames())
+                editor.setStyleSheet(
+                    WidgetStyle.DEF_COMBOBOX_ARROW_ICON.value
+                )
                 editor.setPlaceholderText("Seleccionar un producto...")
             
             case TableViewColumns.SALES_TOTAL_COST.value: # costo total
@@ -239,6 +242,9 @@ class SalesDelegate(QStyledItemDelegate):
                 editor.setCalendarWidget(
                     CustomCalendar(editor)
                 )
+                editor.setStyleSheet(
+                    WidgetStyle.DEF_DATETIMEEDIT_ARROW_ICON.value
+                )
         return editor
     
     
@@ -247,8 +253,6 @@ class SalesDelegate(QStyledItemDelegate):
         '''
         Emite la señal 'fieldIsValid' hacia MainWindow. Funciona principalmente 
         como una extensión de la señal 'validator.validationSucceeded'.
-
-        
         '''
         self.fieldIsValid.emit(TableViewId.SALES_TABLE_VIEW)
         return None
@@ -264,8 +268,6 @@ class SalesDelegate(QStyledItemDelegate):
         ----------
         feedback_text: str
             Texto con feedback para mostrar al usuario
-
-        
         '''
         self.fieldIsInvalid.emit((TableViewId.SALES_TABLE_VIEW, feedback_text))
         return None
@@ -318,7 +320,7 @@ class SalesDelegate(QStyledItemDelegate):
                     
                     # verifica si alguno de esos strings está, sino lo coloca al final
                     if not search(pattern, value):
-                        price_type = search(pattern, model._data[index.row()][index.column() + 1])
+                        price_type = search(pattern, model.data(index, Qt.ItemDataRole.DisplayRole))
                         price_type = str(price_type.group()).upper()
                         
                         value = f"{value} {price_type}"

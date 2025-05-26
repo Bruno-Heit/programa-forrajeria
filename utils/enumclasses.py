@@ -52,12 +52,26 @@ class DatabaseTable(IntEnum):
 class DateAndTimeFormat(StrEnum):
     '''
     Clase StrEnum con los formatos de fecha y hora admitidos por el programa.
+    Las declaraciones de fechas y horas usadas siguen los siguientes patrones:
+    
+    - las usadas **internamente** en el programa tienen el prefijo "***LOCAL***"
+    - las usadas en la **base de datos** tienen el sufijo "***ISO_8601***"
+    - las usadas como **directivas** para los objetos *datetime* tienen el 
+    prefijo "***DIR***"
     '''
-    DATE_FORMAT = "d/M/yyyy"
+    # fecha
+    LOCAL_DATE_FORMAT = "d/M/yyyy"
+    DIR_LOCAL_DATE_FORMAT = "%d/%m/%Y"
     DATE_ISO_8601 = "yyyy-MM-d"
-    TIME_FORMAT = "HH:mm:ss"
-    DATETIME_FORMAT = "d/M/yyyy HH:mm:ss"
+    
+    # hora
+    LOCAL_TIME_FORMAT = "HH:mm:ss"
+    
+    # fecha y hora
+    LOCAL_DATETIME_FORMAT = "d/M/yyyy HH:mm:ss"
+    DIR_LOCAL_DATETIME_FORMAT = "%d/%m/%Y %H:%M:%S"
     DATETIME_ISO_8601 = "yyyy-MM-d HH:mm:ss"
+    DIR_DATETIME_ISO_8601 = "%Y-%m-%d %H:%M:%S"
 
 
 
@@ -228,6 +242,7 @@ class WidgetStyle(StrEnum):
     DEF_COMBOBOX_ARROW_ICON = "QComboBox::down-arrow {image: url(':/icons/chevron-down.svg');}"
     
     DEF_DATEEDIT_ARROW_ICON = "QDateEdit::down-arrow {image: url(':/icons/chevron-down.svg');}"
+    DEF_DATETIMEEDIT_ARROW_ICON = "QDateTimeEdit::down-arrow {image: url(':/icons/chevron-down.svg');}"
 
 
 

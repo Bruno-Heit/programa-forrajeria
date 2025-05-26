@@ -1414,6 +1414,20 @@ class MainWindow(QMainWindow):
                     value=register[0]
                 )
                 
+                # intenta convertir la fecha y hora a objeto 'datetime'
+                _id, _date_time = register
+                try:
+                    dt = datetime.strptime(_date_time[-1], DateAndTimeFormat.DIR_DATETIME_ISO_8601.value)
+                    _date_time = list(_date_time)
+                    _date_time[-1] = dt.strftime(DateAndTimeFormat.DIR_LOCAL_DATETIME_FORMAT.value)
+                
+                except (ValueError, TypeError) as err:
+                    logging.error(f"Error al convertir fecha y hora a objeto 'datetime': {err}")
+                    _date_time = register[1]
+                
+                finally:
+                    register = (_id, _date_time)
+                
                 # guarda en la posición actual el registro completo
                 self._sales_model_data_acc[register[0]] = register[1]
             
@@ -2236,6 +2250,8 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
+        _datetime_to_iso:str
+        
         match column:
             case 0: # detalle de ventas
                 with self._db_repo as db_repo:
@@ -2300,6 +2316,10 @@ class MainWindow(QMainWindow):
                     )
             
             case 5: # fecha y hora
+                # intenta convertir a formato ISO 8601...
+                _datetime_to_iso = local_to_ISO8601(new_val)
+                _datetime_to_iso = new_val if not _datetime_to_iso else _datetime_to_iso
+                
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Ventas 
@@ -2308,7 +2328,7 @@ class MainWindow(QMainWindow):
                                        SELECT IDventa 
                                        FROM Detalle_Ventas 
                                        WHERE ID_detalle_venta = ?);''',
-                        upd_params=(new_val, IDsales_detail)
+                        upd_params=(_datetime_to_iso, IDsales_detail)
                     )
                     
                     db_repo.updateRegisters(
@@ -2318,7 +2338,7 @@ class MainWindow(QMainWindow):
                                        SELECT IDdeuda 
                                        FROM Detalle_Ventas 
                                        WHERE ID_detalle_venta = ?);''',
-                        upd_params=(new_val, IDsales_detail)
+                        upd_params=(_datetime_to_iso, IDsales_detail)
                     )
         
         return None
@@ -3281,7 +3301,7 @@ class MainWindow(QMainWindow):
                             FROM Detalle_Ventas AS dv
                             INNER JOIN Ventas AS v ON dv.IDventa = v.IDventa 
                             WHERE v.fecha_hora LIKE ?;''',
-                data_params=("%" + date.toString(DateAndTimeFormat.DATE_FORMAT.value) + "%",)
+                data_params=("%" + date.toString(DateAndTimeFormat.LOCAL_DATE_FORMAT.value) + "%",)
             )[0][0]
         
         self.ui.label_show_collected_by_day.setText(

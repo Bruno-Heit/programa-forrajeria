@@ -31,7 +31,7 @@ class ProductsBalanceDelegate(QStyledItemDelegate):
         match index.column():
             case TableViewColumns.PRODS_BAL_DATETIME.value:
                 editor = QDateTimeEdit(parent)
-                editor.setDisplayFormat(DateAndTimeFormat.DATETIME_FORMAT.value)
+                editor.setDisplayFormat(DateAndTimeFormat.LOCAL_DATETIME_FORMAT.value)
                 editor.setCalendarPopup(True)
                 editor.setCalendarWidget(
                     CustomCalendar(editor)
@@ -84,7 +84,7 @@ class ProductsBalanceDelegate(QStyledItemDelegate):
         if isinstance(editor, QDateTimeEdit):
             cell_datetime = QDateTime.fromString(
                     index.data(Qt.ItemDataRole.DisplayRole),
-                    DateAndTimeFormat.DATETIME_FORMAT.value
+                    DateAndTimeFormat.LOCAL_DATETIME_FORMAT.value
             )
             editor.setDateTime(cell_datetime)
         
