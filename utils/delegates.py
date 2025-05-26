@@ -8,7 +8,7 @@ from PySide6.QtCore import (Qt, QModelIndex, QSize, QPersistentModelIndex,
                             QAbstractItemModel, Signal, Slot, QDateTime, QEvent, 
                             QObject)
 
-from utils.enumclasses import (TableViewId, TableViewColumns, Regex)
+from utils.enumclasses import (TableViewId, TableViewColumns, Regex, WidgetStyle)
 from utils.functionutils import (getProductsCategories, createCompleter, getProductNames)
 from utils.customvalidators import (ProductNameValidator, ProductStockValidator, 
                                     ProductUnitPriceValidator, ProductComercPriceValidator, 

@@ -17,7 +17,10 @@ import sys # sirve para lo mismo que el módulo 'os'.
 from sqlite3 import (connect, Connection, Cursor, ProgrammingError, Error as sqlite3Error)
 from typing import (Any)
 import logging
-from re import (Match, compile, search, IGNORECASE)
+from datetime import (datetime)
+from re import (Match, compile, fullmatch, search, IGNORECASE)
+
+from utils.enumclasses import (Regex, DateAndTimeFormat)
 
 
 # variables globales
@@ -353,3 +356,110 @@ def makeInsertQuery(sql:str, params:tuple = None) -> None:
         conn.close()
     
     return None
+
+
+def ensureDateTimeISOformat() -> None:
+    '''
+    Realiza modificaciones a la base de datos corrigiendo el formato de fecha 
+    de todas las columnas de las tablas *Ventas* y *Deudas* para usar el 
+    formato **ISO 8601** si no lo hacían.
+    '''
+    registers:list[tuple[Any]]
+    changes:int = 0
+    
+    with DatabaseRepository() as db_repo:
+        # actualiza Ventas
+        registers= db_repo.selectRegisters(
+            data_sql='''SELECT IDventa, fecha_hora 
+                        FROM Ventas;'''
+        )
+        
+        for IDsale, curr_dt in registers:
+            if curr_dt is None or __is_ISO_format(curr_dt):
+                continue
+            
+            try: # intenta convertir el formato anterior al formato ISO 8601
+                db_repo.updateRegisters(
+                    upd_sql= '''UPDATE Ventas 
+                                SET fecha_hora = ? 
+                                WHERE IDventa = ?;''',
+                    upd_params=(
+                        __datetime_to_ISO_format(curr_dt),
+                        IDsale,
+                    )
+                )
+                changes += 1
+            
+            except ValueError:
+                _warning_msg = "La fecha {curr_dt} es inválida"
+                logging.warning(_warning_msg)
+    
+        _info_msg = f"Fechas de Ventas actualizadas correctamente al formato ISO 8601 -> nro. cambios: {changes}"
+        logging.info(_info_msg)
+        
+        changes = 0
+        
+        # actualiza Deudas
+        registers= db_repo.selectRegisters(
+            data_sql='''SELECT IDdeuda, fecha_hora 
+                        FROM Deudas;'''
+        )
+        
+        for IDdebt, curr_dt in registers:
+            if curr_dt is None or __is_ISO_format(curr_dt):
+                continue
+            
+            try: # intenta convertir el formato anterior al formato ISO 8601
+                db_repo.updateRegisters(
+                    upd_sql= '''UPDATE Deudas 
+                                SET fecha_hora = ? 
+                                WHERE IDdeuda = ?;''',
+                    upd_params=(
+                        __datetime_to_ISO_format(curr_dt),
+                        IDdebt,
+                    )
+                )
+                changes += 1
+            
+            except ValueError:
+                _warning_msg = "La fecha {curr_dt} es inválida"
+                logging.warning(_warning_msg)
+        
+        _info_msg = f"Fechas de Deudas actualizadas correctamente al formato ISO 8601 -> nro. cambios: {changes}"
+        logging.info(_info_msg)
+    return None
+
+
+def __is_ISO_format(date_time:str) -> bool:
+    '''
+    Verifica si la fecha y hora ingresada siguen el formato **ISO 8601**.
+
+    Parámetros
+    ----------
+    date_time : str
+        fecha y hora que verificar
+
+    Retorna
+    -------
+    bool
+        flag que determina si la fecha y hora siguen el formato **ISO 8601**
+    '''
+    return fullmatch(Regex.ISO_8601_FORMAT.value, date_time) is not None
+
+
+def __datetime_to_ISO_format(date_time:str) -> str:
+    '''
+    Convierte la fecha y hora ingresadas al formato **ISO 8601**.
+
+    Parámetros
+    ----------
+    date_time : str
+        fecha y hora que convertir
+
+    Retorna
+    -------
+    str
+        fecha y hora en formato **ISO 8601**
+    '''
+    _dt = datetime.strptime(date_time, DateAndTimeFormat.DIR_LOCAL_DATE_FORMAT.value)
+    return _dt.strftime(DateAndTimeFormat.DIR_DATE_ISO_8601.value)

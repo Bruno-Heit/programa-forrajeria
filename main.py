@@ -17,7 +17,7 @@ from utils.functionutils import *
 from utils.model_classes import (InventoryTableModel, SalesTableModel, DebtsTableModel)
 from utils.delegates import (InventoryDelegate, SalesDelegate, DebtsDelegate)
 from utils.workerclasses import (WorkerSelect, WorkerUpdate, WorkerDelete)
-from utils.dboperations import (DatabaseRepository)
+from utils.dboperations import (DatabaseRepository, ensureDateTimeISOformat)
 from utils.customvalidators import (SalePaidValidator, CategoryNameValidator)
 from utils.enumclasses import (LoggingMessage, ModelHeaders, TableViewId, 
                                LabelFeedbackStyle, InventoryPriceType, TypeSideBar, 
@@ -99,9 +99,6 @@ class MainWindow(QMainWindow):
         # en el formulario de Ventas coloca el tiempo en que se inició el programa
         self.ui.dateTimeEdit_sale.setDateTime(QDateTime.currentDateTime())
         
-        # TODO: cuando se modifique la fecha en el "dateedit_from_date" se tiene que modificar el mínimo de "dateedit_to_date", y 
-        # todo: si se modifica en "dateedit_to_date" se tiene que actualizar el máximo en "dateedit_from_date".
-        # TODO2: a todos los datetimeedit y dateedit que muestren calendario ponerles el calendario personalizado que creé.
         # en los dateedit coloca la fecha de hoy
         _today:QDate = QDate.currentDate()
         
@@ -3311,6 +3308,8 @@ def main():
         format='%(asctime)s -- (%(levelname)s) %(module)s.%(funcName)s:%(message)s',
         level=logging.DEBUG,
         datefmt='%A %d/%m/%Y %H:%M:%S')
+    
+    ensureDateTimeISOformat()
     
     app = QApplication(sys.argv)
     

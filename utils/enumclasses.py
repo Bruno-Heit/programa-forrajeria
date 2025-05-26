@@ -54,8 +54,10 @@ class DateAndTimeFormat(StrEnum):
     Clase StrEnum con los formatos de fecha y hora admitidos por el programa.
     '''
     DATE_FORMAT = "d/M/yyyy"
+    DATE_ISO_8601 = "yyyy-MM-d"
     TIME_FORMAT = "HH:mm:ss"
     DATETIME_FORMAT = "d/M/yyyy HH:mm:ss"
+    DATETIME_ISO_8601 = "yyyy-MM-d HH:mm:ss"
 
 
 
@@ -412,6 +414,8 @@ class Regex(StrEnum):
     usarse en 'utils.customvalidators.py', pero no exclusivamente.
     '''
     GENERIC_CHARS_TO_AVOID = "[^;\"']*"
+    
+    ISO_8601_FORMAT = "\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"
     
     PROD_NAME = "[^;\"']{1,50}"
     PROD_STOCK_QUANTITY = "\d{1,8}(\.|,)?\d{0,2}"
