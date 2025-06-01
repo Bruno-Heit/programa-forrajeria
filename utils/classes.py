@@ -151,6 +151,19 @@ class ProductValues(QObject):
         return None
     
     
+    def setMeasurementUnit(self, measurement_unit:str) -> None:
+        '''
+        Guarda la unidad de medida.
+
+        Parámetros
+        ----------
+        measurement_unit : str
+            la nueva unidad de medida
+        '''
+        self.__stock_unit = measurement_unit
+        return None
+    
+    
     def setNormalPrice(self, normal_price:str) -> None:
         '''
         Guarda el precio normal.
@@ -370,6 +383,18 @@ class ProductDialog(QDialog):
         )
         self.productDialog_ui.lineedit_productComercialPrice.editingFinished.connect(
             lambda: self.formatField(ProductFields.COMERCIAL_PRICE)
+        )
+        
+        # guardar datos de campos opcionales
+        self.productDialog_ui.lineedit_productDescription.editingFinished.connect(
+            lambda: self.product_values.setDescription(
+                self.productDialog_ui.lineedit_productDescription.text()
+            )
+        )
+        self.productDialog_ui.lineedit_measurementUnit.editingFinished.connect(
+            lambda: self.product_values.setStockUnit(
+                self.productDialog_ui.lineedit_measurementUnit.text()
+            )
         )
         
         # validación
