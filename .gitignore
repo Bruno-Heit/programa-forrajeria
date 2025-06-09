@@ -1,9 +1,10 @@
 # carpetas
 __pycache__/
-db_tests
+db_tries
 
 # archivos .py
 test.py
+*tries.py
 
 # archivos innecesarios
 py_to_exe_config.json
