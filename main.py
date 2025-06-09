@@ -36,13 +36,29 @@ from resources import (rc_icons)
 # TODO1: falta hacer DELETE a Deudas
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, db_path:str=DATABASE_DIR):
+        '''
+        Inicializa la ventana principal de la aplicación.
+        
+        Parámetros
+        ----------
+        db_path : str, opcional
+            dirección usada para la base de datos, por defecto DATABASE_DIR; 
+            admite las siguientes direcciones comunes:
+            - DATABASE_DIR: usa la dirección "*database/inventario.db*"
+            - DATABASE_MEMORY: usa una base de datos en memoria ("*:memory:*"), 
+            útil para *tests*
+            - DATABASE_MEMORY_SHARED: usa una base de datos en memoria 
+            ("*file::memory:?cache=shared*"), útil para *tests* con conexiones 
+            simultáneas
+            Alternativamente se puede especificar una dirección diferente
+        '''
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         
         # repositorio de base de datos
-        self._db_repo:DatabaseRepository = DatabaseRepository()
+        self._db_repo:DatabaseRepository = DatabaseRepository(db_path=db_path)
         
         # inicializa ajustes personalizados de widgets
         self.setup_ui()
@@ -3318,19 +3334,66 @@ class MainWindow(QMainWindow):
         return None
     
     
+    #* dateedits de rango de fechas
+    @Slot(QDateEdit, QDate)
+    def validateDateRange(self, dateedit:QDateEdit, date:QDate) -> None:
+        '''
+        Actualiza el rango de fechas seleccionable entre los **QDateEdits** de 
+        Ventas.
+
+        Parámetros
+        ----------
+        dateedit : QDateEdit
+            el *dateedit* modificado a partir del cual se actualiza el rango 
+            de valores seleccionables del otro **QDateEdit** (si se modifica 
+            la fecha inicial entonces se actualiza el rango de fechas para la 
+            fecha final, y viceversa)
+        date : QDate
+            la fecha actual seleccionada
+        '''
+        # TODO: reiniciar la diferencia cuando se reinicie la tabla
+        match dateedit.objectName():
+            case "dateEdit_from_date":
+                self.ui.dateEdit_to_date.setMinimumDate(date)
+                self.ui.dateEdit_to_date.setMaximumDate(
+                    QDate(date).addDays(DateTimeRanges.MAX_DAYS_DIFF.value)
+                )
+            
+            case "dateEdit_to_date":
+                self.ui.dateEdit_from_date.setMaximumDate(date)
+                self.ui.dateEdit_from_date.setMinimumDate(
+                    QDate(date).addDays(-DateTimeRanges.MAX_DAYS_DIFF.value)
+                )
+                
+        return None
+    
+    
     #¡### DEUDAS ######################################################
 
 
 
 
+# TODO: probar borrando la base de datos a ver si se crean todas las tablas bien
 def main():
-    logging.basicConfig(
-        format='%(asctime)s -- (%(levelname)s) %(module)s.%(funcName)s:%(message)s',
-        level=logging.DEBUG,
-        datefmt='%A %d/%m/%Y %H:%M:%S')
+    # logging
+    with open("program.log", "w"): # borra los logs
+        pass
     
+    logging.basicConfig(
+        format='%(asctime)s - (%(levelname)s) - %(module)s.%(funcName)s - %(message)s',
+        level=logging.DEBUG,
+        datefmt='%A %d/%m/%Y %H:%M:%S',
+        handlers=[
+            logging.FileHandler("program.log"),
+            logging.StreamHandler()
+        ]
+    )
+    
+    # base de datos
+    createTables()
     ensureDateTimeISOformat()
     
+    # app
     app = QApplication(sys.argv)
     
     # traducción al español
@@ -3338,7 +3401,6 @@ def main():
     path = QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)
     translator.load("qtbase_es", path)
     app.installTranslator(translator)
-    
     
     mainWindow = MainWindow()
     mainWindow.show()

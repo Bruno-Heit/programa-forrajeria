@@ -8,7 +8,8 @@ from PySide6.QtCore import (Signal, QLocale, QObject)
 from PySide6.QtGui import (QValidator, QRegularExpressionValidator, 
                            QIntValidator, QDoubleValidator)
 
-from utils.dboperations import (makeReadQuery)
+from utils.dboperations import (makeReadQuery, DatabaseRepository, 
+                                DATABASE_DIR, DATABASE_MEMORY_SHARED)
 from utils.enumclasses import (Regex, CommonCategories)
 
 from re import (fullmatch, compile, Pattern, IGNORECASE)
@@ -43,18 +44,37 @@ class ProductNameValidator(QValidator):
     validationSucceeded = Signal() # se emite cuando el estado es 'Acceptable'. Sirve para esconder el label con feedback
     validationFailed = Signal(str) # se emite cuando el estado es 'Invalid', envía un str con feedback para mostrar
     
-    def __init__(self, prev_name:str, parent:QWidget=None):
+    def __init__(self, prev_name:str, db_path:str=DATABASE_DIR):
+        '''
+        Inicializa un validador para los nombres de productos.
+
+        Parámetros
+        ----------
+        prev_name : str
+            el nombre del producto anterior del campo
+        db_path : str, opcional
+            el *path* de la base de datos utilizada, por defecto DATABASE_DIR
+        '''
         super(ProductNameValidator, self).__init__()
         self.pattern:Pattern = compile(Regex.PROD_NAME.value, flags=IGNORECASE)
         self.prev_name:str = prev_name
+        self._db_path:str = db_path
     
     
     def validate(self, text: str, pos: int) -> object:
+        names:list = []
+        
         #? no quiero validar cuando el nombre sea el mismo que el que estaba antes
         if text != self.prev_name:
             # lista para verificar si el nombre existe en la base de datos
-            names:list = [name[0] for name in makeReadQuery(
-                '''SELECT nombre FROM Productos WHERE nombre = ?;''', (text,))]
+            with DatabaseRepository(self._db_path) as db_repo:
+                names = db_repo.selectRegisters(
+                    data_sql='''SELECT nombre 
+                                FROM Productos 
+                                WHERE nombre = ?;''',
+                    data_params=(text,)
+                )
+                names = [name[0] for name in names] if names else names
             
             # si el nombre ya existe devuelve Intermediate
             if text in names:

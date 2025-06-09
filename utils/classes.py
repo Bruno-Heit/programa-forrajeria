@@ -275,12 +275,23 @@ class ProductDialog(QDialog):
     Sirve para crear un nuevo registro de producto en la tabla "Productos" en la base de datos.'''
     dataFilled:Signal = Signal(object) # emite un dict con todos los datos introducidos a MainWindow
     
-    def __init__(self):
+    def __init__(self, db_path:str=DATABASE_DIR):
+        '''
+        Inicializa un **QDialog** que permite al usuario ingresar datos de un 
+        producto a la base de datos.
+
+        Parámetros
+        ----------
+        db_path : str, opcional
+            *path* de la base de datos utilizada, por defecto DATABASE_DIR
+        '''
         super(ProductDialog, self).__init__()
         self.productDialog_ui = Ui_Dialog()
         self.productDialog_ui.setupUi(self)
         
         self.product_values = ProductValues()
+        
+        self._db_path = db_path
         
         self.setup_validators()
         
@@ -335,7 +346,7 @@ class ProductDialog(QDialog):
         # desactiva desde el principio el botón "Aceptar"
         self.productDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
         self.productDialog_ui.buttonBox.button(QDialogButtonBox.Cancel).setText("Cancelar")
-        comboBox_categories:list[str] = getProductsCategories()
+        comboBox_categories:list[str] = getProductsCategories(self._db_path)
         self.productDialog_ui.cb_productCategory.addItems(comboBox_categories)
         
         self.__setInitialStyles()
@@ -664,7 +675,7 @@ class ProductDialog(QDialog):
         Emite la señal 'dataFilled' con los datos introducidos a MainWindow 
         para poder actualizar el MODELO DE DATOS.
         '''
-        with DatabaseRepository() as db_repo:
+        with DatabaseRepository(self._db_path) as db_repo:
             db_repo.insertRegister(
                 ins_sql= '''INSERT INTO Productos(
                                 nombre,
@@ -697,23 +708,23 @@ class ProductDialog(QDialog):
                 )
             )
             
-        # emite los datos a MainWindow
-        self.dataFilled.emit(
-            {
-                'product_ID': makeReadQuery( # obtengo el último ID, el del nuevo producto
-                    ''' SELECT IDproducto 
-                        FROM Productos 
-                        ORDER BY IDproducto DESC 
-                        LIMIT 1;''')[0][0],
-                'product_name': self.product_values.getProductName(),
-                'product_description': self.product_values.getDescription(),
-                'product_stock': float(self.product_values.getStockQuantity()),
-                'product_measurement_unit': self.product_values.getStockUnit(),
-                'product_unit_price': float(self.product_values.getNormalPrice()),
-                'product_comercial_price': float(self.product_values.getComercialPrice()),
-                'product_category': self.product_values.getCategory()
-            }
-        )
+            # emite los datos a MainWindow
+            self.dataFilled.emit(
+                {
+                    'product_ID': db_repo.selectRegisters( # obtengo el último ID, el del nuevo producto
+                        ''' SELECT IDproducto 
+                            FROM Productos 
+                            ORDER BY IDproducto DESC 
+                            LIMIT 1;''')[0][0],
+                    'product_name': self.product_values.getProductName(),
+                    'product_description': self.product_values.getDescription(),
+                    'product_stock': float(self.product_values.getStockQuantity()),
+                    'product_measurement_unit': self.product_values.getStockUnit(),
+                    'product_unit_price': float(self.product_values.getNormalPrice()),
+                    'product_comercial_price': float(self.product_values.getComercialPrice()),
+                    'product_category': self.product_values.getCategory()
+                }
+            )
         return None
 
 
@@ -1299,7 +1310,7 @@ class SaleValues(QObject):
         datetime : QDateTime
             la fecha y hora de la venta
         '''
-        self.__datetime = datetime.toString(DateAndTimeFormat.DATETIME_FORMAT.value)
+        self.__datetime = datetime.toString(DateAndTimeFormat.LOCAL_DATETIME_FORMAT.value)
         self.datetimeChanged.emit(self.__datetime)
         return None
     

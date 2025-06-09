@@ -6,7 +6,7 @@ que tienen la intención de no generar resultados masivos.
 También contiene la clase 'DatabaseRepository' que, usando el patrón de diseño de 
 repositorio, contiene las consultas a bases de datos generales.
 
-Contiene variables globales relacionadas con base de datos.
+Contiene direcciones generales relacionadas con base de datos.
 
 Por último coloqué acá la función 'pyinstallerCompleteResourcePath' para evitar 
 'circular import' con 'utils/functionutils'.
@@ -23,14 +23,16 @@ from re import (Match, compile, fullmatch, search, IGNORECASE)
 from utils.enumclasses import (Regex, DateAndTimeFormat)
 
 
-# variables globales
+# direcciones
 DATABASE_DIR:str = "database/inventario.db"
 DATABASE_MEMORY:str = ":memory:"
+DATABASE_MEMORY_SHARED:str = "file::memory:?cache=shared"
 
 
 # repositorio de base de datos
 class DatabaseRepository():
-    '''Clase repositorio y "context manager" para realizar operaciones a la base de datos.'''
+    '''Clase repositorio y "context manager" para realizar operaciones a la 
+    base de datos.'''
     
     def __init__(self, db_path:str=DATABASE_DIR) -> None:
         self._db_path:str = db_path
@@ -38,7 +40,10 @@ class DatabaseRepository():
     
     
     def __enter__(self):
-        self._connection = createConnection(self._db_path)
+        self._connection = createConnection(
+            db_name=self._db_path,
+            shared_memory_db=True if self._db_path == DATABASE_MEMORY_SHARED else False
+            )
         return self
     
     
@@ -48,6 +53,33 @@ class DatabaseRepository():
             
         self._connection.close()
         return None
+    
+    
+    def executeScript(self, sql:str) -> bool:
+        '''
+        Ejecuta el script ingresado.
+
+        Parámetros
+        ----------
+        sql : str
+            script a ejecutar
+        
+        Retorna
+        -------
+        bool
+            True si el script se ejecutó exitosamente, sino False
+        '''
+        cursor = self._connection.cursor()    
+        try:
+            cursor.executescript(sql)
+            self._connection.commit()
+        
+        except (ProgrammingError, sqlite3Error) as err:
+            self._connection.rollback()
+            logging.critical(f"{err}")
+            return False
+        
+        return True
     
     
     def __executeQuery(self, sql:str, params:tuple=None, executemany:bool=False) -> Cursor:
@@ -262,24 +294,85 @@ class DatabaseRepository():
 #? La siguiente función sirve para ayudar a pyinstaller a completar el path completo a un archivo, 
 #? y se tiene que hacer esto porque tiene un error y a veces no puede hacerlo.
 def pyinstallerCompleteResourcePath(relative_path:str) -> str:
-    '''Obtiene el path completo para el archivo especificado y lo devuelve. Retorna un 'str'.'''
+    '''
+    Obtiene el *path* completo para el archivo especificado.
+    
+    Parámetros
+    ----------
+    relative_path : str
+        el *path* relativo del archivo al programa
+    
+    Retorna
+    -------
+    str
+        el *path* completo del archivo
+    '''
     base_path:str
+    full_path:str
+    
     try:
         base_path = sys._MEIPASS
-    except AttributeError:
+    
+    except AttributeError as err:
+        logging.error("No se encuentra el atributo 'sys._MEIPASS'")
         base_path = os.path.abspath(".")
-    except Exception:
+    
+    except Exception as err:
+        logging.critical(err)
         base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
+    
+    finally:
+        full_path = os.path.join(base_path, relative_path.replace("/", "\\"))
+        __createDirPathIfNotExists(full_path)
+    
+    return full_path
 
 
-def createConnection(db_name:str) -> Connection | None:
-    '''Crea una conexión a la base de datos y devuelve la conexión, si no se pudo devuelve None.'''
+def __createDirPathIfNotExists(full_path:str) -> None:
+    '''
+    Crea los directorios del *path* si no existen.
+
+    Parámetros
+    ----------
+    full_path : str
+        *path* al cual crear directorio
+    '''
+    os.makedirs("\\".join(full_path.split("\\")[:-1]), exist_ok=True)
+    return None
+
+
+def createConnection(db_name:str, shared_memory_db:bool=False) -> Connection | None:
+    '''
+    Crea una conexión a la base de datos y devuelve la conexión. En caso de 
+    no encontrarse la dirección de la base de datos se crea una conexión en 
+    memoria.
+    
+    Parámetros
+    ----------
+    db_name : str
+        dirección de la base de datos
+    shared_memory_db : bool
+        *flag* que determina si usar una base de datos en memoria compartida
+    
+    Retorna
+    -------
+    Connection | None
+        devuelve el objeto **Connection**, si no se pudo devuelve ***None***
+    '''
+    alt_db_path = DATABASE_MEMORY_SHARED if shared_memory_db else DATABASE_MEMORY
     try:
-        connection = connect(pyinstallerCompleteResourcePath(db_name))
+        connection = connect(
+            db_name if db_name == alt_db_path else pyinstallerCompleteResourcePath(db_name),
+            uri=True if alt_db_path == DATABASE_MEMORY_SHARED else False
+        )
+    
     except sqlite3Error as err:
         logging.critical(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
-        return None
+        connection = None
+
+    except Exception as err:
+        logging.critical(err)
+        connection = None
     return connection
 
 
@@ -355,6 +448,109 @@ def makeInsertQuery(sql:str, params:tuple = None) -> None:
     finally:
         conn.close()
     
+    return None
+
+
+# configuraciones iniciales
+def createTables(path:str=DATABASE_DIR) -> None:
+    '''
+    Verifica que las tablas existan dentro de la base de datos, sino las 
+    crea.
+    
+    Parámetros
+    ----------
+    path : str, opcional
+        *path* en el que crear la base de datos, por defecto toma el valor de 
+        la variable global "DATABASE_DIR"; alternativamente se puede pasar el 
+        valor de la variable "DATABASE_MEMORY" o "DATABASE_MEMORY_SHARED" para 
+        crear una base de datos en memoria para hacer tests, o la dirección 
+        que se desee
+    '''
+    res:bool
+    
+    with DatabaseRepository(db_path=path) as db_repo:
+        res = db_repo.executeScript(
+            sql= '''-- Categorias
+                    CREATE TABLE IF NOT EXISTS Categorias (
+                        IDcategoria      INTEGER    PRIMARY KEY AUTOINCREMENT
+                                                    NOT NULL,
+                        nombre_categoria TEXT (40)  NOT NULL
+                                                    UNIQUE ON CONFLICT ROLLBACK,
+                        descripcion      TEXT (255) 
+                    );
+                    
+                    -- Productos
+                    CREATE TABLE IF NOT EXISTS Productos (
+                        IDproducto    INTEGER     PRIMARY KEY AUTOINCREMENT
+                                                NOT NULL,
+                        nombre        TEXT (50)   NOT NULL
+                                                UNIQUE ON CONFLICT FAIL,
+                        descripcion   TEXT (256),
+                        stock         REAL        NOT NULL,
+                        unidad_medida TEXT,
+                        precio_unit   REAL        NOT NULL,
+                        precio_comerc REAL,
+                        IDcategoria   INTEGER     REFERENCES Categorias (IDcategoria) 
+                                                NOT NULL,
+                        eliminado     INTEGER (1) NOT NULL ON CONFLICT ROLLBACK
+                                                DEFAULT (0) 
+                    );
+                    
+                    -- Ventas
+                    CREATE TABLE IF NOT EXISTS Ventas (
+                        IDventa        INTEGER     PRIMARY KEY AUTOINCREMENT
+                                                NOT NULL,
+                        fecha_hora     TEXT        NOT NULL,
+                        detalles_venta TEXT,
+                        eliminado      INTEGER (1) DEFAULT (0) 
+                                                NOT NULL ON CONFLICT ROLLBACK
+                    );
+                    
+                    CREATE INDEX IF NOT EXISTS index_ventas_fecha_hora ON Ventas(fecha_hora);
+                    
+                    -- Deudores
+                    CREATE TABLE IF NOT EXISTS Deudores (
+                        IDdeudor      INTEGER    PRIMARY KEY AUTOINCREMENT
+                                                NOT NULL,
+                        nombre        TEXT (40)  NOT NULL,
+                        apellido      TEXT (40)  NOT NULL,
+                        num_telefono  TEXT,
+                        direccion     TEXT (256),
+                        codigo_postal TEXT
+                    );
+                    
+                    -- Deudas
+                    CREATE TABLE IF NOT EXISTS Deudas (
+                        IDdeuda        INTEGER     PRIMARY KEY AUTOINCREMENT
+                                                NOT NULL,
+                        fecha_hora     TEXT        NOT NULL,
+                        total_adeudado REAL        NOT NULL,
+                        IDdeudor       INTEGER     REFERENCES Deudores (IDdeudor) 
+                                                NOT NULL,
+                        eliminado      INTEGER (1) NOT NULL ON CONFLICT ROLLBACK
+                                                DEFAULT (0) 
+                    );
+                    
+                    -- Detalle_Ventas
+                    CREATE TABLE IF NOT EXISTS Detalle_Ventas (
+                        ID_detalle_venta INTEGER     PRIMARY KEY AUTOINCREMENT
+                                                    NOT NULL,
+                        cantidad         REAL        NOT NULL,
+                        costo_total      REAL        NOT NULL,
+                        IDproducto       INTEGER     REFERENCES Productos (IDproducto) 
+                                                    NOT NULL,
+                        IDventa          INTEGER     REFERENCES Ventas (IDventa) 
+                                                    NOT NULL,
+                        abonado          REAL        NOT NULL,
+                        IDdeuda          INTEGER     REFERENCES Deudas (IDdeuda),
+                        eliminado        INTEGER (1) NOT NULL ON CONFLICT ROLLBACK
+                                                    DEFAULT (0) 
+                    );
+            '''
+        )
+        
+        if res:
+            logging.info("tablas creadas exitosamente")
     return None
 
 
@@ -461,5 +657,6 @@ def __datetime_to_ISO_format(date_time:str) -> str:
     str
         fecha y hora en formato **ISO 8601**
     '''
-    _dt = datetime.strptime(date_time, DateAndTimeFormat.DIR_LOCAL_DATE_FORMAT.value)
-    return _dt.strftime(DateAndTimeFormat.DIR_DATE_ISO_8601.value)
+    date_time = date_time.replace("-", "/")
+    _dt = datetime.strptime(date_time, DateAndTimeFormat.DIR_LOCAL_DATETIME_FORMAT.value)
+    return _dt.strftime(DateAndTimeFormat.DIR_DATETIME_ISO_8601.value)

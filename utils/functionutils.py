@@ -186,20 +186,27 @@ def __toggleSideBarWidgetsVisibility(body:QFrame, signal:int):
 
 
 #========================================================================================================================
-def getProductsCategories() -> list[str] | None:
+def getProductsCategories(db_path:str=DATABASE_DIR) -> list[str] | None:
     '''
-    Hace una consulta SELECT a la base de datos y toma las categorías que hay. Devuelve una lista con las 
-    categorías. 
+    Hace una consulta SELECT a la base de datos y toma las categorías que hay. 
+    Devuelve una lista con las categorías.
+    
+    Parámetros
+    ----------
+    db_path : str, opcional
+        *path* de la base de datos utilizada, por defecto DATABASE_DIR
+    
+    Retorna
+    -------
+    list[str]
+        lista con todas las categorías de los productos
     '''
-    connection = createConnection(DATABASE_DIR)
-    if not connection:
-        return None
-    cursor = connection.cursor()
-    query:list[tuple] = cursor.execute("SELECT nombre_categoria FROM Categorias;").fetchall()
-    # convierto la lista de tuplas en una lista de strings...
-    query:list[str] = [q[0] for q in query]
-    connection.close()
-    return query
+    with DatabaseRepository(db_path) as db_repo:
+        data = db_repo.selectRegisters('''SELECT nombre_categoria 
+                                FROM Categorias;''')
+        if data:
+            data = [d[0] for d in data]
+    return data
 
 
 def getProductNames() -> list[str]:
