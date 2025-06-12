@@ -77,6 +77,17 @@ class DateAndTimeFormat(StrEnum):
 
 
 
+class DateTimeRanges(IntEnum):
+    '''
+    Clase IntEnum con los valores máximos de los rangos de valores posibles 
+    seleccionables en **QDateTimeEdits** y sus subclases.
+    '''
+    MAX_DAYS_DIFF = 180
+
+
+
+
+
 class LabelFeedbackStyle(StrEnum):
     '''Clase con StrEnum con estilos predefinidos para darle a los QLabel 
     dependiendo de si son válidos los datos del QTableView asociado o no.'''

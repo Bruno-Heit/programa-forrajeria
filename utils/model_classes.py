@@ -12,7 +12,6 @@ from PySide6.QtGui import (QBrush, QColor)
 from utils.enumclasses import (TableBgColors, TableFontColor, ModelDataCols, 
                                TableViewColumns, DateAndTimeFormat)
 from utils.dboperations import (DatabaseRepository)
-from utils.functionutils import (ISO8601_to_local)
 
 from datetime import datetime
 

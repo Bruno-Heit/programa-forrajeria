@@ -4,7 +4,7 @@ from typing import (Any, Iterable)
 
 from PySide6.QtWidgets import (QApplication, QMainWindow, QTableView, 
                                QCheckBox, QAbstractItemView, QListWidgetItem, 
-                               QLineEdit, QDateTimeEdit)
+                               QLineEdit, QDateTimeEdit, QDateEdit)
 from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot, QSize, QTranslator, 
                             QLibraryInfo, QSignalBlocker)
 from PySide6.QtGui import (QIcon)
@@ -22,7 +22,7 @@ from utils.customvalidators import (SalePaidValidator, CategoryNameValidator)
 from utils.enumclasses import (LoggingMessage, ModelHeaders, TableViewId, 
                                LabelFeedbackStyle, InventoryPriceType, TypeSideBar, 
                                TableViewColumns, ProgressBarStyle, DateAndTimeFormat, 
-                               CommonCategories)
+                               CommonCategories, DateTimeRanges)
 from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxyModel)
 from utils.eventfilters import (BackgroundEventFilter, CategoryItemEventFilter, 
                                 CategoryListEventFilter)
@@ -120,7 +120,7 @@ class MainWindow(QMainWindow):
         
         self.__setInitDateWidgets(
             widget=self.ui.dateEdit_from_date,
-            date= _today.addDays( - (_today.dayOfWeek() - 1) )
+            date= getWeekStartDate(_today)
         )
         self.__setInitDateWidgets(
             widget=self.ui.dateEdit_to_date,
@@ -358,9 +358,31 @@ class MainWindow(QMainWindow):
     
     
     def setup_sales_signals(self) -> None:
+        # todo: cambiar el trigger para llenar la tabla de ventas, usar mejor una llamada a una función cuando se 
+        # todo: cambie alguna fecha (cuando se cambia de pestaña emitir manualmente señal de algún dateEdit para 
+        # todo: llenar la tabla)
+        #* cambio de pestaña
+        self.ui.tab2_toolBox.currentChanged.connect(
+            lambda curr_index: self.setInitialDateRange() if curr_index == 1 else None
+        )
+        
+        #* deteedits (rango de fechas)
+        # todo: en fillTableView corregir las consultas, obtener ventas entre esas fechas
+        self.ui.dateEdit_from_date.dateChanged.connect(
+            lambda date: self.validateDateRange(
+                dateedit=self.ui.dateEdit_from_date,
+                date=date
+            )
+        )
+        
         #* (READ) cargar con ventas 'tv_sales_data'
-        self.ui.tab2_toolBox.currentChanged.connect(lambda curr_index: self.fillTableView(
-            table_viewID=TableViewId.SALES_TABLE_VIEW, SHOW_ALL=True) if curr_index == 1 else None)
+        self.ui.dateEdit_from_date.dateChanged.connect(
+            lambda: self.fillTableView(table_viewID=TableViewId.SALES_TABLE_VIEW)
+        )
+        self.ui.dateEdit_to_date.dateChanged.connect(
+            lambda: self.fillTableView(table_viewID=TableViewId.SALES_TABLE_VIEW)
+        )
+        
         
         self.ui.tabWidget.currentChanged.connect(lambda index: self.ui.tab2_toolBox.setCurrentIndex(0) if index == 1 else None)
         
@@ -406,7 +428,7 @@ class MainWindow(QMainWindow):
                 tableViewID=TableViewId.SALES_TABLE_VIEW
             )
         )
-        
+
         #* dateedit (mostrar ganancias por día)
         self.ui.dateEdit_show_collected_by_day.dateChanged.connect(
             self.showCollectedInDay
@@ -1251,12 +1273,15 @@ class MainWindow(QMainWindow):
         None
         '''
         count_sql:str = "" # consulta de tipo COUNT()
-        count_params:tuple[Any] = None # params de la consulta COUNT()
+        count_params:tuple[Any] = None
         
         data_sql:str = "" # consulta que pide los registros
-        data_params:tuple[Any] = None # params de la consulta de registros
+        data_params:tuple[Any] = None
         
-        # crea las consultas para obtener el COUNT() de filas y los registros 
+        _from_datetime:str # variables usadas cuando se llena la tabla de Ventas, 
+        _to_datetime:str # sirven para marcar las fechas iniciales y finales
+        
+        # crea las consultas para obtener el COUNT de filas y los registros 
         # para llenar la tabla
         match table_viewID.name:
             case "INVEN_TABLE_VIEW":
@@ -1277,15 +1302,28 @@ class MainWindow(QMainWindow):
                     data_params = (self.ui.tables_ListWidget.currentItem().text(),)
                 self.ui.label_feedbackInventory.hide()
 
-
             case "SALES_TABLE_VIEW":
+                _from_datetime = self.ui.dateEdit_from_date.date().toString(
+                    DateAndTimeFormat.LOCAL_DATE_FORMAT.value
+                )
+                _to_datetime = self.ui.dateEdit_to_date.date().toString(
+                    DateAndTimeFormat.LOCAL_DATE_FORMAT.value
+                )
+                
+                _from_datetime = f"{_from_datetime} 00:00:00"
+                _to_datetime = f"{_to_datetime} 23:59:59"
+                
+                _from_datetime = local_to_ISO8601(_from_datetime)
+                _to_datetime = local_to_ISO8601(_to_datetime)
+                
                 self.ui.tv_sales_data.selectionModel().clearSelection()
                 
                 count_sql, data_sql = getTableViewsSqlQueries(
                     table_viewID=TableViewId.SALES_TABLE_VIEW
                 )
+                count_params = (_from_datetime, _to_datetime)
+                data_params = (_from_datetime, _to_datetime)
                 self.ui.label_feedbackSales.hide()
-
 
             case "DEBTS_TABLE_VIEW":
                 self.ui.tv_debts_data.selectionModel().clearSelection()
@@ -2668,7 +2706,7 @@ class MainWindow(QMainWindow):
         return None
 
 
-    #¡### VENTAS ######################################################
+    #¡### VENTAS ######################################################    
     #* métodos de lineEdit_paid
     @Slot()
     def onSalePaidEditingFinished(self) -> None:
@@ -3299,6 +3337,37 @@ class MainWindow(QMainWindow):
     
     
     #* dateedit para mostrar recaudado por día
+    @Slot()
+    def setInitialDateRange(self) -> None:
+        '''
+        Al cambiar a la pestaña de la tabla de Ventas coloca el rango de 
+        fechas de los **QDateEdits** desde el inicio de semana hasta el día 
+        actual.
+        '''
+        with QSignalBlocker(self.ui.dateEdit_from_date):
+            #? le cambio el máximo temporalmente porque sino no deja colocar 
+            #? correctamente la fecha a veces (luego, en 'validateDateRange' 
+            #? se corrige este cambio...
+            self.ui.dateEdit_from_date.setMaximumDate(
+                QDate.currentDate()
+            )
+            self.ui.dateEdit_from_date.setDate(
+                getWeekStartDate(
+                    QDate.currentDate()
+                )
+            )
+        
+        with QSignalBlocker(self.ui.dateEdit_to_date):
+            # ? ... y acá cambio temporalmente la fecha mínima por la mismo
+            self.ui.dateEdit_to_date.setMinimumDate(
+                QDate.currentDate()
+            )
+            self.ui.dateEdit_to_date.setDate(
+                QDate().currentDate()
+            )
+        return None
+    
+    
     @Slot(QDate)
     def showCollectedInDay(self, date:QDate) -> None:
         '''
@@ -3351,7 +3420,6 @@ class MainWindow(QMainWindow):
         date : QDate
             la fecha actual seleccionada
         '''
-        # TODO: reiniciar la diferencia cuando se reinicie la tabla
         match dateedit.objectName():
             case "dateEdit_from_date":
                 self.ui.dateEdit_to_date.setMinimumDate(date)
@@ -3364,7 +3432,6 @@ class MainWindow(QMainWindow):
                 self.ui.dateEdit_from_date.setMinimumDate(
                     QDate(date).addDays(-DateTimeRanges.MAX_DAYS_DIFF.value)
                 )
-                
         return None
     
     
@@ -3373,7 +3440,6 @@ class MainWindow(QMainWindow):
 
 
 
-# TODO: probar borrando la base de datos a ver si se crean todas las tablas bien
 def main():
     # logging
     with open("program.log", "w"): # borra los logs

@@ -5,42 +5,111 @@
 
 from typing import (Any)
 
-from PySide6.QtWidgets import (QTableWidget, QComboBox, QHeaderView, QListWidget, QLineEdit, 
-                               QCompleter, QFrame, QWidget, QDateTimeEdit, QTableView, 
-                               QCheckBox, QButtonGroup)
-from PySide6.QtCore import (QModelIndex, Qt, QPropertyAnimation, QEasingCurve, QDateTime, 
-                            QDate, QTime)
+from PySide6.QtWidgets import (QHeaderView, QCompleter, QFrame, QWidget, 
+                               QTableView, QComboBox)
+from PySide6.QtCore import (QModelIndex, Qt, QPropertyAnimation, QEasingCurve, 
+                            QDateTime, QDate)
 
 from resources import (rc_icons)
 from utils.dboperations import *
 from utils.customvalidators import *
-from utils.enumclasses import (TableViewId)
+from utils.enumclasses import (TableViewId, DateAndTimeFormat)
 from re import (Match, sub, match, findall)
+from datetime import (datetime)
 
+
+# formatos de fecha y hora
+def ISO8601_to_local(date_time:str) -> str | None:
+    '''
+    Convierte la fecha y hora ingresada al formato local usado en el programa.
+
+    Parámetros
+    ----------
+    date_time : str
+        la fecha y hora en formato **ISO 8601**
+    
+    Retorna
+    -------
+    str | None
+        la fecha y hora en formato local como **str**, devuelve **None** si 
+        hubo algún error
+    '''
+    try: # "d/M/yyyy HH:mm:ss"
+        date_time = date_time.replace("/", "-")
+        dt_obj = datetime.strptime(date_time, DateAndTimeFormat.DIR_DATETIME_ISO_8601.value)
+        return dt_obj.strftime(DateAndTimeFormat.DIR_LOCAL_DATETIME_FORMAT.value)
+    
+    except ValueError as err:
+        logging.error(f"No se pudo convertir la fecha y hora de formato ISO 8601 a local: {err}")
+        return None
+
+
+def local_to_ISO8601(date_time:str) -> str | None:
+    '''
+    Convierte la fecha y hora ingresada al formato ISO 8601.
+
+    Parámetros
+    ----------
+    date_time : str
+        la fecha y hora en formato local
+    
+    Retorna
+    -------
+    str | None
+        la fecha y hora en formato **ISO 8601** como **str**, devuelve 
+        **None** si hubo algún error
+    '''
+    try:
+        date_time = date_time.replace("-", "/")
+        dt_obj = datetime.strptime(date_time, DateAndTimeFormat.DIR_LOCAL_DATETIME_FORMAT.value)
+        return dt_obj.strftime(DateAndTimeFormat.DIR_DATETIME_ISO_8601.value)
+
+    except ValueError:
+        logging.error("No se pudo convertir la fecha y hora local a formato ISO 8601")
+        return None
+
+
+# fecha de inicio de semana
+def getWeekStartDate(today:QDate) -> QDate:
+    '''
+    A partir del día actual devuelve la fecha del lunes de la semana actual, 
+    día que se considera como el inicio de la semana.
+
+    Parámetros
+    ----------
+    today : QDate
+        la fecha de hoy
+
+    Retorna
+    -------
+    QDate
+        la fecha del lunes de la semana actual
+    '''
+    return today.addDays( - (today.dayOfWeek() - 1) )
 
 # consultas sql
 def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=False, 
                             SHOW_ALL:bool=False) -> tuple[str, str]:
     '''
-    Dependiendo de la tabla, devuelve las consultas sql en formato 'str' para 
-    obtener dimensiones y registros.
+    Dependiendo de la tabla, devuelve las consultas sql en formato **str** 
+    para obtener dimensiones y registros.
     
     Parámetros
     ----------
-    table_viewID: TableViewID
-        QTableView al que se referencia
-    ACCESSED_BY_LIST: bool, opcional
-        flag que será True si se seleccionó un item desde 'tables_ListWidget', 
-        sino False
-    SHOW_ALL: bool, opcional
-        flag que determina si se muestran todos los elementos del QTableView 
-        'table_viewID'
+    table_viewID : TableViewID
+        **QTableView** al que se referencia
+    ACCESSED_BY_LIST : bool, opcional
+        flag que será *True* si se seleccionó un item desde 
+        *tables_ListWidget* sino **False**, por defecto **False**
+    SHOW_ALL : bool, opcional
+        flag que determina si se muestran todos los elementos de la vista, por 
+        defecto **False**
     
     Retorna
     -------
     tuple[str, str]
-        tupla[count_sql, data_sql], siendo 'count_sql' la consulta tipo COUNT y 
-        'data_sql' la consulta para traer los registros
+        *tupla[count_sql, data_sql]*, siendo *count_sql* la consulta tipo 
+        *COUNT* y *data_sql* la consulta para traer los registros
     '''
     match table_viewID.name:
         case "INVEN_TABLE_VIEW":
@@ -84,7 +153,8 @@ def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=Fals
                 str( '''SELECT COUNT(*) 
                         FROM Detalle_Ventas as dv 
                         LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto 
-                        LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa;'''),
+                        LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa 
+                        WHERE v.fecha_hora BETWEEN ? AND ?;'''),
                 str( '''SELECT dv.ID_detalle_venta,
                                v.detalles_venta,
                                dv.cantidad,
@@ -95,7 +165,8 @@ def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=Fals
                                v.fecha_hora 
                         FROM Detalle_Ventas as dv 
                         LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto 
-                        LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa;''')
+                        LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa
+                        WHERE v.fecha_hora BETWEEN ? AND ?;''')
                 )
 
         case "DEBTS_TABLE_VIEW":
