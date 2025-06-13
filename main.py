@@ -29,10 +29,6 @@ from utils.eventfilters import (BackgroundEventFilter, CategoryItemEventFilter,
 
 from resources import (rc_icons)
 
-# TODO: falta implementar timeedits en ventas para mostrar un rango de resultados (no voy a hacer Lazy-loading, afecta negativamente al filtrado con proxy models)
-# TODO: falta conectar señales de timeedits, y corregir las consultas SELECT para mostrar ventas entre esas fechas,
-# TODO: además tengo que cambiar el search-bar de ventas para que busque en base de datos directamente, sin usar el filtrado del proxy model
-
 # TODO1: falta hacer DELETE a Deudas
 
 class MainWindow(QMainWindow):
@@ -358,19 +354,21 @@ class MainWindow(QMainWindow):
     
     
     def setup_sales_signals(self) -> None:
-        # todo: cambiar el trigger para llenar la tabla de ventas, usar mejor una llamada a una función cuando se 
-        # todo: cambie alguna fecha (cuando se cambia de pestaña emitir manualmente señal de algún dateEdit para 
-        # todo: llenar la tabla)
         #* cambio de pestaña
         self.ui.tab2_toolBox.currentChanged.connect(
             lambda curr_index: self.setInitialDateRange() if curr_index == 1 else None
         )
         
         #* deteedits (rango de fechas)
-        # todo: en fillTableView corregir las consultas, obtener ventas entre esas fechas
         self.ui.dateEdit_from_date.dateChanged.connect(
             lambda date: self.validateDateRange(
                 dateedit=self.ui.dateEdit_from_date,
+                date=date
+            )
+        )
+        self.ui.dateEdit_to_date.dateChanged.connect(
+            lambda date: self.validateDateRange(
+                dateedit=self.ui.dateEdit_to_date,
                 date=date
             )
         )
@@ -3365,6 +3363,16 @@ class MainWindow(QMainWindow):
             self.ui.dateEdit_to_date.setDate(
                 QDate().currentDate()
             )
+        
+        # vuelve a validar los rangos
+        self.validateDateRange(
+            dateedit=self.ui.dateEdit_from_date,
+            date=self.ui.dateEdit_from_date.date()
+        )
+        self.validateDateRange(
+            dateedit=self.ui.dateEdit_to_date,
+            date=self.ui.dateEdit_to_date.date()
+        )
         return None
     
     
