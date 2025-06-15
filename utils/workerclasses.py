@@ -76,8 +76,7 @@ class WorkerSelect(QObject):
 
 
 class WorkerDelete(QObject):
-    '''Clase WORKER que se encarga de ejecutar las consultas de tipo DELETE a la base de datos.
-    Este WORKER guarda los registros eliminados de la base de datos en archivos .csv.'''
+    '''Clase WORKER que se encarga de ejecutar las consultas de tipo DELETE a la base de datos.'''
     progress = Signal(int) # devuelve un int con el progreso que lleva borrado para actualizar el progressbar en MainWindow.
     finished = Signal(int)
     
@@ -120,8 +119,8 @@ class WorkerDelete(QObject):
         cursor = conn.cursor()
         
         try:
-            match table_viewID.name:
-                case "INVEN_TABLE_VIEW":
+            match table_viewID:
+                case TableViewId.INVEN_TABLE_VIEW:
                     for n,param in enumerate(params):
                         cursor.execute(sql, param)
                         conn.commit()
@@ -130,17 +129,17 @@ class WorkerDelete(QObject):
             
                 # al ser de VENTAS, params es 'dict[list]', donde cada item 
                 # tiene los IDs necesarios para las 3 tablas
-                case "SALES_TABLE_VIEW":
+                case TableViewId.SALES_TABLE_VIEW:
                     # recorre cada (consulta sql, item) simultáneamente
                     for n, ( sql, (_, values) ) in enumerate( zip(mult_sql, params.items()) ):
-                        # recorre cada valor de la lista 'values' y hace las consultas (en orden, 
-                        # borra Detalle_Ventas, Ventas y marca "eliminado" en Deudas)
                         for val in values:
                             cursor.execute(sql, (val,))
                             conn.commit()
                         self.progress.emit(n)
                     logging.debug(LoggingMessage.DEBUG_DB_MULT_DELETE_SUCCESS)
-            
+                
+                case TableViewId.DEBTS_TABLE_VIEW:
+                    ...
         
         except sqlite3Error as err: #! errores de base de datos, consultas, etc.
             conn.rollback()

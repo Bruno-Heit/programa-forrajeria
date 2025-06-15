@@ -29,7 +29,10 @@ from utils.eventfilters import (BackgroundEventFilter, CategoryItemEventFilter,
 
 from resources import (rc_icons)
 
-# TODO1: falta hacer DELETE a Deudas
+# TODO1: falta cambiar las consultas DELETE de Inventario y Ventas para no borrar registros sino marcarlos como "eliminados": 
+# TODO1: las tablas a marcar son: Productos, Detalle_Ventas, Ventas y Deudas... de las tablas Categorias y Deudores se borran 
+# TODO1: directamente los registros.
+# TODO2: falta hacer DELETE a Deudas
 
 class MainWindow(QMainWindow):
     def __init__(self, db_path:str=DATABASE_DIR):
@@ -287,7 +290,7 @@ class MainWindow(QMainWindow):
         )
         
         self.ui.btn_delete_product_inventory.clicked.connect(
-            lambda: self.handleTableDeleteRows(TableViewId.INVEN_TABLE_VIEW)
+            lambda: self.__deleteInventoryRows()
         )
         
         self.inventory_proxy_model.baseModelRowsSelected.connect(
@@ -393,7 +396,9 @@ class MainWindow(QMainWindow):
             lambda: self.toggleDeleteButton(table_viewID=TableViewId.SALES_TABLE_VIEW)
         )
         
-        self.ui.btn_delete_product_sales.clicked.connect(lambda: self.handleTableDeleteRows(TableViewId.SALES_TABLE_VIEW))
+        self.ui.btn_delete_product_sales.clicked.connect(
+            lambda: self.__deleteSalesRows()
+        )
         
         self.sales_proxy_model.baseModelRowsSelected.connect(
             self.__onSalesBaseModelRowsSelected
@@ -1872,9 +1877,13 @@ class MainWindow(QMainWindow):
         
         # cambia la progress-bar para representar las eliminaciones
         self.ui.sales_progressbar.setMaximum(len(selected_rows))
-        self.ui.sales_progressbar.setStyleSheet(ProgressBarStyle.DELETION.value)
+        self.ui.sales_progressbar.setStyleSheet(
+            ProgressBarStyle.DELETION.value
+        )
         
-        self.sales_proxy_model.removeSelectedRows(selected_rows=selected_rows)
+        self.sales_proxy_model.removeSelectedRows(
+            selected_rows=selected_rows
+        )
         return None
 
 
@@ -1883,7 +1892,9 @@ class MainWindow(QMainWindow):
         '''
         Instancia un Worker y un QThread para actualizar la base de datos con 
         los productos eliminados.
-        NOTA: Este método SÍ ELIMINA LOS REGISTROS DE "Ventas" Y "Detalle_Ventas".
+        NOTA: Este método NO ELIMINA LOS REGISTROS DE "Ventas", "Deudas" NI 
+        "Detalle_Ventas" SINO QUE LOS MARCA COMO "ELIMINADOS" EN LA BASE DE 
+        DATOS.
 
         Parámetros
         ----------
@@ -1907,6 +1918,58 @@ class MainWindow(QMainWindow):
         return None
 
 
+    # TODO: implementar la eliminación de deudores
+    # deudas
+    def __deleteDebtsRows(self) -> None:
+        '''
+        Elimina los deudores seleccionados en el MODELO de deudas y actualiza 
+        la VISTA, además actualiza la progress-bar asociada.
+        '''
+        # obtiene las filas seleccionadas
+        selected_rows = getSelectedTableRows(self.ui.tv_debts_data)
+        
+        if not selected_rows:
+            return None
+        
+        # cambia la progress-bar para representar las eliminaciones
+        self.ui.debts_progressbar.setMaximum(len(selected_rows))
+        self.ui.debts_progressbar.setStyleSheet(ProgressBarStyle.DELETION.value)
+        
+        self.debts_proxy_model.removeSelectedRows(selected_rows=selected_rows)
+        return None
+    
+    
+    @Slot(object)
+    def __onDebtsBaseModelRowsSelected(self, base_model_rows_selected:tuple[int]) -> None:
+        '''
+        Instancia un Worker y un QThread para actualizar la base de datos con 
+        los deudores eliminados.
+        NOTA: Este método NO ELIMINA LOS REGISTROS DE "Deudas", SINO QUE LAS 
+        MARCA COMO ELIMINADAS.
+
+        Parámetros
+        ----------
+        base_model_rows_selected : tuple[int]
+            las filas mapeadas del MODELO BASE seleccionadas para eliminar en 
+            la base de datos
+
+        Retorna
+        -------
+        None
+        '''
+        ids_params = self.__getDeleteData(
+                table_viewID=TableViewId.SALES_TABLE_VIEW,
+                selected_rows=base_model_rows_selected
+            )
+        
+        # instancia y ejecuta WORKER y THREAD
+        self.__instanciateDeleteWorkerAndThread(
+            table_viewID=TableViewId.SALES_TABLE_VIEW, 
+            del_params=ids_params)
+        return None
+    
+    
+    # generales
     def __getDeleteData(self, table_viewID:TableViewId, selected_rows:Iterable) -> Iterable[tuple | dict]:
         '''
         Obtiene los datos necesarios desde el MODELO de datos de la VISTA especifica 
@@ -1979,8 +2042,12 @@ class MainWindow(QMainWindow):
 
     def __instanciateDeleteWorkerAndThread(self, table_viewID:TableViewId, del_params:Iterable[tuple]) -> None:
         '''
-        Dependiendo de la VISTA, instancia y ejecuta un WORKER y un QTHREAD para realizar 
-        las consultas de eliminación a la base de datos y conecta sus señales.
+        Dependiendo de la VISTA, instancia y ejecuta un *Worker* y un 
+        **QThread** para realizar las consultas de eliminación a la base de 
+        datos y conecta sus señales.
+        Aunque éste método está pensado para ejecutar *DELETES* en la base de 
+        datos también se encarga de aquellas consultas *UPDATE* que marquen 
+        como "eliminados" los registros en las tablas.
 
         Parámetros
         ----------
@@ -1995,8 +2062,8 @@ class MainWindow(QMainWindow):
         '''
         self.DELETE_THREAD = QThread()
         
-        match table_viewID.name:
-            case "INVEN_TABLE_VIEW":
+        match table_viewID:
+            case TableViewId.INVEN_TABLE_VIEW:
                 self.update_worker = WorkerUpdate()
                 self.update_worker.moveToThread(self.DELETE_THREAD)
                 
@@ -2016,14 +2083,17 @@ class MainWindow(QMainWindow):
                 self.update_worker.finished.connect(self.DELETE_THREAD.quit)
                 self.DELETE_THREAD.finished.connect(self.update_worker.deleteLater)
             
-            case "SALES_TABLE_VIEW":
+            case TableViewId.SALES_TABLE_VIEW:
                 # borra registros de Detalle_Ventas, Ventas y Deudas
                 mult_sql:tuple[str] = (
-                    '''DELETE FROM Detalle_Ventas 
+                    '''UPDATE Detalle_Ventas 
+                       SET eliminado = 1 
                        WHERE ID_detalle_venta = ?;''',
-                    '''DELETE FROM Ventas 
+                    '''UPDATE Ventas 
+                       SET eliminado = 1 
                        WHERE IDventa = ?;''',
-                    '''DELETE FROM Deudas 
+                    '''UPDATE Deudas 
+                       SET eliminado = 1 
                        WHERE IDdeuda = ?;'''
                     )
                 self.delete_worker = WorkerDelete()
@@ -2045,8 +2115,8 @@ class MainWindow(QMainWindow):
                 self.delete_worker.finished.connect(self.DELETE_THREAD.quit)
                 self.DELETE_THREAD.finished.connect(self.delete_worker.deleteLater)
             
-            case "DEBTS_TABLE_VIEW":
-                pass
+            case TableViewId.DEBTS_TABLE_VIEW:
+                ...
             
         self.DELETE_THREAD.start()
         return None
