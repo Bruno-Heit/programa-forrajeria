@@ -1788,45 +1788,23 @@ class MainWindow(QMainWindow):
         return None
     
     
-    # TODO: implementar la eliminación de deudores
-    @Slot(QTableView)
-    def handleTableDeleteRows(self, table_viewID:TableViewId) -> None:
-        '''
-        Elimina los registros seleccionados en la VISTA correspondiente y 
-        modifica el MODELO DE DATOS, además actualiza el estado de la 
-        progress-bar relacionada con la VISTA.
-        
-        Parámetros
-        ----------
-        table_viewID : TableViewId
-            QTableView al que se refencia
-        '''
-        match table_viewID:
-            case TableViewId.INVEN_TABLE_VIEW:
-                self.__deleteInventoryRows()
-            
-            case TableViewId.SALES_TABLE_VIEW:
-                self.__deleteSalesRows()
-
-            case TableViewId.DEBTS_TABLE_VIEW:
-                self.__deleteDebtsRows()
-            
-        return None
-    
-    
     # productos
     def __deleteInventoryRows(self) -> None:
         '''
-        Elimina los productos seleccionados en el MODELO de inventario y actualiza 
-        la VISTA, , además actualiza la progress-bar asociada.
+        Elimina los productos seleccionados en el MODELO de inventario y 
+        actualiza la VISTA, además actualiza la progress-bar asociada.
         '''
-        selected_rows:tuple[int] = getSelectedTableRows(self.ui.tv_inventory_data)
+        selected_rows:tuple[int] = getSelectedTableRows(
+            self.ui.tv_inventory_data
+        )
         if not selected_rows:
             return None
         
         # cambia la progress-bar para representar las eliminaciones
         self.ui.inventory_progressbar.setMaximum(len(selected_rows))
-        self.ui.inventory_progressbar.setStyleSheet(ProgressBarStyle.DELETION.value)
+        self.ui.inventory_progressbar.setStyleSheet(
+            ProgressBarStyle.DELETION.value
+        )
         
         # actualiza el MODELO de datos
         self.inventory_proxy_model.removeSelectedRows(selected_rows)
