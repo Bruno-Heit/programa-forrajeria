@@ -154,7 +154,7 @@ def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=Fals
                         FROM Detalle_Ventas as dv 
                         LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto 
                         LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa 
-                        WHERE v.fecha_hora BETWEEN ? AND ?;'''),
+                        WHERE v.fecha_hora BETWEEN ? AND ? AND dv.eliminado = 0;'''),
                 str( '''SELECT dv.ID_detalle_venta,
                                v.detalles_venta,
                                dv.cantidad,
@@ -166,7 +166,7 @@ def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=Fals
                         FROM Detalle_Ventas as dv 
                         LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto 
                         LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa
-                        WHERE v.fecha_hora BETWEEN ? AND ?;''')
+                        WHERE v.fecha_hora BETWEEN ? AND ? AND dv.eliminado = 0;''')
                 )
 
         case "DEBTS_TABLE_VIEW":
