@@ -40,12 +40,14 @@ from utils.productbalancedelegate import (ProductsBalanceDelegate)
 from utils.customvalidators import (SearchBarValidator, ProductReduceDebtValidator, 
                                     CategoryDescValidator)
 from utils.eventfilters import (BackgroundEventFilter, CategoryDescTextEditEventFilter)
+from ui.customCalendars import (CustomCalendar)
 
 from sqlite3 import (Error as sqlite3Error)
 from phonenumbers import (parse, format_number, is_valid_number, 
                           PhoneNumber, PhoneNumberFormat, 
                           NumberParseException)
 from re import (sub)
+from datetime import (datetime)
 
 
 # PRODUCTOS ====================================================================================================
@@ -1539,7 +1541,14 @@ class SaleDialog(QDialog):
         
         self.saleDialog_ui.comboBox_productName.addItems(getProductNames())
         
-        self.saleDialog_ui.dateTimeEdit.setDateTime(QDateTime.currentDateTime())
+        with QSignalBlocker(self.saleDialog_ui.dateTimeEdit):
+            self.saleDialog_ui.dateTimeEdit.setCalendarWidget(
+                CustomCalendar(self.saleDialog_ui.dateTimeEdit)
+            )
+            self.saleDialog_ui.dateTimeEdit.setDateTime(
+                QDateTime.currentDateTime()
+            )
+        
         self.sale_values.setDatetime(self.saleDialog_ui.dateTimeEdit.dateTime())
 
         # esconde widgets
@@ -4234,7 +4243,7 @@ class ProductsBalanceDialog(QDialog):
         self.setup_delegate()
         self.setup_signals()
         
-        self.adjustSize()
+        self.updateWindowOnTableChanges()
         return None
     
     
@@ -4390,6 +4399,12 @@ class ProductsBalanceDialog(QDialog):
         self.products_balance_proxy_model.baseModelRowsSelected.connect(
             self.__onProductsBalanceBaseModelRowsSelected
         )
+        
+        # redimensionar la ventana
+        self.products_balance_model.modelReset.connect(self.updateWindowOnTableChanges)
+        self.products_balance_model.rowsInserted.connect(self.updateWindowOnTableChanges)
+        self.products_balance_model.rowsRemoved.connect(self.updateWindowOnTableChanges)
+        self.products_balance_model.dataChanged.connect(self.updateWindowOnTableChanges)
         return None
 
 
@@ -4410,6 +4425,9 @@ class ProductsBalanceDialog(QDialog):
         ndarray
             ndarray[[ID_detalle_venta, fecha y hora, descripción, saldo]]
         '''
+        _date_time:str | datetime
+        dt:str | datetime
+        
         with DatabaseRepository() as db_repo:
             match show_all:
                 case True: # selecciona todas las deudas
@@ -4450,6 +4468,25 @@ class ProductsBalanceDialog(QDialog):
                                         d.eliminado = 0;''',
                         data_params=(self.debtor_id,)
                     )
+        
+        # intenta convertir la fecha y hora a objeto 'datetime'
+        if data:
+            for i, reg in enumerate(data):
+                _date_time = reg[1]
+                reg = list(reg)
+                try:
+                    dt = datetime.strptime(_date_time, DateAndTimeFormat.DIR_DATETIME_ISO_8601.value)
+                    _date_time = dt.strftime(DateAndTimeFormat.DIR_LOCAL_DATETIME_FORMAT.value)
+
+                except (ValueError, TypeError) as err:
+                    logging.error(f"Error al convertir fecha y hora a objeto 'datetime': {err}")
+                    _date_time = reg[1]
+
+                finally:
+                    reg[1] = _date_time
+                    reg = tuple(reg)
+                    data[i] = reg
+        
         return array(data, dtype=object)
 
     
@@ -4558,6 +4595,10 @@ class ProductsBalanceDialog(QDialog):
         with DatabaseRepository() as db_repo:
             match column:
                 case TableViewColumns.PRODS_BAL_DATETIME.value:
+                    # intenta convertir a formato ISO 8601...
+                    _datetime_to_iso = local_to_ISO8601(new_val)
+                    _datetime_to_iso = new_val if not _datetime_to_iso else _datetime_to_iso
+                    
                     db_repo.updateRegisters(
                         upd_sql= '''UPDATE Ventas 
                                     SET fecha_hora = ? 
@@ -4565,7 +4606,7 @@ class ProductsBalanceDialog(QDialog):
                                         SELECT IDventa 
                                         FROM Detalle_Ventas 
                                         WHERE ID_detalle_venta = ?);''',
-                        upd_params=(new_val, IDsales_detail)
+                        upd_params=(_datetime_to_iso, IDsales_detail)
                     )
                     
                     db_repo.updateRegisters(
@@ -4575,7 +4616,7 @@ class ProductsBalanceDialog(QDialog):
                                         SELECT IDdeuda 
                                         FROM Detalle_Ventas 
                                         WHERE ID_detalle_venta = ?);''',
-                        upd_params=(new_val, IDsales_detail)
+                        upd_params=(_datetime_to_iso, IDsales_detail)
                     )
                 
                 case TableViewColumns.PRODS_BAL_DESCRIPTION.value:
@@ -4688,6 +4729,14 @@ class ProductsBalanceDialog(QDialog):
         
         # mapea los índices
         return [proxy_model.mapToSource(proxy_model.index(row, col)) for row in selected_rows]
+
+
+    # redimensionar la ventana
+    # TODO: corregir, cuando se hace un reset a la tabla el dialog se hace más pequeño que la altura de la tabla
+    def updateWindowOnTableChanges(self) -> None:
+        self.products_balance_dialog.tv_balance_products.adjustSize()
+        self.adjustSize()
+        return None
 
 
     # eventos
