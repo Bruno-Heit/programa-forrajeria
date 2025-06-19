@@ -4242,8 +4242,6 @@ class ProductsBalanceDialog(QDialog):
         self.setup_model()
         self.setup_delegate()
         self.setup_signals()
-        
-        self.updateWindowOnTableChanges()
         return None
     
     
@@ -4399,12 +4397,6 @@ class ProductsBalanceDialog(QDialog):
         self.products_balance_proxy_model.baseModelRowsSelected.connect(
             self.__onProductsBalanceBaseModelRowsSelected
         )
-        
-        # redimensionar la ventana
-        self.products_balance_model.modelReset.connect(self.updateWindowOnTableChanges)
-        self.products_balance_model.rowsInserted.connect(self.updateWindowOnTableChanges)
-        self.products_balance_model.rowsRemoved.connect(self.updateWindowOnTableChanges)
-        self.products_balance_model.dataChanged.connect(self.updateWindowOnTableChanges)
         return None
 
 
@@ -4730,15 +4722,7 @@ class ProductsBalanceDialog(QDialog):
         # mapea los índices
         return [proxy_model.mapToSource(proxy_model.index(row, col)) for row in selected_rows]
 
-
-    # redimensionar la ventana
-    # TODO: corregir, cuando se hace un reset a la tabla el dialog se hace más pequeño que la altura de la tabla
-    def updateWindowOnTableChanges(self) -> None:
-        self.products_balance_dialog.tv_balance_products.adjustSize()
-        self.adjustSize()
-        return None
-
-
+    
     # eventos
     def showEvent(self, event:QShowEvent):
         '''
