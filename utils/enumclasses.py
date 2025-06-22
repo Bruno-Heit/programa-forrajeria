@@ -359,30 +359,45 @@ class DebtsFields(IntEnum):
 
 
 # nombres predeterminados de columnas de tablas
-class TableViewColumns(IntEnum):
-    '''Clase de tipo 'IntEnum' con los nombres predeterminados de las columnas de las 
-    VISTAS.'''
+class InvViewCols(IntEnum):
+    '''Clase de tipo 'IntEnum' con los nombres predeterminados de las columnas 
+    de las VISTAS.'''
     INV_CATEGORY = 0
     INV_PRODUCT_NAME = 1
     INV_DESCRIPTION = 2
     INV_STOCK = 3
     INV_NORMAL_PRICE = 4
     INV_COMERCIAL_PRICE = 5
-    
+
+
+
+
+
+class SalesViewCols(IntEnum):
     SALES_DETAIL = 0
     SALES_QUANTITY = 1
     SALES_PRODUCT_NAME = 2
     SALES_TOTAL_COST = 3
     SALES_TOTAL_PAID = 4
     SALES_DATETIME = 5
-    
+
+
+
+
+
+class DebtorViewCols(IntEnum):
     DEBTS_NAME = 0
     DEBTS_SURNAME = 1
     DEBTS_PHONE_NUMBER = 2
     DEBTS_DIRECTION = 3
     DEBTS_POSTAL_CODE = 4
     DEBTS_BALANCE = 5
-    
+
+
+
+
+
+class DebtsViewCols(IntEnum):
     PRODS_BAL_DATETIME = 0
     PRODS_BAL_DESCRIPTION = 1
     PRODS_BAL_BALANCE = 2
@@ -391,10 +406,12 @@ class TableViewColumns(IntEnum):
 
 
 
-class ModelDataCols(IntEnum):
-    '''Clase de tipo 'IntEnum' con las columnas que maneja cada modelo de datos 
-    internamente en su respectivo atributo '_data', ya que los datos internos del 
-    MODELO DE DATOS son diferentes a los datos que muestra la VISTA.'''
+# columnas en los modelos de las tablas
+class InvModelCols(IntEnum):
+    '''Clase de tipo **IntEnum** con las columnas que maneja el modelo de 
+    datos de Inventario internamente en su atributo *_data*, ya que los datos 
+    internos del *MODELO DE DATOS* son diferentes a los datos que muestra la 
+    *VISTA*.'''
     INV_IDPRODUCT = 0
     INV_CATEGORY_NAME = 1
     INV_NAME = 2
@@ -403,7 +420,16 @@ class ModelDataCols(IntEnum):
     INV_MEASUREMENT_UNIT = 5
     INV_NORMAL_PRICE = 6
     INV_COMERCIAL_PRICE = 7
-    
+
+
+
+
+
+class SalesModelCols(IntEnum):
+    '''Clase de tipo **IntEnum** con las columnas que maneja el modelo de 
+    datos de Ventas internamente en su atributo *_data*, ya que los datos 
+    internos del *MODELO DE DATOS* son diferentes a los datos que muestra la 
+    *VISTA*.'''
     SALES_ID_SALES_DETAIL = 0
     SALES_DETAIL = 1
     SALES_QUANTITY = 2
@@ -412,10 +438,28 @@ class ModelDataCols(IntEnum):
     SALES_TOTAL_COST = 5
     SALES_TOTAL_PAID = 6
     SALES_DATETIME = 7
-    
+
+
+
+
+
+class DebtorFullName(IntEnum):
+    '''Clase de tipo **IntEnum** con las columnas dentro de los modelos que 
+    referencien al nombre completo de un deudor internamente, ya que los datos 
+    internos del *MODELO DE DATOS* son diferentes a los datos que muestra la 
+    *VISTA*.'''
     DEBTOR_NAME_SURNAME_MODEL_NAME = 0
     DEBTOR_NAME_SURNAME_MODEL_SURNAME = 1
-    
+
+
+
+
+
+class DebtorModelCols(IntEnum):
+    '''Clase de tipo **IntEnum** con las columnas que maneja el modelo de 
+    datos de Cuentas Corrientes internamente en su atributo *_data*, ya que 
+    los datos internos del *MODELO DE DATOS* son diferentes a los datos que 
+    muestra la *VISTA*.'''
     DEBTS_IDDEBTOR = 0
     DEBTS_NAME = 1
     DEBTS_SURNAME = 2
@@ -423,7 +467,16 @@ class ModelDataCols(IntEnum):
     DEBTS_DIRECTION = 4
     DEBTS_POSTAL_CODE = 5
     DEBTS_TOTAL_BALANCE = 6
-    
+
+
+
+
+
+class DebtsModelCols(IntEnum):
+    '''Clase de tipo **IntEnum** con las columnas que maneja el modelo de 
+    datos de balance de productos (deudas) internamente en su atributo 
+    *_data*, ya que los datos internos del *MODELO DE DATOS* son diferentes a 
+    los datos que muestra la *VISTA*.'''
     PRODS_BAL_ID_SALES_DETAIL = 0
     PRODS_BAL_DATETIME = 1
     PRODS_BAL_DESCRIPTION = 2

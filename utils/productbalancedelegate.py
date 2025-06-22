@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (QWidget, QStyledItemDelegate, QStyleOptionViewIte
 from PySide6.QtCore import (Qt, QModelIndex, QSize, QPersistentModelIndex, 
                             QAbstractItemModel, Slot, QDateTime)
 
-from utils.enumclasses import (LabelFeedbackStyle, TableViewColumns, Regex, 
+from utils.enumclasses import (LabelFeedbackStyle, DebtsViewCols, Regex, 
                                DateAndTimeFormat)
 from utils.customvalidators import (ProductBalanceValidator, SaleDetailsValidator)
 from ui.customCalendars import (CustomCalendar)
@@ -29,7 +29,7 @@ class ProductsBalanceDelegate(QStyledItemDelegate):
         editor:QLineEdit | QDateTimeEdit
         validator = None
         match index.column():
-            case TableViewColumns.PRODS_BAL_DATETIME.value:
+            case DebtsViewCols.PRODS_BAL_DATETIME.value:
                 editor = QDateTimeEdit(parent)
                 editor.setDisplayFormat(DateAndTimeFormat.LOCAL_DATETIME_FORMAT.value)
                 editor.setCalendarPopup(True)
@@ -37,7 +37,7 @@ class ProductsBalanceDelegate(QStyledItemDelegate):
                     CustomCalendar(editor)
                 )
             
-            case TableViewColumns.PRODS_BAL_DESCRIPTION.value:
+            case DebtsViewCols.PRODS_BAL_DESCRIPTION.value:
                 editor = QLineEdit(parent)
                 validator = SaleDetailsValidator(editor)
                 validator.validationSucceeded.connect(
@@ -48,7 +48,7 @@ class ProductsBalanceDelegate(QStyledItemDelegate):
                 )
                 editor.setValidator(validator)
             
-            case TableViewColumns.PRODS_BAL_BALANCE.value:
+            case DebtsViewCols.PRODS_BAL_BALANCE.value:
                 editor = QLineEdit(parent)
                 validator = ProductBalanceValidator(editor)
                 validator.validationSucceeded.connect(
@@ -101,11 +101,11 @@ class ProductsBalanceDelegate(QStyledItemDelegate):
                      model: QAbstractItemModel, 
                      index: QModelIndex | QPersistentModelIndex) -> None:
         match index.column():
-            case TableViewColumns.PRODS_BAL_DATETIME.value:
+            case DebtsViewCols.PRODS_BAL_DATETIME.value:
                 editor:QDateTimeEdit
                 value = editor.text()
             
-            case TableViewColumns.PRODS_BAL_DESCRIPTION.value:
+            case DebtsViewCols.PRODS_BAL_DESCRIPTION.value:
                 value = editor.text().strip()
                 pattern = compile(Regex.SALES_DETAILS_PRICE_TYPE.value, IGNORECASE)
                 
@@ -124,7 +124,7 @@ class ProductsBalanceDelegate(QStyledItemDelegate):
                     _price_type = str(_price_type.group()).upper().replace(" ", "")
                     value = sub(pattern, _price_type, value)
             
-            case TableViewColumns.PRODS_BAL_BALANCE.value:
+            case DebtsViewCols.PRODS_BAL_BALANCE.value:
                 value = editor.text().replace(",",".")
                 if value.endswith((",",".")):
                         value = value.rstrip(",.")

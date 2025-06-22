@@ -21,7 +21,8 @@ from utils.dboperations import (DatabaseRepository, ensureDateTimeISOformat)
 from utils.customvalidators import (SalePaidValidator, CategoryNameValidator)
 from utils.enumclasses import (LoggingMessage, ModelHeaders, TableViewId, 
                                LabelFeedbackStyle, InventoryPriceType, TypeSideBar, 
-                               TableViewColumns, ProgressBarStyle, DateAndTimeFormat, 
+                               InvViewCols, SalesViewCols, DebtorViewCols, 
+                               DebtsViewCols, ProgressBarStyle, DateAndTimeFormat, 
                                CommonCategories, DateTimeRanges)
 from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxyModel)
 from utils.eventfilters import (BackgroundEventFilter, CategoryItemEventFilter, 
@@ -1728,7 +1729,7 @@ class MainWindow(QMainWindow):
         if self.inventory_data_model.modelHasData():
             # obtengo el índice donde modificar el stock
             found_index_row = self.inventory_data_model.match(
-                self.inventory_data_model.index(0, TableViewColumns.INV_PRODUCT_NAME.value), # busca desde la 1ra fila, 2da columna (de nombre).
+                self.inventory_data_model.index(0, InvViewCols.INV_PRODUCT_NAME.value), # busca desde la 1ra fila, 2da columna (de nombre).
                 Qt.ItemDataRole.DisplayRole.value,          # devuelve la coincidencia como texto.
                 data_to_insert['product_name'],             # el dato a buscar.
                 1,                                          # cantidad de coincidencias para que deje de buscar.
@@ -1739,7 +1740,7 @@ class MainWindow(QMainWindow):
                 # obtiene el stock en esa fila
                 target_index = self.inventory_data_model.index(
                     found_index_row,
-                    TableViewColumns.INV_STOCK.value
+                    InvViewCols.INV_STOCK.value
                 )
                 curr_stock, measurement_unit = target_index.data(Qt.ItemDataRole.DisplayRole).split(" ", 1)
                 
@@ -2188,7 +2189,7 @@ class MainWindow(QMainWindow):
         None
         '''
         match column:
-            case TableViewColumns.INV_CATEGORY.value:
+            case InvViewCols.INV_CATEGORY.value:
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Productos 
@@ -2199,7 +2200,7 @@ class MainWindow(QMainWindow):
                         upd_params=(new_val, IDproduct,)
                         )
             
-            case TableViewColumns.INV_PRODUCT_NAME.value:
+            case InvViewCols.INV_PRODUCT_NAME.value:
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Productos 
@@ -2208,7 +2209,7 @@ class MainWindow(QMainWindow):
                         upd_params=(new_val, IDproduct,)
                         )
             
-            case TableViewColumns.INV_DESCRIPTION.value:
+            case InvViewCols.INV_DESCRIPTION.value:
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Productos 
@@ -2217,7 +2218,7 @@ class MainWindow(QMainWindow):
                         upd_params=(new_val, IDproduct,)
                         )
             
-            case TableViewColumns.INV_STOCK.value:
+            case InvViewCols.INV_STOCK.value:
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Productos 
@@ -2226,7 +2227,7 @@ class MainWindow(QMainWindow):
                         upd_params=(new_val[0], new_val[1], IDproduct,)
                         )
             
-            case TableViewColumns.INV_NORMAL_PRICE.value:
+            case InvViewCols.INV_NORMAL_PRICE.value:
                 # actualiza en Productos
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
@@ -2242,7 +2243,7 @@ class MainWindow(QMainWindow):
                     params=(IDproduct,)
                 )
             
-            case TableViewColumns.INV_COMERCIAL_PRICE.value:
+            case InvViewCols.INV_COMERCIAL_PRICE.value:
                 # actualiza en Productos
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
@@ -2484,7 +2485,7 @@ class MainWindow(QMainWindow):
             Valor nuevo del item
         '''
         match column:
-            case TableViewColumns.DEBTS_NAME.value:
+            case DebtorViewCols.DEBTS_NAME.value:
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Deudores 
@@ -2493,7 +2494,7 @@ class MainWindow(QMainWindow):
                         upd_params=(new_val, ID_debtor,)
                         )
             
-            case TableViewColumns.DEBTS_SURNAME.value:
+            case DebtorViewCols.DEBTS_SURNAME.value:
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Deudores 
@@ -2502,7 +2503,7 @@ class MainWindow(QMainWindow):
                         upd_params=(new_val, ID_debtor,)
                         )
             
-            case TableViewColumns.DEBTS_PHONE_NUMBER.value:
+            case DebtorViewCols.DEBTS_PHONE_NUMBER.value:
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Deudores 
@@ -2511,7 +2512,7 @@ class MainWindow(QMainWindow):
                         upd_params=(new_val, ID_debtor,)
                         )
             
-            case TableViewColumns.DEBTS_DIRECTION.value:
+            case DebtorViewCols.DEBTS_DIRECTION.value:
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Deudores 
@@ -2520,7 +2521,7 @@ class MainWindow(QMainWindow):
                         upd_params=(new_val, ID_debtor,)
                         )
             
-            case TableViewColumns.DEBTS_POSTAL_CODE.value:
+            case DebtorViewCols.DEBTS_POSTAL_CODE.value:
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Deudores 
@@ -2651,11 +2652,11 @@ class MainWindow(QMainWindow):
         
         if self.ui.checkbox_unit_prices.isChecked():
             selected_indexes = self.__getInventoryMappedIndexes(
-                column=TableViewColumns.INV_NORMAL_PRICE
+                column=InvViewCols.INV_NORMAL_PRICE
             )
         else:
             selected_indexes = self.__getInventoryMappedIndexes(
-                column=TableViewColumns.INV_COMERCIAL_PRICE
+                column=InvViewCols.INV_COMERCIAL_PRICE
             )
         
         if not selected_indexes:
@@ -2669,14 +2670,14 @@ class MainWindow(QMainWindow):
         return None
 
 
-    def __getInventoryMappedIndexes(self, column:TableViewColumns) -> list[QModelIndex]:
+    def __getInventoryMappedIndexes(self, column:int) -> list[QModelIndex]:
         '''
         Obtiene los índices ya mapeados seleccionados en la VISTA para usarse 
         en el MODELO DE DATOS de Inventario.
         
         Parámetros
         ----------
-        column : TableViewColumns
+        column : int
             la columna de la cual obtener los índices mapeados, sólo admite 
             las columnas de "precio normal" y "precio comercial"
 

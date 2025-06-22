@@ -31,8 +31,10 @@ from utils.workerclasses import *
 from utils.dboperations import *
 from utils.enumclasses import (WidgetStyle, InventoryPriceType, 
                                ProductFields, SaleFields, DebtsFields, 
-                               ModelDataCols, ModelHeaders, 
-                               LabelFeedbackStyle, TableViewColumns,
+                               InvModelCols, SalesModelCols, DebtorFullName, 
+                               DebtorModelCols, DebtsModelCols, ModelHeaders, 
+                               LabelFeedbackStyle, InvViewCols, SalesViewCols, 
+                               DebtorViewCols, DebtsViewCols,
                                SaleDialogDimensions, DateAndTimeFormat)
 from utils.model_classes import (ProductsBalanceModel)
 from utils.proxy_models import (ProductsBalanceProxyModel)
@@ -4197,13 +4199,13 @@ class DebtorDataDialog(QDialog):
             # si se llamó desde Deudas emite los datos para actualizar el MODELO
             else:
                 self.dataToInsert.emit(
-                    {ModelDataCols.DEBTS_IDDEBTOR.name: debtor_id,
-                     ModelDataCols.DEBTS_NAME.name: self.debtor_values.getName(),
-                     ModelDataCols.DEBTS_SURNAME.name: self.debtor_values.getSurname(),
-                     ModelDataCols.DEBTS_PHONE_NUMBER.name: self.debtor_values.getPhoneNumber(),
-                     ModelDataCols.DEBTS_DIRECTION.name: self.debtor_values.getDirection(),
-                     ModelDataCols.DEBTS_POSTAL_CODE.name: self.debtor_values.getPostalCode(),
-                     ModelDataCols.DEBTS_TOTAL_BALANCE.name: 0.0}
+                    {DebtorModelCols.DEBTS_IDDEBTOR.name: debtor_id,
+                     DebtorModelCols.DEBTS_NAME.name: self.debtor_values.getName(),
+                     DebtorModelCols.DEBTS_SURNAME.name: self.debtor_values.getSurname(),
+                     DebtorModelCols.DEBTS_PHONE_NUMBER.name: self.debtor_values.getPhoneNumber(),
+                     DebtorModelCols.DEBTS_DIRECTION.name: self.debtor_values.getDirection(),
+                     DebtorModelCols.DEBTS_POSTAL_CODE.name: self.debtor_values.getPostalCode(),
+                     DebtorModelCols.DEBTS_TOTAL_BALANCE.name: 0.0}
                 )
         
         return None
@@ -4554,7 +4556,7 @@ class ProductsBalanceDialog(QDialog):
         # marca como eliminados los registros
         for id in ids_to_delete:
             self.updateValuesInDatabase(
-                column=TableViewColumns.PRODS_BAL_BALANCE.value,
+                column=DebtsViewCols.PRODS_BAL_BALANCE.value,
                 IDsales_detail=id,
                 new_val=0
             )
@@ -4586,7 +4588,7 @@ class ProductsBalanceDialog(QDialog):
         '''
         with DatabaseRepository() as db_repo:
             match column:
-                case TableViewColumns.PRODS_BAL_DATETIME.value:
+                case DebtsViewCols.PRODS_BAL_DATETIME.value:
                     # intenta convertir a formato ISO 8601...
                     _datetime_to_iso = local_to_ISO8601(new_val)
                     _datetime_to_iso = new_val if not _datetime_to_iso else _datetime_to_iso
@@ -4611,7 +4613,7 @@ class ProductsBalanceDialog(QDialog):
                         upd_params=(_datetime_to_iso, IDsales_detail)
                     )
                 
-                case TableViewColumns.PRODS_BAL_DESCRIPTION.value:
+                case DebtsViewCols.PRODS_BAL_DESCRIPTION.value:
                     db_repo.updateRegisters(
                         upd_sql= '''UPDATE Ventas 
                                     SET detalles_venta = ? 
@@ -4622,7 +4624,7 @@ class ProductsBalanceDialog(QDialog):
                         upd_params=(new_val, IDsales_detail,)
                     )
                 
-                case TableViewColumns.PRODS_BAL_BALANCE.value:
+                case DebtsViewCols.PRODS_BAL_BALANCE.value:
                     db_repo.updateRegisters(
                         upd_sql= '''UPDATE Deudas
                                     SET 
@@ -4714,7 +4716,7 @@ class ProductsBalanceDialog(QDialog):
         selected_rows:tuple[int] # filas seleccionadas
         table_view = self.products_balance_dialog.tv_balance_products
         proxy_model = self.products_balance_proxy_model
-        col = TableViewColumns.PRODS_BAL_BALANCE.value
+        col = DebtsViewCols.PRODS_BAL_BALANCE.value
         
         # obtengo las filas seleccionadas
         selected_rows = getSelectedTableRows(tableView=table_view)

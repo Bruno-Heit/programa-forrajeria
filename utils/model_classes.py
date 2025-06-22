@@ -5,12 +5,14 @@
 from typing import (Any, Sequence)
 from numpy import (ndarray, delete, s_, vstack, array)
 
-from PySide6.QtCore import (QAbstractTableModel, Qt, QModelIndex, QPersistentModelIndex, 
-                            QObject, Signal)
+from PySide6.QtCore import (QAbstractTableModel, Qt, QModelIndex, 
+                            QPersistentModelIndex, QObject, Signal)
 from PySide6.QtGui import (QBrush, QColor)
 
-from utils.enumclasses import (TableBgColors, TableFontColor, ModelDataCols, 
-                               TableViewColumns, DateAndTimeFormat)
+from utils.enumclasses import (TableBgColors, TableFontColor, InvModelCols, 
+                               SalesModelCols, DebtorFullName, DebtorModelCols, 
+                               DebtsModelCols, InvViewCols, SalesViewCols, 
+                               DebtorViewCols, DebtsViewCols, DateAndTimeFormat)
 from utils.dboperations import (DatabaseRepository)
 
 from datetime import datetime
@@ -446,10 +448,10 @@ class SalesTableModel(QAbstractTableModel):
             match index.column():
                 case 0: # detalle de venta
                     #? no modifica el modelo si el nuevo dato es igual al anterior
-                    if str(value) == str(self._data[index.row()][ModelDataCols.SALES_DETAIL.value]):
+                    if str(value) == str(self._data[index.row()][SalesModelCols.SALES_DETAIL.value]):
                         return False
                     
-                    self._data[index.row()][ModelDataCols.SALES_DETAIL.value] = value
+                    self._data[index.row()][SalesModelCols.SALES_DETAIL.value] = value
                     
                     # actualiza detalles de venta en MainWindow
                     self.dataToUpdate.emit(
@@ -463,10 +465,10 @@ class SalesTableModel(QAbstractTableModel):
         
                 case 1: # cantidad
                     value = str(value).replace(",", ".").strip()
-                    if value == str(self._data[index.row()][ModelDataCols.SALES_QUANTITY.value]):
+                    if value == str(self._data[index.row()][SalesModelCols.SALES_QUANTITY.value]):
                         return False
                     
-                    self._data[index.row()][ModelDataCols.SALES_QUANTITY.value] = float(value)
+                    self._data[index.row()][SalesModelCols.SALES_QUANTITY.value] = float(value)
                     
                     # actualiza cantidad en MainWindow
                     self.dataToUpdate.emit(
@@ -479,10 +481,10 @@ class SalesTableModel(QAbstractTableModel):
                     return True
                     
                 case 2: # producto
-                    if value == str(self._data[index.row()][ModelDataCols.SALES_PRODUCT_NAME.value]):
+                    if value == str(self._data[index.row()][SalesModelCols.SALES_PRODUCT_NAME.value]):
                         return False
                     
-                    self._data[index.row()][ModelDataCols.SALES_PRODUCT_NAME.value] = value
+                    self._data[index.row()][SalesModelCols.SALES_PRODUCT_NAME.value] = value
 
                     # actualiza producto en MainWindow
                     self.dataToUpdate.emit(
@@ -499,10 +501,10 @@ class SalesTableModel(QAbstractTableModel):
                 
                 case 3: # costo total
                     value = str(value).replace(",", ".")
-                    if str(value) == str(self._data[index.row()][ModelDataCols.SALES_TOTAL_COST.value]):
+                    if str(value) == str(self._data[index.row()][SalesModelCols.SALES_TOTAL_COST.value]):
                         return False
                     
-                    self._data[index.row()][ModelDataCols.SALES_TOTAL_COST.value] = value
+                    self._data[index.row()][SalesModelCols.SALES_TOTAL_COST.value] = value
                     
                     # actualiza costo total | abonado en MainWindow
                     self.dataToUpdate.emit(
@@ -516,10 +518,10 @@ class SalesTableModel(QAbstractTableModel):
                 
                 case 4: # abonado
                     value = str(value).replace(",", ".")
-                    if str(value) == str(self._data[index.row()][ModelDataCols.SALES_TOTAL_PAID.value]):
+                    if str(value) == str(self._data[index.row()][SalesModelCols.SALES_TOTAL_PAID.value]):
                         return False
                     
-                    self._data[index.row()][ModelDataCols.SALES_TOTAL_PAID.value] = value
+                    self._data[index.row()][SalesModelCols.SALES_TOTAL_PAID.value] = value
                     
                     # actualiza costo total | abonado en MainWindow
                     self.dataToUpdate.emit(
@@ -532,14 +534,14 @@ class SalesTableModel(QAbstractTableModel):
                     return True
                 
                 case 5: # fecha y hora
-                    if value == self._data[index.row()][ModelDataCols.SALES_DATETIME.value]:
+                    if value == self._data[index.row()][SalesModelCols.SALES_DATETIME.value]:
                         return False
                     
                     # intenta convertir la fecha y hora de la vista al 'datetime'
                     try:
                         value:datetime = datetime.strptime(value, DateAndTimeFormat.DIR_LOCAL_DATETIME_FORMAT.value)
                         value = value.strftime(DateAndTimeFormat.DIR_LOCAL_DATETIME_FORMAT.value).replace("-", "/")
-                        self._data[index.row()][ModelDataCols.SALES_DATETIME.value] = value
+                        self._data[index.row()][SalesModelCols.SALES_DATETIME.value] = value
                     
                     except ValueError as err:
                         return False
@@ -567,28 +569,28 @@ class SalesTableModel(QAbstractTableModel):
             case Qt.ItemDataRole.DisplayRole:
                 match col:
                     case 0: # detalle de venta
-                        return self._data[row, ModelDataCols.SALES_DETAIL.value]
+                        return self._data[row, SalesModelCols.SALES_DETAIL.value]
                     
                     case 1: # cantidad (+ unidad de medida)
-                        return (f"{self._data[row, ModelDataCols.SALES_QUANTITY.value]} " +
-                                f"{self._data[row, ModelDataCols.SALES_MEASUREMENT_UNIT.value]}"
+                        return (f"{self._data[row, SalesModelCols.SALES_QUANTITY.value]} " +
+                                f"{self._data[row, SalesModelCols.SALES_MEASUREMENT_UNIT.value]}"
                                 .replace(".", ","))
                     
                     case 2: # producto
-                        return self._data[row, ModelDataCols.SALES_PRODUCT_NAME.value]
+                        return self._data[row, SalesModelCols.SALES_PRODUCT_NAME.value]
                     
                     case 3: # costo total
                         return str(
-                            self._data[row, ModelDataCols.SALES_TOTAL_COST.value]
+                            self._data[row, SalesModelCols.SALES_TOTAL_COST.value]
                             ).replace(".", ",")
                     
                     case 4: # abonado
                         return str(
-                            self._data[row, ModelDataCols.SALES_TOTAL_PAID.value]
+                            self._data[row, SalesModelCols.SALES_TOTAL_PAID.value]
                             ).replace(".", ",")
                     
                     case 5: # fecha y hora
-                        return self._data[row, ModelDataCols.SALES_DATETIME.value]
+                        return self._data[row, SalesModelCols.SALES_DATETIME.value]
             
             case Qt.ItemDataRole.BackgroundRole:
                 match col:
@@ -803,7 +805,7 @@ class DebtsTableModel(QAbstractTableModel):
     #¡ flags
     def flags(self, index:QModelIndex | QPersistentModelIndex) -> Qt.ItemFlag:
         # si la columna es "balance" sólo es interactiva, no se puede editar directamente
-        if index.column() != TableViewColumns.DEBTS_BALANCE.value:
+        if index.column() != DebtorViewCols.DEBTS_BALANCE.value:
             return Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsEditable
         else:
             return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
@@ -839,85 +841,85 @@ class DebtsTableModel(QAbstractTableModel):
         '''
         if role == Qt.ItemDataRole.EditRole:
             match index.column():
-                case TableViewColumns.DEBTS_NAME.value: # nombre
+                case DebtorViewCols.DEBTS_NAME.value: # nombre
                     if value == self.data(index):
                         return False
-                    self._data[index.row(), ModelDataCols.DEBTS_NAME.value] = value
+                    self._data[index.row(), DebtorModelCols.DEBTS_NAME.value] = value
                     
                     # actualiza nombre en MainWindow
                     self.dataToUpdate.emit(
                         {'column': index.column(),
-                         'IDdebtor': self._data[index.row(), ModelDataCols.DEBTS_IDDEBTOR.value],
+                         'IDdebtor': self._data[index.row(), DebtorModelCols.DEBTS_IDDEBTOR.value],
                          'new_value': value}
                         )
                     
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
                     return True
         
-                case TableViewColumns.DEBTS_SURNAME.value: # apellido
+                case DebtorViewCols.DEBTS_SURNAME.value: # apellido
                     if value == self.data(index):
                         return False
-                    self._data[index.row(), ModelDataCols.DEBTS_SURNAME.value] = value
+                    self._data[index.row(), DebtorModelCols.DEBTS_SURNAME.value] = value
                     
                     # actualiza apellido en MainWindow
                     self.dataToUpdate.emit(
                         {'column': index.column(),
-                         'IDdebtor': self._data[index.row(), ModelDataCols.DEBTS_IDDEBTOR.value],
+                         'IDdebtor': self._data[index.row(), DebtorModelCols.DEBTS_IDDEBTOR.value],
                          'new_value': value}
                     )
                     
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
                     return True
                     
-                case TableViewColumns.DEBTS_PHONE_NUMBER.value: # número de teléfono
+                case DebtorViewCols.DEBTS_PHONE_NUMBER.value: # número de teléfono
                     if value == self.data(index):
                         return False
-                    self._data[index.row(), ModelDataCols.DEBTS_PHONE_NUMBER.value] = value
+                    self._data[index.row(), DebtorModelCols.DEBTS_PHONE_NUMBER.value] = value
 
                     # actualiza el número de teléfono en MainWindow
                     self.dataToUpdate.emit(
                         {'column': index.column(),
-                         'IDdebtor': self._data[index.row(), ModelDataCols.DEBTS_IDDEBTOR.value],
+                         'IDdebtor': self._data[index.row(), DebtorModelCols.DEBTS_IDDEBTOR.value],
                          'new_value': value}
                     )
                     
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
                     return True
                 
-                case TableViewColumns.DEBTS_DIRECTION.value: # dirección
+                case DebtorViewCols.DEBTS_DIRECTION.value: # dirección
                     if value == self.data(index):
                         return False
-                    self._data[index.row(), ModelDataCols.DEBTS_DIRECTION.value] = value
+                    self._data[index.row(), DebtorModelCols.DEBTS_DIRECTION.value] = value
 
                     # actualiza la dirección en MainWindow
                     self.dataToUpdate.emit(
                         {'column': index.column(),
-                         'IDdebtor': self._data[index.row(), ModelDataCols.DEBTS_IDDEBTOR.value],
+                         'IDdebtor': self._data[index.row(), DebtorModelCols.DEBTS_IDDEBTOR.value],
                          'new_value': value}
                     )
                     
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
                     return True
 
-                case TableViewColumns.DEBTS_POSTAL_CODE.value: # código postal
+                case DebtorViewCols.DEBTS_POSTAL_CODE.value: # código postal
                     if value == self.data(index):
                         return False
-                    self._data[index.row(), ModelDataCols.DEBTS_POSTAL_CODE.value] = value
+                    self._data[index.row(), DebtorModelCols.DEBTS_POSTAL_CODE.value] = value
 
                     # actualiza el código postal en MainWindow
                     self.dataToUpdate.emit(
                         {'column': index.column(),
-                            'IDdebtor': self._data[index.row(), ModelDataCols.DEBTS_IDDEBTOR.value],
+                            'IDdebtor': self._data[index.row(), DebtorModelCols.DEBTS_IDDEBTOR.value],
                             'new_value': value}
                     )
                             
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
                     return True
                 
-                case TableViewColumns.DEBTS_BALANCE.value: # balance
+                case DebtorViewCols.DEBTS_BALANCE.value: # balance
                     if value == self.data(index):
                         return False
-                    self._data[index.row(), ModelDataCols.DEBTS_TOTAL_BALANCE.value] = value
+                    self._data[index.row(), DebtorModelCols.DEBTS_TOTAL_BALANCE.value] = value
                     
                     #? NO EMITE LA SEÑAL 'dataToUpdate' PORQUE LA ACTUALIZACIÓN EN LA BASE DE DATOS 
                     #? YA ES HECHA DENTRO DEL DIALOG, SÓLO ES NECESARIO ACTUALIZAR LA VISTA...
@@ -955,43 +957,43 @@ class DebtsTableModel(QAbstractTableModel):
         match role:
             case Qt.ItemDataRole.DisplayRole:
                 match col:
-                    case TableViewColumns.DEBTS_NAME.value:
-                        return f"{self._data[row, ModelDataCols.DEBTS_NAME.value]}"
+                    case DebtorViewCols.DEBTS_NAME.value:
+                        return f"{self._data[row, DebtorModelCols.DEBTS_NAME.value]}"
                     
-                    case TableViewColumns.DEBTS_SURNAME.value:
-                        return f"{self._data[row, ModelDataCols.DEBTS_SURNAME.value]}"
+                    case DebtorViewCols.DEBTS_SURNAME.value:
+                        return f"{self._data[row, DebtorModelCols.DEBTS_SURNAME.value]}"
                     
-                    case TableViewColumns.DEBTS_PHONE_NUMBER.value:
-                        return f"{self._data[row, ModelDataCols.DEBTS_PHONE_NUMBER.value]}"
+                    case DebtorViewCols.DEBTS_PHONE_NUMBER.value:
+                        return f"{self._data[row, DebtorModelCols.DEBTS_PHONE_NUMBER.value]}"
                     
-                    case TableViewColumns.DEBTS_DIRECTION.value:
-                        return f"{self._data[row, ModelDataCols.DEBTS_DIRECTION.value]}"
+                    case DebtorViewCols.DEBTS_DIRECTION.value:
+                        return f"{self._data[row, DebtorModelCols.DEBTS_DIRECTION.value]}"
                     
-                    case TableViewColumns.DEBTS_POSTAL_CODE.value:
-                        return f"{self._data[row, ModelDataCols.DEBTS_POSTAL_CODE.value]}"
+                    case DebtorViewCols.DEBTS_POSTAL_CODE.value:
+                        return f"{self._data[row, DebtorModelCols.DEBTS_POSTAL_CODE.value]}"
                     
-                    case TableViewColumns.DEBTS_BALANCE.value:
+                    case DebtorViewCols.DEBTS_BALANCE.value:
                         if not return_debtor_id:
-                            return f"$ {self._data[row, ModelDataCols.DEBTS_TOTAL_BALANCE.value]}"
+                            return f"$ {self._data[row, DebtorModelCols.DEBTS_TOTAL_BALANCE.value]}"
                         else:
-                            return self._data[row, ModelDataCols.DEBTS_IDDEBTOR.value]
+                            return self._data[row, DebtorModelCols.DEBTS_IDDEBTOR.value]
                             
             
             case Qt.ItemDataRole.BackgroundRole:
                 match col:
-                    case (TableViewColumns.DEBTS_PHONE_NUMBER.value | 
-                         TableViewColumns.DEBTS_DIRECTION.value | 
-                         TableViewColumns.DEBTS_POSTAL_CODE.value):
+                    case (DebtorViewCols.DEBTS_PHONE_NUMBER.value | 
+                         DebtorViewCols.DEBTS_DIRECTION.value | 
+                         DebtorViewCols.DEBTS_POSTAL_CODE.value):
                         return TableBgColors.DEBTS_CONTACT.value
                     
                     
-                    case TableViewColumns.DEBTS_BALANCE.value:
+                    case DebtorViewCols.DEBTS_BALANCE.value:
                         # si el balance es negativo le da un fondo rojizo
-                        if float(self._data[row, ModelDataCols.DEBTS_TOTAL_BALANCE.value]) < 0:
+                        if float(self._data[row, DebtorModelCols.DEBTS_TOTAL_BALANCE.value]) < 0:
                             return TableBgColors.DEBTS_NEGATIVE_BALANCE.value
                         
                         # sino le da un fondo verdoso
-                        elif float(self._data[row, ModelDataCols.DEBTS_TOTAL_BALANCE.value]) > 0:
+                        elif float(self._data[row, DebtorModelCols.DEBTS_TOTAL_BALANCE.value]) > 0:
                             return TableBgColors.DEBTS_POSITIVE_BALANCE.value
                         
                         # si es 0, devuelve un fondo gris claro
@@ -1000,13 +1002,13 @@ class DebtsTableModel(QAbstractTableModel):
                     
             case Qt.ItemDataRole.ForegroundRole:
                 match col:
-                    case TableViewColumns.DEBTS_BALANCE.value:
+                    case DebtorViewCols.DEBTS_BALANCE.value:
                         # si el balance es negativo le da una font rojiza
-                        if float(self._data[row, ModelDataCols.DEBTS_TOTAL_BALANCE.value]) > 0:
+                        if float(self._data[row, DebtorModelCols.DEBTS_TOTAL_BALANCE.value]) > 0:
                             return TableFontColor.CONTRAST_RED.value
                         
                         # sino le da una font verdosa
-                        elif float(self._data[row, ModelDataCols.DEBTS_TOTAL_BALANCE.value]) < 0:
+                        elif float(self._data[row, DebtorModelCols.DEBTS_TOTAL_BALANCE.value]) < 0:
                             return TableFontColor.CONTRAST_GREEN.value
                         
                         # si es 0, devuelve una font gris claro
@@ -1015,9 +1017,9 @@ class DebtsTableModel(QAbstractTableModel):
                 
             case Qt.ItemDataRole.TextAlignmentRole:
                 match col:
-                    case (TableViewColumns.DEBTS_PHONE_NUMBER.value |
-                          TableViewColumns.DEBTS_DIRECTION.value |
-                          TableViewColumns.DEBTS_POSTAL_CODE.value):
+                    case (DebtorViewCols.DEBTS_PHONE_NUMBER.value |
+                          DebtorViewCols.DEBTS_DIRECTION.value |
+                          DebtorViewCols.DEBTS_POSTAL_CODE.value):
                         return Qt.AlignmentFlag.AlignCenter
                     
                     case _:
@@ -1119,13 +1121,13 @@ class DebtsTableModel(QAbstractTableModel):
         self.beginInsertRows(parent, row, row + count - 1)
         # actualiza el atributo '_data'
         dict_to_ndarray:ndarray = array( # convierte el dict a un array de Numpy
-            object=[data_to_insert[ModelDataCols.DEBTS_IDDEBTOR.name],
-                    data_to_insert[ModelDataCols.DEBTS_NAME.name],
-                    data_to_insert[ModelDataCols.DEBTS_SURNAME.name],
-                    data_to_insert[ModelDataCols.DEBTS_PHONE_NUMBER.name],
-                    data_to_insert[ModelDataCols.DEBTS_DIRECTION.name],
-                    data_to_insert[ModelDataCols.DEBTS_POSTAL_CODE.name],
-                    data_to_insert[ModelDataCols.DEBTS_TOTAL_BALANCE.name]]
+            object=[data_to_insert[DebtorModelCols.DEBTS_IDDEBTOR.name],
+                    data_to_insert[DebtorModelCols.DEBTS_NAME.name],
+                    data_to_insert[DebtorModelCols.DEBTS_SURNAME.name],
+                    data_to_insert[DebtorModelCols.DEBTS_PHONE_NUMBER.name],
+                    data_to_insert[DebtorModelCols.DEBTS_DIRECTION.name],
+                    data_to_insert[DebtorModelCols.DEBTS_POSTAL_CODE.name],
+                    data_to_insert[DebtorModelCols.DEBTS_TOTAL_BALANCE.name]]
             )
         # 'numpy.vstack' concatena ambos arrays de forma vertical, es decir, por filas
         self._data = vstack((self._data, dict_to_ndarray))
@@ -1214,45 +1216,45 @@ class ProductsBalanceModel(QAbstractTableModel):
         '''
         if role == Qt.ItemDataRole.EditRole:
             match index.column():
-                case TableViewColumns.PRODS_BAL_DATETIME.value:
+                case DebtsViewCols.PRODS_BAL_DATETIME.value:
                     if value == self.data(index):
                         return False
-                    self._data[index.row(), ModelDataCols.PRODS_BAL_DATETIME.value] = value
+                    self._data[index.row(), DebtsModelCols.PRODS_BAL_DATETIME.value] = value
                     
                     # actualiza la fecha y la hora en el dialog
                     self.dataToUpdate.emit(
                         {'column': index.column(),
-                         'ID_sales_detail': self._data[index.row(), ModelDataCols.PRODS_BAL_ID_SALES_DETAIL.value],
+                         'ID_sales_detail': self._data[index.row(), DebtsModelCols.PRODS_BAL_ID_SALES_DETAIL.value],
                          'new_value': value}
                         )
                     
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
                     return True
         
-                case TableViewColumns.PRODS_BAL_DESCRIPTION.value:
+                case DebtsViewCols.PRODS_BAL_DESCRIPTION.value:
                     if value == self.data(index):
                         return False
-                    self._data[index.row(), ModelDataCols.PRODS_BAL_DESCRIPTION.value] = value
+                    self._data[index.row(), DebtsModelCols.PRODS_BAL_DESCRIPTION.value] = value
                     
                     # actualiza la descripción en el dialog
                     self.dataToUpdate.emit(
                         {'column': index.column(),
-                         'ID_sales_detail': self._data[index.row(), ModelDataCols.PRODS_BAL_ID_SALES_DETAIL.value],
+                         'ID_sales_detail': self._data[index.row(), DebtsModelCols.PRODS_BAL_ID_SALES_DETAIL.value],
                          'new_value': value}
                     )
                     
                     self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole])
                     return True
                     
-                case TableViewColumns.PRODS_BAL_BALANCE.value:
+                case DebtsViewCols.PRODS_BAL_BALANCE.value:
                     if value == self.data(index):
                         return False
-                    self._data[index.row(), ModelDataCols.PRODS_BAL_BALANCE.value] = value
+                    self._data[index.row(), DebtsModelCols.PRODS_BAL_BALANCE.value] = value
 
                     # actualiza el balance en el dialog
                     self.dataToUpdate.emit(
                         {'column': index.column(),
-                         'ID_sales_detail': self._data[index.row(), ModelDataCols.PRODS_BAL_ID_SALES_DETAIL.value],
+                         'ID_sales_detail': self._data[index.row(), DebtsModelCols.PRODS_BAL_ID_SALES_DETAIL.value],
                          'new_value': float(value)}
                     )
                     
@@ -1272,24 +1274,24 @@ class ProductsBalanceModel(QAbstractTableModel):
         match role:
             case Qt.ItemDataRole.DisplayRole:
                 match col:
-                    case TableViewColumns.PRODS_BAL_DATETIME.value:
-                        return self._data[row, ModelDataCols.PRODS_BAL_DATETIME.value]
+                    case DebtsViewCols.PRODS_BAL_DATETIME.value:
+                        return self._data[row, DebtsModelCols.PRODS_BAL_DATETIME.value]
                     
-                    case TableViewColumns.PRODS_BAL_DESCRIPTION.value:
-                        return f"{self._data[row, ModelDataCols.PRODS_BAL_DESCRIPTION.value]}"
+                    case DebtsViewCols.PRODS_BAL_DESCRIPTION.value:
+                        return f"{self._data[row, DebtsModelCols.PRODS_BAL_DESCRIPTION.value]}"
                     
-                    case TableViewColumns.PRODS_BAL_BALANCE.value:
-                        return self._data[row, ModelDataCols.PRODS_BAL_BALANCE.value]
+                    case DebtsViewCols.PRODS_BAL_BALANCE.value:
+                        return self._data[row, DebtsModelCols.PRODS_BAL_BALANCE.value]
                             
             
             case Qt.ItemDataRole.BackgroundRole:
-                if col == TableViewColumns.PRODS_BAL_BALANCE.value:
+                if col == DebtsViewCols.PRODS_BAL_BALANCE.value:
                     # si el balance es negativo le da un fondo rojizo
-                    if float(self._data[row, ModelDataCols.PRODS_BAL_BALANCE.value]) < 0:
+                    if float(self._data[row, DebtsModelCols.PRODS_BAL_BALANCE.value]) < 0:
                         return TableBgColors.DEBTS_NEGATIVE_BALANCE.value
                     
                     # sino le da un fondo verdoso
-                    elif float(self._data[row, ModelDataCols.PRODS_BAL_BALANCE.value]) > 0:
+                    elif float(self._data[row, DebtsModelCols.PRODS_BAL_BALANCE.value]) > 0:
                         return TableBgColors.DEBTS_POSITIVE_BALANCE.value
                     
                     # si es 0, devuelve un fondo gris claro
@@ -1297,13 +1299,13 @@ class ProductsBalanceModel(QAbstractTableModel):
                         return TableBgColors.DEBTS_CERO_BALANCE.value
             
             case Qt.ItemDataRole.ForegroundRole:
-                if col == TableViewColumns.PRODS_BAL_BALANCE.value:
+                if col == DebtsViewCols.PRODS_BAL_BALANCE.value:
                     # si el balance es negativo le da una font rojiza
-                    if float(self._data[row, ModelDataCols.PRODS_BAL_BALANCE.value]) > 0:
+                    if float(self._data[row, DebtsModelCols.PRODS_BAL_BALANCE.value]) > 0:
                         return TableFontColor.CONTRAST_RED.value
                     
                     # sino le da una font verdosa
-                    elif float(self._data[row, ModelDataCols.PRODS_BAL_BALANCE.value]) < 0:
+                    elif float(self._data[row, DebtsModelCols.PRODS_BAL_BALANCE.value]) < 0:
                         return TableFontColor.CONTRAST_GREEN.value
                     
                     # si es 0, devuelve una font gris claro
@@ -1312,13 +1314,13 @@ class ProductsBalanceModel(QAbstractTableModel):
             
             case Qt.ItemDataRole.TextAlignmentRole:
                 match col:
-                    case TableViewColumns.PRODS_BAL_DATETIME.value:
+                    case DebtsViewCols.PRODS_BAL_DATETIME.value:
                         return Qt.AlignmentFlag.AlignLeft
                     
-                    case TableViewColumns.PRODS_BAL_DESCRIPTION.value:
+                    case DebtsViewCols.PRODS_BAL_DESCRIPTION.value:
                         return Qt.AlignmentFlag.AlignCenter
                     
-                    case TableViewColumns.PRODS_BAL_BALANCE.value:
+                    case DebtsViewCols.PRODS_BAL_BALANCE.value:
                         return Qt.AlignmentFlag.AlignRight
         return None
     
@@ -1337,7 +1339,7 @@ class ProductsBalanceModel(QAbstractTableModel):
         int
             el ID_detalle_venta del producto seleccionado
         '''
-        return int(self._data[row, ModelDataCols.PRODS_BAL_ID_SALES_DETAIL.value])
+        return int(self._data[row, DebtsModelCols.PRODS_BAL_ID_SALES_DETAIL.value])
     
     
     def headerData(self, section:int, orientation:Qt.Orientation, 
@@ -1359,7 +1361,7 @@ class ProductsBalanceModel(QAbstractTableModel):
         '''
         if self.modelHasData():
             return round(
-                sum(list(self._data[:,ModelDataCols.PRODS_BAL_BALANCE.value]),
+                sum(list(self._data[:,DebtsModelCols.PRODS_BAL_BALANCE.value]),
                     start=0),
                 ndigits=2)
         
@@ -1448,13 +1450,13 @@ class ProductsBalanceModel(QAbstractTableModel):
         self.beginInsertRows(parent, row, row + count - 1)
         # actualiza el atributo '_data'
         dict_to_ndarray:ndarray = array( # convierte el dict a un array de Numpy
-            object=[data_to_insert[ModelDataCols.DEBTS_IDDEBTOR.name],
-                    data_to_insert[ModelDataCols.DEBTS_NAME.name],
-                    data_to_insert[ModelDataCols.DEBTS_SURNAME.name],
-                    data_to_insert[ModelDataCols.DEBTS_PHONE_NUMBER.name],
-                    data_to_insert[ModelDataCols.DEBTS_DIRECTION.name],
-                    data_to_insert[ModelDataCols.DEBTS_POSTAL_CODE.name],
-                    data_to_insert[ModelDataCols.DEBTS_TOTAL_BALANCE.name]]
+            object=[data_to_insert[DebtorModelCols.DEBTS_IDDEBTOR.name],
+                    data_to_insert[DebtorModelCols.DEBTS_NAME.name],
+                    data_to_insert[DebtorModelCols.DEBTS_SURNAME.name],
+                    data_to_insert[DebtorModelCols.DEBTS_PHONE_NUMBER.name],
+                    data_to_insert[DebtorModelCols.DEBTS_DIRECTION.name],
+                    data_to_insert[DebtorModelCols.DEBTS_POSTAL_CODE.name],
+                    data_to_insert[DebtorModelCols.DEBTS_TOTAL_BALANCE.name]]
             )
         # 'numpy.vstack' concatena ambos arrays de forma vertical, es decir, por filas
         self._data = vstack((self._data, dict_to_ndarray))
