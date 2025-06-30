@@ -35,6 +35,9 @@ from resources import (rc_icons)
 # TODO1: directamente los registros.
 # TODO2: falta hacer DELETE a Deudas
 
+# TODO3: arreglar, cuando se agrega una venta desde el formulario no se agrega al programa por alguna razón, se tiene que reiniciar 
+# TODO3: el programa para que se vea.
+
 class MainWindow(QMainWindow):
     def __init__(self, db_path:str=DATABASE_DIR):
         '''
@@ -60,6 +63,7 @@ class MainWindow(QMainWindow):
         # repositorio de base de datos
         self._db_repo:DatabaseRepository = DatabaseRepository(db_path=db_path)
         
+        print(self._db_repo._connection)
         # inicializa ajustes personalizados de widgets
         self.setup_ui()
         
@@ -389,7 +393,9 @@ class MainWindow(QMainWindow):
         self.ui.tabWidget.currentChanged.connect(lambda index: self.ui.tab2_toolBox.setCurrentIndex(0) if index == 1 else None)
         
         #* (CREATE) añadir una venta a 'tv_sales_data'
-        self.ui.btn_add_product_sales.clicked.connect(lambda: self.handleTableCreateRow(TableViewId.SALES_TABLE_VIEW))
+        self.ui.btn_add_product_sales.clicked.connect(
+            lambda: self.handleTableCreateRow(TableViewId.SALES_TABLE_VIEW)
+        )
         
         #* (DELETE) eliminar ventas de 'tv_sales_data'
         # cambios en la selección
@@ -467,11 +473,11 @@ class MainWindow(QMainWindow):
         )
         
         self.ui.btn_delete_debtor.clicked.connect(
-            lambda: self.handleTableDeleteRows(TableViewId.DEBTS_TABLE_VIEW) # TODO: implementar la eliminación de deudores en éste método
+            lambda: self.__deleteDebtsRows()
         )
         
         self.debts_proxy_model.baseModelRowsSelected.connect(
-            self.__onSalesBaseModelRowsSelected # TODO: implementar éste método
+            self.__onDebtsBaseModelRowsSelected # TODO: implementar éste método
         )
         
         #* (UPDATE) modificar celdas de 'tv_sales_data'
@@ -574,6 +580,7 @@ class MainWindow(QMainWindow):
         self.add_register_icon = QIcon() # añadir registros
         self.add_debtor_icon = QIcon() # añadir deudores
         self.delete_register_icon = QIcon() # eliminar registros
+        self.delete_register_dark_icon = QIcon() # eliminar registros (color alternativo oscuro)
         self.end_sale_icon = QIcon() # terminar venta (formulario)
         
         # sidebar de categorías
@@ -601,16 +608,21 @@ class MainWindow(QMainWindow):
         self.ui.btn_add_product_inventory.setIcon(self.add_register_icon)
         self.ui.btn_add_product.setIcon(self.add_register_icon)
         self.ui.btn_add_product_sales.setIcon(self.add_register_icon)
+        self.ui.btn_sidebar_list_add_item.setIcon(self.add_register_icon)
         
         # botón para añadir deudores
         self.add_debtor_icon.addFile(":/icons/add-debtor.svg", QSize())
         self.ui.btn_add_debtor.setIcon(self.add_debtor_icon)
         
-        # # botones para eliminar registros
+        # botones para eliminar registros
         self.delete_register_icon.addFile(":/icons/minus-circle.svg", QSize())
         self.ui.btn_delete_product_inventory.setIcon(self.delete_register_icon)
         self.ui.btn_delete_product_sales.setIcon(self.delete_register_icon)
         self.ui.btn_delete_debtor.setIcon(self.delete_register_icon)
+        
+        # botones para eliminar registros (color oscuro)
+        self.delete_register_dark_icon.addFile(":/icons/minus-circle-alt.svg", QSize())
+        self.ui.btn_sidebar_list_delete_item.setIcon(self.delete_register_dark_icon)
 
         # botón para terminar venta
         self.end_sale_icon.addFile(":/icons/check-circle.svg")
@@ -1600,6 +1612,7 @@ class MainWindow(QMainWindow):
 
 
     #¡ tablas (CREATE)
+    # TODO: corregir, cuando se añade una venta nueva a bd le coloca el formato de fecha y hora local en lugar del ISO8601
     @Slot(str)
     def handleTableCreateRow(self, table_viewID:TableViewId) -> None:
         '''
@@ -3112,7 +3125,7 @@ class MainWindow(QMainWindow):
         return None
     
     
-    #* finalizando compra
+    #* finalizando venta
     @Slot()
     def onFinishedSale(self) -> None:
         '''
@@ -3132,6 +3145,10 @@ class MainWindow(QMainWindow):
         '''
         total_paid:float
         
+        # fecha y hora en formato ISO8601
+        _dt:datetime = local_to_ISO8601(self.ui.dateTimeEdit_sale.text())
+        _dt = self.ui.dateTimeEdit_sale.text() if not _dt else _dt
+        
         # obtengo el total pagado
         total_paid = self.ui.lineEdit_paid.text().replace(",",".")
         total_paid = float(total_paid if total_paid else 0.0)
@@ -3143,7 +3160,8 @@ class MainWindow(QMainWindow):
             
             dialog.debtorChosen.connect(lambda debtor_id: self.finishedSaleOnDebtorChosen(
                     debtor_id=debtor_id,
-                    total_paid=total_paid
+                    total_paid=total_paid,
+                    dt_iso8601=_dt
                 )
             )
             
@@ -3158,7 +3176,7 @@ class MainWindow(QMainWindow):
                         ins_sql= '''INSERT INTO Ventas(
                                         fecha_hora, detalles_venta) 
                                     VALUES(?, ?);''',
-                        ins_params=(self.ui.dateTimeEdit_sale.text(),
+                        ins_params=(_dt,
                                     item[SaleFields.SALE_DETAILS.name],)
                     )
                     
@@ -3181,7 +3199,7 @@ class MainWindow(QMainWindow):
                             ins_params=(item[SaleFields.QUANTITY.name],
                                         item[SaleFields.SUBTOTAL.name],
                                         item[SaleFields.PRODUCT_NAME.name],
-                                        self.ui.dateTimeEdit_sale.text(),
+                                        _dt,
                                         item[SaleFields.SALE_DETAILS.name],
                                         item[SaleFields.SUBTOTAL.name],)
                     )
@@ -3202,7 +3220,7 @@ class MainWindow(QMainWindow):
 
 
     @Slot(tuple)
-    def finishedSaleOnDebtorChosen(self, debtor_id:int, total_paid:float) -> None:
+    def finishedSaleOnDebtorChosen(self, debtor_id:int, total_paid:float, dt_iso8601:datetime) -> None:
         '''
         Cuando se termina una venta y hay deuda se invoca este método.
         
@@ -3222,6 +3240,8 @@ class MainWindow(QMainWindow):
             el 'IDdeudor' del deudor
         total_paid : float
             el total abonado al finalizar la venta
+        dt_iso8601 : datetime
+            fecha y hora del momento de la venta en formato ISO8601
         
         Retorna
         -------
@@ -3248,7 +3268,7 @@ class MainWindow(QMainWindow):
                                     fecha_hora,
                                     detalles_venta) 
                                 VALUES(?,?);''',
-                    ins_params=(self.ui.dateTimeEdit_sale.text(),
+                    ins_params=(dt_iso8601,
                                 product["SALE_DETAILS"],)
                 )
                 
@@ -3265,7 +3285,7 @@ class MainWindow(QMainWindow):
                                         IDdeudor,
                                         eliminado) 
                                     VALUES(?, ?, ?, 0);''',
-                        ins_params=(self.ui.dateTimeEdit_sale.text(),
+                        ins_params=(dt_iso8601,
                                     abs(total_due),
                                     debtor_id)
                     )
@@ -3298,10 +3318,10 @@ class MainWindow(QMainWindow):
                         ins_params=(product["QUANTITY"],
                                     product["SUBTOTAL"],
                                     product["PRODUCT_NAME"],
-                                    self.ui.dateTimeEdit_sale.text(),
+                                    dt_iso8601,
                                     product["SALE_DETAILS"],
                                     round(product["SUBTOTAL"] - abs(total_due), 2),
-                                    self.ui.dateTimeEdit_sale.text(),
+                                    dt_iso8601,
                                     debtor_id,)
                     )
                     
@@ -3332,7 +3352,7 @@ class MainWindow(QMainWindow):
                         ins_params=(product["QUANTITY"],
                                     product["SUBTOTAL"],
                                     product["PRODUCT_NAME"],
-                                    self.ui.dateTimeEdit_sale.text(),
+                                    dt_iso8601,
                                     product["SALE_DETAILS"],
                                     product["SUBTOTAL"],)
                     )

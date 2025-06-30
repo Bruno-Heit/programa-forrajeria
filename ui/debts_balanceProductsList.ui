@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>160</height>
+    <height>260</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -19,12 +19,12 @@
   <property name="minimumSize">
    <size>
     <width>400</width>
-    <height>160</height>
+    <height>260</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>400</width>
+    <width>600</width>
     <height>16777215</height>
    </size>
   </property>
@@ -200,6 +200,9 @@ QScrollBar::handle:horizontal {
 	min-width: 15px;
 }</string>
   </property>
+  <property name="sizeGripEnabled">
+   <bool>true</bool>
+  </property>
   <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0">
    <property name="spacing">
     <number>0</number>
@@ -218,6 +221,12 @@ QScrollBar::handle:horizontal {
    </property>
    <item>
     <widget class="QWidget" name="central_widget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -318,13 +327,19 @@ QScrollBar::handle:horizontal {
       </item>
       <item>
        <widget class="QWidget" name="body" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="minimumSize">
          <size>
           <width>0</width>
           <height>86</height>
          </size>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
+        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0">
          <property name="spacing">
           <number>5</number>
          </property>
@@ -343,10 +358,16 @@ QScrollBar::handle:horizontal {
          <item>
           <widget class="QTableView" name="tv_balance_products">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>100</height>
+            </size>
            </property>
            <property name="frameShape">
             <enum>QFrame::Shape::NoFrame</enum>
@@ -589,6 +610,13 @@ QScrollBar::handle:horizontal {
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>search_bar</tabstop>
+  <tabstop>tv_balance_products</tabstop>
+  <tabstop>checkbox_show_all_products</tabstop>
+  <tabstop>btn_delete_debt</tabstop>
+  <tabstop>le_reduce_debt</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -1,0 +1,12 @@
+Alimentos de mascotas
+Alimentos de granja
+Electrónicos
+Electrodomésticos
+Vehículos
+Varios
+Artículos de pesca
+Artículos de cacería
+Artículos limpieza
+Accesorios de mascotas
+Accesorios de campo
+Herramientas
