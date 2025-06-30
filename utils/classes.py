@@ -1080,7 +1080,6 @@ class SaleValues(QObject):
                 self.__sale_detail = f"{_quantity} de {_product_name} ({price_type})"
             
             case _: # lo escribió el usuario
-                print(sale_detail)
                 _pattern = compile(
                     Regex.SALES_DETAILS_PRICE_TYPE.value,
                     flags=IGNORECASE)
