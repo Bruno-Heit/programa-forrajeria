@@ -1368,8 +1368,14 @@ class SaleValues(QObject):
         return InventoryPriceType.NORMAL if not self.__is_comercial_price else InventoryPriceType.COMERCIAL
     
     
-    def getDatetime(self) -> str:
+    def getLocalDatetime(self) -> str:
         return str(self.__datetime)
+    
+    
+    def getISO8601Datetime(self) -> str:
+        # intenta convertir a formato ISO 8601...
+        _dt = local_to_ISO8601(self.__datetime)
+        return self.__datetime if not _dt else _dt
     
     
     def isProductNameValid(self) -> bool:
@@ -2110,7 +2116,7 @@ class SaleDialog(QDialog):
                 ins_sql= '''INSERT INTO Ventas(fecha_hora, detalles_venta) 
                             VALUES(?,?);''',
                 ins_params=(
-                    self.sale_values.getDatetime(),
+                    self.sale_values.getISO8601Datetime(),
                     self.sale_values.getSaleDetail()
                 )
             )
@@ -2135,7 +2141,7 @@ class SaleDialog(QDialog):
                                         AND apellido = ?), 
                                     0);''',
                     ins_params=(
-                        self.sale_values.getDatetime(),
+                        self.sale_values.getISO8601Datetime(),
                         round(
                             float(self.sale_values.getTotalCost()) - float(self.sale_values.getTotalPaid()),
                             2
@@ -2178,10 +2184,10 @@ class SaleDialog(QDialog):
                         float(self.sale_values.getQuantity()),
                         float(self.sale_values.getTotalCost()),
                         self.sale_values.getProductName(),
-                        self.sale_values.getDatetime(),
+                        self.sale_values.getISO8601Datetime(),
                         self.sale_values.getSaleDetail(),
                         float(self.sale_values.getTotalPaid()),
-                        self.sale_values.getDatetime(),
+                        self.sale_values.getISO8601Datetime(),
                         self.sale_values.getDebtorName(),
                         self.sale_values.getDebtorSurname()
                     )
@@ -2214,7 +2220,7 @@ class SaleDialog(QDialog):
                     float(self.sale_values.getQuantity()),
                     float(self.sale_values.getTotalCost()),
                     self.sale_values.getProductName(),
-                    self.sale_values.getDatetime(),
+                    self.sale_values.getISO8601Datetime(),
                     self.sale_values.getSaleDetail(),
                     float(self.sale_values.getTotalPaid())
                     )
@@ -2252,7 +2258,7 @@ class SaleDialog(QDialog):
                 'product_name': self.sale_values.getProductName(),
                 'total_cost': float(self.sale_values.getTotalCost()),
                 'total_paid': float(self.sale_values.getTotalPaid()),
-                'datetime': self.sale_values.getDatetime(),
+                'datetime': self.sale_values.getLocalDatetime(),
             }
         
         self.dataFilled.emit(values_to_dict)
