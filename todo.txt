@@ -7,14 +7,14 @@ CAMBIOS A HACER/IMPLEMENTACIONES NUEVAS:
 
 	☑ Mejorar muestra de mensajes de errores. Para eso, mostrar los QLabels de errores necesarios con el fallo 
 	 y colocarles tooltips con descripciones más detalladas y posibles soluciones.
-	☐ Crear subclases de QCalendarWidgets y personalizarlos, no se pueden personalizar completamente con QSS. 
+	☑ Crear subclases de QCalendarWidgets y personalizarlos, no se pueden personalizar completamente con QSS. 
 
 	☑ Validar con 'phonenumbers' los números de teléfono introducidos.
 	☐ Hacer mención del uso del módulo 'phonenumbers' (tiene lincencia APACHE).
 	☐ Mostrar licencia en algún lugar.
 
 	☐ Guardar datos de hasta 5 años de antigüedad (por seguridad).
-	☐ Mostrar datos en tablas principalmente de los últimos 2 días, con posibilidad de expandir a los días deseados.
+	☑ Mostrar datos en tablas principalmente de la semana actual, con posibilidad de expandir a los días deseados.
 
 	☑ Modificar las tablas para que al efectuarse un DELETE en una tabla "padre" se borren los registros "hijos" 
 	 en cascada (evita errores de clave foránea).
