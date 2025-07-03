@@ -11,7 +11,8 @@ from PySide6.QtGui import (QIcon)
 
 from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, 
                            ListItemValues, DebtorDataDialog, WidgetStyle, 
-                           SaleFields, CategoryDescDialog, AskBeforeDeletion)
+                           SaleFields, CategoryDescDialog)
+from utils.messageboxes import (AskBeforeDeletion, WarnAccountHasBalance)
 from ui.ui_mainwindow import (Ui_MainWindow)
 from ui.customCalendars import (CustomCalendar)
 from utils.functionutils import *
@@ -31,7 +32,7 @@ from utils.eventfilters import (BackgroundEventFilter, CategoryItemEventFilter,
 
 from resources import (rc_icons)
 
-# TODO2: falta hacer "DELETE" a Cuentas Corrientes y Deudas (ver si en Deudas funciona bien) (no eliminar Cuentas Corrientes, sino anonimizarlas)
+# TODO2: falta hacer "DELETE" a Cuentas Corrientes (no eliminar Cuentas Corrientes, sino anonimizarlas)
 
 class MainWindow(QMainWindow):
     def __init__(self, db_path:str=DATABASE_DIR):
@@ -1924,10 +1925,13 @@ class MainWindow(QMainWindow):
     def __deleteDebtsRows(self) -> None:
         '''
         Elimina los deudores seleccionados en el MODELO de deudas y actualiza 
-        la VISTA, además actualiza la progress-bar asociada.
+        la VISTA, además actualiza la progress-bar asociada. Antes de eliminar 
+        registros advierte al usuario si se seleccionaron cuentas corrientes 
+        con saldo acreedor/deudor.
         '''
         # obtiene las filas seleccionadas
         selected_rows = getSelectedTableRows(self.ui.tv_debts_data)
+        _accounts_with_balance:list[list[str, str]]
         
         if not selected_rows:
             return None
@@ -1939,13 +1943,72 @@ class MainWindow(QMainWindow):
             reg_count=len(selected_rows)
         )
         
-        if ask_dialog.exec() == ask_dialog.StandardButton.Yes:
-            # cambia la progress-bar para representar las eliminaciones
-            self.ui.debts_progressbar.setMaximum(len(selected_rows))
-            self.ui.debts_progressbar.setStyleSheet(ProgressBarStyle.DELETION.value)
+        if ask_dialog.exec() != ask_dialog.StandardButton.Yes:
+            return None
+        
+        # verifica si hay cuentas seleccionadas con balance no nulo
+        _accounts_with_balance = self.__accountsThatHaveBalance(
+            selected_accounts=selected_rows
+        )
+        if _accounts_with_balance:
+            # advierte al usuario
+            warn_dialog = WarnAccountHasBalance(
+                selected_accounts=_accounts_with_balance
+            )
             
-            self.debts_proxy_model.removeSelectedRows(selected_rows=selected_rows)
+            if warn_dialog.exec() != warn_dialog.DialogCode.Accepted:
+                return None
+        
+        return # todo: sacar este return después de hacer UPDATES en lugar de DELETES a Deudores
+        # cambia la progress-bar para representar las eliminaciones
+        self.ui.debts_progressbar.setMaximum(len(selected_rows))
+        self.ui.debts_progressbar.setStyleSheet(ProgressBarStyle.DELETION.value)
+        
+        self.debts_proxy_model.removeSelectedRows(selected_rows=selected_rows)
         return None
+    
+    
+    def __accountsThatHaveBalance(self, selected_accounts:tuple[int]) -> list[list[str, str]]:
+        '''
+        Devuelve una lista con los nombres y apellidos de las cuentas 
+        corrientes seleccionadas que tengan un saldo no nulo.
+        
+        Parámetros
+        ----------
+        selected_accounts : tuple[int]
+            tupla con las filas seleccionadas
+        
+        Retorna
+        -------
+        list[list[str, str]]
+            lista con los nombres y apellidos de las cuentas con saldo no 
+            nulo
+        '''
+        _data:list[list[str, str]] = []
+        _name:QModelIndex
+        _surname:QModelIndex
+        _balance:QModelIndex
+        
+        for acc_row in selected_accounts:
+            _name = self.debts_proxy_model.index(
+                acc_row, DebtorViewCols.DEBTS_NAME.value
+            )
+            _surname = self.debts_proxy_model.index(
+                acc_row, DebtorViewCols.DEBTS_SURNAME.value
+            )
+            _balance = self.debts_proxy_model.index(
+                acc_row, DebtorViewCols.DEBTS_BALANCE.value
+            )
+            
+            if str(_balance.data(Qt.ItemDataRole.DisplayRole)).strip("$ ") not in ("0", "0.0"):
+                _data.append(
+                    [
+                        _name.data(Qt.ItemDataRole.DisplayRole),
+                        _surname.data(Qt.ItemDataRole.DisplayRole)
+                    ]
+                )
+        
+        return _data
     
     
     @Slot(object)
@@ -2076,18 +2139,26 @@ class MainWindow(QMainWindow):
                 self.update_worker = WorkerUpdate()
                 self.update_worker.moveToThread(self.DELETE_THREAD)
                 
-                self.DELETE_THREAD.started.connect(lambda: self.update_worker.executeUpdateQuery(
-                    sql="UPDATE Productos SET eliminado = 1 WHERE IDproducto = ?",
-                    params=del_params)
+                self.DELETE_THREAD.started.connect(
+                    lambda: self.update_worker.executeUpdateQuery(
+                        sql= '''UPDATE Productos 
+                                SET eliminado = 1 
+                                WHERE IDproducto = ?''',
+                        params=del_params
+                    )
                 )
-                self.update_worker.progress.connect(lambda value: self.__updateProgressBar(
-                    table_viewID=table_viewID,
-                    value=value)
+                self.update_worker.progress.connect(
+                    lambda value: self.__updateProgressBar(
+                        table_viewID=table_viewID,
+                        value=value
+                    )
                 )
                 
-                self.update_worker.finished.connect(lambda: self.__workerOnFinished(
-                    table_viewID=TableViewId.INVEN_TABLE_VIEW,
-                    READ_OPERATION=False)
+                self.update_worker.finished.connect(
+                    lambda: self.__workerOnFinished(
+                        table_viewID=TableViewId.INVEN_TABLE_VIEW,
+                        READ_OPERATION=False
+                    )
                 )
                 self.update_worker.finished.connect(self.DELETE_THREAD.quit)
                 self.DELETE_THREAD.finished.connect(self.update_worker.deleteLater)
@@ -2108,21 +2179,30 @@ class MainWindow(QMainWindow):
                 self.delete_worker = WorkerDelete()
                 self.delete_worker.moveToThread(self.DELETE_THREAD)
                 
-                self.DELETE_THREAD.started.connect(lambda: self.delete_worker.executeDeleteQuery(
-                    mult_sql=mult_sql,
-                    params=del_params,
-                    table_viewID=TableViewId.SALES_TABLE_VIEW)
+                self.DELETE_THREAD.started.connect(
+                    lambda: self.delete_worker.executeDeleteQuery(
+                        mult_sql=mult_sql,
+                        params=del_params,
+                        table_viewID=TableViewId.SALES_TABLE_VIEW
+                    )
                 )
-                self.delete_worker.progress.connect(lambda value: self.__updateProgressBar(
-                    table_viewID=table_viewID,
-                    value=value)
+                self.delete_worker.progress.connect(
+                    lambda value: self.__updateProgressBar(
+                        table_viewID=table_viewID,
+                        value=value
+                    )
                 )
-                self.delete_worker.finished.connect(lambda: self.__workerOnFinished(
-                    table_viewID=table_viewID,
-                    READ_OPERATION=False) )
+                self.delete_worker.finished.connect(
+                    lambda: self.__workerOnFinished(
+                        table_viewID=table_viewID,
+                        READ_OPERATION=False
+                    )
+                )
                 
                 self.delete_worker.finished.connect(self.DELETE_THREAD.quit)
-                self.DELETE_THREAD.finished.connect(self.delete_worker.deleteLater)
+                self.DELETE_THREAD.finished.connect(
+                    self.delete_worker.deleteLater
+                )
             
             case TableViewId.DEBTS_TABLE_VIEW:
                 ...
