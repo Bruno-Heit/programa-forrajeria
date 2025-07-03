@@ -11,7 +11,8 @@
 from numpy import (ndarray, array)
 
 from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QLineEdit, QCompleter, 
-                               QWidget, QGraphicsDropShadowEffect, QListWidgetItem)
+                               QWidget, QGraphicsDropShadowEffect, QListWidgetItem, 
+                               QMessageBox, QLabel)
 from PySide6.QtCore import (Signal, QSize, QRect, QPropertyAnimation, QEasingCurve, 
                             QPoint, QSignalBlocker)
 from PySide6.QtGui import (QIcon, QShowEvent, QCursor, QKeyEvent, QColor, QCloseEvent, 
@@ -4792,4 +4793,131 @@ class ProductsBalanceDialog(QDialog):
 
 
 
+
+
+# message-box dialog para preguntar antes de eliminar registros
+class AskBeforeDeletion(QMessageBox):
+    '''
+    **QMessageBox** usado para preguntar al usuario si de verdad quiere borrar 
+    un registro antes de hacerlo.
+    '''
+    def __init__(self, parent:QWidget, table_viewID:TableViewId, reg_count:int) -> None:
+        '''
+        Inicializa un objeto de tipo **QMessageBox** usado para preguntar si 
+        se quiere eliminar un registro con mensajes personalizados dependiendo 
+        de la tabla a la que estará asociado.
+
+        Parámetros
+        ----------
+        parent : QWidget
+            *widget* padre del **QMessageBox**
+        table_viewID : TableViewId
+            ID de la tabla asociada
+        reg_count : int
+            cantidad de registros seleccionados
+        '''
+        super(AskBeforeDeletion, self).__init__()
+        self.setParent = parent
+        self.table_viewID = table_viewID
+        
+        # textos
+        self.setText(f"¿Está seguro de borrar los registros seleccionados?")
+        self.setInformativeText(
+            f"Se borrarán {reg_count} registros" if reg_count > 1 else f"Se borrará {reg_count} registro"
+        )
+        self.setDetailedText(
+            "Los registros borrados no se eliminarán de la base de datos " +
+            "para evitar conflictos, simplemente no serán mostrados al " +
+            "ver datos en las tablas"
+        ) if self.table_viewID != TableViewId.DEBTS_TABLE_VIEW else None
+        
+        match self.table_viewID:
+            case TableViewId.INVEN_TABLE_VIEW:
+                self.setWindowTitle("¿Eliminar registros de inventario?")
+            
+            case TableViewId.SALES_TABLE_VIEW:
+                self.setWindowTitle("¿Eliminar registros de ventas?")
+            
+            case TableViewId.DEBTS_TABLE_VIEW:
+                self.setWindowTitle("¿Eliminar registros de cuentas corrientes?")
+                self.setDetailedText(
+                    "Los registros borrados no se eliminarán de la base de " +
+                    "datos para evitar conflictos, pero sí serán " +
+                    "anonimizados para así cumplir con la Ley de Protección " +
+                    "de los Datos Personales 25.326 de la República Argentina"
+                )
+        
+        # botones
+        self.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        self.setDefaultButton(QMessageBox.StandardButton.No)
+        
+        self.setup_ui()
+        return None
+    
+    
+    def setup_ui(self) -> None:
+        self.setIcon(QMessageBox.Icon.Question)
+        
+        self.setStyleSheet(
+            '''
+            QMessageBox {
+                background-color: #fff;
+            }
+            
+            QDialogButtonBox > QPushButton {
+                background-color: #415a77;
+                color: #fff;
+                border: none;
+                border-radius: 3px;
+                min-width: 80px;
+                height: 30px;
+            }
+            QDialogButtonBox > QPushButton:hover,
+            QDialogButtonBox > QPushButton:focus {
+                background-color: #3b66ab;
+            }
+            QDialogButtonBox > QPushButton:pressed {
+                background-color: #3b66ab;
+                border: 1px inset #778da9;
+            }
+            QDialogButtonBox > QPushButton:disabled {
+                background-color: rgb(103, 115, 122);
+                color: #999;
+            }
+            
+            QDialogButtonBox > QPushButton[text="&Sí"] {
+                background-color: #ff4949;
+            }
+            QDialogButtonBox > QPushButton[text="&Sí"]:hover,
+            QDialogButtonBox > QPushButton[text="&Sí"]:focus {
+                background-color: #faa;
+            }
+            QDialogButtonBox > QPushButton[text="&Sí"]:pressed {
+                background-color: #3b66ab;
+                border: 1px inset #778da9;
+            }
+            
+            QDialogButtonBox > QPushButton[text="&No"] {
+                background-color: #fff;
+                color: #111;
+                border: 1px solid #aaa;
+            }
+            QDialogButtonBox > QPushButton[text="&No"]:hover,
+            QDialogButtonBox > QPushButton[text="&No"]:pressed,
+            QDialogButtonBox > QPushButton[text="&No"]:focus {
+                background-color: #ccc;
+            }
+            
+            
+            QLabel {
+                font-size: 13px;
+                color: #111;
+            }
+            
+            QLabel#qt_msgbox_label {
+                font-weight: bold;
+            }
+            '''
+        )
+        return None
 

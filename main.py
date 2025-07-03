@@ -9,8 +9,9 @@ from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot, QSize, QTranslator,
                             QLibraryInfo, QSignalBlocker)
 from PySide6.QtGui import (QIcon)
 
-from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, ListItemValues, 
-                           DebtorDataDialog, WidgetStyle, SaleFields, CategoryDescDialog)
+from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, 
+                           ListItemValues, DebtorDataDialog, WidgetStyle, 
+                           SaleFields, CategoryDescDialog, AskBeforeDeletion)
 from ui.ui_mainwindow import (Ui_MainWindow)
 from ui.customCalendars import (CustomCalendar)
 from utils.functionutils import *
@@ -21,22 +22,16 @@ from utils.dboperations import (DatabaseRepository, ensureDateTimeISOformat)
 from utils.customvalidators import (SalePaidValidator, CategoryNameValidator)
 from utils.enumclasses import (LoggingMessage, ModelHeaders, TableViewId, 
                                LabelFeedbackStyle, InventoryPriceType, TypeSideBar, 
-                               InvViewCols, SalesViewCols, DebtorViewCols, 
-                               DebtsViewCols, ProgressBarStyle, DateAndTimeFormat, 
-                               CommonCategories, DateTimeRanges)
+                               InvViewCols, DebtorViewCols, ProgressBarStyle, 
+                               DateAndTimeFormat, CommonCategories, 
+                               DateTimeRanges)
 from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxyModel)
 from utils.eventfilters import (BackgroundEventFilter, CategoryItemEventFilter, 
                                 CategoryListEventFilter)
 
 from resources import (rc_icons)
 
-# TODO1: falta cambiar las consultas DELETE de Inventario y Ventas para no borrar registros sino marcarlos como "eliminados": 
-# TODO1: las tablas a marcar son: Productos, Detalle_Ventas, Ventas y Deudas... de las tablas Categorias y Deudores se borran 
-# TODO1: directamente los registros.
-# TODO2: falta hacer DELETE a Deudas
-
-# TODO3: arreglar, cuando se agrega una venta desde el formulario no se agrega al programa por alguna razón, se tiene que reiniciar 
-# TODO3: el programa para que se vea.
+# TODO2: falta hacer "DELETE" a Cuentas Corrientes y Deudas (ver si en Deudas funciona bien) (no eliminar Cuentas Corrientes, sino anonimizarlas)
 
 class MainWindow(QMainWindow):
     def __init__(self, db_path:str=DATABASE_DIR):
@@ -63,7 +58,6 @@ class MainWindow(QMainWindow):
         # repositorio de base de datos
         self._db_repo:DatabaseRepository = DatabaseRepository(db_path=db_path)
         
-        print(self._db_repo._connection)
         # inicializa ajustes personalizados de widgets
         self.setup_ui()
         
@@ -1612,7 +1606,6 @@ class MainWindow(QMainWindow):
 
 
     #¡ tablas (CREATE)
-    # TODO: corregir, cuando se añade una venta nueva a bd le coloca el formato de fecha y hora local en lugar del ISO8601
     @Slot(str)
     def handleTableCreateRow(self, table_viewID:TableViewId) -> None:
         '''
@@ -1814,14 +1807,22 @@ class MainWindow(QMainWindow):
         if not selected_rows:
             return None
         
-        # cambia la progress-bar para representar las eliminaciones
-        self.ui.inventory_progressbar.setMaximum(len(selected_rows))
-        self.ui.inventory_progressbar.setStyleSheet(
-            ProgressBarStyle.DELETION.value
+        # preguntar antes de borrar
+        ask_dialog = AskBeforeDeletion(
+            parent=self,
+            table_viewID=TableViewId.INVEN_TABLE_VIEW,
+            reg_count=len(selected_rows)
         )
         
-        # actualiza el MODELO de datos
-        self.inventory_proxy_model.removeSelectedRows(selected_rows)
+        if ask_dialog.exec() == ask_dialog.StandardButton.Yes:
+            # cambia la progress-bar para representar las eliminaciones
+            self.ui.inventory_progressbar.setMaximum(len(selected_rows))
+            self.ui.inventory_progressbar.setStyleSheet(
+                ProgressBarStyle.DELETION.value
+            )
+            
+            # actualiza el MODELO de datos
+            self.inventory_proxy_model.removeSelectedRows(selected_rows)
         return None
     
     
@@ -1867,15 +1868,23 @@ class MainWindow(QMainWindow):
         if not selected_rows:
             return None
         
-        # cambia la progress-bar para representar las eliminaciones
-        self.ui.sales_progressbar.setMaximum(len(selected_rows))
-        self.ui.sales_progressbar.setStyleSheet(
-            ProgressBarStyle.DELETION.value
+        # preguntar antes de borrar
+        ask_dialog = AskBeforeDeletion(
+            parent=self,
+            table_viewID=TableViewId.SALES_TABLE_VIEW,
+            reg_count=len(selected_rows)
         )
         
-        self.sales_proxy_model.removeSelectedRows(
-            selected_rows=selected_rows
-        )
+        if ask_dialog.exec() == ask_dialog.StandardButton.Yes:
+            # cambia la progress-bar para representar las eliminaciones
+            self.ui.sales_progressbar.setMaximum(len(selected_rows))
+            self.ui.sales_progressbar.setStyleSheet(
+                ProgressBarStyle.DELETION.value
+            )
+            
+            self.sales_proxy_model.removeSelectedRows(
+                selected_rows=selected_rows
+            )
         return None
 
 
@@ -1923,11 +1932,19 @@ class MainWindow(QMainWindow):
         if not selected_rows:
             return None
         
-        # cambia la progress-bar para representar las eliminaciones
-        self.ui.debts_progressbar.setMaximum(len(selected_rows))
-        self.ui.debts_progressbar.setStyleSheet(ProgressBarStyle.DELETION.value)
+        # preguntar antes de borrar
+        ask_dialog = AskBeforeDeletion(
+            parent=self,
+            table_viewID=TableViewId.DEBTS_TABLE_VIEW,
+            reg_count=len(selected_rows)
+        )
         
-        self.debts_proxy_model.removeSelectedRows(selected_rows=selected_rows)
+        if ask_dialog.exec() == ask_dialog.StandardButton.Yes:
+            # cambia la progress-bar para representar las eliminaciones
+            self.ui.debts_progressbar.setMaximum(len(selected_rows))
+            self.ui.debts_progressbar.setStyleSheet(ProgressBarStyle.DELETION.value)
+            
+            self.debts_proxy_model.removeSelectedRows(selected_rows=selected_rows)
         return None
     
     
