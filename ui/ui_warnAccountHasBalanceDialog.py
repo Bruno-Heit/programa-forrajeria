@@ -80,6 +80,29 @@ class Ui_AccountHasBalDialog(object):
 "}\n"
 "\n"
 "\n"
+"/* checkbox */\n"
+"QCheckBox {\n"
+"	margin-top: 5px;\n"
+"	padding: 0 3px;\n"
+"	spacing: 5px;\n"
+"    border: none;\n"
+"	border-radius: 3px;\n"
+"}\n"
+"QCheckBox:hover,\n"
+"QCheckBox:focus {\n"
+"	background-color: #3b66ab;\n"
+"}\n"
+"QCheckBox:checked {\n"
+"	background-color: #3b66ab;\n"
+"    border: 1px inset #778da9;\n"
+"}\n"
+"QCheckBox:disabled {\n"
+"	back"
+                        "ground-color: rgb(103, 115, 122);\n"
+"    color: #999;\n"
+"}\n"
+"\n"
+"\n"
 "/* listtable y header */\n"
 "QListWidget {\n"
 "	color: #0d1b2a;\n"
@@ -95,20 +118,13 @@ class Ui_AccountHasBalDialog(object):
 "	border: 1px solid #fff;\n"
 "}\n"
 "/* QHeaderView */\n"
-"QHeaderView::section"
-                        " {\n"
+"QHeaderView::section {\n"
 "	background-color: #778da9;\n"
 "	color: #fff;\n"
 "	border: none;\n"
 "	border-right: 1px solid;\n"
 "	border-bottom: 1px solid;\n"
 "	border-color: #e0e1dd;\n"
-"}\n"
-"\n"
-"\n"
-"/* checkbox */\n"
-"QCheckBox {\n"
-"	spacing: 5px;\n"
 "}\n"
 "\n"
 "\n"
@@ -131,7 +147,8 @@ class Ui_AccountHasBalDialog(object):
 "QScrollBar::sub-line {\n"
 "	width: 0;\n"
 "	height: 0;\n"
-"	background: none;\n"
+"	"
+                        "background: none;\n"
 "}\n"
 "QScrollBar::add-line {\n"
 "	width: 0;\n"
@@ -151,8 +168,7 @@ class Ui_AccountHasBalDialog(object):
 "	background: none;\n"
 "}\n"
 "QScrollBar::add-page:vertical {\n"
-""
-                        "	background: none;\n"
+"	background: none;\n"
 "}")
         AccountHasBalDialog.setSizeGripEnabled(False)
         self.verticalLayout = QVBoxLayout(AccountHasBalDialog)
@@ -239,7 +255,7 @@ class Ui_AccountHasBalDialog(object):
     def retranslateUi(self, AccountHasBalDialog):
         AccountHasBalDialog.setWindowTitle(QCoreApplication.translate("AccountHasBalDialog", u"Dialog", None))
 #if QT_CONFIG(tooltip)
-        self.body.setToolTip(QCoreApplication.translate("AccountHasBalDialog", u"<html><head/><body><p><span style=\" font-size:12pt;\">Se considera que una cuenta tiene saldo nulo o cero cuando el balance es igual a cero, por lo que no tiene saldo a favor (acreedor) ni en contra (deudor).</span></p></body></html>", None))
+        self.body.setToolTip(QCoreApplication.translate("AccountHasBalDialog", u"<html><head/><body><p><span style=\" font-size:11pt;\">Se considera que una cuenta tiene saldo nulo o cero cuando el balance es igual a cero, por lo que no tiene saldo a favor (acreedor) ni en contra (deudor).</span></p></body></html>", None))
 #endif // QT_CONFIG(tooltip)
         self.label_askDelete.setText(QCoreApplication.translate("AccountHasBalDialog", u"\u00bfEst\u00e1 seguro de dar de baja las cuentas corrientes seleccionadas?", None))
         self.label_accountsWithoutZeroBal.setText(QCoreApplication.translate("AccountHasBalDialog", u"Hay _ cuentas corrientes seleccionadas con saldo no nulo", None))

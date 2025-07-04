@@ -80,6 +80,28 @@ QLabel {
 }
 
 
+/* checkbox */
+QCheckBox {
+	margin-top: 5px;
+	padding: 0 3px;
+	spacing: 5px;
+    border: none;
+	border-radius: 3px;
+}
+QCheckBox:hover,
+QCheckBox:focus {
+	background-color: #3b66ab;
+}
+QCheckBox:checked {
+	background-color: #3b66ab;
+    border: 1px inset #778da9;
+}
+QCheckBox:disabled {
+	background-color: rgb(103, 115, 122);
+    color: #999;
+}
+
+
 /* listtable y header */
 QListWidget {
 	color: #0d1b2a;
@@ -102,12 +124,6 @@ QHeaderView::section {
 	border-right: 1px solid;
 	border-bottom: 1px solid;
 	border-color: #e0e1dd;
-}
-
-
-/* checkbox */
-QCheckBox {
-	spacing: 5px;
 }
 
 
@@ -187,7 +203,7 @@ QScrollBar::add-page:vertical {
       </size>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Se considera que una cuenta tiene saldo nulo o cero cuando el balance es igual a cero, por lo que no tiene saldo a favor (acreedor) ni en contra (deudor).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Se considera que una cuenta tiene saldo nulo o cero cuando el balance es igual a cero, por lo que no tiene saldo a favor (acreedor) ni en contra (deudor).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,0">
       <property name="spacing">
