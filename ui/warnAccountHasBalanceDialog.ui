@@ -35,14 +35,14 @@
    <string notr="true">* {
 	color: #111;
 	font-family: &quot;Futura&quot;, &quot;Verdana&quot;, &quot;Sans-Serif&quot;;
-	font-size: 16px;
+	font-size: 14px;
 }
 
 
 QMenu {
 	background-color: #fff;
 	color: #111;
-	font-size: 14px;
+	font-size: 13px;
 }
 
 
@@ -77,6 +77,10 @@ QLabel {
 
 #label_askDelete {
 	font-weight: bold;
+}
+#label_balanceWarning {
+	margin-top: 10px;
+	color: #F65755;
 }
 
 
@@ -205,9 +209,9 @@ QScrollBar::add-page:vertical {
      <property name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Se considera que una cuenta tiene saldo nulo o cero cuando el balance es igual a cero, por lo que no tiene saldo a favor (acreedor) ni en contra (deudor).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,0">
+     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0">
       <property name="spacing">
-       <number>6</number>
+       <number>10</number>
       </property>
       <property name="leftMargin">
        <number>5</number>
@@ -221,48 +225,94 @@ QScrollBar::add-page:vertical {
       <property name="bottomMargin">
        <number>5</number>
       </property>
-      <item alignment="Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignTop">
-       <widget class="QLabel" name="label_askDelete">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>40</height>
-         </size>
+      <item>
+       <widget class="QFrame" name="frame_labels">
+        <property name="frameShape">
+         <enum>QFrame::Shape::NoFrame</enum>
         </property>
-        <property name="text">
-         <string>¿Está seguro de dar de baja las cuentas corrientes seleccionadas?</string>
+        <property name="frameShadow">
+         <enum>QFrame::Shadow::Plain</enum>
         </property>
-        <property name="textFormat">
-         <enum>Qt::TextFormat::PlainText</enum>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignCenter</set>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item alignment="Qt::AlignmentFlag::AlignHCenter">
-       <widget class="QLabel" name="label_accountsWithoutZeroBal">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>40</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Hay _ cuentas corrientes seleccionadas con saldo no nulo</string>
-        </property>
-        <property name="textFormat">
-         <enum>Qt::TextFormat::PlainText</enum>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignCenter</set>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_askDelete">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>40</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>¿Está seguro de dar de baja las cuentas corrientes seleccionadas?</string>
+           </property>
+           <property name="textFormat">
+            <enum>Qt::TextFormat::PlainText</enum>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_accountsWithoutZeroBal">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>40</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Hay _ cuentas corrientes seleccionadas con saldo no nulo</string>
+           </property>
+           <property name="textFormat">
+            <enum>Qt::TextFormat::PlainText</enum>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_balanceWarning">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;El saldo deudor/a favor de cada cuenta asociada será considerado 0.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Nota: el balance de las cuentas será considerado saldado</string>
+           </property>
+           <property name="textFormat">
+            <enum>Qt::TextFormat::PlainText</enum>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item alignment="Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop">

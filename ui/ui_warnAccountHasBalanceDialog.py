@@ -35,14 +35,14 @@ class Ui_AccountHasBalDialog(object):
         AccountHasBalDialog.setStyleSheet(u"* {\n"
 "	color: #111;\n"
 "	font-family: \"Futura\", \"Verdana\", \"Sans-Serif\";\n"
-"	font-size: 16px;\n"
+"	font-size: 14px;\n"
 "}\n"
 "\n"
 "\n"
 "QMenu {\n"
 "	background-color: #fff;\n"
 "	color: #111;\n"
-"	font-size: 14px;\n"
+"	font-size: 13px;\n"
 "}\n"
 "\n"
 "\n"
@@ -78,6 +78,10 @@ class Ui_AccountHasBalDialog(object):
 "#label_askDelete {\n"
 "	font-weight: bold;\n"
 "}\n"
+"#label_balanceWarning {\n"
+"	margin-top: 10px;\n"
+"	color: #F65755;\n"
+"}\n"
 "\n"
 "\n"
 "/* checkbox */\n"
@@ -93,12 +97,12 @@ class Ui_AccountHasBalDialog(object):
 "	background-color: #3b66ab;\n"
 "}\n"
 "QCheckBox:checked {\n"
-"	background-color: #3b66ab;\n"
+"	background-color: #3b66a"
+                        "b;\n"
 "    border: 1px inset #778da9;\n"
 "}\n"
 "QCheckBox:disabled {\n"
-"	back"
-                        "ground-color: rgb(103, 115, 122);\n"
+"	background-color: rgb(103, 115, 122);\n"
 "    color: #999;\n"
 "}\n"
 "\n"
@@ -142,13 +146,13 @@ class Ui_AccountHasBalDialog(object):
 "	border-radius: 5px;\n"
 "}\n"
 "QScrollBar::handle:pressed {\n"
-"	background-color: #3b465b;\n"
+"	background-color: "
+                        "#3b465b;\n"
 "}\n"
 "QScrollBar::sub-line {\n"
 "	width: 0;\n"
 "	height: 0;\n"
-"	"
-                        "background: none;\n"
+"	background: none;\n"
 "}\n"
 "QScrollBar::add-line {\n"
 "	width: 0;\n"
@@ -184,26 +188,45 @@ class Ui_AccountHasBalDialog(object):
         self.body.setSizePolicy(sizePolicy1)
         self.body.setMinimumSize(QSize(0, 0))
         self.verticalLayout_2 = QVBoxLayout(self.body)
-        self.verticalLayout_2.setSpacing(6)
+        self.verticalLayout_2.setSpacing(10)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.verticalLayout_2.setContentsMargins(5, 5, 5, 5)
-        self.label_askDelete = QLabel(self.body)
+        self.frame_labels = QFrame(self.body)
+        self.frame_labels.setObjectName(u"frame_labels")
+        self.frame_labels.setFrameShape(QFrame.Shape.NoFrame)
+        self.frame_labels.setFrameShadow(QFrame.Shadow.Plain)
+        self.verticalLayout_3 = QVBoxLayout(self.frame_labels)
+        self.verticalLayout_3.setSpacing(0)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
+        self.label_askDelete = QLabel(self.frame_labels)
         self.label_askDelete.setObjectName(u"label_askDelete")
         self.label_askDelete.setMinimumSize(QSize(0, 40))
         self.label_askDelete.setTextFormat(Qt.TextFormat.PlainText)
         self.label_askDelete.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_askDelete.setWordWrap(True)
 
-        self.verticalLayout_2.addWidget(self.label_askDelete, 0, Qt.AlignmentFlag.AlignHCenter|Qt.AlignmentFlag.AlignTop)
+        self.verticalLayout_3.addWidget(self.label_askDelete)
 
-        self.label_accountsWithoutZeroBal = QLabel(self.body)
+        self.label_accountsWithoutZeroBal = QLabel(self.frame_labels)
         self.label_accountsWithoutZeroBal.setObjectName(u"label_accountsWithoutZeroBal")
         self.label_accountsWithoutZeroBal.setMinimumSize(QSize(0, 40))
         self.label_accountsWithoutZeroBal.setTextFormat(Qt.TextFormat.PlainText)
         self.label_accountsWithoutZeroBal.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_accountsWithoutZeroBal.setWordWrap(True)
 
-        self.verticalLayout_2.addWidget(self.label_accountsWithoutZeroBal, 0, Qt.AlignmentFlag.AlignHCenter)
+        self.verticalLayout_3.addWidget(self.label_accountsWithoutZeroBal)
+
+        self.label_balanceWarning = QLabel(self.frame_labels)
+        self.label_balanceWarning.setObjectName(u"label_balanceWarning")
+        self.label_balanceWarning.setTextFormat(Qt.TextFormat.PlainText)
+        self.label_balanceWarning.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_balanceWarning.setWordWrap(True)
+
+        self.verticalLayout_3.addWidget(self.label_balanceWarning)
+
+
+        self.verticalLayout_2.addWidget(self.frame_labels)
 
         self.checkb_toggleAccountsList = QCheckBox(self.body)
         self.checkb_toggleAccountsList.setObjectName(u"checkb_toggleAccountsList")
@@ -259,6 +282,10 @@ class Ui_AccountHasBalDialog(object):
 #endif // QT_CONFIG(tooltip)
         self.label_askDelete.setText(QCoreApplication.translate("AccountHasBalDialog", u"\u00bfEst\u00e1 seguro de dar de baja las cuentas corrientes seleccionadas?", None))
         self.label_accountsWithoutZeroBal.setText(QCoreApplication.translate("AccountHasBalDialog", u"Hay _ cuentas corrientes seleccionadas con saldo no nulo", None))
+#if QT_CONFIG(tooltip)
+        self.label_balanceWarning.setToolTip(QCoreApplication.translate("AccountHasBalDialog", u"<html><head/><body><p><span style=\" font-size:11pt;\">El saldo deudor/a favor de cada cuenta asociada ser\u00e1 considerado 0.</span></p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.label_balanceWarning.setText(QCoreApplication.translate("AccountHasBalDialog", u"Nota: el balance de las cuentas ser\u00e1 considerado saldado", None))
         self.checkb_toggleAccountsList.setText(QCoreApplication.translate("AccountHasBalDialog", u"Mostrar cuentas con saldo", None))
     # retranslateUi
 
