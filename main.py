@@ -1959,7 +1959,6 @@ class MainWindow(QMainWindow):
             if warn_dialog.exec() != warn_dialog.DialogCode.Accepted:
                 return None
         
-        return # todo: sacar este return después de hacer UPDATES en lugar de DELETES a Deudores
         # cambia la progress-bar para representar las eliminaciones
         self.ui.debts_progressbar.setMaximum(len(selected_rows))
         self.ui.debts_progressbar.setStyleSheet(ProgressBarStyle.DELETION.value)
@@ -2016,8 +2015,8 @@ class MainWindow(QMainWindow):
         '''
         Instancia un Worker y un QThread para actualizar la base de datos con 
         los deudores eliminados.
-        NOTA: Este método NO ELIMINA LOS REGISTROS DE "Deudas", SINO QUE LAS 
-        MARCA COMO ELIMINADAS.
+        NOTA: Este método NO ELIMINA LOS REGISTROS DE "Deudores", SINO QUE LOS  
+        ANONIMIZA.
 
         Parámetros
         ----------
@@ -2030,13 +2029,13 @@ class MainWindow(QMainWindow):
         None
         '''
         ids_params = self.__getDeleteData(
-                table_viewID=TableViewId.SALES_TABLE_VIEW,
+                table_viewID=TableViewId.DEBTS_TABLE_VIEW,
                 selected_rows=base_model_rows_selected
             )
         
         # instancia y ejecuta WORKER y THREAD
         self.__instanciateDeleteWorkerAndThread(
-            table_viewID=TableViewId.SALES_TABLE_VIEW, 
+            table_viewID=TableViewId.DEBTS_TABLE_VIEW, 
             del_params=ids_params)
         return None
     
@@ -2107,7 +2106,10 @@ class MainWindow(QMainWindow):
                     }
             
             case "DEBTS_TABLE_VIEW":
-                pass
+                # obtiene los IDs de los Deudores y los convierte en tuple[ID]
+                for row in selected_rows:
+                    data.append( (self.debts_data_model._data[row][0],) )
+                data = tuple(data)
         
         return data
 
@@ -2164,7 +2166,7 @@ class MainWindow(QMainWindow):
                 self.DELETE_THREAD.finished.connect(self.update_worker.deleteLater)
             
             case TableViewId.SALES_TABLE_VIEW:
-                # borra registros de Detalle_Ventas, Ventas y Deudas
+                # actualiza registros de Detalle_Ventas, Ventas y Deudas
                 mult_sql:tuple[str] = (
                     '''UPDATE Detalle_Ventas 
                        SET eliminado = 1 
@@ -2205,7 +2207,48 @@ class MainWindow(QMainWindow):
                 )
             
             case TableViewId.DEBTS_TABLE_VIEW:
-                ...
+                # borra registros de Detalle_Ventas, Ventas y Deudas
+                mult_sql:tuple[str] = (
+                    ''' UPDATE Deudores 
+                        SET nombre = '[ELIMINADO]',
+                            apellido = '[ELIMINADO]',
+                            num_telefono = NULL,
+                            direccion = NULL,
+                            codigo_postal = NULL
+                        WHERE IDdeudor = ?;''',
+                    ''' UPDATE Deudas
+                        SET total_adeudado = 0,
+                            eliminado = 1
+                        WHERE IDdeudor = ?;'''
+                    )
+
+                self.delete_worker = WorkerDelete()
+                self.delete_worker.moveToThread(self.DELETE_THREAD)
+                
+                self.DELETE_THREAD.started.connect(
+                    lambda: self.delete_worker.executeDeleteQuery(
+                        mult_sql=mult_sql,
+                        params=del_params,
+                        table_viewID=table_viewID
+                    )
+                )
+                self.delete_worker.progress.connect(
+                    lambda value: self.__updateProgressBar(
+                        table_viewID=table_viewID,
+                        value=value
+                    )
+                )
+                self.delete_worker.finished.connect(
+                    lambda: self.__workerOnFinished(
+                        table_viewID=table_viewID,
+                        READ_OPERATION=False
+                    )
+                )
+                
+                self.delete_worker.finished.connect(self.DELETE_THREAD.quit)
+                self.DELETE_THREAD.finished.connect(
+                    self.delete_worker.deleteLater
+                )
             
         self.DELETE_THREAD.start()
         return None

@@ -139,7 +139,12 @@ class WorkerDelete(QObject):
                     logging.debug(LoggingMessage.DEBUG_DB_MULT_DELETE_SUCCESS)
                 
                 case TableViewId.DEBTS_TABLE_VIEW:
-                    ...
+                    for n, param in enumerate(params):
+                        for sql in mult_sql:
+                            cursor.execute(sql, param)
+                            conn.commit()
+                        self.progress.emit(n)
+                    logging.debug(LoggingMessage.DEBUG_DB_MULT_DELETE_SUCCESS)
         
         except sqlite3Error as err: #! errores de base de datos, consultas, etc.
             conn.rollback()
