@@ -52,7 +52,6 @@ class WorkerSelect(QObject):
         data_query:list[Any] # guarda los registros obtenidos
         signal:tuple[int,Any] = None
         
-        # TODO: limitar la cantidad de registros a 150
         with DatabaseRepository() as repo:
             # si recibió 'count_sql' hace la consulta COUNT() y manda la cantidad de registros encontrados...
             if count_sql:
