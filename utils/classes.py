@@ -1623,7 +1623,9 @@ class SaleDialog(QDialog):
         with DatabaseRepository() as db_repo:
             full_name = db_repo.selectRegisters(
                 data_sql='''SELECT nombre, apellido 
-                            FROM Deudores;'''
+                            FROM Deudores 
+                            WHERE nombre <> "[ELIMINADO]" AND 
+                              apellido <> "[ELIMINADO]";'''
             )
             
             for name, surname in full_name:

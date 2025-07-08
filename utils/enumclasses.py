@@ -513,8 +513,8 @@ class Regex(StrEnum):
     SALES_TOTAL_COST = "[0-9]{1,8}(\.|,)?[0-9]{0,2}"
     SALES_PAID = "[\d]{0,8}(\.|,)?[\d]{0,2}"
     
-    DEBTS_NAME = "[^;\"']{1,40}"
-    DEBTS_SURNAME = "[^;\"']{1,40}"
+    DEBTS_NAME = "[^;\"'\[\]]{1,40}"
+    DEBTS_SURNAME = "[^;\"'\[\]]{1,40}"
     DEBTS_PHONE_NUMB = "\+?[0-9 -]{0,20}"
     DEBTS_DIRECTION = "[^;\"']{0,256}"
     

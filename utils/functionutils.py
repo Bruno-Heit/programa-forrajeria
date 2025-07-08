@@ -172,7 +172,9 @@ def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=Fals
         case "DEBTS_TABLE_VIEW":
             return (
                 str( '''SELECT COUNT(*) 
-                        FROM Deudores;'''),
+                        FROM Deudores 
+                        WHERE nombre <> "[ELIMINADO]" AND 
+                              apellido <> "[ELIMINADO]";'''),
                 str( '''SELECT de.IDdeudor,
                                de.nombre,
                                de.apellido,
@@ -182,6 +184,8 @@ def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=Fals
                                COALESCE(ROUND(SUM(CASE WHEN d.eliminado = 0 THEN d.total_adeudado ELSE 0 END), 2), 0)
                         FROM Deudores AS de
                         LEFT JOIN Deudas AS d ON de.IDdeudor = d.IDdeudor
+                        WHERE nombre <> "[ELIMINADO]" AND 
+                              apellido <> "[ELIMINADO]" 
                         GROUP BY de.IDdeudor, de.nombre
                         ORDER BY de.nombre;''')
                 )
@@ -450,12 +454,12 @@ def createCompleter(sql:str=None, params:tuple[Any]=None, type:int=None) -> QCom
     
     else:
         if type == 1: # nombres de personas con cta. corriente
-            query = makeReadQuery("SELECT DISTINCT nombre FROM Deudores;")
+            query = makeReadQuery("SELECT DISTINCT nombre FROM Deudores WHERE nombre <> '[ELIMINADO]';")
             names = [name[0] for name in query]
             completer = QCompleter(names)
         
         elif type == 2: # apellidos de personas con cta. corriente
-            query = makeReadQuery("SELECT DISTINCT apellido FROM Deudores;")
+            query = makeReadQuery("SELECT DISTINCT apellido FROM Deudores WHERE apellido <> '[ELIMINADO]';")
             surnames = [surname[0] for surname in query]
             completer = QCompleter(surnames)
         

@@ -32,7 +32,8 @@ from utils.eventfilters import (BackgroundEventFilter, CategoryItemEventFilter,
 
 from resources import (rc_icons)
 
-# TODO2: falta hacer "DELETE" a Cuentas Corrientes (no eliminar Cuentas Corrientes, sino anonimizarlas)
+# TODO: tengo que, en Cuentas Corrientes, no traer cuentas eliminadas, y no mostrar (en Dialogs ni en ningún lugar) esos datos eliminados
+# TODO: tengo que validar que el usuario no pueda introducir [ELIMINADO] o algo parecido como nombre o apellido de cuenta corriente
 
 class MainWindow(QMainWindow):
     def __init__(self, db_path:str=DATABASE_DIR):
@@ -449,7 +450,6 @@ class MainWindow(QMainWindow):
     
     
     def setup_debts_signals(self) -> None:
-        # TODO: SEGUIR CON PARTE DE DEUDAS
         #* (READ) cargar con deudas 'tv_debts_data'
         self.ui.tabWidget.currentChanged.connect(lambda curr_index: self.fillTableView(
             table_viewID=TableViewId.DEBTS_TABLE_VIEW, SHOW_ALL=True) if curr_index == 2 else None)
@@ -472,7 +472,7 @@ class MainWindow(QMainWindow):
         )
         
         self.debts_proxy_model.baseModelRowsSelected.connect(
-            self.__onDebtsBaseModelRowsSelected # TODO: implementar éste método
+            self.__onDebtsBaseModelRowsSelected
         )
         
         #* (UPDATE) modificar celdas de 'tv_sales_data'
@@ -1920,7 +1920,6 @@ class MainWindow(QMainWindow):
         return None
 
 
-    # TODO: implementar la eliminación de deudores
     # deudas
     def __deleteDebtsRows(self) -> None:
         '''
