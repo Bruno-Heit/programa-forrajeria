@@ -32,8 +32,6 @@ from utils.eventfilters import (BackgroundEventFilter, CategoryItemEventFilter,
 
 from resources import (rc_icons)
 
-# TODO: tengo que, en Cuentas Corrientes, no traer cuentas eliminadas, y no mostrar (en Dialogs ni en ningún lugar) esos datos eliminados
-# TODO: tengo que validar que el usuario no pueda introducir [ELIMINADO] o algo parecido como nombre o apellido de cuenta corriente
 
 class MainWindow(QMainWindow):
     def __init__(self, db_path:str=DATABASE_DIR):
