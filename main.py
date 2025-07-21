@@ -3592,14 +3592,17 @@ class MainWindow(QMainWindow):
             la fecha seleccionada
         '''
         collected:float
+        _datetime_to_iso:str
         
         with self._db_repo as db_repo:
+            _datetime_to_iso = date.toString(DateAndTimeFormat.DATE_ISO_8601.value)
+            
             collected = db_repo.selectRegisters(
-                data_sql='''SELECT COALESCE(ROUND(SUM(dv.costo_total), 2), 0) 
+                data_sql='''SELECT COALESCE(ROUND(SUM(dv.costo_total), 2), 0)
                             FROM Detalle_Ventas AS dv
                             INNER JOIN Ventas AS v ON dv.IDventa = v.IDventa 
-                            WHERE v.fecha_hora LIKE ?;''',
-                data_params=("%" + date.toString(DateAndTimeFormat.LOCAL_DATE_FORMAT.value) + "%",)
+                            WHERE v.fecha_hora LIKE ? AND v.eliminado <> 1;''',
+                data_params=(str(_datetime_to_iso) + "%",)
             )[0][0]
         
         self.ui.label_show_collected_by_day.setText(
@@ -3646,9 +3649,7 @@ class MainWindow(QMainWindow):
                     QDate(date).addDays(-DateTimeRanges.MAX_DAYS_DIFF.value)
                 )
         return None
-    
-    
-    #¡### DEUDAS ######################################################
+
 
 
 

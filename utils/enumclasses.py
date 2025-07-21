@@ -35,7 +35,7 @@ class DateAndTimeFormat(StrEnum):
     # fecha
     LOCAL_DATE_FORMAT = "d/M/yyyy"
     DIR_LOCAL_DATE_FORMAT = "%d/%m/%Y"
-    DATE_ISO_8601 = "yyyy-MM-d"
+    DATE_ISO_8601 = "yyyy-MM-dd"
     
     # hora
     LOCAL_TIME_FORMAT = "HH:mm:ss"
