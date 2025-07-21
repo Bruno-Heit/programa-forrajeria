@@ -25,7 +25,6 @@ import os
 from utils.enumclasses import (Regex, DateAndTimeFormat, ProgramValues as PV)
 
 
-# TODO: ver qué pasa, no crea una conexión a bd
 # direcciones
 # DATABASE_DIR:str = "database/inventario.db" # antes se llamaba "inventario", ahora es "db_gestion.db"
 DATABASE_DIR = user_data_dir(appname=PV.APP_NAME.value,

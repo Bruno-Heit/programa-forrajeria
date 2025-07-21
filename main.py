@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
         db_path : str, opcional
             dirección usada para la base de datos, por defecto DATABASE_DIR; 
             admite las siguientes direcciones comunes:
-            - DATABASE_DIR: usa la dirección "*database/inventario.db*"
+            - DATABASE_DIR: usa la dirección por defecto
             - DATABASE_MEMORY: usa una base de datos en memoria ("*:memory:*"), 
             útil para *tests*
             - DATABASE_MEMORY_SHARED: usa una base de datos en memoria 
