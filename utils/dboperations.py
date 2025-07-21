@@ -19,14 +19,21 @@ from typing import (Any)
 import logging
 from datetime import (datetime)
 from re import (Match, compile, fullmatch, search, IGNORECASE)
+from platformdirs import (user_data_dir)
+import os
 
-from utils.enumclasses import (Regex, DateAndTimeFormat)
+from utils.enumclasses import (Regex, DateAndTimeFormat, ProgramValues as PV)
 
 
+# TODO: ver qué pasa, no crea una conexión a bd
 # direcciones
-DATABASE_DIR:str = "database/inventario.db"
+# DATABASE_DIR:str = "database/inventario.db" # antes se llamaba "inventario", ahora es "db_gestion.db"
+DATABASE_DIR = user_data_dir(appname=PV.APP_NAME.value,
+                             appauthor=PV.APP_AUTHOR.value,
+                             ensure_exists=True) + "/database/db_gestion.db"
 DATABASE_MEMORY:str = ":memory:"
 DATABASE_MEMORY_SHARED:str = "file::memory:?cache=shared"
+
 
 
 # repositorio de base de datos

@@ -6,7 +6,7 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QTableView,
                                QCheckBox, QAbstractItemView, QListWidgetItem, 
                                QLineEdit, QDateTimeEdit, QDateEdit)
 from PySide6.QtCore import (QModelIndex, Qt, QThread, Slot, QSize, QTranslator, 
-                            QLibraryInfo, QSignalBlocker)
+                            QLibraryInfo, QSignalBlocker, QSettings)
 from PySide6.QtGui import (QIcon)
 
 from utils.classes import (ProductDialog, SaleDialog, ListItemWidget, 
@@ -21,7 +21,7 @@ from utils.delegates import (InventoryDelegate, SalesDelegate, DebtsDelegate)
 from utils.workerclasses import (WorkerSelect, WorkerUpdate, WorkerDelete)
 from utils.dboperations import (DatabaseRepository, ensureDateTimeISOformat)
 from utils.customvalidators import (SalePaidValidator, CategoryNameValidator)
-from utils.enumclasses import (LoggingMessage, ModelHeaders, TableViewId, 
+from utils.enumclasses import (ProgramValues, LoggingMessage, ModelHeaders, TableViewId, 
                                LabelFeedbackStyle, InventoryPriceType, TypeSideBar, 
                                InvViewCols, DebtorViewCols, ProgressBarStyle, 
                                DateAndTimeFormat, CommonCategories, 
@@ -90,9 +90,8 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
-        self.setWindowTitle("herramienta de gestión - Forrajería Torres")
+        self.setWindowTitle(ProgramValues.APP_NAME.value)
         
-        # set_tables_ListWidgetItemsTooltip(self.ui.tables_ListWidget, getCategoriesDescription())
         self.__setTablesListWidgetItems()
         
         self.__hideWidgets() # esconde algunos widgets inicialmente
@@ -3667,6 +3666,12 @@ def main():
             logging.FileHandler("program.log"),
             logging.StreamHandler()
         ]
+    )
+    
+    # configuraciones
+    settings = QSettings(
+        ProgramValues.APP_NAME.value,
+        ProgramValues.APP_AUTHOR.value
     )
     
     # base de datos
