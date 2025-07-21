@@ -49,6 +49,9 @@ class InventoryDelegate(QStyledItemDelegate):
                 editor.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
                 editor.setFrame(False)
                 editor.addItems(getProductsCategories())
+                editor.setStyleSheet(
+                    WidgetStyle.DEF_COMBOBOX_ARROW_ICON.value
+                )
                 editor.setPlaceholderText("Seleccionar una categoría")
             
             case InvViewCols.INV_PRODUCT_NAME.value: # nombre
@@ -56,8 +59,8 @@ class InventoryDelegate(QStyledItemDelegate):
                 editor.setCompleter(createCompleter(type=3))
                 editor.setMaxLength(50)
                 validator = ProductNameValidator(
-                    prev_name=index.data(Qt.ItemDataRole.DisplayRole),
-                    parent=editor)
+                    prev_name=index.data(Qt.ItemDataRole.DisplayRole)
+                )
                 validator.validationSucceeded.connect(self.__onValidField)
                 validator.validationFailed.connect(self.__onInvalidField)
                 editor.setValidator(validator)
