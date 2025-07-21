@@ -400,11 +400,13 @@ class SalesTableModel(QAbstractTableModel):
     def rowCount(self, parent:QObject = ...) -> int:
         if self._data is not None:
             return self._data.shape[0]
+        return 0
     
     
-    def columnCount(self, parent:QObject = ...):
+    def columnCount(self, parent:QObject = ...) -> int:
         if self._headers is not None:
             return len(self._headers)
+        return 0
     
     
     #¡ flags
@@ -795,11 +797,13 @@ class DebtsTableModel(QAbstractTableModel):
     def rowCount(self, parent:QObject = ...) -> int:
         if self._data is not None:
             return self._data.shape[0]
+        return 0
     
     
-    def columnCount(self, parent:QObject = ...):
+    def columnCount(self, parent:QObject = ...) -> int:
         if self._headers is not None:
             return len(self._headers)
+        return 0
     
     
     #¡ flags
@@ -1174,11 +1178,13 @@ class ProductsBalanceModel(QAbstractTableModel):
     def rowCount(self, parent:QObject = ...) -> int:
         if self._data is not None:
             return self._data.shape[0]
+        return 0
     
     
-    def columnCount(self, parent:QObject = ...):
+    def columnCount(self, parent:QObject = ...) -> int:
         if self._headers is not None:
             return len(self._headers)
+        return 0
     
     
     #¡ flags
