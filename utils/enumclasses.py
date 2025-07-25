@@ -22,6 +22,21 @@ class ProgramValues(StrEnum):
 
 
 
+
+class SettingsDirs(StrEnum):
+    '''
+    Clase **StrEnum** con las direcciones de los valores guardados en las 
+    configuraciones del programa.
+    '''
+    MW_SIZE = "MainWindow/size"
+    MW_POSITION = "MainWindow/position"
+    MW_GEOMETRY = "MainWindow/geometry"
+    MW_STATE = "MainWindow/windowState"
+    
+
+
+
+
 class DateAndTimeFormat(StrEnum):
     '''
     Clase StrEnum con los formatos de fecha y hora admitidos por el programa.

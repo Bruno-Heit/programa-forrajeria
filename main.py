@@ -29,6 +29,7 @@ from utils.enumclasses import (ProgramValues, LoggingMessage, ModelHeaders, Tabl
 from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxyModel)
 from utils.eventfilters import (BackgroundEventFilter, CategoryItemEventFilter, 
                                 CategoryListEventFilter)
+from utils.settings_manager import (SettingsManager)
 
 from resources import (rc_icons)
 
@@ -57,6 +58,12 @@ class MainWindow(QMainWindow):
         
         # repositorio de base de datos
         self._db_repo:DatabaseRepository = DatabaseRepository(db_path=db_path)
+        
+        # configuraciones
+        self.config:SettingsManager = SettingsManager(
+            app_name=PV.APP_NAME.value,
+            organization_name=PV.APP_AUTHOR.value
+        )
         
         # inicializa ajustes personalizados de widgets
         self.setup_ui()
@@ -91,6 +98,9 @@ class MainWindow(QMainWindow):
         None
         '''
         self.setWindowTitle(ProgramValues.APP_NAME.value)
+        geometry, state = self.config.getMainWindowState()
+        self.restoreGeometry(geometry) if geometry else None
+        self.restoreState(state) if state else None
         
         self.__setTablesListWidgetItems()
         
@@ -3649,6 +3659,16 @@ class MainWindow(QMainWindow):
                     QDate(date).addDays(-DateTimeRanges.MAX_DAYS_DIFF.value)
                 )
         return None
+
+
+    def closeEvent(self, event):
+        # guarda la geometría de la ventana
+        self.config.saveMainWindowGeometry(self.size(), self.pos())
+        
+        # guarda el estado
+        self.config.saveMainWindowState(self.saveGeometry(), self.saveState())
+        
+        return super().closeEvent(event)
 
 
 
