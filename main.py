@@ -575,6 +575,7 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
+        self.main_window_icon = QIcon() # ventana principal
         self.sidebar_toggle_icon = QIcon() # sidebar de categorías
         self.inv_sidebar_toggle_icon = QIcon() # sidebar de porcentajes
         self.percent_icon = QIcon() # lineedit de porcentajes
@@ -584,6 +585,10 @@ class MainWindow(QMainWindow):
         self.delete_register_icon = QIcon() # eliminar registros
         self.delete_register_dark_icon = QIcon() # eliminar registros (color alternativo oscuro)
         self.end_sale_icon = QIcon() # terminar venta (formulario)
+        
+        # ícono de la ventana principal
+        self.main_window_icon.addFile(":/icons/program-icon.ico")
+        self.setWindowIcon(self.main_window_icon)
         
         # sidebar de categorías
         self.sidebar_toggle_icon.addFile(":/icons/list-normal.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)

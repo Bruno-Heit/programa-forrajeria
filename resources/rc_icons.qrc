@@ -2,7 +2,10 @@
 <RCC version="1.0">
     <qresource prefix="icons">
         
-        <!-- #### (MainWindow) ####   íconos para los botones de los menús laterales -->        
+        <!-- #### (MainWindow) ####   ícono de la ventana principal -->
+        <file alias="program-icon.ico">../icons/program_icon.ico</file>
+
+        <!-- #### (MainWindow) ####   íconos para los botones de los menús laterales -->
         <file alias="list-normal.svg">../icons/listNormal.svg</file>
         <file alias="list-focus.svg">../icons/listFocus.svg</file>
 
