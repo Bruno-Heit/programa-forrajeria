@@ -51,6 +51,8 @@ from phonenumbers import (parse, format_number, is_valid_number,
 from re import (sub)
 from datetime import (datetime)
 
+# TODO: testear modificación de precios por porcentajes en Productos, y si se agregan bien los productos, ventas y deudas nuevas
+# TODO: escribir README.md del programa
 
 # PRODUCTOS ====================================================================================================
 
@@ -345,6 +347,10 @@ class ProductDialog(QDialog):
     
 
     def setup_ui(self) -> None:
+        self.dialog_icon = QIcon()
+        self.dialog_icon.addFile(":/icons/program-icon.ico")
+        self.setWindowIcon(self.dialog_icon)
+        
         self.productDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setText("Aceptar")
         self.__hideWidgets()
         # desactiva desde el principio el botón "Aceptar"
@@ -772,6 +778,10 @@ class CategoryDescDialog(QDialog):
     
     
     def setup_ui(self) -> None:
+        self.dialog_icon = QIcon()
+        self.dialog_icon.addFile(":/icons/program-icon.ico")
+        self.setWindowIcon(self.dialog_icon)
+        
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating, False)
         
@@ -1540,6 +1550,10 @@ class SaleDialog(QDialog):
         
         '''
         self.setWindowTitle("Nueva venta")
+        
+        self.dialog_icon = QIcon()
+        self.dialog_icon.addFile(":/icons/program-icon.ico")
+        self.setWindowIcon(self.dialog_icon)
 
         self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setText("Aceptar")
         self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Cancel).setText("Cancelar")
@@ -3678,6 +3692,10 @@ class DebtorDataDialog(QDialog):
 
 
     def setup_ui(self) -> None:
+        self.dialog_icon = QIcon()
+        self.dialog_icon.addFile(":/icons/program-icon.ico")
+        self.setWindowIcon(self.dialog_icon)
+        
         self.debtorData.buttonBox.button(QDialogButtonBox.Ok).setText("Aceptar")
         self.debtorData.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
 
@@ -4255,6 +4273,10 @@ class ProductsBalanceDialog(QDialog):
     
     
     def setup_ui(self) -> None:
+        self.dialog_icon = QIcon()
+        self.dialog_icon.addFile(":/icons/program-icon.png")
+        self.setWindowIcon(self.dialog_icon)
+        
         # crea el dialog como ventana sin frame
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | 
                             Qt.WindowType.Popup)
