@@ -10,17 +10,76 @@ from utils.dboperations import (DatabaseRepository, DATABASE_DIR)
 from sqlite3 import (Connection, Error as sqlite3Error)
 from typing import (Any, Iterable)
 import logging
-        
 
 
-class WorkerSelect(QObject):
-    '''Clase WORKER que se encarga de ejecutar las consultas de tipo READ a la base de datos.'''
+class Worker(QObject):
+    '''
+    Clase base para la creación de **Workers**, contiene declaraciones de 
+    señales y métodos básicos que utilizarán las subclases de **Worker**.
+    
+    **NOTA**: ésta clase no debe instanciarse directamente, para implementar 
+    **Workers** se deben utilizar las diferentes subclases.
+    
+    Los **Workers** ejecutan acciones de forma asíncrona al programa principal 
+    y son especialmente útiles para realizar operaciones que puedan tardar 
+    bastante tiempo sin bloquear el *thread principal*.
+    
+    Señales
+    -------
+    progress : se emite a medida que se avanza con cada registro, emite un 
+        **int** con el progreso que lleva.
+    finished : es emitida una vez que se terminó de ejecutar el worker.
+    '''
+    progress:Signal = Signal(Any)
+    finished:Signal = Signal()
+    
+    def __init__(self) -> None:
+        super(Worker, self).__init__()
+        self._interrupted:bool = False
+        return None
+    
+    def requestInterruption(self) -> None:
+        '''
+        Solicita al **Worker** detener la tarea y muestra un *log* avisando 
+        de la interrupción.
+        '''
+        self._interrupted = True
+        logging.debug(LoggingMessage.WORKER_INTERRUPTION_REQUESTED)
+        return None
+    
+    def isInterrupted(self) -> bool:
+        '''
+        Verifica si la tarea del **Worker** fue detenida.
+
+        Retorna
+        -------
+        bool
+            flag que determina si la tarea está detenida
+        '''
+        return self._interrupted
+
+
+
+
+
+class WorkerSelect(Worker):
+    '''
+    Clase WORKER que se encarga de ejecutar las consultas de tipo READ a la 
+    base de datos.
+    
+    SEÑALES
+    -------
+    countFinished : es emitida cuando se termina de contar los registros 
+        coincidentes, emite un **int** que representa la cantidad de registros.
+    registerProgress : es emitida a medida que se recorren los registros 
+        obtenidos, emite un **tuple[int,[Any]]** donde **int** representa el 
+        progreso y **[Any]** es el registro actual.
+    '''
     countFinished = Signal(tuple) # se emite cuando se termina la consulta de COUNT(). emite tuple[int, int], teniendo 
                                   # la tupla las dimensiones del "batch" ([filas, columnas])
     registerProgress = Signal(tuple) # envía un tuple[int,[Any]] con cada registro coincidente (el 'int' se obtiene de 
                                      # 'enumerate' y sirve solamente para actualizar en MainWindow el QProgressBar de 
                                      # la tabla relacionada, lo más importante es el tuple interno '[Any]').
-    finished = Signal(int) # si hubo algún error envía 0, sino 1. Se emite cuando se termina la consulta de registros.
 
     def __init__(self) -> None:
         super(WorkerSelect, self).__init__()
@@ -30,27 +89,27 @@ class WorkerSelect(QObject):
     def executeReadQuery(self, data_sql:str, data_params:tuple=None, 
                          count_sql:str=None, count_params:tuple=None) -> None:
         '''
-        Hace la consulta SELECT a la base de datos y devuelve los valores de las filas seleccionadas. 
+        Hace la consulta SELECT a la base de datos y devuelve los valores de 
+        las filas seleccionadas.
         
-        PARAMS:
-        - data_sql: la consulta para obtener registros a ejecutar.
-        - data_params: los parámetros de la consulta 'data_sql'. Por defecto es None.
-        - count_sql: (opcional) la consulta READ COUNT() a ejecutar. Por defecto es None.
-        - count_params: (opcional) los parámetros de la consulta 'count_sql'. Por defecto es None.
-        
-        SEÑALES:
-        La señal 'finished' emite:
-        - 0: si no se pudo establecer una conexión con la base de datos.
-        - 1: si no hubo errores.
-        
-        La señal 'countFinished' emite un int que representa la cantidad de registros coincidentes.
-        
-        La señal 'registerProgress' emite un tuple[int,[Any]], donde 'int' representa el progreso de lectura y '[Any]' 
-        es el registro actual.
+        Parámetros
+        ----------
+        data_sql : str
+            la consulta para obtener registros
+        data_params : tuple, opcional
+            los parámetros de la consulta, por defecto ***None***
+        count_sql : str, opcional
+            la consulta COUNT para obtener la cantidad de coincidencias, por 
+            defecto ***None***
+        count_params : tuple, opcional
+            los parámetros de la consulta COUNT, por defecto ***None***
         '''
-        count_query:int # guarda el COUNT() de registros
         data_query:list[Any] # guarda los registros obtenidos
-        signal:tuple[int,Any] = None
+        
+        if self.isInterrupted():
+            logging.debug(LoggingMessage.WORKER_INTERRUPTED)
+            self.finished.emit()
+            return None
         
         with DatabaseRepository() as repo:
             # si recibió 'count_sql' hace la consulta COUNT() y manda la cantidad de registros encontrados...
@@ -62,20 +121,30 @@ class WorkerSelect(QObject):
             
             # luego obtiene los registros y los envía de a uno...
             data_query = repo.selectRegisters(
-                data_sql, data_params if data_params else None)
+                data_sql=data_sql,
+                data_params=data_params if data_params else None
+            )
             for n,reg in enumerate(data_query):
-                # signal = tuple((n, reg))
-                self.registerProgress.emit( tuple((n, reg)) )
+                match self.isInterrupted():
+                    case False:
+                        self.registerProgress.emit( tuple((n, reg)) )
+                    case True:
+                        logging.debug(LoggingMessage.WORKER_INTERRUPTED)
+                        self.finished.emit()
+                        return None
         
-        self.finished.emit(1) #* todo bien
         logging.debug(LoggingMessage.DEBUG_DB_MULT_SELECT_SUCCESS)
+        self.finished.emit()
 
 
 
 
 
 class WorkerDelete(QObject):
-    '''Clase WORKER que se encarga de ejecutar las consultas de tipo DELETE a la base de datos.'''
+    '''
+    Clase **Worker** que se encarga de ejecutar las consultas de tipo DELETE 
+    a la base de datos.
+    '''
     progress = Signal(int) # devuelve un int con el progreso que lleva borrado para actualizar el progressbar en MainWindow.
     finished = Signal(int)
     
@@ -87,34 +156,22 @@ class WorkerDelete(QObject):
         Parámetros
         ----------
         params : Iterable[Any] | dict[list]
-            parámetros para la consulta DELETE, será un 'dict[list]' cuando el 
-            parámetro 'mult_sql' sea diferente de None. Cada 'dict' tiene los 
-            IDs necesarios para la consulta
+            parámetros para la consulta DELETE, será un **dict[list]** cuando 
+            el parámetro **mult_sql** sea diferente de ***None***. Cada 
+            **dict** tiene los IDs necesarios para la consulta
         sql : str, opcional
             consulta DELETE para eliminar registros de una tabla
         mult_sql : tuple[str], opcional
-            consultas DELETE y sus parámetros en formato tuple[str], se recibe 
-            cuando se deben realizar consultas DELETE en más de una tabla en forma 
-            consecutiva (por ej.: en Detalle_Ventas se debe borrar registros de 
-            Ventas también).
+            consultas DELETE y sus parámetros en formato **tuple[str]**, se 
+            recibe cuando se deben realizar consultas DELETE en más de una 
+            tabla en forma consecutiva
         table_viewID : TableViewId, opcional
             vista a la que se referencia
-        
-        SEÑALES:
-        La señal 'finished' emite:
-        - 0: si no se pudo establecer una conexión con la base de datos.
-        - 1: si no hubo errores.
-        - sqlite3.Error.sqlite_errorcode: si hubo un error concreto, emite el código de error de sqlite3.
-        
-        La señal 'progress' emite un int que indica el progreso de borrado.
-        
-        Retorna
-        -------
-        None
         '''
         conn = createConnection(DATABASE_DIR)
         if not conn:
-            self.finished.emit(0) #! error con la comunicación a la base de datos
+            self.finished.emit()
+            return None
         cursor = conn.cursor()
         
         try:
@@ -148,19 +205,21 @@ class WorkerDelete(QObject):
         except sqlite3Error as err: #! errores de base de datos, consultas, etc.
             conn.rollback()
             logging.critical(LoggingMessage.ERROR_DB_DELETE, f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
-            self.finished.emit(err.sqlite_errorcode)
             
         finally:
             conn.close()
+            self.finished.emit()
             
-        self.finished.emit(1) #* todo bien
 
 
 
 
 
 class WorkerInsert(QObject):
-    '''Clase WORKER que se encarga de ejecutar las consultas de tipo INSERT a la base de datos.'''
+    '''
+    Clase **Worker** que se encarga de ejecutar las consultas de tipo INSERT 
+    a la base de datos.
+    '''
     progress = Signal(int)
     finished = Signal(int)
     
@@ -170,19 +229,17 @@ class WorkerInsert(QObject):
         '''
         Hace la consulta INSERT a la base de datos.
         
-        PARAMS:
-        - data_sql: la consulta con el registro a insertar.
-        - data_params: los parámetros de la consulta 'data_sql'. Por defecto es None.
-        
-        SEÑALES:
-        La señal 'finished' emite:
-        - 0: si no se pudo establecer una conexión con la base de datos.
-        - 1: si no hubo errores.
-        - sqlite3.Error.sqlite_errorcode: si hubo un error concreto, emite el código de error de sqlite3.
+        Parámetros
+        ----------
+        data_sql : str
+            la consulta con el registro a insertar
+        data_params : tuple
+            los parámetros de la consulta, por defecto ***None***
         '''
         conn = createConnection(DATABASE_DIR)
         if not conn:
-            self.finished.emit(0) #! error con la comunicación de la base de datos
+            self.finished.emit()
+            return None
         cursor = conn.cursor()
         
         try:
@@ -190,25 +247,27 @@ class WorkerInsert(QObject):
             
             conn.commit()
             logging.debug(LoggingMessage.DEBUG_DB_MULT_INSERT_SUCCESS)
-            self.finished.emit(1) #* todo bien
             
         except sqlite3Error as err:
             conn.rollback()
             logging.critical(LoggingMessage.ERROR_DB_INSERT, f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
-            self.finished.emit(err.sqlite_errorcode) #! error al realizar el insert
             
         finally:
+            self.finished.emit()
             conn.close()
-        
-        return None
 
 
 
 
 
 class WorkerUpdate(QObject):
-    '''Clase WORKER que se encarga de ejecutar las consultas de tipo UPDATE a la base de datos.
-    Este WORKER es usado también para marcar registros como eliminados en la columna "eliminado" en la base de datos.'''
+    '''
+    Clase **Worker** que se encarga de ejecutar las consultas de tipo UPDATE 
+    a la base de datos.
+    
+    Este **Worker** es usado también para marcar registros como eliminados en 
+    la columna *eliminado* en la base de datos.
+    '''
     progress = Signal(int)
     finished = Signal(int)
     
@@ -217,11 +276,6 @@ class WorkerUpdate(QObject):
     def executeUpdateQuery(self, sql:str, params:Iterable[tuple]) -> None:
         '''
         Hace la consulta UPDATE a la base de datos.
-        La señal 'finished' emite:
-        - 0: si no se pudo establecer una conexión con la base de datos
-        - 1: si no hubo errores
-        - sqlite3.Error: si hubo un error concreto, emite el código de error de sqlite3
-        La señal 'progress' emite un 'int' que indica el progreso de actualización.
         
         Parámetros
         ----------
@@ -229,14 +283,11 @@ class WorkerUpdate(QObject):
             consulta UPDATE a ejecutar
         params: Iterable[tuple]
             parámetros para consulta
-        
-        Retorna
-        -------
-        None
         '''
         conn = createConnection(DATABASE_DIR)
         if not conn:
-            self.finished.emit(0) #! error con la comunicación de la base de datos
+            self.finished.emit()
+            return None
         cursor = conn.cursor()
         
         try:
@@ -249,10 +300,7 @@ class WorkerUpdate(QObject):
         except sqlite3Error as err:
             conn.rollback()
             logging.critical(LoggingMessage.ERROR_DB_UPDATE, f"{err}")
-            self.finished.emit(err) #! error al realizar el update
                 
         finally:
             conn.close()
-            
-        self.finished.emit(1) #* todo bien
-        return None
+            self.finished.emit()

@@ -267,6 +267,9 @@ class LoggingMessage(StrEnum):
     ERROR_DB_DELETE = "Error en consulta DELETE"
     
     WORKER_SUCCESS = "WORKER terminó de ejecutarse correctamente"
+    WORKER_INTERRUPTION_REQUESTED = "solicitud de interrupción de WORKER..."
+    WORKER_INTERRUPTED = "WORKER fue interrumpido antes de terminar"
+    WORKER_ALREADY_DISCONNECTED = "WORKER ya fue desconectado del thread"
 
 
 

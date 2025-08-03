@@ -266,6 +266,12 @@ class MainWindow(QMainWindow):
         #¡ variables de deudas
         self._debts_model_data_acc:ndarray[Any] = None #? acumulador temp. de datos para modelo de Deudas.
         
+        #¡ variables de workers
+        self.select_thread:QThread = None
+        self.select_worker:WorkerSelect = None
+        self._select_worker_waiting_to_restart:bool = False
+        self._next_worker_params:dict[str, Any] = None
+        
         return None
 
 
@@ -1303,7 +1309,7 @@ class MainWindow(QMainWindow):
         
         _from_datetime:str # variables usadas cuando se llena la tabla de Ventas, 
         _to_datetime:str # sirven para marcar las fechas iniciales y finales
-        
+                
         # crea las consultas para obtener el COUNT de filas y los registros 
         # para llenar la tabla
         match table_viewID.name:
@@ -1356,6 +1362,25 @@ class MainWindow(QMainWindow):
                 )
                 self.ui.label_feedbackDebts.hide()
         
+        
+        # si hay un worker corriendo lo detiene, y cuando termina corre uno nuevo
+        if self.select_thread and self.select_thread.isRunning():
+            self.select_worker.requestInterruption()
+            
+            if not self._select_worker_waiting_to_restart:
+                self.select_worker.finished.connect(self._startNewWorker)
+                self._select_worker_waiting_to_restart = True
+            
+            self._next_worker_params = {
+                "table_viewID": table_viewID,
+                "data_sql": data_sql,
+                "data_params": data_params,
+                "count_sql": count_sql,
+                "count_params": count_params
+            }
+            return None
+        
+        # si no hay un worker corriendo se ejecuta normalmente
         self.__instanciateSelectWorkerAndThread(
             table_viewID=table_viewID,
             data_sql=data_sql,
@@ -1363,6 +1388,33 @@ class MainWindow(QMainWindow):
             count_sql=count_sql,
             count_params=count_params
         )
+        return None
+    
+    
+    def _startNewWorker(self) -> None:
+        '''
+        Éste método es usado cuando hay un **Worker** ya ejecutándose.
+        Reinicia el estado del **Worker** y las variables asociadas a él.
+        '''
+        try:
+            self.select_worker.finished.disconnect(self._startNewWorker)
+        
+        except TypeError:
+            logging.error(LoggingMessage.WORKER_ALREADY_DISCONNECTED)
+        
+        self._select_worker_waiting_to_restart = False
+        
+        if self._next_worker_params:
+            args = self._next_worker_params
+            self._next_worker_params = None
+            
+            self.__instanciateSelectWorkerAndThread(
+                table_viewID=args["table_viewID"],
+                data_sql=args["data_sql"],
+                data_params=args["data_params"],
+                count_sql=args["count_sql"],
+                count_params=args["count_params"]
+            )
         return None
     
     

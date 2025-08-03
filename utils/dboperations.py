@@ -26,7 +26,6 @@ from utils.enumclasses import (Regex, DateAndTimeFormat, ProgramValues as PV)
 
 
 # direcciones
-# DATABASE_DIR:str = "database/inventario.db" # antes se llamaba "inventario", ahora es "db_gestion.db"
 DATABASE_DIR = user_data_dir(appname=PV.APP_NAME.value,
                              appauthor=PV.APP_AUTHOR.value,
                              ensure_exists=True) + "/database/db_gestion.db"

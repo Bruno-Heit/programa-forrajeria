@@ -1,13 +1,15 @@
-# Programa de gestión "Forrajería Torres"
-El propósito de este proyecto es desarrollar un **programa de escritorio** adaptado a su ejecución en **Windows 10** o superior para un **forraje local** y que permite al usuario realizar un *CRUD* a una base de datos que contiene la siguiente información:
-
+# Programa de gestión "Forraje Torres"
+El propósito de este **programa de escritorio** es otorgar a un **forraje local** la posibilidad de llevar un registro de:
   - detalles de inventario (productos disponibles, stock, precios, etc.)
   - detalles de ventas realizadas.
-  - detalles de cuentas corrientes de los clientes.
+  - detalles de cuentas corrientes de los clientes y de su balance
 
-Éste programa de gestión fue diseñado teniendo en cuenta las necesidades específicas del usuario, además de que busca ser simple, eficiente y sencillo de usar, dado que "la simplicidad es la máxima sofisticación" (frase de Leonardo Da Vinci).
+Éste programa de gestión fue diseñado teniendo en cuenta las necesidades específicas del usuario, además de que busca ser ***simple, eficiente y sencillo de usar***, dado que:
+
+    "la simplicidad es la máxima sofisticación" - Leonardo Da Vinci.
 
 ## TABLA DE CONTENIDOS
+  - [COMPATIBILIDAD](#COMPATIBILIDAD)
   - [INSTALACIÓN](#INSTALACIÓN)
   - [USO](#USO)
     - [INVENTARIO](#INVENTARIO)
@@ -20,8 +22,18 @@ El propósito de este proyecto es desarrollar un **programa de escritorio** adap
 <hr>
 <br>
 
+### COMPATIBILIDAD
+El programa está principalmente diseñado para ser ejecutado en **Windows 10/11** debido a las necesidades del cliente, no se ha probado su compatibilidad con **Linux** y **MacOS**.
+
+Aunque no se ha probado su compatibilidad en otros sistemas operativos diferentes a Windows 10 y 11 he de mencionar que las tecnologías usadas son multiplataformas (ver "*[información del desarrollo](#INFORMACIÓN-DEL-DESARROLLO)*").
+
+<br>
+<hr>
+<br>
+
 ### <ins>INSTALACIÓN</ins>
-(a implementar)
+No se requiere de una instalación en sí, el programa está empaquetado en un ejecutable (**.exe**), simplemente hay que ejecutarlo.
+
 <hr>
 <br>
 
@@ -29,7 +41,7 @@ El propósito de este proyecto es desarrollar un **programa de escritorio** adap
 El software se divide en 3 partes principales:
   #### <ins>**INVENTARIO**</ins>  
   La sección de **INVENTARIO** sirve para mostrar los productos disponibles junto con algunos datos de interés como se muestra en la imagen siguiente.
-  ![inventario ejemplo prueba datos tabla](images/sct_inventory.png)  
+  ![inventario ejemplo prueba datos tabla](images/sct_inventory.png)
     - **<ins>MUESTRA DE DATOS</ins>**:  
       Se pueden mostrar los datos principalmente de 2 formas:  
         1. usando la barra de búsqueda que hay encima de la tabla de inventario.  
@@ -93,20 +105,14 @@ El software se divide en 3 partes principales:
 <br>
 
 ### <ins>INFORMACIÓN DEL DESARROLLO</ins>
-El programa está desarrollado en ***Python*** en su versión 3.11, usando el framework para desarrollo de *GUIs* ***PySide6***.
-El manejo de bases de datos es llevado a cabo con ***SQLite*** para lograr una mayor rapidez en la ejecución de las consultas.
-
-<hr>
-<br>
-
-### <ins>FUNCIONES A FUTURO</ins>
-- [ ] Implementación del **sistema de gestión de cuentas corrientes** (¡las deudas no se pueden cobrar! :scream:)
-- [ ] Implementación de un **sistema de estadísticas**.
-- [ ] Implementación de un **sistema de facturación** que permita crear facturas y distribuirlas a los clientes. **(a considerar)**
+- Desarrollado en ***Python 3.11***.
+- El *framework* usado para desarrollo de *GUIs* es ***PySide6*** (https://wiki.qt.io/Qt_for_Python).
+- El manejo de bases de datos es llevado a cabo con ***SQLite*** para lograr una mayor rapidez en la ejecución de las consultas (https://www.sqlite.org/).
+- Se lleva a cabo el formateo y validación de números telefónicos usando la librería ***phonenumbers*** de *David Drysdale* (https://github.com/daviddrysdale/python-phonenumbers).
+- íconos usados pertenecientes al conjunto de **Feather Icons** (https://feathericons.com/) y **Google Fonts** (https://fonts.google.com/icons).
 
 <hr>
 <br>
 
 ### <ins>LICENCIA</ins>
-Software bajo licencia Apache v2.0.
-URL oficial: [https://www.apache.org/licenses/LICENSE-2.0]
+Software bajo licencia Apache v2.0 (https://www.apache.org/licenses/LICENSE-2.0).
