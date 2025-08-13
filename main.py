@@ -18,14 +18,14 @@ from ui.customCalendars import (CustomCalendar)
 from utils.functionutils import *
 from utils.model_classes import (InventoryTableModel, SalesTableModel, DebtsTableModel)
 from utils.delegates import (InventoryDelegate, SalesDelegate, DebtsDelegate)
-from utils.workerclasses import (WorkerSelect, WorkerUpdate, WorkerDelete)
+from utils.workerclasses import (WorkerManager, WorkerSelect, WorkerUpdate, WorkerDelete)
 from utils.dboperations import (DatabaseRepository, ensureDateTimeISOformat)
 from utils.customvalidators import (SalePaidValidator, CategoryNameValidator)
 from utils.enumclasses import (ProgramValues, LoggingMessage, ModelHeaders, TableViewId, 
                                LabelFeedbackStyle, InventoryPriceType, TypeSideBar, 
                                InvViewCols, DebtorViewCols, ProgressBarStyle, 
                                DateAndTimeFormat, CommonCategories, 
-                               DateTimeRanges)
+                               DateTimeRanges, WorkerPriority)
 from utils.proxy_models import (InventoryProxyModel, SalesProxyModel, DebtsProxyModel)
 from utils.eventfilters import (BackgroundEventFilter, CategoryItemEventFilter, 
                                 CategoryListEventFilter)
@@ -267,10 +267,8 @@ class MainWindow(QMainWindow):
         self._debts_model_data_acc:ndarray[Any] = None #? acumulador temp. de datos para modelo de Deudas.
         
         #¡ variables de workers
-        self.select_thread:QThread = None
+        self.worker_manager:WorkerManager = WorkerManager()
         self.select_worker:WorkerSelect = None
-        self._select_worker_waiting_to_restart:bool = False
-        self._next_worker_params:dict[str, Any] = None
         
         return None
 
@@ -1362,26 +1360,7 @@ class MainWindow(QMainWindow):
                 )
                 self.ui.label_feedbackDebts.hide()
         
-        
-        # si hay un worker corriendo lo detiene, y cuando termina corre uno nuevo
-        if self.select_thread and self.select_thread.isRunning():
-            self.select_worker.requestInterruption()
-            
-            if not self._select_worker_waiting_to_restart:
-                self.select_worker.finished.connect(self._startNewWorker)
-                self._select_worker_waiting_to_restart = True
-            
-            self._next_worker_params = {
-                "table_viewID": table_viewID,
-                "data_sql": data_sql,
-                "data_params": data_params,
-                "count_sql": count_sql,
-                "count_params": count_params
-            }
-            return None
-        
-        # si no hay un worker corriendo se ejecuta normalmente
-        self.__instanciateSelectWorkerAndThread(
+        self.__initSelectWorker(
             table_viewID=table_viewID,
             data_sql=data_sql,
             data_params=data_params,
@@ -1391,68 +1370,35 @@ class MainWindow(QMainWindow):
         return None
     
     
-    def _startNewWorker(self) -> None:
+    def __initSelectWorker(self, table_viewID:QTableView, data_sql:str, 
+                           data_params:tuple, count_sql:str, 
+                           count_params:tuple) -> None:
         '''
-        Éste método es usado cuando hay un **Worker** ya ejecutándose.
-        Reinicia el estado del **Worker** y las variables asociadas a él.
-        '''
-        try:
-            self.select_worker.finished.disconnect(self._startNewWorker)
-        
-        except TypeError:
-            logging.error(LoggingMessage.WORKER_ALREADY_DISCONNECTED)
-        
-        self._select_worker_waiting_to_restart = False
-        
-        if self._next_worker_params:
-            args = self._next_worker_params
-            self._next_worker_params = None
-            
-            self.__instanciateSelectWorkerAndThread(
-                table_viewID=args["table_viewID"],
-                data_sql=args["data_sql"],
-                data_params=args["data_params"],
-                count_sql=args["count_sql"],
-                count_params=args["count_params"]
-            )
-        return None
-    
-    
-    def __instanciateSelectWorkerAndThread(self, table_viewID:QTableView, data_sql:str, 
-                                           data_params:tuple=..., count_sql:str=..., 
-                                           count_params:tuple=...) -> None:
-        '''
-        Inicializa un QThread y un worker para realizar un tipo de consultas a la base de 
-        datos de forma asíncrona, conecta sus señales y slots.
+        Instancia un **Worker** para realizar un tipo de consultas a la base 
+        de datos de forma asíncrona, conecta sus señales y slots.
 
         Parámetros
         ----------
         table_viewID: TableViewId
-            QTableView asociado al modelo de datos y QProgressBar que hay que actualizar.
+            QTableView asociado al modelo de datos y al **QProgressBar** que 
+            hay que actualizar
         data_sql: str
-            Consulta de tipo SELECT
-        data_params: tuple, opcional
-            Parámetros de la consulta SELECT
-        count_sql: str, opcional
-            Consulta de tipo SELECT COUNT() para obtener la cantidad de registros coincidentes
-        count_params: tuple, opcional
-            Parámetros de la consulta SELECT COUNT()
-
-        Retorna
-        -------
-        None
+            Consulta de tipo **SELECT**
+        data_params: tuple
+            Parámetros de la consulta **SELECT**
+        count_sql: str
+            Consulta de tipo **SELECT COUNT()** para obtener la cantidad de 
+            registros coincidentes
+        count_params: tuple
+            Parámetros de la consulta **SELECT COUNT()**
         '''
-        self.select_thread = QThread()
-        self.select_worker = WorkerSelect()
-        
-        self.select_worker.moveToThread(self.select_thread)
-        
-        self.select_thread.started.connect(
-            lambda: self.select_worker.executeReadQuery(
-                data_sql=data_sql, data_params=data_params,
-                count_sql=count_sql, count_params=count_params
-            )
+        self.select_worker = WorkerSelect(
+            data_sql=data_sql,
+            data_params=data_params,
+            count_sql=count_sql,
+            count_params=count_params
         )
+        
         self.select_worker.countFinished.connect(
             lambda model_shape: self.__workerOnCountFinished(
                 table_viewID=table_viewID,
@@ -1466,12 +1412,15 @@ class MainWindow(QMainWindow):
             )
         )
         self.select_worker.finished.connect(
-            lambda: self.__workerOnFinished(table_viewID=table_viewID)
+            lambda: self.__workerOnFinished(
+                table_viewID=table_viewID
+            )
         )
-        self.select_worker.finished.connect(self.select_thread.quit)
-        self.select_worker.finished.connect(self.select_worker.deleteLater)
         
-        self.select_thread.start()
+        self.worker_manager.addTask(
+            worker=self.select_worker,
+            priority=WorkerPriority.MEDIUM
+        )
         
         return None
     

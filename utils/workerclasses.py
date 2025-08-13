@@ -1,14 +1,15 @@
 '''
 En este archivo están todas las clases de WORKER THREADS
 '''
-from PySide6.QtCore import (QObject, Signal, Slot)
+from PySide6.QtCore import (QObject, Signal, Slot, QThread)
 
 from utils.functionutils import (createConnection)
-from utils.enumclasses import (LoggingMessage, TableViewId)
+from utils.enumclasses import (LoggingMessage, TableViewId, WorkerType, WorkerPriority)
 from utils.dboperations import (DatabaseRepository, DATABASE_DIR)
 
 from sqlite3 import (Connection, Error as sqlite3Error)
 from typing import (Any, Iterable)
+import itertools
 import logging
 
 
@@ -35,19 +36,19 @@ class Worker(QObject):
     
     def __init__(self) -> None:
         super(Worker, self).__init__()
-        self._interrupted:bool = False
+        self._canceled:bool = False
         return None
     
-    def requestInterruption(self) -> None:
+    def cancel(self) -> None:
         '''
-        Solicita al **Worker** detener la tarea y muestra un *log* avisando 
-        de la interrupción.
+        Cancela la ejecución del **Worker** y muestra un *log* avisando de la 
+        cancelación.
         '''
-        self._interrupted = True
-        logging.debug(LoggingMessage.WORKER_INTERRUPTION_REQUESTED)
+        self._canceled = True
+        logging.debug(LoggingMessage.WORKER_CANCEL_REQUESTED)
         return None
     
-    def isInterrupted(self) -> bool:
+    def isCanceled(self) -> bool:
         '''
         Verifica si la tarea del **Worker** fue detenida.
 
@@ -56,7 +57,7 @@ class Worker(QObject):
         bool
             flag que determina si la tarea está detenida
         '''
-        return self._interrupted
+        return self._canceled
 
 
 
@@ -64,8 +65,8 @@ class Worker(QObject):
 
 class WorkerSelect(Worker):
     '''
-    Clase WORKER que se encarga de ejecutar las consultas de tipo READ a la 
-    base de datos.
+    Subclase especializada de **Worker** que se encarga de ejecutar las 
+    consultas de tipo **READ** a la base de datos.
     
     SEÑALES
     -------
@@ -81,55 +82,66 @@ class WorkerSelect(Worker):
                                      # 'enumerate' y sirve solamente para actualizar en MainWindow el QProgressBar de 
                                      # la tabla relacionada, lo más importante es el tuple interno '[Any]').
 
-    def __init__(self) -> None:
-        super(WorkerSelect, self).__init__()
-
-
-    @Slot(str,str,tuple,tuple)
-    def executeReadQuery(self, data_sql:str, data_params:tuple=None, 
-                         count_sql:str=None, count_params:tuple=None) -> None:
+    def __init__(self, data_sql:str, data_params:tuple=None, 
+                 count_sql:str=None, count_params:tuple=None) -> None:
         '''
-        Hace la consulta SELECT a la base de datos y devuelve los valores de 
-        las filas seleccionadas.
-        
+        Inicializa el objeto **WorkerSelect**.
+
         Parámetros
         ----------
-        data_sql : str
-            la consulta para obtener registros
-        data_params : tuple, opcional
-            los parámetros de la consulta, por defecto ***None***
-        count_sql : str, opcional
-            la consulta COUNT para obtener la cantidad de coincidencias, por 
-            defecto ***None***
-        count_params : tuple, opcional
-            los parámetros de la consulta COUNT, por defecto ***None***
+        data_sql: str
+            Consulta de tipo **SELECT**
+        data_params: tuple, opcional
+            Parámetros de la consulta **SELECT**, por defecto ***None***
+        count_sql: str, opcional
+            Consulta de tipo **SELECT COUNT()** para obtener la cantidad de 
+            registros coincidentes, por defecto ***None***
+        count_params: tuple, opcional
+            Parámetros de la consulta **SELECT COUNT()**, por defecto 
+            ***None***
+        '''
+        super(WorkerSelect, self).__init__()
+        self._data_sql:str = data_sql
+        self._data_params:str | None = data_params
+        self._count_sql:str | None = count_sql
+        self._count_params:str | None = count_params
+        
+        # todo: seguir reimplementando esto... tengo que, en "run", hacer que se accedan a estas variables
+
+
+    @Slot()
+    def run(self) -> None:
+        '''
+        Hace la consulta **SELECT** a la base de datos y devuelve los valores 
+        de las filas seleccionadas.
         '''
         data_query:list[Any] # guarda los registros obtenidos
         
-        if self.isInterrupted():
-            logging.debug(LoggingMessage.WORKER_INTERRUPTED)
+        if self.isCanceled():
+            logging.debug(LoggingMessage.WORKER_CANCELED)
             self.finished.emit()
             return None
         
         with DatabaseRepository() as repo:
             # si recibió 'count_sql' hace la consulta COUNT() y manda la cantidad de registros encontrados...
-            if count_sql:
+            if self._count_sql:
                 self.countFinished.emit(
-                    (repo.selectRowCount(count_sql,count_params),
-                    repo.selectColumnCount(data_sql, data_params),)
+                    (repo.selectRowCount(self._count_sql,self._count_params),
+                     repo.selectColumnCount(self._data_sql, self._data_params),
                     )
+                )
             
             # luego obtiene los registros y los envía de a uno...
             data_query = repo.selectRegisters(
-                data_sql=data_sql,
-                data_params=data_params if data_params else None
+                data_sql=self._data_sql,
+                data_params=self._data_params if self._data_params else None
             )
             for n,reg in enumerate(data_query):
-                match self.isInterrupted():
+                match self.isCanceled():
                     case False:
                         self.registerProgress.emit( tuple((n, reg)) )
                     case True:
-                        logging.debug(LoggingMessage.WORKER_INTERRUPTED)
+                        logging.debug(LoggingMessage.WORKER_CANCELED)
                         self.finished.emit()
                         return None
         
@@ -139,6 +151,7 @@ class WorkerSelect(Worker):
 
 
 
+# todo: implementar también los siguientes workers como subclases de Worker
 
 class WorkerDelete(QObject):
     '''
@@ -304,3 +317,113 @@ class WorkerUpdate(QObject):
         finally:
             conn.close()
             self.finished.emit()
+
+
+
+
+
+class WorkerManager(QObject):
+    '''
+    Clase **WorkerManager** que administra las operaciones **SELECT**, 
+    **UPDATE** y **DELETE** como si fueran tareas (*tasks*) y se encarga de 
+    ejecutarlas en un único **QThread**.
+    Las operaciones siguen una jerarquía de importancia: la operación más 
+    importante (mayor prioridad)
+    '''
+    taskStarted:Signal = Signal(str)
+    taskFinished:Signal = Signal(str)
+    
+    def __init__(self, parent=None) -> None:
+        super(WorkerManager, self).__init__(parent)
+        
+        self.task_queue:list = [] # lista con las tareas a ejecutar
+        self._counter:itertools.count = itertools.count() # contador para evitar problemas de orden en prioridades
+        
+        self._current_thread:QThread = None
+        self._current_worker:type[Worker] = None
+        self._is_running:bool = False
+        return None
+    
+    
+    def addTask(self, worker:type[Worker], 
+                priority:WorkerPriority=WorkerPriority.HIGH) -> None:
+        '''
+        Añade una tarea nueva a realizar por medio del **Worker** especificado 
+        y teniendo en cuenta la prioridad especificada.
+
+        Parámetros
+        ----------
+        worker : type[Worker]
+            subclase de **Worker** a ejecutar
+        priority : WorkerPriority, opcional
+            prioridad que darle a la tarea, por defecto *WorkerPriority.HIGH*
+        '''
+        count = next(self._counter)
+        self.task_queue.append((priority, count, worker))
+        # ordena según prioridad y orden de llegada
+        self.task_queue.sort(key=lambda x: (x[0], x[1]))
+        
+        if not self._is_running:
+            self.__startNextTask()
+        return None
+    
+    def __startNextTask(self) -> None:
+        '''
+        Intenta iniciar la siguiente tarea en la cola teniendo en cuenta la 
+        prioridad de cada tarea.
+        '''
+        if not self.task_queue:
+            self._is_running = False
+            return None
+        
+        self._is_running = True
+        
+        # obtiene la tarea con mayor prioridad
+        priority, count, worker = self.task_queue.pop(0)
+        
+        self.__startWorker(worker)
+        return None
+    
+    def __startWorker(self, worker:type[Worker]) -> None:
+        '''
+        Inicia un **QThread** y le asigna el **Worker** especificado para 
+        realizar la consulta a la base de datos de forma asíncrona, conecta 
+        sus señales y slots.
+
+        Parámetros
+        ----------
+        worker : type[Worker]
+            instancia de tipo **Worker** que ejecutar
+        '''
+        thread:QThread = QThread()
+        worker.moveToThread(thread)
+        
+        # todo: en MainWindow conectar el resto de señales a slots
+        thread.started.connect(worker.run)
+        worker.finished.connect(thread.quit)
+        worker.finished.connect(worker.deleteLater)
+        thread.finished.connect(thread.deleteLater)
+        
+        thread.finished.connect(self.__startNextTask)
+        
+        self._current_thread = thread
+        self._current_worker = worker
+        
+        thread.start()
+        return None
+
+    def clearTasks(self) -> None:
+        '''
+        Borra todas las tareas pendientes.
+        '''
+        self.task_queue.clear()
+        return None
+    
+    def stopCurrentTask(self) -> None:
+        '''
+        Intenta cancelar la ejecución del **Worker** actual.
+        '''
+        if self._current_worker and hasattr(self._current_worker, "cancel"):
+            self._current_worker.cancel()
+        return None
+

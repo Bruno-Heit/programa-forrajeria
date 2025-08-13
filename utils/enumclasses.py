@@ -216,6 +216,44 @@ class CommonCategories(StrEnum):
 
 
 
+class WorkerType(IntEnum):
+    '''
+    Clase **IntEnum** que contiene las representaciones de cada tipo de 
+    **Worker** que instancia y con el que trabaja el **WorkerManager**.
+    '''
+    SELECT = 0
+    UPDATE = 1
+    DELETE = 2
+
+
+
+
+
+class WorkerPriority(IntEnum):
+    '''
+    Clase **IntEnum** que contiene los valores de prioridad de cada tipo de 
+    **Worker** con el que trabaja el **WorkerManager**.
+    
+    La *prioridad* en el programa está definida de la siguiente forma:
+    - Las operaciones **UPDATE**/**DELETE** tienen una mayor prioridad (1), 
+    ya que son las operaciones que garantizan que los datos en la base de 
+    datos estén actualizados.
+    - Las operaciones **SELECT** tienen una prioridad media (2), debido a que 
+    sirven principalmente para mostrar al usuario los datos en tablas y 
+    realizar operaciones sencillas.
+    - Las operaciones **SELECT *"de fondo"*** (no críticas) tienen una 
+    prioridad baja (3); estas operaciones son las que obtienen datos para su 
+    análisis y uso más complejo (cálculos, gráficos, etc.) y cuya necesidad no 
+    es urgente.
+    '''
+    HIGH = 1 # UPDATE / DELETE
+    MEDIUM = 2 # SELECT inmediato
+    LOW = 3 # SELECT en segundo plano
+
+
+
+
+
 # estilos generales para widgets
 class WidgetStyle(StrEnum):
     '''Clase de tipo 'strEnum' con estilos generales para aplicar a los widgets.'''
@@ -267,8 +305,8 @@ class LoggingMessage(StrEnum):
     ERROR_DB_DELETE = "Error en consulta DELETE"
     
     WORKER_SUCCESS = "WORKER terminó de ejecutarse correctamente"
-    WORKER_INTERRUPTION_REQUESTED = "solicitud de interrupción de WORKER..."
-    WORKER_INTERRUPTED = "WORKER fue interrumpido antes de terminar"
+    WORKER_CANCEL_REQUESTED = "solicitud de cancelación de WORKER..."
+    WORKER_CANCELED = "WORKER cancelado antes de terminar"
     WORKER_ALREADY_DISCONNECTED = "WORKER ya fue desconectado del thread"
 
 
