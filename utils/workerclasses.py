@@ -27,10 +27,13 @@ class Worker(QObject):
     
     Señales
     -------
+    countFinished : es emitida cuando se termina de contar los registros 
+        coincidentes, emite un **int** que representa la cantidad de registros.
     progress : se emite a medida que se avanza con cada registro, emite un 
         **int** con el progreso que lleva.
     finished : es emitida una vez que se terminó de ejecutar el worker.
     '''
+    countFinished:Signal = Signal(int)
     progress:Signal = Signal(Any)
     finished:Signal = Signal()
     
@@ -70,8 +73,9 @@ class WorkerSelect(Worker):
     
     SEÑALES
     -------
-    countFinished : es emitida cuando se termina de contar los registros 
-        coincidentes, emite un **int** que representa la cantidad de registros.
+    countFinished : señal reimplementada; es emitida cuando se termina de 
+        contar los registros coincidentes, emite una **tuple[int, int]** que 
+        representa las dimensiones del *batch* (filas, columnas).
     registerProgress : es emitida a medida que se recorren los registros 
         obtenidos, emite un **tuple[int,[Any]]** donde **int** representa el 
         progreso y **[Any]** es el registro actual.
@@ -102,11 +106,9 @@ class WorkerSelect(Worker):
         '''
         super(WorkerSelect, self).__init__()
         self._data_sql:str = data_sql
-        self._data_params:str | None = data_params
+        self._data_params:tuple | None = data_params
         self._count_sql:str | None = count_sql
-        self._count_params:str | None = count_params
-        
-        # todo: seguir reimplementando esto... tengo que, en "run", hacer que se accedan a estas variables
+        self._count_params:tuple | None = count_params
 
 
     @Slot()

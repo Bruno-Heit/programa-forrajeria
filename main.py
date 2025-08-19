@@ -1238,10 +1238,10 @@ class MainWindow(QMainWindow):
     
     
     #¡ métodos de acumulador de datos
-    def setNpDataAccumulator(self, table_viewID:TableViewId,
+    def __setNpDataAccumulator(self, table_viewID:TableViewId,
                             model_shape:tuple[int, int]) -> None:
         '''
-        Dependiendo de la VISTA usada, crea un 'numpy.ndarray' vacío con 
+        Dependiendo de la VISTA usada, crea un **numpy.ndarray** vacío con 
         las dimensiones especificadas.
 
         Parámetros
@@ -1370,26 +1370,25 @@ class MainWindow(QMainWindow):
         return None
     
     
-    def __initSelectWorker(self, table_viewID:QTableView, data_sql:str, 
+    def __initSelectWorker(self, table_viewID:TableViewId, data_sql:str, 
                            data_params:tuple, count_sql:str, 
                            count_params:tuple) -> None:
         '''
-        Instancia un **Worker** para realizar un tipo de consultas a la base 
-        de datos de forma asíncrona, conecta sus señales y slots.
+        Instancia un **Worker** para realizar las consultas de tipo **SELECT** 
+        a la base de datos de forma asíncrona; conecta sus señales y slots.
 
         Parámetros
         ----------
-        table_viewID: TableViewId
-            QTableView asociado al modelo de datos y al **QProgressBar** que 
-            hay que actualizar
-        data_sql: str
+        table_viewID : TableViewId
+            **QTableView** al que se referencia
+        data_sql : str
             Consulta de tipo **SELECT**
-        data_params: tuple
+        data_params : tuple
             Parámetros de la consulta **SELECT**
-        count_sql: str
+        count_sql : str
             Consulta de tipo **SELECT COUNT()** para obtener la cantidad de 
             registros coincidentes
-        count_params: tuple
+        count_params : tuple
             Parámetros de la consulta **SELECT COUNT()**
         '''
         self.select_worker = WorkerSelect(
@@ -1400,19 +1399,19 @@ class MainWindow(QMainWindow):
         )
         
         self.select_worker.countFinished.connect(
-            lambda model_shape: self.__workerOnCountFinished(
+            lambda model_shape: self.__workerSelectOnCountFinished(
                 table_viewID=table_viewID,
                 model_shape=model_shape
             )
         )
         self.select_worker.registerProgress.connect(
-            lambda register: self.__workerOnRegisterProgress(
+            lambda register: self.__workerSelectOnRegisterProgress(
                 register=register,
                 table_viewID=table_viewID
             )
         )
         self.select_worker.finished.connect(
-            lambda: self.__workerOnFinished(
+            lambda: self.__workerSelectOnFinished(
                 table_viewID=table_viewID
             )
         )
@@ -1425,24 +1424,22 @@ class MainWindow(QMainWindow):
         return None
     
     
-    @Slot()
-    def __workerOnCountFinished(self, table_viewID:TableViewId, model_shape:tuple[int, int]=None) -> None:
+    @Slot(object, tuple)
+    def __workerSelectOnCountFinished(self, table_viewID:TableViewId, 
+                                model_shape:tuple[int, int]=None) -> None:
         '''
-        Instancia un acumulador numpy.array para los datos del modelo, y actualiza el estado 
-        del QProgressBar asociado al QTableView.
+        Instancia un acumulador **numpy.array** para los datos del modelo, y 
+        actualiza el estado del **QProgressBar** asociado al **QTableView**.
 
         Parámetros
         ----------
-        table_viewID: TableViewID
+        table_viewID : TableViewID
             QTableView que se referencia
-        model_shape: tuple[int, int]
-            Dimensiones del modelo de datos, se usa para instanciar el acumulador
-
-        Retorna
-        -------
-        None
+        model_shape : tuple[int, int]
+            Dimensiones del modelo de datos, se usa para instanciar el 
+            acumulador
         '''
-        self.setNpDataAccumulator(
+        self.__setNpDataAccumulator(
             table_viewID=table_viewID,
             model_shape=model_shape
         )
@@ -1454,23 +1451,20 @@ class MainWindow(QMainWindow):
         return None
     
     
-    @Slot(tuple, QTableView)
-    def __workerOnRegisterProgress(self, register:tuple[Any], table_viewID:TableViewId) -> None:
+    @Slot(tuple, object)
+    def __workerSelectOnRegisterProgress(self, register:tuple[Any], 
+                                   table_viewID:TableViewId) -> None:
         '''
-        A medida que se progresa con los registros leídos guarda los IDs necesarios de cada registro, 
-        acumula los registros en una variable y actualiza la QProgressBar asociada a ese QTableView.
+        Guarda los IDs necesarios de cada registro, acumula los registros en 
+        una variable y actualiza la **QProgressBar** asociada a esa tabla.
 
         Parámetros
         ----------
         register : tuple[Any]
-            El registro obtenido de la consulta SELECT, la posición [0] debe contener el progreso 
-            de lectura de registros
+            El registro obtenido de la consulta SELECT, la posición [0] 
+            contiene el progreso de lectura de registros
         table_viewID : TableViewID
-            QTableView al que se referencia
-        
-        Retorna
-        -------
-        None
+            **QTableView** al que se referencia
         '''
         match table_viewID.name:
             case "INVEN_TABLE_VIEW":
@@ -1521,22 +1515,25 @@ class MainWindow(QMainWindow):
         return None
     
     
-    def __updateProgressBar(self, table_viewID:TableViewId, max_val:int=None, value:int=None) -> None:
+    def __updateProgressBar(self, table_viewID:TableViewId, 
+                            max_val:int=None, value:int=None) -> None:
         '''
-        Actualiza el estado del QProgressBar correspondiente dependiendo del QTableView asociado.
+        Actualiza el estado del **QProgressBar** correspondiente dependiendo 
+        del **QTableView** asociado.
 
         Parámetros
         ----------
-        table_viewID: TableViewID
-            Nombre del QTableView al cual está asociado el QProgressBar a actualizar
-        max_val: int, opcional
-            Valor máximo del QProgressBar, por defecto es None
-        value: int, opcional
-            Valor actual del QProgressBar, por defecto es None
-
-        Retorna
-        -------
-        None
+        table_viewID : TableViewID
+            Nombre del QTableView al cual está asociado el **QProgressBar** a 
+            actualizar
+        max_val : int, opcional
+            Valor máximo del **QProgressBar**, por defecto es ***None***; si 
+            el valor máximo es diferente de ***None*** es porque se está 
+            mostrando inicialmente la barra de progreso
+        value : int, opcional
+            Valor actual del **QProgressBar**, por defecto es ***None***; si 
+            el valor es diferente de ***None*** es porque ya se está mostrando 
+            la barra de progreso y se está actualizando el valor
         '''
         match table_viewID.name:
             case "INVEN_TABLE_VIEW":
@@ -1557,29 +1554,25 @@ class MainWindow(QMainWindow):
     
     
     @Slot(str)
-    def __workerOnFinished(self, table_viewID:TableViewId, READ_OPERATION:bool=True) -> None:
+    def __workerSelectOnFinished(self, table_viewID:TableViewId, 
+                           READ_OPERATION:bool=True) -> None:
         '''
-        Esconde la QProgressBar relacionada con el QTableView, reinicia el valor del 
-        QSS de dicha QProgressBar y carga los datos en el QTableView, luego reinicia 
-        los acumuladores temporales.
+        Esconde la **QProgressBar** relacionada con la tabla, reinicia el 
+        valor del *QSS* de dicha **QProgressBar** y carga los datos en la 
+        tabla, finalmente reinicia los acumuladores temporales.
         
         Parámetros
         ----------
-        tv_name : TableViewID
-            QTableView al que se referencia
+        table_viewID : TableViewId
+            **QTableView** al que se referencia
         READ_OPERATION : bool, opcional
-            determina si la operación a base de datos es de lectura, sino no reinicia 
-            el contenido de la tabla
-
-        Retorna
-        -------
-        None
+            determina si la operación a base de datos es de lectura, si no 
+            es de lectura no reinicia el contenido de la tabla
         '''
+        self.__hideProgressBar(table_viewID)
+        
         match table_viewID.name:
             case "INVEN_TABLE_VIEW":
-                self.ui.inventory_progressbar.setStyleSheet("")
-                self.ui.inventory_progressbar.hide()
-                
                 if READ_OPERATION:
                     self.inventory_data_model.setModelData(
                         data=self._inv_model_data_acc,
@@ -1588,12 +1581,8 @@ class MainWindow(QMainWindow):
             
                 # borra el acumulador temporal de datos
                 self._inv_model_data_acc = None
-
-                
+            
             case "SALES_TABLE_VIEW":
-                self.ui.sales_progressbar.setStyleSheet("")
-                self.ui.sales_progressbar.hide()
-                
                 if READ_OPERATION:
                     self.sales_data_model.setModelData(
                         data=self._sales_model_data_acc,
@@ -1602,11 +1591,8 @@ class MainWindow(QMainWindow):
                 
                 # borra el acumulador temp. de datos
                 self._sales_model_data_acc = None
-                
+            
             case "DEBTS_TABLE_VIEW":
-                self.ui.debts_progressbar.setStyleSheet("")
-                self.ui.debts_progressbar.hide()
-                
                 if READ_OPERATION:
                     self.debts_data_model.setModelData(
                         data=self._debts_model_data_acc,
@@ -1614,8 +1600,33 @@ class MainWindow(QMainWindow):
                     )
                 
                 self._debts_model_data_acc = None
-            
+        
         logging.debug(LoggingMessage.WORKER_SUCCESS)
+        return None
+
+
+    def __hideProgressBar(self, table_viewID:TableViewId):
+        '''
+        Quita el estilo de la barra de progresos asociada a la tabla y la 
+        esconde.
+
+        Parámetros
+        ----------
+        table_viewID : TableViewId
+            tabla a la que se referencia
+        '''
+        match table_viewID:
+            case TableViewId.INVEN_TABLE_VIEW:
+                self.ui.inventory_progressbar.setStyleSheet("")
+                self.ui.inventory_progressbar.hide()
+            
+            case TableViewId.SALES_TABLE_VIEW:
+                self.ui.sales_progressbar.setStyleSheet("")
+                self.ui.sales_progressbar.hide()
+            
+            case TableViewId.DEBTS_TABLE_VIEW:
+                self.ui.debts_progressbar.setStyleSheet("")
+                self.ui.debts_progressbar.hide()
         return None
 
 
