@@ -98,8 +98,8 @@ class InventoryTableModel(QAbstractTableModel):
                 value: Any, role: int = Qt.ItemDataRole.EditRole) -> bool:
         '''
         Realiza la actualización de datos dentro del modelo y además emite la 
-        señal 'dataToUpdate' con el índice, el IDproducto y el valor nuevo, para 
-        poder actualizar la base de datos a partir de esos datos.
+        señal *dataToUpdate* con el índice, el IDproducto y el valor nuevo 
+        para poder actualizar la base de datos.
         '''
         
         if role == Qt.ItemDataRole.EditRole:

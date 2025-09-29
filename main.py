@@ -18,7 +18,7 @@ from ui.customCalendars import (CustomCalendar)
 from utils.functionutils import *
 from utils.model_classes import (InventoryTableModel, SalesTableModel, DebtsTableModel)
 from utils.delegates import (InventoryDelegate, SalesDelegate, DebtsDelegate)
-from utils.workerclasses import (WorkerManager, WorkerSelect, WorkerUpdate, WorkerDelete)
+from utils.workerclasses import (WorkerManager, WorkerSelect, WorkerDelete)
 from utils.dboperations import (DatabaseRepository, ensureDateTimeISOformat)
 from utils.customvalidators import (SalePaidValidator, CategoryNameValidator)
 from utils.enumclasses import (ProgramValues, LoggingMessage, ModelHeaders, TableViewId, 
@@ -247,28 +247,35 @@ class MainWindow(QMainWindow):
         -------
         None
         '''
+        #? Los acumuladores de datos sirven para hacer operaciones sobre los 
+        #? modelos de datos y la base de datos en "batches" y mejorar el 
+        #? rendimiento de la aplicación en general...
+        
         #¡ variables de inventario
-        #? Los acumuladores de datos sirven para hacer operaciones sobre los modelos de datos 
-        #? y la base de datos en "batches" y mejorar el rendimiento de la aplicación en general
-        self._inv_model_data_acc:ndarray[Any] = None #? acumulador temporal de datos para modelo de Inventario.
-        self._UPD_BATCH_SIZE:int = None # al modificar precios en porcentajes, sirve para hacerlo en batches.
+        self._inv_model_data_acc:ndarray[Any] = None # acumulador temporal de 
+            # datos para modelo de Inventario.
         
         #¡ variables de ventas
-        self._sales_model_data_acc:ndarray[Any] = None #? acumulador temp. de datos para modelo de Ventas.
+        self._sales_model_data_acc:ndarray[Any] = None # acumulador temp. de 
+            # datos para modelo de Ventas.
         
         self.SALES_ITEM_NUM:int = 0 # contador para crear nombres de items en 
                                     # 'input_sales_data'.
-        self.DICT_ITEMS_VALUES:dict[str, dict] = {} # tiene los valores de cada 'ListItemWidget'.
-        self.VALID_PAID_FIELD:bool = None # True si lineEdit_paid es válido, sino False.
-        self.TOTAL_COST:float = None # guarda el costo total de 'label_total' como 
-                                     # float, para no tener que buscarlo con regex
+        self.DICT_ITEMS_VALUES:dict[str, dict] = {} # tiene los valores de 
+            # cada 'ListItemWidget'.
+        self.VALID_PAID_FIELD:bool = None # True si lineEdit_paid es válido, 
+            # sino False.
+        self.TOTAL_COST:float = None # guarda el costo total de 'label_total' 
+            # como float, para no tener que buscarlo con regex.
 
         #¡ variables de deudas
-        self._debts_model_data_acc:ndarray[Any] = None #? acumulador temp. de datos para modelo de Deudas.
+        self._debts_model_data_acc:ndarray[Any] = None # acumulador temp. de 
+            # datos para modelo de Deudas.
         
         #¡ variables de workers
         self.worker_manager:WorkerManager = WorkerManager()
         self.select_worker:WorkerSelect = None
+        self.delete_worker:WorkerDelete = None
         
         return None
 
@@ -312,7 +319,7 @@ class MainWindow(QMainWindow):
         #* (UPDATE) modificar celdas de 'tv_inventory_data' (sin porcentajes)
         self.inventory_data_model.dataToUpdate.connect(
             lambda params: self.onInventoryModelDataToUpdate(
-                column=params[0], IDproduct=params[1], new_val=params[2]
+                column=params[0], new_values=params[1:]
             )
         )
         
@@ -2341,9 +2348,9 @@ class MainWindow(QMainWindow):
     
     
     #¡¡ ....... inventario ........................................................................
-    @Slot(int, int, object)
-    def onInventoryModelDataToUpdate(self, column:int, IDproduct:int,
-                                       new_val:Any | list[str]) -> None:
+    @Slot(int, object)
+    def onInventoryModelDataToUpdate(self, column:int,
+                          new_values:tuple[int, Any]) -> None:
         '''
         Actualiza la base de datos con el valor nuevo de Productos. En caso de 
         que las columnas sean de precio unitario o precio comercial también 
@@ -2352,20 +2359,19 @@ class MainWindow(QMainWindow):
         Parámetros
         ----------
         column : int
-            Columna del item modificado
-        IDproduct : int
-            IDproducto en la base de datos del item modificado
-        new_val : Any | list[str]
-            Valor nuevo del item, sólo será list[str] cuando la columna 
-            modificada en el modelo sea la de stock (3), en ese caso 
-            new_val será una lista[stock, unidad de medida]
-        
-        Retorna
-        -------
-        None
+            columna del item modificado
+        new_values : tuple[int, Any]
+            tupla con los valores nuevos de los items seleccionados, sigue el 
+            formato *[IDproducto, valor]*; en caso que la columna sea la de 
+            stock el *valor* será una tupla con *[stock, unidad de medida]*
         '''
+        IDproduct:int = new_values[0]
+        new_val:Any
+        
         match column:
             case InvViewCols.INV_CATEGORY.value:
+                new_val:str = new_values[1]
+                
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Productos 
@@ -2377,6 +2383,8 @@ class MainWindow(QMainWindow):
                         )
             
             case InvViewCols.INV_PRODUCT_NAME.value:
+                new_val:str = new_values[1]
+                
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Productos 
@@ -2386,6 +2394,8 @@ class MainWindow(QMainWindow):
                         )
             
             case InvViewCols.INV_DESCRIPTION.value:
+                new_val:str = new_values[1]
+                
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Productos 
@@ -2395,15 +2405,20 @@ class MainWindow(QMainWindow):
                         )
             
             case InvViewCols.INV_STOCK.value:
+                new_val:tuple[float, str] = new_values[1] # (stock, unidad de medida)
+                
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
                         upd_sql='''UPDATE Productos 
-                                SET stock = ?, unidad_medida = ? 
-                                WHERE IDproducto = ?;''',
+                                   SET stock = ?,
+                                       unidad_medida = ? 
+                                   WHERE IDproducto = ?;''',
                         upd_params=(new_val[0], new_val[1], IDproduct,)
                         )
             
             case InvViewCols.INV_NORMAL_PRICE.value:
+                new_val:float = new_values[1]
+                
                 # actualiza en Productos
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
@@ -2420,6 +2435,8 @@ class MainWindow(QMainWindow):
                 )
             
             case InvViewCols.INV_COMERCIAL_PRICE.value:
+                new_val:float = new_values[1]
+                
                 # actualiza en Productos
                 with self._db_repo as db_repo:
                     db_repo.updateRegisters(
@@ -2434,7 +2451,6 @@ class MainWindow(QMainWindow):
                     price_type=InventoryPriceType.COMERCIAL,
                     params=(IDproduct,)
                 )
-        
         return None
     
     
@@ -2451,10 +2467,6 @@ class MainWindow(QMainWindow):
         params: tuple[int], opcional
             Se usa cuando no se modifican los precios en porcentajes, recibe 
             una tupla con el IDproduct del producto
-        
-        Retorna
-        -------
-        None
         '''
         match price_type:
             case InventoryPriceType.NORMAL:
@@ -2806,24 +2818,20 @@ class MainWindow(QMainWindow):
         ''' 
         A partir de las filas seleccionadas calcula los precios nuevos y 
         actualiza el modelo de datos.
-        NOTA: la actualización de la base de datos se hace luego de la 
-        actualización del modelo de datos, y no se hace en éste método, 
-        se hace en 'self.onInventoryModelDataToUpdate'.
-        
-        Retorna
-        -------
-        None
+        Emite la señal *self.*
         '''
         percentage:float
         selected_indexes:list[QModelIndex]
         
         # obtiene el valor del lineedit
         try:
-            percentage:float = float(self.ui.lineEdit_percentage_change.text().replace(",","."))
-        except ValueError:
-            return None
+            percentage = float(
+                self.ui.lineEdit_percentage_change.text().replace(",",".")
+            )
+            if not percentage:
+                return None
         
-        if not percentage:
+        except ValueError:
             return None
         
         if self.ui.checkbox_unit_prices.isChecked():
@@ -2876,19 +2884,15 @@ class MainWindow(QMainWindow):
     def __calculateNewPrices(self, percentage:float, 
                              selected_indexes:list[QModelIndex]) -> None:
         '''
-        Calcula los aumentos/decrementos en los precios unitarios o comerciales 
-        y actualiza el MODELO DE DATOS.
+        Calcula los aumentos/decrementos en los precios unitarios o 
+        comerciales y actualiza el MODELO DE DATOS.
         
         Parámetros
         ----------
         percentage : float
             Porcentaje de incremento/decremento
-        selected_indexes: list[QModelIndex]
-            Índices seleccionadas en la vista
-        
-        Retorna
-        -------
-        None
+        selected_indexes : list[QModelIndex]
+            Índices seleccionados en la vista
         '''
         _idx_value:float
         _new_val:float
@@ -2900,14 +2904,13 @@ class MainWindow(QMainWindow):
                     idx.data(Qt.ItemDataRole.DisplayRole).replace(",",".")
                 )
                 
-                # asigna el valor nuevo
+                # asigna el valor nuevo al modelo
                 _new_val = round(_idx_value + (_idx_value * percentage / 100), 2)
-                
                 self.inventory_data_model.setData(
                     index=idx,
                     value=_new_val
                 )
-
+        
         # sino, si está activada la checkbox de precios comerciales...
         else:
             for idx in selected_indexes:
@@ -2915,7 +2918,6 @@ class MainWindow(QMainWindow):
                 
                 if _idx_value:
                     _idx_value = float(_idx_value)
-                    
                     _new_val = round(_idx_value + (_idx_value * percentage / 100), 2)
                 
                 else:
@@ -2925,7 +2927,6 @@ class MainWindow(QMainWindow):
                     index=idx,
                     value=_new_val
                 )
-            
         return None
 
 
