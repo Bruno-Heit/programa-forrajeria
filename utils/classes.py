@@ -4513,6 +4513,7 @@ class ProductsBalanceDialog(QDialog):
         return array(data, dtype=object)
 
     
+    @Slot()
     def setModelDataOnCheckStateChange(self) -> None:
         '''
         Actualiza los datos del MODELO DE DATOS con respecto al estado de la 
@@ -4811,6 +4812,14 @@ class ProductsBalanceDialog(QDialog):
 
 
     def closeEvent(self, event:QCloseEvent):
-        self.balanceChanged.emit(self.products_balance_model.getBalance())
+        _checkbox = self.products_balance_dialog.checkbox_show_all_products
+        
+        # destilda el checkbox para evitar devolver la sumatoria de los 
+        # productos cuyo valor ya fue saldado
+        _checkbox.setCheckState(_checkbox.checkState().Unchecked)
+        
+        self.balanceChanged.emit(
+            self.products_balance_model.getBalance()
+        )
         return super(ProductsBalanceDialog, self).closeEvent(event)
 
