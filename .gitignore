@@ -1,6 +1,7 @@
 # carpetas
 __pycache__/
 db_tries
+.vscode
 
 # archivos .py
 test.py
