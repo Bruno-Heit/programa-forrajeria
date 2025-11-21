@@ -51,8 +51,6 @@ from phonenumbers import (parse, format_number, is_valid_number,
 from re import (sub)
 from datetime import (datetime)
 
-# TODO: testear modificación de precios por porcentajes en Productos, y si se agregan bien los productos, ventas y deudas nuevas
-# TODO: escribir README.md del programa
 
 # PRODUCTOS ====================================================================================================
 
