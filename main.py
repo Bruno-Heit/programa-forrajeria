@@ -1227,6 +1227,8 @@ class MainWindow(QMainWindow):
         
         category_dialog.categ_desc_dialog.te_category_desc.setFocus()
         
+        # si se escribe una descripción del item la coloca como tooltip, sino 
+        # deja el tooltip del item vacío
         category_dialog.descriptionChanged.connect(
             lambda desc: item.setToolTip(
                 f''' <html>
@@ -1237,7 +1239,7 @@ class MainWindow(QMainWindow):
                             </p>
                         </body>
                     </html>'''
-            )
+            if desc else None)
         )
         
         category_dialog.exec()
