@@ -4417,6 +4417,9 @@ class ProductsBalanceDialog(QDialog):
         
         # cambio de selección en la tabla
         self.tv_selection_model.selectionChanged.connect(
+            self.toggleLeReduceDebt
+        )
+        self.tv_selection_model.selectionChanged.connect(
             self.toggleDeleteDebtButton
         )
         
@@ -4533,7 +4536,21 @@ class ProductsBalanceDialog(QDialog):
         return None
     
     
+    @Slot()
+    def toggleLeReduceDebt(self) -> None:
+        '''
+        Habilita/deshabilita el lineedit que se usa para reducir la cantidad 
+        adeuda/a favor de los productos seleccionados dependiendo de si hay 
+        registros seleccionados en la tabla o no.
+        '''
+        self.products_balance_dialog.le_reduce_debt.setEnabled(
+            self.tv_selection_model.hasSelection()
+        )
+        return None
+    
+    
     # eliminar productos (DELETE)
+    @Slot()
     def toggleDeleteDebtButton(self) -> None:
         '''
         Activa/desactiva el botón que permite eliminar registros de la tabla 
