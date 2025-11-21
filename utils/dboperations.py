@@ -127,11 +127,7 @@ class DatabaseRepository():
                     cursor.executemany(sql, params)
                     self._connection.commit()
                 
-                except ProgrammingError as err:
-                    self._connection.rollback()
-                    logging.critical(f"{err}")
-                
-                except sqlite3Error as err:
+                except (sqlite3Error, ProgrammingError) as err:
                     self._connection.rollback()
                     logging.critical(f"{err}")
         

@@ -114,8 +114,8 @@ class WorkerSelect(Worker):
     @Slot()
     def run(self) -> None:
         '''
-        Hace la consulta **SELECT** a la base de datos y devuelve los valores 
-        de las filas seleccionadas.
+        Hace la consulta **SELECT** a la base de datos y emite los valores de 
+        las filas seleccionadas.
         '''
         data_query:list[Any] # guarda los registros obtenidos
         
@@ -125,7 +125,8 @@ class WorkerSelect(Worker):
             return None
         
         with DatabaseRepository() as repo:
-            # si recibió 'count_sql' hace la consulta COUNT() y manda la cantidad de registros encontrados...
+            # si recibió 'count_sql' hace la consulta COUNT() y manda la 
+            # cantidad de registros encontrados...
             if self._count_sql:
                 self.countFinished.emit(
                     (repo.selectRowCount(self._count_sql,self._count_params),
@@ -153,172 +154,175 @@ class WorkerSelect(Worker):
 
 
 
-# todo: implementar también los siguientes workers como subclases de Worker
 
-class WorkerDelete(QObject):
+class WorkerDelete(Worker):
     '''
-    Clase **Worker** que se encarga de ejecutar las consultas de tipo DELETE 
-    a la base de datos.
+    Subclase especializada de **Worker** que se encarga de ejecutar las 
+    consultas de tipo **DELETE** | **UPDATE** a la base de datos.
+    Las operaciones **UPDATE** que maneja son aquellas que tengan la 
+    naturaleza de marcar como *eliminados* algunos registros.
     '''
-    progress = Signal(int) # devuelve un int con el progreso que lleva borrado para actualizar el progressbar en MainWindow.
-    finished = Signal(int)
     
-    def executeDeleteQuery(self, params:Iterable[Any] | dict[str, list], sql:str=None, 
-                           mult_sql:tuple[str]=None, table_viewID:TableViewId=TableViewId.INVEN_TABLE_VIEW) -> None:
+    def __init__(self, del_params:Iterable[Any] | dict[list], 
+                 table_viewID:TableViewId, del_sql:str=None, 
+                 mult_sql:tuple[str]=None) -> None:
         '''
-        Hace la consulta DELETE a la base de datos.
-        
+        Inicializa el objeto **WorkerDelete**.
+
         Parámetros
         ----------
-        params : Iterable[Any] | dict[list]
-            parámetros para la consulta DELETE, será un **dict[list]** cuando 
-            el parámetro **mult_sql** sea diferente de ***None***. Cada 
-            **dict** tiene los IDs necesarios para la consulta
-        sql : str, opcional
-            consulta DELETE para eliminar registros de una tabla
-        mult_sql : tuple[str], opcional
-            consultas DELETE y sus parámetros en formato **tuple[str]**, se 
-            recibe cuando se deben realizar consultas DELETE en más de una 
-            tabla en forma consecutiva
-        table_viewID : TableViewId, opcional
+        table_viewID : TableViewId
             vista a la que se referencia
+        del_params : Iterable[Any] | dict[list]
+            parámetros para la/s consulta/s **DELETE**; será un **dict[list]** 
+            cuando las tablas afectadas sean las de Ventas, cada **dict** 
+            tiene los IDs necesarios para la consulta
+        del_sql: str, opcional
+            Consulta de tipo **DELETE**; se usa cuando se realizan consultas 
+            **DELETE** a una sola tabla, por defecto ***None***
+        mult_sql : tuple[str], opcional
+            consultas **DELETE** y sus parámetros en formato **tuple[str]**; 
+            se usa cuando se realizan consultas **DELETE** en más de una tabla 
+            consecutivamente, por defecto ***None***
         '''
-        conn = createConnection(DATABASE_DIR)
-        if not conn:
+        super(WorkerDelete, self).__init__()
+        self._table_viewID:TableViewId = table_viewID
+        self._del_sql:str = del_sql
+        self._del_params:Iterable[Any] | dict[list] = del_params
+        self._mult_sql:tuple[str] = mult_sql
+    
+    def run(self) -> None:
+        '''
+        Hace la consulta **DELETE** a la base de datos y emite los valores de 
+        las filas borradas.
+        '''
+        if self.isCanceled():
+            logging.debug(LoggingMessage.WORKER_CANCELED)
             self.finished.emit()
             return None
-        cursor = conn.cursor()
         
-        try:
-            match table_viewID:
+        with DatabaseRepository() as db_repo:
+            match self._table_viewID:
+                #? INVENTARIO: sólo usa una consulta y un ID, itera el ID
                 case TableViewId.INVEN_TABLE_VIEW:
-                    for n,param in enumerate(params):
-                        cursor.execute(sql, param)
-                        conn.commit()
-                        self.progress.emit(n)
-                    logging.debug(LoggingMessage.DEBUG_DB_MULT_DELETE_SUCCESS)
-            
-                # al ser de VENTAS, params es 'dict[list]', donde cada item 
-                # tiene los IDs necesarios para las 3 tablas
-                case TableViewId.SALES_TABLE_VIEW:
-                    # recorre cada (consulta sql, item) simultáneamente
-                    for n, ( sql, (_, values) ) in enumerate( zip(mult_sql, params.items()) ):
-                        for val in values:
-                            cursor.execute(sql, (val,))
-                            conn.commit()
-                        self.progress.emit(n)
-                    logging.debug(LoggingMessage.DEBUG_DB_MULT_DELETE_SUCCESS)
+                    # recorre cada parámetro y hace la consulta
+                    for n, param in enumerate(self._del_params):
+                        match self.isCanceled():
+                            case False:
+                                db_repo.updateRegisters(
+                                    upd_sql=self._del_sql,
+                                    upd_params=param
+                                )
+                                self.progress.emit(n)
+                            
+                            case True:
+                                logging.debug(LoggingMessage.WORKER_CANCELED)
+                                self.finished.emit()
+                                return None
                 
+                #? VENTAS: params es 'dict[list]' y cada item tiene los IDs 
+                #? necesarios para las 3 tablas... itera sobre las consultas 
+                #? y también sobre cada ID...
+                case TableViewId.SALES_TABLE_VIEW:
+                    # recorre cada (consulta, item)
+                    for n, (sql, (_, values)) in enumerate( zip(self._mult_sql, self._del_params.items()) ):
+                        match self.isCanceled():
+                            case False:
+                                # recorre cada ID
+                                for val in values:
+                                    db_repo.updateRegisters(
+                                        upd_sql=sql,
+                                        upd_params=(val,)
+                                    )
+                                self.progress.emit(n)
+                            
+                            case True:
+                                logging.debug(LoggingMessage.WORKER_CANCELED)
+                                self.finished.emit()
+                                return None
+                
+                #? DEUDAS: itera sobre cada ID y luego cada consulta...
                 case TableViewId.DEBTS_TABLE_VIEW:
-                    for n, param in enumerate(params):
-                        for sql in mult_sql:
-                            cursor.execute(sql, param)
-                            conn.commit()
-                        self.progress.emit(n)
-                    logging.debug(LoggingMessage.DEBUG_DB_MULT_DELETE_SUCCESS)
+                    # recorre cada ID...
+                    for n, param in enumerate(self._del_params):
+                        match self.isCanceled():
+                            case False:
+                                # recorre cada consulta...
+                                for sql in self._mult_sql:
+                                    db_repo.updateRegisters(
+                                        upd_sql=sql,
+                                        upd_params=param
+                                    )
+                                self.progress.emit(n)
+                            
+                            case True:
+                                logging.debug(LoggingMessage.WORKER_CANCELED)
+                                self.finished.emit()
+                                return None
         
-        except sqlite3Error as err: #! errores de base de datos, consultas, etc.
-            conn.rollback()
-            logging.critical(LoggingMessage.ERROR_DB_DELETE, f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
-            
-        finally:
-            conn.close()
-            self.finished.emit()
+        logging.debug(LoggingMessage.DEBUG_DB_MULT_DELETE_SUCCESS)
+        self.finished.emit()
             
 
 
 
-
-
-class WorkerInsert(QObject):
+# TODO: implementar correctamente esto (no es urgente)
+class WorkerUpdate(Worker):
     '''
-    Clase **Worker** que se encarga de ejecutar las consultas de tipo INSERT 
-    a la base de datos.
-    '''
-    progress = Signal(int)
-    finished = Signal(int)
-    
-    
-    @Slot(str,tuple,bool)
-    def executeInsertQuery(self, data_sql:str, data_params:tuple=None) -> None:
-        '''
-        Hace la consulta INSERT a la base de datos.
-        
-        Parámetros
-        ----------
-        data_sql : str
-            la consulta con el registro a insertar
-        data_params : tuple
-            los parámetros de la consulta, por defecto ***None***
-        '''
-        conn = createConnection(DATABASE_DIR)
-        if not conn:
-            self.finished.emit()
-            return None
-        cursor = conn.cursor()
-        
-        try:
-            cursor.execute(data_sql, data_params) if data_params else cursor.execute(data_sql)
-            
-            conn.commit()
-            logging.debug(LoggingMessage.DEBUG_DB_MULT_INSERT_SUCCESS)
-            
-        except sqlite3Error as err:
-            conn.rollback()
-            logging.critical(LoggingMessage.ERROR_DB_INSERT, f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
-            
-        finally:
-            self.finished.emit()
-            conn.close()
-
-
-
-
-
-class WorkerUpdate(QObject):
-    '''
-    Clase **Worker** que se encarga de ejecutar las consultas de tipo UPDATE 
-    a la base de datos.
+    Clase **Worker** que se encarga de ejecutar las consultas de tipo 
+    **UPDATE** a la base de datos.
     
     Este **Worker** es usado también para marcar registros como eliminados en 
     la columna *eliminado* en la base de datos.
     '''
-    progress = Signal(int)
-    finished = Signal(int)
     
-    
-    @Slot(str,tuple,bool)
-    def executeUpdateQuery(self, sql:str, params:Iterable[tuple]) -> None:
+    def __init__(self, upd_sql:str, upd_params:tuple) -> None:
         '''
-        Hace la consulta UPDATE a la base de datos.
-        
+        Inicializa el objeto **WorkerUpdate**.
+
         Parámetros
         ----------
-        sql: str
-            consulta UPDATE a ejecutar
-        params: Iterable[tuple]
-            parámetros para consulta
+        upd_sql : str
+            Consulta de tipo **UPDATE**
+        upd_params : tuple
+            Parámetros de la consulta **UPDATE**
         '''
-        conn = createConnection(DATABASE_DIR)
-        if not conn:
+        super(WorkerUpdate, self).__init__()
+        self._upd_sql:str = upd_sql
+        self._upd_params:tuple = upd_params
+    
+    
+    @Slot()
+    def run(self) -> None:
+        '''
+        Hace la consulta **UPDATE** a la base de datos.
+        '''
+        if self.isCanceled():
+            logging.debug(LoggingMessage.WORKER_CANCELED)
             self.finished.emit()
             return None
-        cursor = conn.cursor()
         
-        try:
-            for n,param in enumerate(params):
-                cursor.execute(sql, param)
-                conn.commit()
-                self.progress.emit(n)
-            logging.debug(LoggingMessage.DEBUG_DB_MULT_UPDATE_SUCCESS)
+        self.countFinished.emit(len(self._upd_params))
+        
+        with DatabaseRepository() as db_repo:
+            for n,param in enumerate(self._upd_params):
+                match self.isCanceled():
+                    case False:
+                        db_repo.updateRegisters(
+                            upd_sql=self._upd_sql,
+                            upd_params=param
+                        )
+                        self.progress.emit(n)
+                        # TODO: emitir los datos para actualizar el modelo
+                    case True:
+                        logging.debug(LoggingMessage.WORKER_CANCELED)
+                        self.finished.emit()
+                        return None
             
-        except sqlite3Error as err:
-            conn.rollback()
-            logging.critical(LoggingMessage.ERROR_DB_UPDATE, f"{err}")
-                
-        finally:
-            conn.close()
-            self.finished.emit()
+            logging.debug(LoggingMessage.DEBUG_DB_MULT_UPDATE_SUCCESS)
+        
+        self.finished.emit()
+        return None
 
 
 
@@ -345,7 +349,6 @@ class WorkerManager(QObject):
         self._current_worker:type[Worker] = None
         self._is_running:bool = False
         return None
-    
     
     def addTask(self, worker:type[Worker], 
                 priority:WorkerPriority=WorkerPriority.HIGH) -> None:
@@ -391,7 +394,9 @@ class WorkerManager(QObject):
         Inicia un **QThread** y le asigna el **Worker** especificado para 
         realizar la consulta a la base de datos de forma asíncrona, conecta 
         sus señales y slots.
-
+        Al finalizar llama nuevamente al método *'__startNextTask'* para 
+        continuar ejecutando tareas si hay más en cola.
+        
         Parámetros
         ----------
         worker : type[Worker]
@@ -400,7 +405,6 @@ class WorkerManager(QObject):
         thread:QThread = QThread()
         worker.moveToThread(thread)
         
-        # todo: en MainWindow conectar el resto de señales a slots
         thread.started.connect(worker.run)
         worker.finished.connect(thread.quit)
         worker.finished.connect(worker.deleteLater)
@@ -428,4 +432,3 @@ class WorkerManager(QObject):
         if self._current_worker and hasattr(self._current_worker, "cancel"):
             self._current_worker.cancel()
         return None
-
