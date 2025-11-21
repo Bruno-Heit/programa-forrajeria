@@ -125,6 +125,12 @@ class Ui_ProductsBalance(object):
 "	background-color: #3b66ab;\n"
 "	color: #fff;\n"
 "}\n"
+"QLineEdit:disabled {\n"
+"    background-color: #a0a0a0;\n"
+"    color: #555;\n"
+"    border: 1px solid #909090;\n"
+"    padding: 3px;\n"
+"}\n"
 "\n"
 "\n"
 "/* QDateTimeEdit y del QCalendarWidget */\n"
@@ -135,13 +141,13 @@ class Ui_ProductsBalance(object):
 "	background-color: #fff;\n"
 "	selection-background-color: #38a3a5;\n"
 "}\n"
-"QCalendarWidget QToolButton {\n"
+"QCalendarWidg"
+                        "et QToolButton {\n"
 "	background-color: #22577a;\n"
 "	color: #fff;\n"
 "}\n"
 "QCalendarWidget QToolButton:hover,\n"
-"QCalendarWidget QToolButton:"
-                        "pressed {\n"
+"QCalendarWidget QToolButton:pressed {\n"
 "	background-color: #38a3a5;\n"
 "	color: #111;\n"
 "}\n"
@@ -187,15 +193,15 @@ class Ui_ProductsBalance(object):
 "}\n"
 "QScrollBar::add-page:vertical {\n"
 "	background: none;\n"
-"}\n"
+""
+                        "}\n"
 "\n"
 "/*horizontal scrollbars*/\n"
 "QScrollBar:horizontal {\n"
 "	height: 13px;\n"
 "}\n"
 "QScrollBar::handle:horizontal {\n"
-"	min-width: 15"
-                        "px;\n"
+"	min-width: 15px;\n"
 "}")
         ProductsBalance.setSizeGripEnabled(True)
         self.horizontalLayout_4 = QHBoxLayout(ProductsBalance)
@@ -341,6 +347,7 @@ class Ui_ProductsBalance(object):
         self.horizontalLayout_2.setContentsMargins(15, 0, 15, 0)
         self.le_reduce_debt = QLineEdit(self.footer)
         self.le_reduce_debt.setObjectName(u"le_reduce_debt")
+        self.le_reduce_debt.setEnabled(False)
         sizePolicy7 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Fixed)
         sizePolicy7.setHorizontalStretch(0)
         sizePolicy7.setVerticalStretch(0)
@@ -349,7 +356,7 @@ class Ui_ProductsBalance(object):
         self.le_reduce_debt.setMinimumSize(QSize(0, 24))
         self.le_reduce_debt.setMaximumSize(QSize(16777215, 24))
 #if QT_CONFIG(tooltip)
-        self.le_reduce_debt.setToolTip(u"<html><head/><body><p>Descuenta la cantidad especificada de los productos seleccionados en <span style=\" font-weight:700;\">orden de selecci\u00f3n</span>. Si no hay productos seleccionados, descuenta desde el primero al \u00faltimo en <span style=\" font-weight:700;\">orden de aparici\u00f3n</span>.</p></body></html>")
+        self.le_reduce_debt.setToolTip(u"<html><head/><body><p>Descuenta la cantidad especificada de los productos seleccionados en <span style=\" font-weight:700;\">orden de selecci\u00f3n</span>.</p></body></html>")
 #endif // QT_CONFIG(tooltip)
         self.le_reduce_debt.setFrame(False)
         self.le_reduce_debt.setClearButtonEnabled(True)

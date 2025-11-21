@@ -129,6 +129,12 @@ QLineEdit:focus {
 	background-color: #3b66ab;
 	color: #fff;
 }
+QLineEdit:disabled {
+    background-color: #a0a0a0;
+    color: #555;
+    border: 1px solid #909090;
+    padding: 3px;
+}
 
 
 /* QDateTimeEdit y del QCalendarWidget */
@@ -570,6 +576,9 @@ QScrollBar::handle:horizontal {
          </property>
          <item>
           <widget class="QLineEdit" name="le_reduce_debt">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="sizePolicy">
             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -589,7 +598,7 @@ QScrollBar::handle:horizontal {
             </size>
            </property>
            <property name="toolTip">
-            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Descuenta la cantidad especificada de los productos seleccionados en &lt;span style=&quot; font-weight:700;&quot;&gt;orden de selección&lt;/span&gt;. Si no hay productos seleccionados, descuenta desde el primero al último en &lt;span style=&quot; font-weight:700;&quot;&gt;orden de aparición&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Descuenta la cantidad especificada de los productos seleccionados en &lt;span style=&quot; font-weight:700;&quot;&gt;orden de selección&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="frame">
             <bool>false</bool>
