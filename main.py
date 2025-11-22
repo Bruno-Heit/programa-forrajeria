@@ -396,6 +396,13 @@ class MainWindow(QMainWindow):
             )
         )
         
+        #* (otra vez) cambio de pestaña
+        self.ui.tab2_toolBox.currentChanged.connect(
+            lambda curr_index: self.ui.dateEdit_from_date.dateChanged.emit(
+                self.ui.dateEdit_from_date.date()
+            ) if curr_index == 1 else None
+        )
+        
         #* (READ) cargar con ventas 'tv_sales_data'
         self.ui.dateEdit_from_date.dateChanged.connect(
             lambda: self.fillTableView(table_viewID=TableViewId.SALES_TABLE_VIEW)
