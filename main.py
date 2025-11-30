@@ -34,7 +34,7 @@ from utils.settings_manager import (SettingsManager)
 
 from resources import (rc_icons)
 
-# TODO: escribir README.md del programa
+# TODO2: probar hacer deploy con pyside6-deploy en lugar de con pyinstaller
 class MainWindow(QMainWindow):
     def __init__(self, db_path:str=DATABASE_DIR):
         '''

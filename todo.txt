@@ -13,8 +13,8 @@ CAMBIOS A HACER/IMPLEMENTACIONES NUEVAS:
 	  lag).
 
 	☑ Validar con 'phonenumbers' los números de teléfono introducidos.
-	☐ Hacer mención del uso del módulo 'phonenumbers' (tiene lincencia APACHE).
-	☐ Mostrar licencia en algún lugar.
+	☑ Hacer mención del uso del módulo 'phonenumbers' (tiene lincencia APACHE).
+	☑ Mostrar licencia en algún lugar.
 
 	☐ Guardar datos de hasta 5 años de antigüedad (por seguridad).
 	☑ Mostrar datos en tablas principalmente de la semana actual, con posibilidad de expandir a los días deseados.
