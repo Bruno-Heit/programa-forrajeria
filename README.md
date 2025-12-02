@@ -59,8 +59,6 @@
 <!-- ABOUT THE PROJECT -->
 ## Acerca del proyecto
 
-[![Product Name Screen Shot][product-screenshot]](images/sct_form_venta_nueva.png)
-
 Éste proyecto apunta a ayudar en la digitalización de la información que maneja el comercio, mejorar su organización a corto, medio y largo plazo y simplificar algunas tareas diarias.
 <ul>
   <li>
@@ -140,11 +138,11 @@
 
 <!-- GETTING STARTED -->
 ## Para empezar
-Para ejecutar el programa simplemente es necesario abrir el archivo *gestion-forraje.exe* y listo.
+Para ejecutar el programa simplemente es necesario abrir el archivo *main.exe* y listo.
 
 ### Instalación
 #### Ejecutable
-Descargar la carpeta *dist*, dentro de ella se encuentra el archivo *gestion-forraje.exe* usado para ejecutar el programa.
+Descargar el archivo *main.exe* usado para ejecutar el programa, no requiere instalación.
 
 #### Proyecto completo
 Contiene el código fuente y todos los demás archivos necesarios para ejecutar el programa (Se recomienda clonar el repositorio dentro de un entorno virtual):
