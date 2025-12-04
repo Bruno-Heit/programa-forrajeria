@@ -1,52 +1,48 @@
-'''
-    Éste archivo contiene las declaraciones de subclases de QCalendar usadas 
-    en el programa.
-    
-    La principal razón por la que crear calendarios personalizados es que, por 
-    defecto, PySide no permite modificar algunas cosas de los calendarios, por 
-    ejemplo los botones que permiten cambiar entre meses, de ahí la existencia 
-    de este archivo.
-'''
+"""
+Éste archivo contiene las declaraciones de subclases de QCalendar usadas
+en el programa.
 
-from PySide6.QtWidgets import (QCalendarWidget)
-from PySide6.QtCore import (Qt, QObject, QRect, QDate)
-from PySide6.QtGui import (QPainter, QColor, QTextCharFormat, QBrush)
+La principal razón por la que crear calendarios personalizados es que, por
+defecto, PySide no permite modificar algunas cosas de los calendarios, por
+ejemplo los botones que permiten cambiar entre meses, de ahí la existencia
+de este archivo.
+"""
 
-from resources import (rc_icons)
+from PySide6.QtWidgets import QCalendarWidget
+from PySide6.QtCore import Qt, QObject, QRect, QDate
+from PySide6.QtGui import QPainter, QColor, QTextCharFormat, QBrush
+
+from resources import rc_icons
 
 
 class CustomCalendar(QCalendarWidget):
-    '''
-    Subclase de **QCalendarWidget** creado específicamente para personalizar 
+    """
+    Subclase de **QCalendarWidget** creado específicamente para personalizar
     el calendario mostrado en **QDateTimeEdits** y subclases.
-    '''
-    def __init__(self, parent:QObject=None) -> None:
+    """
+
+    def __init__(self, parent: QObject = None) -> None:
         super(CustomCalendar, self).__init__()
         self.setParent(parent)
-        
+
         self.setup_ui()
         return None
-    
-    
+
     def setup_ui(self) -> None:
-        self.setHorizontalHeaderFormat(
-            self.HorizontalHeaderFormat.ShortDayNames
-        )
-        self.setVerticalHeaderFormat(
-            self.VerticalHeaderFormat.ISOWeekNumbers
-        )
-        
+        self.setHorizontalHeaderFormat(self.HorizontalHeaderFormat.ShortDayNames)
+        self.setVerticalHeaderFormat(self.VerticalHeaderFormat.ISOWeekNumbers)
+
         self.setFirstDayOfWeek(Qt.DayOfWeek.Monday)
-        
+
         # formato de texto del header de los días
         _header_format = QTextCharFormat()
         _header_format.setBackground(QColor(65, 90, 119))
         _header_format.setForeground(QColor(255, 255, 255))
         self.setHeaderTextFormat(_header_format)
-        
+
         # estilos de botones
         self.setStyleSheet(
-            '''
+            """
             /* barra de navegación superior */
             QCalendarWidget QWidget#qt_calendar_navigationbar {
                 background-color: #fff;
@@ -122,13 +118,12 @@ class CustomCalendar(QCalendarWidget):
                 border-width: 1px;
                 border-top-width: 0;
             }
-            '''
+            """
         )
         return None
-    
-    
-    def dateIsValid(self, date:QDate) -> bool:
-        '''
+
+    def dateIsValid(self, date: QDate) -> bool:
+        """
         Determina si la fecha está dentro del rango permitido.
 
         Parámetros
@@ -140,56 +135,51 @@ class CustomCalendar(QCalendarWidget):
         -------
         bool
             flag que determina la validez de la fecha
-        '''
+        """
         return self.minimumDate() <= date <= self.maximumDate()
-    
-    
-    def paintCell(self, painter:QPainter, rect:QRect, date:QDate):
-        _text_color:QColor = QColor(246, 87, 85)
-        
+
+    def paintCell(self, painter: QPainter, rect: QRect, date: QDate):
+        _text_color: QColor = QColor(246, 87, 85)
+
         if not self.dateIsValid(date):
             painter.save()
-            
+
             # pinta el background
             painter.fillRect(rect, QBrush(QColor(200, 200, 200)))
             painter.setPen(Qt.PenStyle.NoPen)
             painter.drawRect(rect)
-            
+
             # pinta el texto
             painter.setPen(_text_color)
             painter.drawText(
                 rect,
                 Qt.TextFlag.TextSingleLine | Qt.AlignmentFlag.AlignCenter,
-                f"{date.day()}"
+                f"{date.day()}",
             )
-            
+
             painter.restore()
-        
+
         else:
             match date.dayOfWeek():
-                case 7: # domingo
+                case 7:  # domingo
                     painter.save()
-                    painter.setRenderHint(
-                        QPainter.RenderHint.Antialiasing, True
-                    )
-                    painter.setRenderHint(
-                        QPainter.RenderHint.TextAntialiasing, True
-                    )
-                    
+                    painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+                    painter.setRenderHint(QPainter.RenderHint.TextAntialiasing, True)
+
                     # pinta el background
                     painter.setBrush(QColor(224, 225, 221))
-                    painter.setPen(Qt.PenStyle.NoPen) # sin borde
+                    painter.setPen(Qt.PenStyle.NoPen)  # sin borde
                     painter.drawRect(rect)
-                    
+
                     # pinta el texto
                     painter.setPen(_text_color)
                     painter.drawText(
                         rect,
                         Qt.TextFlag.TextSingleLine | Qt.AlignmentFlag.AlignCenter,
-                        f"{date.day()}"
+                        f"{date.day()}",
                     )
-                    
+
                     painter.restore()
-            
+
                 case _:
                     return super().paintCell(painter, rect, date)

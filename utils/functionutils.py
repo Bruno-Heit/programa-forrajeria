@@ -1,67 +1,85 @@
-'''
-    Éste archivo contiene algunas funciones de uso general, la mayoría son 
-    funciones que son compartidas en varias partes del programa.
-'''
+"""
+Éste archivo contiene algunas funciones de uso general, la mayoría son
+funciones que son compartidas en varias partes del programa.
+"""
 
-from typing import (Any)
+from typing import Any
 
-from PySide6.QtWidgets import (QHeaderView, QCompleter, QFrame, QWidget, 
-                               QTableView, QComboBox)
-from PySide6.QtCore import (QModelIndex, Qt, QPropertyAnimation, QEasingCurve, 
-                            QDateTime, QDate)
+from PySide6.QtWidgets import (
+    QHeaderView,
+    QCompleter,
+    QFrame,
+    QWidget,
+    QTableView,
+    QComboBox,
+)
+from PySide6.QtCore import (
+    QModelIndex,
+    Qt,
+    QPropertyAnimation,
+    QEasingCurve,
+    QDateTime,
+    QDate,
+)
 
-from resources import (rc_icons)
+from resources import rc_icons
 from utils.dboperations import *
 from utils.customvalidators import *
-from utils.enumclasses import (TableViewId, DateAndTimeFormat)
-from re import (Match, sub, match, findall)
-from datetime import (datetime)
+from utils.enumclasses import TableViewId, DateAndTimeFormat
+from re import Match, sub, match, findall
+from datetime import datetime
 
 
 # formatos de fecha y hora
-def ISO8601_to_local(date_time:str) -> str | None:
-    '''
+def ISO8601_to_local(date_time: str) -> str | None:
+    """
     Convierte la fecha y hora ingresada al formato local usado en el programa.
 
     Parámetros
     ----------
     date_time : str
         la fecha y hora en formato **ISO 8601**
-    
+
     Retorna
     -------
     str | None
-        la fecha y hora en formato local como **str**, devuelve **None** si 
+        la fecha y hora en formato local como **str**, devuelve **None** si
         hubo algún error
-    '''
-    try: # "d/M/yyyy HH:mm:ss"
+    """
+    try:  # "d/M/yyyy HH:mm:ss"
         date_time = date_time.replace("/", "-")
-        dt_obj = datetime.strptime(date_time, DateAndTimeFormat.DIR_DATETIME_ISO_8601.value)
+        dt_obj = datetime.strptime(
+            date_time, DateAndTimeFormat.DIR_DATETIME_ISO_8601.value
+        )
         return dt_obj.strftime(DateAndTimeFormat.DIR_LOCAL_DATETIME_FORMAT.value)
-    
+
     except ValueError as err:
-        logging.error(f"No se pudo convertir la fecha y hora de formato ISO 8601 a local: {err}")
+        logging.error(
+            f"No se pudo convertir la fecha y hora de formato ISO 8601 a local: {err}"
+        )
         return None
 
 
-def local_to_ISO8601(date_time:str) -> str | None:
-    '''
+def local_to_ISO8601(date_time: str) -> str | None:
+    """
     Convierte la fecha y hora ingresada al formato ISO 8601.
 
     Parámetros
     ----------
     date_time : str
         la fecha y hora en formato local
-    
+
     Retorna
     -------
     str | None
-        la fecha y hora en formato **ISO 8601** como **str**, devuelve 
+        la fecha y hora en formato **ISO 8601** como **str**, devuelve
         **None** si hubo algún error
-    '''
+    """
     try:
         date_time = date_time.replace("-", "/")
-        dt_obj = datetime.strptime(date_time, DateAndTimeFormat.DIR_LOCAL_DATETIME_FORMAT.value)
+        dt_obj = datetime.strptime(
+            date_time, DateAndTimeFormat.DIR_LOCAL_DATETIME_FORMAT.value
+        )
         return dt_obj.strftime(DateAndTimeFormat.DIR_DATETIME_ISO_8601.value)
 
     except ValueError:
@@ -70,9 +88,9 @@ def local_to_ISO8601(date_time:str) -> str | None:
 
 
 # fecha de inicio de semana
-def getWeekStartDate(today:QDate) -> QDate:
-    '''
-    A partir del día actual devuelve la fecha del lunes de la semana actual, 
+def getWeekStartDate(today: QDate) -> QDate:
+    """
+    A partir del día actual devuelve la fecha del lunes de la semana actual,
     día que se considera como el inicio de la semana.
 
     Parámetros
@@ -84,39 +102,41 @@ def getWeekStartDate(today:QDate) -> QDate:
     -------
     QDate
         la fecha del lunes de la semana actual
-    '''
-    return today.addDays( - (today.dayOfWeek() - 1) )
+    """
+    return today.addDays(-(today.dayOfWeek() - 1))
+
 
 # consultas sql
-def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=False, 
-                            SHOW_ALL:bool=False) -> tuple[str, str]:
-    '''
-    Dependiendo de la tabla, devuelve las consultas sql en formato **str** 
+def getTableViewsSqlQueries(
+    table_viewID: TableViewId, ACCESSED_BY_LIST: bool = False, SHOW_ALL: bool = False
+) -> tuple[str, str]:
+    """
+    Dependiendo de la tabla, devuelve las consultas sql en formato **str**
     para obtener dimensiones y registros.
-    
+
     Parámetros
     ----------
     table_viewID : TableViewID
         **QTableView** al que se referencia
     ACCESSED_BY_LIST : bool, opcional
-        flag que será *True* si se seleccionó un item desde 
+        flag que será *True* si se seleccionó un item desde
         *tables_ListWidget* sino **False**, por defecto **False**
     SHOW_ALL : bool, opcional
-        flag que determina si se muestran todos los elementos de la vista, por 
+        flag que determina si se muestran todos los elementos de la vista, por
         defecto **False**
-    
+
     Retorna
     -------
     tuple[str, str]
-        *tupla[count_sql, data_sql]*, siendo *count_sql* la consulta tipo 
+        *tupla[count_sql, data_sql]*, siendo *count_sql* la consulta tipo
         *COUNT* y *data_sql* la consulta para traer los registros
-    '''
+    """
     match table_viewID.name:
         case "INVEN_TABLE_VIEW":
             if SHOW_ALL:
                 return (
                     str("SELECT COUNT(*) FROM Productos WHERE eliminado = 0;"),
-                    str( '''SELECT IDproducto,
+                    str("""SELECT IDproducto,
                                    nombre_categoria,
                                    nombre,
                                    COALESCE(p.descripcion, ''),
@@ -125,18 +145,19 @@ def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=Fals
                                    precio_unit,
                                    COALESCE(precio_comerc, 0)
                             FROM Productos AS p INNER JOIN Categorias AS c 
-                            WHERE (p.IDcategoria=c.IDcategoria AND p.eliminado = 0);'''))
-            
+                            WHERE (p.IDcategoria=c.IDcategoria AND p.eliminado = 0);"""),
+                )
+
             elif not SHOW_ALL and ACCESSED_BY_LIST:
                 # cols.: detalle venta, cantidad, producto, costo total, abonado, fecha y hora
                 return (
-                    str( '''SELECT COUNT(*) 
+                    str("""SELECT COUNT(*) 
                             FROM Productos 
                             WHERE IDcategoria = (SELECT IDcategoria 
                                 FROM Categorias 
                                 WHERE nombre_categoria = ?) AND 
-                                eliminado = 0;'''),
-                    str( '''SELECT IDproducto,
+                                eliminado = 0;"""),
+                    str("""SELECT IDproducto,
                                    nombre_categoria,
                                    nombre,
                                    COALESCE(p.descripcion, ''),
@@ -145,17 +166,17 @@ def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=Fals
                                    precio_unit,
                                    COALESCE(precio_comerc, 0)
                             FROM Productos AS p INNER JOIN Categorias AS c ON p.IDcategoria=c.IDcategoria 
-                            WHERE c.nombre_categoria=? AND eliminado = 0;''')
-                    )
-                    
+                            WHERE c.nombre_categoria=? AND eliminado = 0;"""),
+                )
+
         case "SALES_TABLE_VIEW":
             return (
-                str( '''SELECT COUNT(*) 
+                str("""SELECT COUNT(*) 
                         FROM Detalle_Ventas as dv 
                         LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto 
                         LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa 
-                        WHERE v.fecha_hora BETWEEN ? AND ? AND dv.eliminado = 0;'''),
-                str( '''SELECT dv.ID_detalle_venta,
+                        WHERE v.fecha_hora BETWEEN ? AND ? AND dv.eliminado = 0;"""),
+                str("""SELECT dv.ID_detalle_venta,
                                v.detalles_venta,
                                dv.cantidad,
                                COALESCE(p.unidad_medida, ''),
@@ -166,16 +187,16 @@ def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=Fals
                         FROM Detalle_Ventas as dv 
                         LEFT JOIN Productos AS p ON dv.IDproducto = p.IDproducto 
                         LEFT JOIN Ventas AS v ON dv.IDventa = v.IDventa
-                        WHERE v.fecha_hora BETWEEN ? AND ? AND dv.eliminado = 0;''')
-                )
+                        WHERE v.fecha_hora BETWEEN ? AND ? AND dv.eliminado = 0;"""),
+            )
 
         case "DEBTS_TABLE_VIEW":
             return (
-                str( '''SELECT COUNT(*) 
+                str("""SELECT COUNT(*) 
                         FROM Deudores 
                         WHERE nombre <> "[ELIMINADO]" AND 
-                              apellido <> "[ELIMINADO]";'''),
-                str( '''SELECT de.IDdeudor,
+                              apellido <> "[ELIMINADO]";"""),
+                str("""SELECT de.IDdeudor,
                                de.nombre,
                                de.apellido,
                                COALESCE(de.num_telefono, ''),
@@ -187,71 +208,75 @@ def getTableViewsSqlQueries(table_viewID:TableViewId, ACCESSED_BY_LIST:bool=Fals
                         WHERE nombre <> "[ELIMINADO]" AND 
                               apellido <> "[ELIMINADO]" 
                         GROUP BY de.IDdeudor, de.nombre
-                        ORDER BY de.nombre;''')
-                )
+                        ORDER BY de.nombre;"""),
+            )
 
 
 # side bars
-def toggleSideBar(side_bar:QFrame, parent:QWidget|QFrame, body:QFrame, max_width:int=250) -> bool:
-    '''
-    Anima la apertura o cierre de los menús laterales y esconde o muestra los 
+def toggleSideBar(
+    side_bar: QFrame, parent: QWidget | QFrame, body: QFrame, max_width: int = 250
+) -> bool:
+    """
+    Anima la apertura o cierre de los menús laterales y esconde o muestra los
     widgets internos.
-    
+
     Parámetros
     ----------
     side_bar: QFrame
         El sidebar al que se referencia
     parent: QWidget|QFrame
-        El widget padre al que pertenece el sidebar, es necesario porque la 
+        El widget padre al que pertenece el sidebar, es necesario porque la
         animación requiere especificar el widget padre
     body: QFrame
         El widget con los widgets hijos que deben esconderse o mostrarse
     max_width: int, opcional
         El ancho máximo al que animar la apertura del sidebar
-    
+
     Retorna
     -------
     bool
-        Determina si se abrió o si se cerró el sidebar, si es False se cerró, si es True 
+        Determina si se abrió o si se cerró el sidebar, si es False se cerró, si es True
         se abrió
-    '''
+    """
     # OBTENER el width actual
     start_value = side_bar.width()
     if start_value == 40:
         end_value = max_width
-        signal = 1 # señal para mostrar los widgets
+        signal = 1  # señal para mostrar los widgets
     else:
         end_value = 40
-        signal = 0 # señal para ocultar los widgets
+        signal = 0  # señal para ocultar los widgets
     # funciones de animación
-    anim = QPropertyAnimation(side_bar, b"minimumWidth", parent) # NOTE: hay que agregarle el 'parent'.
+    anim = QPropertyAnimation(
+        side_bar, b"minimumWidth", parent
+    )  # NOTE: hay que agregarle el 'parent'.
     anim.setDuration(140)
     anim.setStartValue(start_value)
     anim.setEndValue(end_value)
     anim.setEasingCurve(QEasingCurve.Type.InOutCubic)
     anim.start()
-    
+
     # una vez terminada la animación, llama a la función de abajo, que muestra o esconde los widgets
     anim.finished.connect(lambda: __toggleSideBarWidgetsVisibility(body, signal))
     return bool(signal)
 
 
-def __toggleSideBarWidgetsVisibility(body:QFrame, signal:int):
-    '''
-    Muestra o esconde los widgets dentro del menú lateral al terminar la animación 
+def __toggleSideBarWidgetsVisibility(body: QFrame, signal: int):
+    """
+    Muestra o esconde los widgets dentro del menú lateral al terminar la animación
     de apertura o cierre del menú lateral
-    
+
     Parámetros
     ----------
     body: QFrame
         El cuerpo del sidebar que hay que esconder/mostrar
     signal: int
         Flag que determina si esconder/mostrar el cuerpo del sidebar
-    
+
     Retorna
     -------
     None
-    '''
+    """
     match signal:
         case 0:
             body.hide()
@@ -260,60 +285,64 @@ def __toggleSideBarWidgetsVisibility(body:QFrame, signal:int):
     return None
 
 
-#========================================================================================================================
-def getProductsCategories(db_path:str=DATABASE_DIR) -> list[str] | None:
-    '''
-    Hace una consulta SELECT a la base de datos y toma las categorías que hay. 
+# ========================================================================================================================
+def getProductsCategories(db_path: str = DATABASE_DIR) -> list[str] | None:
+    """
+    Hace una consulta SELECT a la base de datos y toma las categorías que hay.
     Devuelve una lista con las categorías.
-    
+
     Parámetros
     ----------
     db_path : str, opcional
         *path* de la base de datos utilizada, por defecto DATABASE_DIR
-    
+
     Retorna
     -------
     list[str]
         lista con todas las categorías de los productos
-    '''
+    """
     with DatabaseRepository(db_path) as db_repo:
-        data = db_repo.selectRegisters('''SELECT nombre_categoria 
-                                FROM Categorias;''')
+        data = db_repo.selectRegisters("""SELECT nombre_categoria 
+                                FROM Categorias;""")
         if data:
             data = [d[0] for d in data]
     return data
 
 
 def getProductNames() -> list[str]:
-    '''
+    """
     Hace una consulta SELECT a la base de datos y obtiene todos los nombres de productos que hay.
-    
+
     Retorna una lista con los nombres.
-    '''
+    """
     conn = createConnection(DATABASE_DIR)
     if not conn:
         return None
     cursor = conn.cursor()
-    
-    query = cursor.execute("SELECT nombre FROM Productos WHERE eliminado != 1;").fetchall()
-    
+
+    query = cursor.execute(
+        "SELECT nombre FROM Productos WHERE eliminado != 1;"
+    ).fetchall()
+
     # convierto la lista de tuplas en una lista de strings...
-    query:list[str] = [q[0] for q in query]
-    
+    query: list[str] = [q[0] for q in query]
+
     conn.close()
     return query
 
 
 def getCategoriesDescription() -> tuple[str] | None:
-    '''
-    Hace una consulta SELECT a la base de datos y toma las descripciones de las categorías que hay. Devuelve una tupla 
+    """
+    Hace una consulta SELECT a la base de datos y toma las descripciones de las categorías que hay. Devuelve una tupla
     con las categorías.
-    '''
+    """
     connection = createConnection(DATABASE_DIR)
     if not connection:
         return None
     cursor = connection.cursor()
-    query:list[tuple] = cursor.execute("SELECT descripcion FROM Categorias;").fetchall()
+    query: list[tuple] = cursor.execute(
+        "SELECT descripcion FROM Categorias;"
+    ).fetchall()
     query_tuple = list()
     connection.close()
     for tupl in query:
@@ -321,10 +350,10 @@ def getCategoriesDescription() -> tuple[str] | None:
     return tuple(query_tuple)
 
 
-def setTableViewPolitics(tableView:QTableView) -> None:
-    '''
+def setTableViewPolitics(tableView: QTableView) -> None:
+    """
     Declara las políticas del QTableView.
-    
+
     Parámetros
     ----------
     tableView : QTableView
@@ -333,144 +362,150 @@ def setTableViewPolitics(tableView:QTableView) -> None:
     Retorna
     -------
     None
-    '''
+    """
     tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-    tableView.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+    tableView.verticalHeader().setSectionResizeMode(
+        QHeaderView.ResizeMode.ResizeToContents
+    )
     return None
 
 
-def getSelectedTableRows(tableView:QTableView, 
-                         indexes_in_col:int=-1) -> tuple[int] | dict[int, QModelIndex]:
-    '''
-    Obtiene todas las filas seleccionadas del QTableView. Puede retornar una 
-    tupla o un diccionario, dependiendo del parámetro 'indexes_in_col'. 
+def getSelectedTableRows(
+    tableView: QTableView, indexes_in_col: int = -1
+) -> tuple[int] | dict[int, QModelIndex]:
+    """
+    Obtiene todas las filas seleccionadas del QTableView. Puede retornar una
+    tupla o un diccionario, dependiendo del parámetro 'indexes_in_col'.
     NOTA: no devuelve valores de filas repetidas.
-    
+
     Parámetros
     ----------
     tableView : QTableView
         El QTableView al que se referencia
     indexes_in_col: int, opcional
-        Especifica una columna en particular de la cual obtener los índices, de forma 
-        que se ignorarán los índices seleccionados en esa fila a excepción de los 
+        Especifica una columna en particular de la cual obtener los índices, de forma
+        que se ignorarán los índices seleccionados en esa fila a excepción de los
         índices seleccionados en la columna especificada.
-        NOTA: al pasar este parámetro, se devuelve un diccionario con la fila como 
+        NOTA: al pasar este parámetro, se devuelve un diccionario con la fila como
         clave y el índice como valor.
-    
+
     Retorna
     -------
     tuple[int] | dict[int, QModelIndex]
-        Tupla con las filas seleccionadas ó diccionario con las filas seleccionadas 
+        Tupla con las filas seleccionadas ó diccionario con las filas seleccionadas
         como 'keys' y el índice como 'value'
-        '''
-    selected_indexes:list[int] | dict[int, QModelIndex]
-    
+    """
+    selected_indexes: list[int] | dict[int, QModelIndex]
+
     match indexes_in_col:
         case -1:
-            selected_indexes:list[int] = []
-            
+            selected_indexes: list[int] = []
+
             for index in tableView.selectedIndexes():
                 if index.row() not in selected_indexes:
                     selected_indexes.append(index.row())
-        
+
             return tuple(selected_indexes)
-        
+
         case _:
-            selected_indexes:dict[int, QModelIndex] = {}
-            
+            selected_indexes: dict[int, QModelIndex] = {}
+
             for index in tableView.selectedIndexes():
                 if index.column() == indexes_in_col:
                     selected_indexes[index.row()] = index
-            
+
             return selected_indexes
 
 
-def getCurrentProductStock(product_name:str) -> tuple[float,str]:
-        '''
-        Hace una consulta SELECT y obtiene el stock actual del producto ingresado. 
-        
-        Retorna una tupla con el stock como número y la unidad de medida como 'str'.
-        '''
-        conn:Connection | None
-        stock:float
-        measurement_unit:str
+def getCurrentProductStock(product_name: str) -> tuple[float, str]:
+    """
+    Hace una consulta SELECT y obtiene el stock actual del producto ingresado.
 
-        conn = createConnection(DATABASE_DIR)
-        if not conn:
-            return None
-        cursor = conn.cursor()
-        query = cursor.execute(
-                '''SELECT stock,
+    Retorna una tupla con el stock como número y la unidad de medida como 'str'.
+    """
+    conn: Connection | None
+    stock: float
+    measurement_unit: str
+
+    conn = createConnection(DATABASE_DIR)
+    if not conn:
+        return None
+    cursor = conn.cursor()
+    query = cursor.execute(
+        """SELECT stock,
                         COALESCE(unidad_medida, '') 
                         FROM Productos 
-                        WHERE nombre = ?;''',
-                (product_name,)
-            ).fetchone()
-        if len(query) == 2:
-            stock, measurement_unit = [q for q in query]
-        else:
-            stock = query[0]
-            measurement_unit = ""
-        
-        try:
-            stock = float(stock)
-        except:
-            pass
-        return stock, measurement_unit
+                        WHERE nombre = ?;""",
+        (product_name,),
+    ).fetchone()
+    if len(query) == 2:
+        stock, measurement_unit = [q for q in query]
+    else:
+        stock = query[0]
+        measurement_unit = ""
+
+    try:
+        stock = float(stock)
+    except:
+        pass
+    return stock, measurement_unit
 
 
-#========================================================================================================================
-def createCompleter(sql:str=None, params:tuple[Any]=None, type:int=None) -> QCompleter:
-    '''
+# ========================================================================================================================
+def createCompleter(
+    sql: str = None, params: tuple[Any] = None, type: int = None
+) -> QCompleter:
+    """
     Crea un QCompleter y establece sus atributos.
-    El parámetro 'type' sirve para realizar una consulta genérica a la base de datos y obtener todas 
-    las coincidencias del valor de 'type', en cambio los parámetros 'sql' y 'params' sirven para obtener 
+    El parámetro 'type' sirve para realizar una consulta genérica a la base de datos y obtener todas
+    las coincidencias del valor de 'type', en cambio los parámetros 'sql' y 'params' sirven para obtener
     resultados más precisos al realizar consultas concretas.
-    
+
     Parámetros
     ----------
     sql: str, opcional
         Consulta SELECT a la base de datos, requiere 'params'
-    params: tuple[Any], opcional 
+    params: tuple[Any], opcional
         Parámetros para la consulta
-    type: int, opcional 
+    type: int, opcional
         Flag que determina los datos con los que llenar el QCompleter
         - 1: lo carga con todos los nombres de personas con cuenta corriente
         - 2: lo carga con todos los apellidos de personas con cuenta corriente
         - 3: lo carga con todos los nombres de productos
-    
+
     Retorna
     -------
     QCompleter
         QCompleter con sus atributos especificados
-    '''
-    completer:QCompleter
-    query:list
-    
+    """
+    completer: QCompleter
+    query: list
+
     if sql and params:
         query = makeReadQuery(sql, params)
         results = [res[0] for res in query]
         completer = QCompleter(results)
-    
+
     else:
-        if type == 1: # nombres de personas con cta. corriente
-            query = makeReadQuery("SELECT DISTINCT nombre FROM Deudores WHERE nombre <> '[ELIMINADO]';")
+        if type == 1:  # nombres de personas con cta. corriente
+            query = makeReadQuery(
+                "SELECT DISTINCT nombre FROM Deudores WHERE nombre <> '[ELIMINADO]';"
+            )
             names = [name[0] for name in query]
             completer = QCompleter(names)
-        
-        elif type == 2: # apellidos de personas con cta. corriente
-            query = makeReadQuery("SELECT DISTINCT apellido FROM Deudores WHERE apellido <> '[ELIMINADO]';")
+
+        elif type == 2:  # apellidos de personas con cta. corriente
+            query = makeReadQuery(
+                "SELECT DISTINCT apellido FROM Deudores WHERE apellido <> '[ELIMINADO]';"
+            )
             surnames = [surname[0] for surname in query]
             completer = QCompleter(surnames)
-        
-        elif type == 3: # nombres de productos
+
+        elif type == 3:  # nombres de productos
             completer = QCompleter(getProductNames())
-    
+
     completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
     completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
     completer.setMaxVisibleItems(10)
 
     return completer
-
-
-
