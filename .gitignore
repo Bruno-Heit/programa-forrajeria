@@ -2,6 +2,8 @@
 __pycache__/
 db_tries
 .vscode
+.ruff_cache
+.pytest_cache
 
 # archivos .py
 test.py
