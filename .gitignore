@@ -3,6 +3,7 @@ __pycache__/
 db_tries
 .vscode
 .pytest_cache
+.venv
 
 # archivos .py
 test.py
