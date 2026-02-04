@@ -3840,11 +3840,15 @@ class MainWindow(QMainWindow):
 
         # guarda el estado
         self.config.saveMainWindowState(self.saveGeometry(), self.saveState())
+        
+        # corre el log analyzer
+        LogAnalyzer().start_analysis()
 
         return super().closeEvent(event)
 
 
 def main():
+    # TODO: implementar rotación de logs (logs por días, es sencillo de hacer, y que se guarden logs de 7 días)
     # logging
     with open("program.log", "w"):  # borra los logs
         pass
@@ -3852,7 +3856,7 @@ def main():
     logging.basicConfig(
         format="%(asctime)s - (%(levelname)s) - %(module)s.%(funcName)s - %(message)s",
         level=logging.DEBUG,
-        datefmt="%A %d/%m/%Y %H:%M:%S",
+        datefmt="%A %Y-%m-%d %H:%M:%S",
         handlers=[logging.FileHandler("program.log"), logging.StreamHandler()],
     )
 
