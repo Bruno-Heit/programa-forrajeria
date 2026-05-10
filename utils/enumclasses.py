@@ -515,3 +515,18 @@ class Regex(StrEnum):
     DEBTS_DIRECTION = "[^;\"']{0,256}"
 
     PRODS_BAL_BALANCE = "[+-]?[\d]{0,8}(\.|,)?[\d]{0,2}"
+
+
+class LogAnalyzerRegex(StrEnum):
+    """
+    Clase StrEnum con expresiones regulares usadas en el *Log Analyzer* para 
+    analizar el archivo *program.log*.
+    Estas regex ya están formateadas para ser usadas por funciones del módulo 
+    "*re*".
+    """
+    MATCH_DAY = r"(?P<day>\w+)\s+"
+    MATCH_DATE = r"(?P<date>\d{4}-\d{2}-\d{2})\s+"
+    MATCH_TIME = r"(?P<time>\d{2}:\d{2}:\d{2})\s+-\s+"
+    MATCH_LEVEL = r"\((?P<level>DEBUG|INFO|WARNING|ERROR|CRITICAL)\)\s+-\s+"
+    MATCH_FUNC_NAME = r"(?P<func_name>[\w\.]+)\s+-\s"
+    MATCH_MSG = r"(?P<msg>.*)"

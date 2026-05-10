@@ -69,6 +69,7 @@ from utils.eventfilters import (
     CategoryListEventFilter,
 )
 from utils.settings_manager import SettingsManager
+# from utils.log_analyzer import LogAnalyzer
 
 from resources import rc_icons
 
@@ -3842,7 +3843,7 @@ class MainWindow(QMainWindow):
         self.config.saveMainWindowState(self.saveGeometry(), self.saveState())
         
         # corre el log analyzer
-        LogAnalyzer().start_analysis()
+        # LogAnalyzer().start_analysis()
 
         return super().closeEvent(event)
 
