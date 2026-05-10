@@ -4266,7 +4266,8 @@ class DebtorDataDialog(QDialog):
 
 # DEUDORES (SECCIÓN CUENTA CORRIENTE) ==========================================================================
 
-
+# TODO: corregir un bug: cuando se cambia el valor de un producto adeudado desde el Dialog y luego 
+# todo: el precio del producto cambia desde Inventario no se actualiza en el Dialog.
 class ProductsBalanceDialog(QDialog):
     """
     QDialog con formato Popup que contiene los productos en cuenta corriente
