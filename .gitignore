@@ -23,3 +23,5 @@ ui/_debts_table_scheme.png
 # archivos temporales/de tiempos de ejecución
 *.log
 *.tmp
+
+_para crear ejecutable.txt
