@@ -22,6 +22,10 @@ CAMBIOS A HACER/IMPLEMENTACIONES NUEVAS:
 
 	☑ Modificar las tablas para que al efectuarse un DELETE en una tabla "padre" se borren los registros "hijos" 
 	 en cascada (evita errores de clave foránea).
+	
+	☐ Añadir a Inventario una columna de costo del producto.
+	☐ Añadir a Inventario la posibilidad de añadir múltiples variaciones de un producto (por ej.: Purina Cat-Chow 
+	 8kg, Purina Cat-Chow 15kg, Purina Cat-Chow 1kg). Hasta ahora cada variación es un producto nuevo.
 
 	☑ Implementar el sistema de ventas del día.
 	☑ Cada vez que se agregue a la tabla de ventas un objeto vendido (o la cantidad especificada) se 
@@ -44,7 +48,7 @@ CAMBIOS A HACER/IMPLEMENTACIONES NUEVAS:
 	☐ Expandir la capacidad de búsqueda con search-bars para lograr filtros avanzados usando operadores 
 	  matemáticos (> < >= <= = !=) y operadores lógicos (AND OR NOT).
 
-	☐ Implementar copias de seguridad (idealmente 3 copias, 2 en disco, 1 en otro dispositivo (principio 321)).
+	☐ Implementar copias de seguridad.
 
 	☑ Crear constante con dirección de la base de datos, para acceder desde las funciones y clases 
 	  que lo necesiten.
