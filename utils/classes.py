@@ -87,6 +87,8 @@ from phonenumbers import (
 from re import sub
 from datetime import datetime
 
+logger = logging.getLogger(__name__)
+
 
 # PRODUCTOS ====================================================================================================
 
@@ -4052,7 +4054,7 @@ class DebtorDataDialog(QDialog):
                         )
 
                 except NumberParseException as err:
-                    logging.error(err)
+                    logger.error(err)
                     field_text = self.debtorData.lineEdit_phoneNumber.text()
 
                 self.debtor_values.setPhoneNumber(field_text)
@@ -4228,7 +4230,7 @@ class DebtorDataDialog(QDialog):
                     ),
                 )
 
-                logging.debug(LoggingMessage.DEBUG_DB_SINGLE_INSERT_SUCCESS)
+                logger.debug(LoggingMessage.DEBUG_DB_SINGLE_INSERT_SUCCESS)
 
             # manda a MainWindow el IDdeudor en la señal 'debtorChosen'
             debtor_id = makeReadQuery(
@@ -4540,7 +4542,7 @@ class ProductsBalanceDialog(QDialog):
                     )
 
                 except (ValueError, TypeError) as err:
-                    logging.error(
+                    logger.error(
                         f"Error al convertir fecha y hora a objeto 'datetime': {err}"
                     )
                     _date_time = reg[1]

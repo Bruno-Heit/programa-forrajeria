@@ -13,6 +13,8 @@ from typing import Any, Iterable
 import itertools
 import logging
 
+logger = logging.getLogger(__name__)
+
 
 class Worker(QObject):
     """
@@ -50,7 +52,7 @@ class Worker(QObject):
         cancelación.
         """
         self._canceled = True
-        logging.debug(LoggingMessage.WORKER_CANCEL_REQUESTED)
+        logger.debug(LoggingMessage.WORKER_CANCEL_REQUESTED)
         return None
 
     def isCanceled(self) -> bool:
@@ -128,7 +130,7 @@ class WorkerSelect(Worker):
         data_query: list[Any]  # guarda los registros obtenidos
 
         if self.isCanceled():
-            logging.debug(LoggingMessage.WORKER_CANCELED)
+            logger.debug(LoggingMessage.WORKER_CANCELED)
             self.finished.emit()
             return None
 
@@ -153,11 +155,11 @@ class WorkerSelect(Worker):
                     case False:
                         self.registerProgress.emit(tuple((n, reg)))
                     case True:
-                        logging.debug(LoggingMessage.WORKER_CANCELED)
+                        logger.debug(LoggingMessage.WORKER_CANCELED)
                         self.finished.emit()
                         return None
 
-        logging.debug(LoggingMessage.DEBUG_DB_MULT_SELECT_SUCCESS)
+        logger.debug(LoggingMessage.DEBUG_DB_MULT_SELECT_SUCCESS)
         self.finished.emit()
 
 
@@ -207,7 +209,7 @@ class WorkerDelete(Worker):
         las filas borradas.
         """
         if self.isCanceled():
-            logging.debug(LoggingMessage.WORKER_CANCELED)
+            logger.debug(LoggingMessage.WORKER_CANCELED)
             self.finished.emit()
             return None
 
@@ -225,7 +227,7 @@ class WorkerDelete(Worker):
                                 self.progress.emit(n)
 
                             case True:
-                                logging.debug(LoggingMessage.WORKER_CANCELED)
+                                logger.debug(LoggingMessage.WORKER_CANCELED)
                                 self.finished.emit()
                                 return None
 
@@ -247,7 +249,7 @@ class WorkerDelete(Worker):
                                 self.progress.emit(n)
 
                             case True:
-                                logging.debug(LoggingMessage.WORKER_CANCELED)
+                                logger.debug(LoggingMessage.WORKER_CANCELED)
                                 self.finished.emit()
                                 return None
 
@@ -265,11 +267,11 @@ class WorkerDelete(Worker):
                                 self.progress.emit(n)
 
                             case True:
-                                logging.debug(LoggingMessage.WORKER_CANCELED)
+                                logger.debug(LoggingMessage.WORKER_CANCELED)
                                 self.finished.emit()
                                 return None
 
-        logging.debug(LoggingMessage.DEBUG_DB_MULT_DELETE_SUCCESS)
+        logger.debug(LoggingMessage.DEBUG_DB_MULT_DELETE_SUCCESS)
         self.finished.emit()
 
 
@@ -304,7 +306,7 @@ class WorkerUpdate(Worker):
         Hace la consulta **UPDATE** a la base de datos.
         """
         if self.isCanceled():
-            logging.debug(LoggingMessage.WORKER_CANCELED)
+            logger.debug(LoggingMessage.WORKER_CANCELED)
             self.finished.emit()
             return None
 
@@ -316,13 +318,13 @@ class WorkerUpdate(Worker):
                     case False:
                         db_repo.updateRegisters(upd_sql=self._upd_sql, upd_params=param)
                         self.progress.emit(n)
-                        # TODO: emitir los datos para actualizar el modelo
+                    
                     case True:
-                        logging.debug(LoggingMessage.WORKER_CANCELED)
+                        logger.debug(LoggingMessage.WORKER_CANCELED)
                         self.finished.emit()
                         return None
 
-            logging.debug(LoggingMessage.DEBUG_DB_MULT_UPDATE_SUCCESS)
+            logger.debug(LoggingMessage.DEBUG_DB_MULT_UPDATE_SUCCESS)
 
         self.finished.emit()
         return None

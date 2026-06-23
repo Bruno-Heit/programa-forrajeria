@@ -29,6 +29,8 @@ from utils.enumclasses import TableViewId, DateAndTimeFormat
 from re import Match, sub, match, findall
 from datetime import datetime
 
+logger = logging.getLogger(__name__)
+
 
 # formatos de fecha y hora
 def ISO8601_to_local(date_time: str) -> str | None:
@@ -54,7 +56,7 @@ def ISO8601_to_local(date_time: str) -> str | None:
         return dt_obj.strftime(DateAndTimeFormat.DIR_LOCAL_DATETIME_FORMAT.value)
 
     except ValueError as err:
-        logging.error(
+        logger.error(
             f"No se pudo convertir la fecha y hora de formato ISO 8601 a local: {err}"
         )
         return None
@@ -83,7 +85,7 @@ def local_to_ISO8601(date_time: str) -> str | None:
         return dt_obj.strftime(DateAndTimeFormat.DIR_DATETIME_ISO_8601.value)
 
     except ValueError:
-        logging.error("No se pudo convertir la fecha y hora local a formato ISO 8601")
+        logger.error("No se pudo convertir la fecha y hora local a formato ISO 8601")
         return None
 
 

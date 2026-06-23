@@ -7,9 +7,6 @@ También contiene la clase 'DatabaseRepository' que, usando el patrón de diseñ
 repositorio, contiene las consultas a bases de datos generales.
 
 Contiene direcciones generales relacionadas con base de datos.
-
-Por último coloqué acá la función 'pyinstallerCompleteResourcePath' para evitar
-'circular import' con 'utils/functionutils'.
 """
 
 import os  # para obtener el 'relative path' de algunos archivos cuando se ejecutan luego de empaquetarse con pyinstaller...
@@ -25,6 +22,7 @@ import os
 
 from utils.enumclasses import Regex, DateAndTimeFormat, ProgramValues as PV
 
+logger = logging.getLogger(__name__)
 
 # direcciones
 DATABASE_DIR = (
@@ -55,7 +53,7 @@ class DatabaseRepository:
 
     def __exit__(self, exc_type, exc_value, exc_trc) -> None:
         if exc_type:
-            logging.critical(f"{exc_type}:{exc_value}")
+            logger.critical(f"{exc_type}:{exc_value}")
 
         self._connection.close()
         return None
@@ -81,7 +79,7 @@ class DatabaseRepository:
 
         except (ProgrammingError, sqlite3Error) as err:
             self._connection.rollback()
-            logging.critical(f"{err}")
+            logger.critical(f"{err}")
             return False
 
         return True
@@ -121,7 +119,7 @@ class DatabaseRepository:
 
                 except sqlite3Error as err:
                     self._connection.rollback()
-                    logging.critical(f"{err}")
+                    logger.critical(f"{err}")
 
             case True:
                 try:
@@ -130,7 +128,7 @@ class DatabaseRepository:
 
                 except (sqlite3Error, ProgrammingError) as err:
                     self._connection.rollback()
-                    logging.critical(f"{err}")
+                    logger.critical(f"{err}")
 
         return cursor
 
@@ -289,56 +287,6 @@ class DatabaseRepository:
 
 
 # funciones generales
-# ? La siguiente función sirve para ayudar a pyinstaller a completar el path completo a un archivo,
-# ? y se tiene que hacer esto porque tiene un error y a veces no puede hacerlo.
-def pyinstallerCompleteResourcePath(relative_path: str) -> str:
-    """
-    Obtiene el *path* completo para el archivo especificado.
-
-    Parámetros
-    ----------
-    relative_path : str
-        el *path* relativo del archivo al programa
-
-    Retorna
-    -------
-    str
-        el *path* completo del archivo
-    """
-    base_path: str
-    full_path: str
-
-    try:
-        base_path = sys._MEIPASS
-
-    except AttributeError as err:
-        logging.error("No se encuentra el atributo 'sys._MEIPASS'")
-        base_path = os.path.abspath(".")
-
-    except Exception as err:
-        logging.critical(err)
-        base_path = os.path.abspath(".")
-
-    finally:
-        full_path = os.path.join(base_path, relative_path.replace("/", "\\"))
-        __createDirPathIfNotExists(full_path)
-
-    return full_path
-
-
-def __createDirPathIfNotExists(full_path: str) -> None:
-    """
-    Crea los directorios del *path* si no existen.
-
-    Parámetros
-    ----------
-    full_path : str
-        *path* al cual crear directorio
-    """
-    os.makedirs("\\".join(full_path.split("\\")[:-1]), exist_ok=True)
-    return None
-
-
 def createConnection(db_name: str, shared_memory_db: bool = False) -> Connection | None:
     """
     Crea una conexión a la base de datos y devuelve la conexión. En caso de
@@ -362,16 +310,16 @@ def createConnection(db_name: str, shared_memory_db: bool = False) -> Connection
         connection = connect(
             db_name
             if db_name == alt_db_path
-            else pyinstallerCompleteResourcePath(db_name),
+            else db_name,
             uri=True if alt_db_path == DATABASE_MEMORY_SHARED else False,
         )
 
     except sqlite3Error as err:
-        logging.critical(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+        logger.critical(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
         connection = None
 
     except Exception as err:
-        logging.critical(err)
+        logger.critical(err)
         connection = None
     return connection
 
@@ -415,7 +363,7 @@ def makeUpdateQuery(sql: str, params: tuple) -> None:
 
     except sqlite3Error as err:
         conn.rollback()
-        logging.critical(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+        logger.critical(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
 
     finally:
         conn.close()
@@ -443,7 +391,7 @@ def makeInsertQuery(sql: str, params: tuple = None) -> None:
 
     except sqlite3Error as err:
         conn.rollback()
-        logging.critical(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
+        logger.critical(f"{err.sqlite_errorcode}: {err.sqlite_errorname} / {err}")
 
     finally:
         conn.close()
@@ -550,7 +498,7 @@ def createTables(path: str = DATABASE_DIR) -> None:
         )
 
         if res:
-            logging.info("tablas creadas exitosamente")
+            logger.info("tablas creadas exitosamente")
     return None
 
 
@@ -588,10 +536,10 @@ def ensureDateTimeISOformat() -> None:
 
             except ValueError:
                 _warning_msg = "La fecha {curr_dt} es inválida"
-                logging.warning(_warning_msg)
+                logger.warning(_warning_msg)
 
         _info_msg = f"Fechas de Ventas actualizadas correctamente al formato ISO 8601 -> nro. cambios: {changes}"
-        logging.info(_info_msg)
+        logger.info(_info_msg)
 
         changes = 0
 
@@ -619,10 +567,10 @@ def ensureDateTimeISOformat() -> None:
 
             except ValueError:
                 _warning_msg = "La fecha {curr_dt} es inválida"
-                logging.warning(_warning_msg)
+                logger.warning(_warning_msg)
 
         _info_msg = f"Fechas de Deudas actualizadas correctamente al formato ISO 8601 -> nro. cambios: {changes}"
-        logging.info(_info_msg)
+        logger.info(_info_msg)
     return None
 
 

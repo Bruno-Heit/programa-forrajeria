@@ -24,6 +24,8 @@ from utils.enumclasses import Regex, CommonCategories
 from re import fullmatch, compile, Pattern, IGNORECASE
 import logging
 
+logger = logging.getLogger(__name__)
+
 
 # ¡ search bars ========================================================================================
 class SearchBarValidator(QValidator):
@@ -442,7 +444,7 @@ class SaleQuantityValidator(QRegularExpressionValidator):
                         return QRegularExpressionValidator.State.Invalid, text, pos
 
                 except TypeError as err:
-                    logging.error(err)
+                    logger.error(err)
                     return QRegularExpressionValidator.State.Invalid, text, pos
 
             self.validationSucceeded.emit()

@@ -1,6 +1,7 @@
 import sys
 from numpy import empty, ndarray
 from typing import Any, Iterable
+from logging.handlers import TimedRotatingFileHandler
 
 from PySide6.QtWidgets import (
     QApplication,
@@ -3848,25 +3849,40 @@ class MainWindow(QMainWindow):
         return super().closeEvent(event)
 
 
-def main():
-    # TODO: implementar rotación de logs (logs por días, es sencillo de hacer, y que se guarden logs de 7 días)
-    # logging
-    with open("program.log", "w"):  # borra los logs
-        pass
-
-    logging.basicConfig(
-        format="%(asctime)s - (%(levelname)s) - %(module)s.%(funcName)s - %(message)s",
-        level=logging.DEBUG,
-        datefmt="%A %Y-%m-%d %H:%M:%S",
-        handlers=[logging.FileHandler("program.log"), logging.StreamHandler()],
+def setup_logging() -> None:
+    handler = TimedRotatingFileHandler(
+        filename="program.log",
+        when="midnight", # rota a medianoche,
+        interval=1, # cada 1 día
+        backupCount=14, # mantiene 30 días de logs
+        encoding="utf-8"
     )
+    
+    formatter = logging.Formatter(
+        "%(asctime)s - (%(levelname)s) - %(module)s.%(funcName)s - %(message)s",
+        datefmt="%A %Y-%m-%d %H:%M:%S"
+    )
+    handler.setFormatter(formatter)
+    
+    logging.basicConfig(
+        level=logging.DEBUG,
+        handlers=[handler, logging.StreamHandler()],
+    )
+    return None
+
+def setup_database() -> None:
+    createTables()
+    ensureDateTimeISOformat()
+    return None
+
+def main():
+    setup_logging()
 
     # configuraciones
     settings = QSettings(ProgramValues.APP_NAME.value, ProgramValues.APP_AUTHOR.value)
 
     # base de datos
-    createTables()
-    ensureDateTimeISOformat()
+    setup_database()
 
     # app
     app = QApplication(sys.argv)

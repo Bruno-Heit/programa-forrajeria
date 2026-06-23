@@ -10,7 +10,6 @@ from utils.enumclasses import ProgramValues as PV, SettingsDirs
 from typing import Any
 
 
-# TODO: mover las direcciones de bases de datos acá
 class SettingsManager(QObject):
     """
     Clase *singleton* usada para llevar a cabo las actualizaciones en

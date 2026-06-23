@@ -5,6 +5,8 @@ import pandas as pd
 from re import (Pattern, match, Match, fullmatch, compile, sub, IGNORECASE)
 from utils.enumclasses import Regex, LogAnalyzerRegex as laregex
 
+logger = logging.getLogger(__name__)
+
 # alias
 CountResult = dict[str, tuple | int] # { "indexes": tuple(idx_1, idx_2, ..., idx_n),
                                      #   "count": len(indexes) }
@@ -77,10 +79,10 @@ class LogAnalyzer():
         """
         try:
             with self._analysis_file.open(mode="w"):
-                logging.info(f"archivo '{self._analysis_file.name}' creado exitosamente")
+                logger.info(f"archivo '{self._analysis_file.name}' creado exitosamente")
         
         except Exception as e:
-            logging.error(e)
+            logger.error(e)
         return None
     
     def start_analysis(self) -> None:
@@ -133,10 +135,10 @@ class LogAnalyzer():
         try:
             with open(self._analysis_file, "w+") as file:
                 file.writelines([line for line in data])
-            logging.info(f"archivo '{self._analysis_file.name}' escrito exitosamente")
+            logger.info(f"archivo '{self._analysis_file.name}' escrito exitosamente")
         
         except Exception as e:
-            logging.error(e)
+            logger.error(e)
         return None
 
 
