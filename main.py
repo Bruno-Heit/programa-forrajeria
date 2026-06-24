@@ -3088,11 +3088,7 @@ class MainWindow(QMainWindow):
     @Slot()
     def onSalePaidEditingFinished(self) -> None:
         """
-        Formatea el campo del 'lineEdit_paid' y muestra el cambio a devolver.
-
-        Retorna
-        -------
-        None
+        Formatea el campo del *lineEdit_paid* y muestra el cambio a devolver.
         """
         # formatea el campo
         field_text: str = self.ui.lineEdit_paid.text()
@@ -3101,7 +3097,11 @@ class MainWindow(QMainWindow):
         field_text = field_text.strip()
         field_text = field_text.rstrip(",")
         field_text = field_text.lstrip("0")
-
+        
+        # si no hay un valor le pone 0
+        if not self.ui.lineEdit_paid.text():
+            field_text = "0.0"
+        
         self.ui.lineEdit_paid.setText(field_text)
 
         # muestra el cambio
@@ -3111,25 +3111,18 @@ class MainWindow(QMainWindow):
     def __setSaleChange(self) -> None:
         """
         Si todos los valores de los items son válidos, muestra el cambio a
-        devolver a partir del valor de 'lineEdit_paid', o si lo abonado es
-        mayor al total se muestra el cambio que se debe dar en 'label_total_change'.
-
-        Retorna None.
+        devolver a partir del valor de *lineEdit_paid*, o si lo abonado es
+        mayor al total se muestra el cambio que se debe dar en *label_total_change*.
         """
         total_paid: float
 
-        # si self.TOTAL_COST es None significa que hay items con valores inválidos
+        # si self.TOTAL_COST es None hay items con valores inválidos
         if not self.TOTAL_COST:
             return None
-
-        # si no hay un valor en lineEdit_paid, le pone 0
-        if not self.ui.lineEdit_paid.text():
-            self.ui.lineEdit_paid.setText(f"0.0")
-
+        
         # obtiene el total abonado
         total_paid = float(self.ui.lineEdit_paid.text().replace(",", "."))
-
-        # si 'self.lineEdit_paid' tiene un valor mayor al total muestra el cambio
+        
         if total_paid > self.TOTAL_COST:
             self.ui.label_total_change.setText(
                 f"{round(total_paid - self.TOTAL_COST, 2)}"
@@ -3876,6 +3869,12 @@ def setup_database() -> None:
     return None
 
 def main():
+    # TODO2: corregir validación del nombre en inventario cuando se hace doble 
+    # TODO2: click en una celda (aparece el mensaje de nombre inválido cuando el 
+    # TODO2: se pierde el foco del lineedit)
+    
+    # TODO3 (?): cambiar la forma en que se muestran las ventas: permitir ver las 
+    # TODO3 (?): ventas como páginas
     setup_logging()
 
     # configuraciones
