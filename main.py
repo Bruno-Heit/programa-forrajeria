@@ -3869,6 +3869,15 @@ def setup_database() -> None:
     return None
 
 def main():
+    # TODO: en las barras de búsqueda, filtrar a medida que el usuario teclea. Para 
+    # TODO: eso hacer un "debounce" con un timer: cuando el usuario empieza a teclear 
+    # TODO: iniciar/reiniciar el timer, pero sólo filtrar cuando el timer termina, 
+    # TODO: de esa forma se evitar filtrar cada vez que el usuario escribe una tecla 
+    # TODO: y sólo se filtra cuando el usuario dejó de escribir por un tiempo (por 
+    # TODO: ej: 2 segundos)
+    
+    # TODO1: permitir crear ofertas
+    
     # TODO2: corregir validación del nombre en inventario cuando se hace doble 
     # TODO2: click en una celda (aparece el mensaje de nombre inválido cuando el 
     # TODO2: se pierde el foco del lineedit)
