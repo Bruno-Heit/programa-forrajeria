@@ -3851,8 +3851,7 @@ def setup_spanish_translator(app:QApplication) -> None:
 
 def setup_app() -> None:
     """
-    Crea la app, declara el traductor, instancia la ventana principal y la 
-    muestra.
+    Crea la app e instancia la ventana principal y la muestra.
     """
     app = QApplication(sys.argv)
     
