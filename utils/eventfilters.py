@@ -55,19 +55,19 @@ class BackgroundEventFilter(QObject):
 
         match widget.objectName():
             case TablesAndListsObjName.INVEN_TABLE_VIEW.value:
-                self.pixmap = QPixmap(":/icons/products-table-empty-bg.png")
+                self.pixmap = QPixmap(":icons/products-table-empty-bg.png")
 
             case TablesAndListsObjName.SALES_INPUT_LIST.value:
-                self.pixmap = QPixmap(":/icons/sales-empty-input-list-bg.png")
+                self.pixmap = QPixmap(":icons/sales-empty-input-list-bg.png")
 
             case TablesAndListsObjName.SALES_TABLE_VIEW.value:
-                self.pixmap = QPixmap(":/icons/sales-table-empty-bg.png")
+                self.pixmap = QPixmap(":icons/sales-table-empty-bg.png")
 
             case TablesAndListsObjName.DEBTS_TABLE_VIEW.value:
-                self.pixmap = QPixmap(":/icons/debts-table-empty-bg.png")
+                self.pixmap = QPixmap(":icons/debts-table-empty-bg.png")
 
             case TablesAndListsObjName.BAL_PRODS_TABLE_VIEW.value:
-                self.pixmap = QPixmap(":/icons/debts-empty-prods-balance-table-bg.png")
+                self.pixmap = QPixmap(":icons/debts-empty-prods-balance-table-bg.png")
 
         self.__max_pixmap_size = QPixmap.size(self.pixmap)
         return None

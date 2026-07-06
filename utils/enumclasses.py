@@ -265,17 +265,17 @@ class WidgetStyle(StrEnum):
     LABEL_RICHTEXT_CONTENT = "font-size:20px; color: #415a77;"
 
     DEF_COMBOBOX_FILTER_ICON = (
-        "QComboBox::down-arrow {image: url(':/icons/filter.svg');}"
+        "QComboBox::down-arrow {image: url(':icons/filter.svg');}"
     )
     DEF_COMBOBOX_ARROW_ICON = (
-        "QComboBox::down-arrow {image: url(':/icons/chevron-down.svg');}"
+        "QComboBox::down-arrow {image: url(':icons/chevron-down.svg');}"
     )
 
     DEF_DATEEDIT_ARROW_ICON = (
-        "QDateEdit::down-arrow {image: url(':/icons/chevron-down.svg');}"
+        "QDateEdit::down-arrow {image: url(':icons/chevron-down.svg');}"
     )
     DEF_DATETIMEEDIT_ARROW_ICON = (
-        "QDateTimeEdit::down-arrow {image: url(':/icons/chevron-down.svg');}"
+        "QDateTimeEdit::down-arrow {image: url(':icons/chevron-down.svg');}"
     )
 
 

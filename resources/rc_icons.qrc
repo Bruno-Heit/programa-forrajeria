@@ -3,61 +3,61 @@
     <qresource prefix="icons">
         
         <!-- #### (MainWindow) ####   ícono de la ventana principal -->
-        <file alias="program-icon.ico">../icons/program_icon.ico</file>
+        <file alias="program-icon.ico">../assets/icons/program_icon.ico</file>
 
         <!-- #### (MainWindow) ####   íconos para los botones de los menús laterales -->
-        <file alias="list-normal.svg">../icons/listNormal.svg</file>
-        <file alias="list-focus.svg">../icons/listFocus.svg</file>
+        <file alias="list-normal.svg">../assets/icons/listNormal.svg</file>
+        <file alias="list-focus.svg">../assets/icons/listFocus.svg</file>
 
-        <file alias="menu-normal.svg">../icons/menuNormal.svg</file>
-        <file alias="menu-focus.svg">../icons/menuFocus.svg</file>
+        <file alias="menu-normal.svg">../assets/icons/menuNormal.svg</file>
+        <file alias="menu-focus.svg">../assets/icons/menuFocus.svg</file>
 
         <!-- #### (uso general) ####   ícono para barras de búsqueda -->
-        <file alias="search.svg">../icons/search.svg</file>
+        <file alias="search.svg">../assets/icons/search.svg</file>
 
         <!-- #### (uso general) ####   ícono para filtrar columnas -->
-        <file alias="filter.svg">../icons/filter.svg</file>
+        <file alias="filter.svg">../assets/icons/filter.svg</file>
 
         <!-- #### (uso general) ####   íconos para los botones que se usan para agregar o borrar registros -->
-        <file alias="plus.svg">../icons/plus.svg</file>
-        <file alias="minus-circle.svg">../icons/minusCircle.svg</file>
-        <file alias="minus-circle-alt.svg">../icons/minusCircleAlt.svg</file>
+        <file alias="plus.svg">../assets/icons/plus.svg</file>
+        <file alias="minus-circle.svg">../assets/icons/minusCircle.svg</file>
+        <file alias="minus-circle-alt.svg">../assets/icons/minusCircleAlt.svg</file>
 
         <!-- #### (MainWindow) ####   íconos para porcentajes -->
-        <file alias="percent.svg">../icons/percent.svg</file>
+        <file alias="percent.svg">../assets/icons/percent.svg</file>
 
         <!-- #### (MainWindow) ####   ícono para el botón de finalizar venta -->
-        <file alias="check-circle.svg">../icons/checkCircle.svg</file>
+        <file alias="check-circle.svg">../assets/icons/checkCircle.svg</file>
 
         <!-- #### (MainWindow) ####   ícono para agregar deudor -->
-        <file alias="add-debtor.svg">../icons/addDebtor.svg</file>
+        <file alias="add-debtor.svg">../assets/icons/addDebtor.svg</file>
 
         <!-- #### (uso general) ####   flechas para comboboxes -->
-        <file alias="chevron-down.svg">../icons/chevronDown.svg</file>
-        <file alias="chevron-up.svg">../icons/chevronUp.svg</file>
+        <file alias="chevron-down.svg">../assets/icons/chevronDown.svg</file>
+        <file alias="chevron-up.svg">../assets/icons/chevronUp.svg</file>
 
         <!-- #### (Dialogs) ####   ícono para cancelar una operación -->
-        <file alias="cancel.svg">../icons/xCircle.svg</file>
+        <file alias="cancel.svg">../assets/icons/xCircle.svg</file>
 
         <!-- #### (Dialogs) ####   ícono para guardar un registro nuevo -->
-        <file alias="accept.svg">../icons/plusCircle.svg</file>
+        <file alias="accept.svg">../assets/icons/plusCircle.svg</file>
 
         <!-- #### (QDateTimeEdit) ####   flechas para cambiar los meses -->
-        <file alias="prev-month.svg">../icons/arrowLeft.svg</file>
-        <file alias="next-month.svg">../icons/arrowRight.svg</file>
+        <file alias="prev-month.svg">../assets/icons/arrowLeft.svg</file>
+        <file alias="next-month.svg">../assets/icons/arrowRight.svg</file>
 
         <!-- #### (ListItemWidget) ####   ícono para eliminar el producto actual -->
-        <file alias="close.svg">../icons/xClose.svg</file>
+        <file alias="close.svg">../assets/icons/xClose.svg</file>
 
         <!-- #### (ProductsBalanceDialog) ####   ícono para eliminar la deuda actual -->
-        <file alias="trash-register.svg">../icons/trashRegister.svg</file>
+        <file alias="trash-register.svg">../assets/icons/trashRegister.svg</file>
 
         <!-- #### (MainWindow) #### imágenes de fondo para las tablas cuando están vacías -->
-        <file alias="products-table-empty-bg.png">../icons/products_empty_table_icon.png</file>
-        <file alias="sales-table-empty-bg.png">../icons/sales_empty_table_icon.png</file>
-        <file alias="debts-table-empty-bg.png">../icons/debts_empty_table_icon.png</file>
-        <file alias="sales-empty-input-list-bg.png">../icons/sales_empty_input_list_icon.png</file>
-        <file alias="debts-empty-prods-balance-table-bg.png">../icons/debts_empty_prods_balance_table_icon.png</file>
+        <file alias="products-table-empty-bg.png">../assets/icons/products_empty_table_icon.png</file>
+        <file alias="sales-table-empty-bg.png">../assets/icons/sales_empty_table_icon.png</file>
+        <file alias="debts-table-empty-bg.png">../assets/icons/debts_empty_table_icon.png</file>
+        <file alias="sales-empty-input-list-bg.png">../assets/icons/sales_empty_input_list_icon.png</file>
+        <file alias="debts-empty-prods-balance-table-bg.png">../assets/icons/debts_empty_prods_balance_table_icon.png</file>
 
 
     </qresource>

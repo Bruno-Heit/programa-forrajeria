@@ -141,7 +141,7 @@ class Ui_listProduct(object):
 "}\n"
 "QComboBox::down-"
                         "arrow {\n"
-"	image: url(':/icons/chevron-down.svg');\n"
+"	image: url(':icons/chevron-down.svg');\n"
 "}\n"
 "QComboBox QAbstractItemView{\n"
 "	background-color: #778da9;\n"

@@ -373,7 +373,7 @@ class ProductDialog(QDialog):
 
     def setup_ui(self) -> None:
         self.dialog_icon = QIcon()
-        self.dialog_icon.addFile(":/icons/program-icon.ico")
+        self.dialog_icon.addFile(":icons/program-icon.ico")
         self.setWindowIcon(self.dialog_icon)
 
         self.productDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setText("Aceptar")
@@ -829,7 +829,7 @@ class CategoryDescDialog(QDialog):
 
     def setup_ui(self) -> None:
         self.dialog_icon = QIcon()
-        self.dialog_icon.addFile(":/icons/program-icon.ico")
+        self.dialog_icon.addFile(":icons/program-icon.ico")
         self.setWindowIcon(self.dialog_icon)
 
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
@@ -1586,7 +1586,7 @@ class SaleDialog(QDialog):
         self.setWindowTitle("Nueva venta")
 
         self.dialog_icon = QIcon()
-        self.dialog_icon.addFile(":/icons/program-icon.ico")
+        self.dialog_icon.addFile(":icons/program-icon.ico")
         self.setWindowIcon(self.dialog_icon)
 
         self.saleDialog_ui.buttonBox.button(QDialogButtonBox.Ok).setText("Aceptar")
@@ -1638,10 +1638,10 @@ class SaleDialog(QDialog):
 
         self.saleDialog_ui.dateTimeEdit.setStyleSheet(
             """ QCalendarWidget QWidget#qt_calendar_prevmonth{
-                    qproperty-icon: url(':/icons/prev-month.svg')
+                    qproperty-icon: url(':icons/prev-month.svg')
                 }
                 QCalendarWidget QWidget#qt_calendar_nextmonth{
-                    qproperty-icon: url(':/icons/next-month.svg')
+                    qproperty-icon: url(':icons/next-month.svg')
                 }"""
         )
         return None
@@ -2800,7 +2800,7 @@ class ListItemWidget(QWidget):
         Coloca íconos y establece stylesheets iniciales en los widgets.
         """
         # asigno el ícono para el botón de borrar el item actual
-        self.listItem.btn_deleteCurrentProduct.setIcon(QIcon(":/icons/close.svg"))
+        self.listItem.btn_deleteCurrentProduct.setIcon(QIcon(":icons/close.svg"))
         self.listItem.btn_deleteCurrentProduct.setIconSize(QSize(32, 32))
         return None
 
@@ -3715,7 +3715,7 @@ class DebtorDataDialog(QDialog):
 
     def setup_ui(self) -> None:
         self.dialog_icon = QIcon()
-        self.dialog_icon.addFile(":/icons/program-icon.ico")
+        self.dialog_icon.addFile(":icons/program-icon.ico")
         self.setWindowIcon(self.dialog_icon)
 
         self.debtorData.buttonBox.button(QDialogButtonBox.Ok).setText("Aceptar")
@@ -4307,7 +4307,7 @@ class ProductsBalanceDialog(QDialog):
 
     def setup_ui(self) -> None:
         self.dialog_icon = QIcon()
-        self.dialog_icon.addFile(":/icons/program-icon.png")
+        self.dialog_icon.addFile(":icons/program-icon.png")
         self.setWindowIcon(self.dialog_icon)
 
         # crea el dialog como ventana sin frame
@@ -4332,12 +4332,12 @@ class ProductsBalanceDialog(QDialog):
         self.fade_in_anim.setEasingCurve(QEasingCurve.Type.InCubic)
 
         # coloca íconos y otros estilos
-        self.search_icon = QIcon(":/icons/search.svg")
+        self.search_icon = QIcon(":icons/search.svg")
         self.products_balance_dialog.search_bar.addAction(
             self.search_icon, QLineEdit.ActionPosition.LeadingPosition
         )
 
-        self.delete_debt_icon = QIcon(":/icons/trash-register.svg")
+        self.delete_debt_icon = QIcon(":icons/trash-register.svg")
         self.products_balance_dialog.btn_delete_debt.setIcon(self.delete_debt_icon)
 
         # sobreescribe el evento Paint (mediante un filtro de eventos)

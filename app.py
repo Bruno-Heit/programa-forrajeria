@@ -679,35 +679,35 @@ class MainWindow(QMainWindow):
         self.end_sale_icon = QIcon()  # terminar venta (formulario)
 
         # ícono de la ventana principal
-        self.main_window_icon.addFile(":/icons/program-icon.ico")
+        self.main_window_icon.addFile(":icons/program-icon.ico")
         self.setWindowIcon(self.main_window_icon)
 
         # sidebar de categorías
         self.sidebar_toggle_icon.addFile(
-            ":/icons/list-normal.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off
+            ":icons/list-normal.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off
         )
         self.sidebar_toggle_icon.addFile(
-            ":/icons/list-focus.svg", QSize(), QIcon.Mode.Active, QIcon.State.On
+            ":icons/list-focus.svg", QSize(), QIcon.Mode.Active, QIcon.State.On
         )
         self.ui.btn_side_barToggle.setIcon(self.sidebar_toggle_icon)
 
         # sidebar de porcentajes
         self.inv_sidebar_toggle_icon.addFile(
-            ":/icons/menu-normal.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off
+            ":icons/menu-normal.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off
         )
         self.inv_sidebar_toggle_icon.addFile(
-            ":/icons/menu-focus.svg", QSize(), QIcon.Mode.Active, QIcon.State.On
+            ":icons/menu-focus.svg", QSize(), QIcon.Mode.Active, QIcon.State.On
         )
         self.ui.btn_inventory_sideBarToggle.setIcon(self.inv_sidebar_toggle_icon)
 
         # lineedit de porcentajes
-        self.percent_icon.addFile(":/icons/percent.svg", QSize())
+        self.percent_icon.addFile(":icons/percent.svg", QSize())
         self.ui.lineEdit_percentage_change.addAction(
             self.percent_icon, QLineEdit.ActionPosition.LeadingPosition
         )
 
         # search-bars
-        self.search_bars_icon.addFile(":/icons/search.svg")
+        self.search_bars_icon.addFile(":icons/search.svg")
         self.ui.inventory_searchBar.addAction(
             self.search_bars_icon, QLineEdit.ActionPosition.LeadingPosition
         )
@@ -719,28 +719,28 @@ class MainWindow(QMainWindow):
         )
 
         # botones para añadir registros
-        self.add_register_icon.addFile(":/icons/plus.svg", QSize())
+        self.add_register_icon.addFile(":icons/plus.svg", QSize())
         self.ui.btn_add_product_inventory.setIcon(self.add_register_icon)
         self.ui.btn_add_product.setIcon(self.add_register_icon)
         self.ui.btn_add_product_sales.setIcon(self.add_register_icon)
         self.ui.btn_sidebar_list_add_item.setIcon(self.add_register_icon)
 
         # botón para añadir deudores
-        self.add_debtor_icon.addFile(":/icons/add-debtor.svg", QSize())
+        self.add_debtor_icon.addFile(":icons/add-debtor.svg", QSize())
         self.ui.btn_add_debtor.setIcon(self.add_debtor_icon)
 
         # botones para eliminar registros
-        self.delete_register_icon.addFile(":/icons/minus-circle.svg", QSize())
+        self.delete_register_icon.addFile(":icons/minus-circle.svg", QSize())
         self.ui.btn_delete_product_inventory.setIcon(self.delete_register_icon)
         self.ui.btn_delete_product_sales.setIcon(self.delete_register_icon)
         self.ui.btn_delete_debtor.setIcon(self.delete_register_icon)
 
         # botones para eliminar registros (color oscuro)
-        self.delete_register_dark_icon.addFile(":/icons/minus-circle-alt.svg", QSize())
+        self.delete_register_dark_icon.addFile(":icons/minus-circle-alt.svg", QSize())
         self.ui.btn_sidebar_list_delete_item.setIcon(self.delete_register_dark_icon)
 
         # botón para terminar venta
-        self.end_sale_icon.addFile(":/icons/check-circle.svg")
+        self.end_sale_icon.addFile(":icons/check-circle.svg")
         self.ui.btn_end_sale.setIcon(self.end_sale_icon)
 
         return None

@@ -65,10 +65,10 @@ class CustomCalendar(QCalendarWidget):
                 height: 20px;
             }
             QCalendarWidget QToolButton#qt_calendar_prevmonth {
-                qproperty-icon: url(":/icons/prev-month.svg");
+                qproperty-icon: url(":icons/prev-month.svg");
             }
             QCalendarWidget QToolButton#qt_calendar_nextmonth {
-                qproperty-icon: url(":/icons/next-month.svg");
+                qproperty-icon: url(":icons/next-month.svg");
             }
             
             
