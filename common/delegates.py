@@ -34,7 +34,7 @@ from utils.enumclasses import (
     WidgetStyle,
 )
 from utils.functionutils import getProductsCategories, createCompleter, getProductNames
-from utils.customvalidators import (
+from common.customvalidators import (
     ProductNameValidator,
     ProductStockValidator,
     ProductUnitPriceValidator,

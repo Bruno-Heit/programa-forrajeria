@@ -68,7 +68,7 @@ from utils.enumclasses import (
 from utils.model_classes import ProductsBalanceModel
 from utils.proxy_models import ProductsBalanceProxyModel
 from utils.productbalancedelegate import ProductsBalanceDelegate
-from utils.customvalidators import (
+from common.customvalidators import (
     SearchBarValidator,
     ProductReduceDebtValidator,
     CategoryDescValidator,

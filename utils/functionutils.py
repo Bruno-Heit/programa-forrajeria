@@ -24,7 +24,7 @@ from PySide6.QtCore import (
 
 from resources import rc_icons
 from database.dboperations import *
-from utils.customvalidators import *
+from common.customvalidators import *
 from utils.enumclasses import TableViewId, DateAndTimeFormat
 from re import Match, sub, match, findall
 from datetime import datetime

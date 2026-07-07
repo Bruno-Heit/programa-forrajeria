@@ -43,7 +43,7 @@ from utils.model_classes import InventoryTableModel, SalesTableModel, DebtsTable
 from common.delegates import InventoryDelegate, SalesDelegate, DebtsDelegate
 from utils.workerclasses import WorkerManager, WorkerSelect, WorkerDelete
 from database.dboperations import DatabaseRepository, ensureDateTimeISOformat
-from utils.customvalidators import SalePaidValidator, CategoryNameValidator
+from common.customvalidators import SalePaidValidator, CategoryNameValidator
 from utils.enumclasses import (
     ProgramValues,
     LoggingMessage,

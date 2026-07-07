@@ -32,7 +32,7 @@ from utils.enumclasses import (
     Regex,
     DateAndTimeFormat,
 )
-from utils.customvalidators import ProductBalanceValidator, SaleDetailsValidator
+from common.customvalidators import ProductBalanceValidator, SaleDetailsValidator
 from ui.customCalendars import CustomCalendar
 
 from re import compile, IGNORECASE, search, sub
