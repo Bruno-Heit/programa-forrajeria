@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QPushButton, QDialogButtonBox, QDialog
 from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
 
-from utils.dboperations import (DATABASE_MEMORY_SHARED)
+from database.dboperations import (DATABASE_MEMORY_SHARED)
 from main import MainWindow
 from utils.classes import (ProductDialog)
 from utils.enumclasses import (TableViewId)
