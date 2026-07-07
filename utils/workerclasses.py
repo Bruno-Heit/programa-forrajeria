@@ -6,7 +6,7 @@ from PySide6.QtCore import QObject, Signal, Slot, QThread
 
 from utils.functionutils import createConnection
 from utils.enumclasses import LoggingMessage, TableViewId, WorkerType, WorkerPriority
-from utils.dboperations import DatabaseRepository, DATABASE_DIR
+from database.dboperations import DatabaseRepository, DATABASE_DIR
 
 from sqlite3 import Connection, Error as sqlite3Error
 from typing import Any, Iterable

@@ -13,7 +13,7 @@ from PySide6.QtGui import (
     QDoubleValidator,
 )
 
-from utils.dboperations import (
+from database.dboperations import (
     makeReadQuery,
     DatabaseRepository,
     DATABASE_DIR,

@@ -30,7 +30,7 @@ from utils.enumclasses import (
     DebtsViewCols,
     DateAndTimeFormat,
 )
-from utils.dboperations import DatabaseRepository
+from database.dboperations import DatabaseRepository
 
 from datetime import datetime
 

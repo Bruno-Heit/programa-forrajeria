@@ -1,7 +1,7 @@
 from app import setup_app
 import logging
 from logging.handlers import TimedRotatingFileHandler
-from utils.dboperations import createTables, ensureDateTimeISOformat
+from database.dboperations import createTables, ensureDateTimeISOformat
 from utils.enumclasses import ProgramValues
 from PySide6.QtCore import QSettings
 

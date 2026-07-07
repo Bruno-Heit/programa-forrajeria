@@ -50,7 +50,7 @@ from resources import rc_icons
 
 from utils.functionutils import *
 from utils.workerclasses import *
-from utils.dboperations import *
+from database.dboperations import *
 from utils.enumclasses import (
     WidgetStyle,
     InventoryPriceType,
