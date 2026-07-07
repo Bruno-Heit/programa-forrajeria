@@ -40,7 +40,7 @@ from ui.ui_mainwindow import Ui_MainWindow
 from ui.customCalendars import CustomCalendar
 from utils.functionutils import *
 from utils.model_classes import InventoryTableModel, SalesTableModel, DebtsTableModel
-from utils.delegates import InventoryDelegate, SalesDelegate, DebtsDelegate
+from common.delegates import InventoryDelegate, SalesDelegate, DebtsDelegate
 from utils.workerclasses import WorkerManager, WorkerSelect, WorkerDelete
 from database.dboperations import DatabaseRepository, ensureDateTimeISOformat
 from utils.customvalidators import SalePaidValidator, CategoryNameValidator
