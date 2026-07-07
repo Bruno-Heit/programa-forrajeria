@@ -1,16 +1,23 @@
 from app import setup_app
 import logging
+import os
 from logging.handlers import TimedRotatingFileHandler
 from database.dboperations import createTables, ensureDateTimeISOformat
 from utils.enumclasses import ProgramValues
 from PySide6.QtCore import QSettings
 
 def setup_logging() -> None:
+    log_dir = "logs"
+    # asegura que la carpeta "logs" existe
+    os.makedirs("logs", exist_ok=True)
+    
+    log_path = os.path.join(log_dir, "program.log")
+    
     handler = TimedRotatingFileHandler(
-        filename="program.log",
+        filename=log_path,
         when="midnight", # rota a medianoche,
         interval=1, # cada 1 día
-        backupCount=14, # mantiene 30 días de logs
+        backupCount=14, # mantiene 14 días de logs
         encoding="utf-8"
     )
     
