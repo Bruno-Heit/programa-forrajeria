@@ -66,7 +66,7 @@ from common.eventfilters import (
     CategoryItemEventFilter,
     CategoryListEventFilter,
 )
-from utils.settings_manager import SettingsManager
+from config.settings_manager import SettingsManager
 # from utils.log_analyzer import LogAnalyzer
 
 from resources import rc_icons
