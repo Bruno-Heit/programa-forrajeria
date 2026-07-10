@@ -73,7 +73,7 @@ from common.customvalidators import (
     ProductReduceDebtValidator,
     CategoryDescValidator,
 )
-from utils.eventfilters import BackgroundEventFilter, CategoryDescTextEditEventFilter
+from common.eventfilters import BackgroundEventFilter, CategoryDescTextEditEventFilter
 from ui.customCalendars import CustomCalendar
 
 from phonenumbers import (

@@ -61,7 +61,7 @@ from common.enumclasses import (
     WorkerPriority,
 )
 from utils.proxy_models import InventoryProxyModel, SalesProxyModel, DebtsProxyModel
-from utils.eventfilters import (
+from common.eventfilters import (
     BackgroundEventFilter,
     CategoryItemEventFilter,
     CategoryListEventFilter,

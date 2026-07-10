@@ -54,6 +54,9 @@ def main():
     
     # TODO3 (?): cambiar la forma en que se muestran las ventas: permitir ver las 
     # TODO3 (?): ventas como páginas
+    
+    # TODO4: cambiar las imágenes de los filtros de eventos por svg (para que sean 
+    # TODO4: escalables)
     setup_logging()
 
     # configuraciones
