@@ -24,7 +24,7 @@ from PySide6.QtCore import (
     QObject,
 )
 
-from utils.enumclasses import (
+from common.enumclasses import (
     TableViewId,
     InvViewCols,
     SalesViewCols,

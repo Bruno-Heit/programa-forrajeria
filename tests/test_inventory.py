@@ -6,7 +6,7 @@ from PySide6.QtTest import QTest
 from database.dboperations import (DATABASE_MEMORY_SHARED)
 from main import MainWindow
 from utils.classes import (ProductDialog)
-from utils.enumclasses import (TableViewId)
+from common.enumclasses import (TableViewId)
 
 import pytest
 from pytestqt.qtbot import QtBot

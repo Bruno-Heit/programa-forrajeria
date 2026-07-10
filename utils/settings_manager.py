@@ -5,7 +5,7 @@ como configuraciones de la aplicación.
 
 from PySide6.QtCore import QSettings, QObject, QSize, QPoint, QByteArray
 
-from utils.enumclasses import ProgramValues as PV, SettingsDirs
+from common.enumclasses import ProgramValues as PV, SettingsDirs
 
 from typing import Any
 

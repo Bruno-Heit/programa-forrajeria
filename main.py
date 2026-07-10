@@ -3,7 +3,7 @@ import logging
 import os
 from logging.handlers import TimedRotatingFileHandler
 from database.dboperations import createTables, ensureDateTimeISOformat
-from utils.enumclasses import ProgramValues
+from common.enumclasses import ProgramValues
 from PySide6.QtCore import QSettings
 
 def setup_logging() -> None:

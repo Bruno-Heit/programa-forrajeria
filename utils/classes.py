@@ -51,7 +51,7 @@ from resources import rc_icons
 from common.functionutils import *
 from utils.workerclasses import *
 from database.dboperations import *
-from utils.enumclasses import (
+from common.enumclasses import (
     WidgetStyle,
     InventoryPriceType,
     ProductFields,

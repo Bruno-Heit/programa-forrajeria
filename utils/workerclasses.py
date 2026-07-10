@@ -5,7 +5,7 @@ En este archivo están todas las clases de WORKER THREADS
 from PySide6.QtCore import QObject, Signal, Slot, QThread
 
 from common.functionutils import createConnection
-from utils.enumclasses import LoggingMessage, TableViewId, WorkerType, WorkerPriority
+from common.enumclasses import LoggingMessage, TableViewId, WorkerType, WorkerPriority
 from database.dboperations import DatabaseRepository, DATABASE_DIR
 
 from sqlite3 import Connection, Error as sqlite3Error

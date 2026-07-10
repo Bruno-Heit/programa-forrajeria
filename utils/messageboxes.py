@@ -8,7 +8,7 @@ diversas acciones.
 from PySide6.QtWidgets import QMessageBox, QWidget, QDialog
 from PySide6.QtCore import Qt, Slot
 
-from utils.enumclasses import TableViewId
+from common.enumclasses import TableViewId
 from ui.ui_warnAccountHasBalanceDialog import Ui_AccountHasBalDialog
 
 

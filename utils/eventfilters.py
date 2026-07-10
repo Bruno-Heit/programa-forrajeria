@@ -16,7 +16,7 @@ from PySide6.QtGui import QPainter, QPixmap, QAction
 
 from resources import rc_icons
 
-from utils.enumclasses import TablesAndListsObjName, CommonCategories
+from common.enumclasses import TablesAndListsObjName, CommonCategories
 
 
 class BackgroundEventFilter(QObject):

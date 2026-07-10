@@ -20,7 +20,7 @@ from re import Match, compile, fullmatch, search, IGNORECASE
 from platformdirs import user_data_dir
 import os
 
-from utils.enumclasses import Regex, DateAndTimeFormat, ProgramValues as PV
+from common.enumclasses import Regex, DateAndTimeFormat, ProgramValues as PV
 
 logger = logging.getLogger(__name__)
 

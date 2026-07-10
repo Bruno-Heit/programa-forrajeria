@@ -19,7 +19,7 @@ from database.dboperations import (
     DATABASE_DIR,
     DATABASE_MEMORY_SHARED,
 )
-from utils.enumclasses import Regex, CommonCategories
+from common.enumclasses import Regex, CommonCategories
 
 from re import fullmatch, compile, Pattern, IGNORECASE
 import logging

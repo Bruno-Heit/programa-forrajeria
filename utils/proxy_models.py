@@ -12,7 +12,7 @@ from utils.model_classes import (
     DebtsTableModel,
     ProductsBalanceModel,
 )
-from utils.enumclasses import (
+from common.enumclasses import (
     InvModelCols,
     SalesModelCols,
     DebtsModelCols,

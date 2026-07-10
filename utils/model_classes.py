@@ -16,7 +16,7 @@ from PySide6.QtCore import (
 )
 from PySide6.QtGui import QBrush, QColor
 
-from utils.enumclasses import (
+from common.enumclasses import (
     TableBgColors,
     TableFontColor,
     InvModelCols,

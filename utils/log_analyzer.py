@@ -3,7 +3,7 @@ from pathlib import Path
 import logging
 import pandas as pd
 from re import (Pattern, match, Match, fullmatch, compile, sub, IGNORECASE)
-from utils.enumclasses import Regex, LogAnalyzerRegex as laregex
+from common.enumclasses import Regex, LogAnalyzerRegex as laregex
 
 logger = logging.getLogger(__name__)
 

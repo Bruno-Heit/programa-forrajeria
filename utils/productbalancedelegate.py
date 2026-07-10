@@ -26,7 +26,7 @@ from PySide6.QtCore import (
     QDateTime,
 )
 
-from utils.enumclasses import (
+from common.enumclasses import (
     LabelFeedbackStyle,
     DebtsViewCols,
     Regex,
