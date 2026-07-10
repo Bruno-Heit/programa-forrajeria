@@ -48,7 +48,7 @@ from ui.ui_categoriesDescEditDialog import Ui_CategoryDescEditDialog
 
 from resources import rc_icons
 
-from utils.functionutils import *
+from common.functionutils import *
 from utils.workerclasses import *
 from database.dboperations import *
 from utils.enumclasses import (

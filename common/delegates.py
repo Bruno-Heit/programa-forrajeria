@@ -33,7 +33,7 @@ from utils.enumclasses import (
     Regex,
     WidgetStyle,
 )
-from utils.functionutils import getProductsCategories, createCompleter, getProductNames
+from common.functionutils import getProductsCategories, createCompleter, getProductNames
 from common.customvalidators import (
     ProductNameValidator,
     ProductStockValidator,

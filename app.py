@@ -38,7 +38,7 @@ from utils.classes import (
 from utils.messageboxes import AskBeforeDeletion, WarnAccountHasBalance
 from ui.ui_mainwindow import Ui_MainWindow
 from ui.customCalendars import CustomCalendar
-from utils.functionutils import *
+from common.functionutils import *
 from utils.model_classes import InventoryTableModel, SalesTableModel, DebtsTableModel
 from common.delegates import InventoryDelegate, SalesDelegate, DebtsDelegate
 from utils.workerclasses import WorkerManager, WorkerSelect, WorkerDelete
