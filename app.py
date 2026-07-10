@@ -35,7 +35,7 @@ from utils.classes import (
     SaleFields,
     CategoryDescDialog,
 )
-from utils.messageboxes import AskBeforeDeletion, WarnAccountHasBalance
+from common.messageboxes import AskBeforeDeletion, WarnAccountHasBalance
 from ui.ui_mainwindow import Ui_MainWindow
 from ui.customCalendars import CustomCalendar
 from common.functionutils import *
