@@ -53,11 +53,11 @@
         <file alias="trash-register.svg">../assets/icons/trashRegister.svg</file>
 
         <!-- #### (MainWindow) #### imágenes de fondo para las tablas cuando están vacías -->
-        <file alias="products-table-empty-bg.png">../assets/icons/products_empty_table_icon.png</file>
-        <file alias="sales-table-empty-bg.png">../assets/icons/sales_empty_table_icon.png</file>
-        <file alias="debts-table-empty-bg.png">../assets/icons/debts_empty_table_icon.png</file>
-        <file alias="sales-empty-input-list-bg.png">../assets/icons/sales_empty_input_list_icon.png</file>
-        <file alias="debts-empty-prods-balance-table-bg.png">../assets/icons/debts_empty_prods_balance_table_icon.png</file>
+        <file alias="products-table-empty-bg.svg">../assets/icons/products_empty_table_icon.svg</file>
+        <file alias="sales-table-empty-bg.svg">../assets/icons/sales_empty_table_icon.svg</file>
+        <file alias="debts-table-empty-bg.svg">../assets/icons/debts_empty_table_icon.svg</file>
+        <file alias="sales-empty-input-list-bg.svg">../assets/icons/sales_empty_input_list_icon.svg</file>
+        <file alias="debts-empty-prods-balance-table-bg.svg">../assets/icons/debts_empty_prods_balance_table_icon.svg</file>
 
 
     </qresource>

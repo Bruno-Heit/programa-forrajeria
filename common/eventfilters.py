@@ -11,12 +11,16 @@ from PySide6.QtWidgets import (
     QMenu,
     QTextEdit,
 )
-from PySide6.QtCore import QObject, QEvent, Qt, QSize, Signal, Slot
-from PySide6.QtGui import QPainter, QPixmap, QAction
+from PySide6.QtSvg import QSvgRenderer
+from PySide6.QtCore import QObject, QEvent, Qt, QSize, Signal, Slot, QRect, QRectF
+from PySide6.QtGui import QPainter, QPixmap, QAction, QFont, QFontMetricsF
 
 from resources import rc_icons
+import logging
 
 from common.enumclasses import TablesAndListsObjName, CommonCategories
+
+logger = logging.getLogger(__name__)
 
 
 class BackgroundEventFilter(QObject):
@@ -34,8 +38,16 @@ class BackgroundEventFilter(QObject):
     - tv_debts_data (QTableView)
     - tv_balance_products (QTableView)
     """
+    MIN_ICON_SIZE:int = 30
+    MAX_ICON_SIZE:int = 160
+    ICON_MAX_MARGIN_FACTOR:float = 0.7 # factor de márgen máximo usado para calcular 
+        # el tamaño del ícono (máximo puede ocupar un 70% del viewport). Ésto es 
+        # necesario porque el margin_factor es dinámico
+    SPACING_ICON_TITLE:int = 16 # espaciado entre el ícono y el título
+    SPACING_TITLE_SUBTITLE:int = 6 # espaciado entre el título y el subtítulo
 
-    def __init__(self, widget: QTableView | QListWidget):
+    def __init__(self, svg_path:str, widget: QTableView | QListWidget,
+                 title_text:str, subtitle_text:str):
         """
         Dependiendo del widget muestra un fondo determinado dependiendo de si
         el widget está mostrando datos o no.
@@ -44,64 +56,290 @@ class BackgroundEventFilter(QObject):
 
         Parámetros
         ----------
+        svg_path : str
+            path del svg a colocar de background
         widget : QTableView | QListWidget
             la vista / widget al que pintarle el background
+        title_text : str
+            texto a mostrar como título debajo de la imagen
+        subtitle_text : str
+            texto a mostrar como subtítulo debajo del título
         """
         super().__init__()
+        
         self.widget: QTableView = widget
-
-        self.pixmap: QPixmap
-        self.__max_pixmap_size: QSize
-
-        match widget.objectName():
-            case TablesAndListsObjName.INVEN_TABLE_VIEW.value:
-                self.pixmap = QPixmap(":icons/products-table-empty-bg.png")
-
-            case TablesAndListsObjName.SALES_INPUT_LIST.value:
-                self.pixmap = QPixmap(":icons/sales-empty-input-list-bg.png")
-
-            case TablesAndListsObjName.SALES_TABLE_VIEW.value:
-                self.pixmap = QPixmap(":icons/sales-table-empty-bg.png")
-
-            case TablesAndListsObjName.DEBTS_TABLE_VIEW.value:
-                self.pixmap = QPixmap(":icons/debts-table-empty-bg.png")
-
-            case TablesAndListsObjName.BAL_PRODS_TABLE_VIEW.value:
-                self.pixmap = QPixmap(":icons/debts-empty-prods-balance-table-bg.png")
-
-        self.__max_pixmap_size = QPixmap.size(self.pixmap)
+        self._svg_renderer:QSvgRenderer = QSvgRenderer(svg_path)
+        self._title_text:str = title_text
+        self._subtitle_text:str = subtitle_text
+        
+        if not self._svg_renderer.isValid():
+            logger.warning(f"No se pudo cargar el SVG en {svg_path}")
         return None
 
     def eventFilter(self, watched: QTableView | QListWidget, event: QEvent):
-        painter: QPainter
-        target_size: QSize
-
+        painter:QPainter
+        layout:dict[str, QRectF | QFont]
+        
         if event.type() == QEvent.Type.Paint:
-            # Deja que se pinte la tabla normalmente
-            result = super().eventFilter(watched, event)
-
-            # Si el modelo está vacío, dibuja la imagen de fondo
-            if self.widget.model() is None or self.widget.model().rowCount() == 0:
-                painter = QPainter(watched)
-
-                # calcula el tamaño objetivo
-                target_size = QSize(
-                    min(watched.size().width(), self.__max_pixmap_size.width()),
-                    min(watched.size().height(), self.__max_pixmap_size.height()),
-                )
-
-                # escala la imagen
-                scaled = self.pixmap.scaled(
-                    target_size,
-                    Qt.AspectRatioMode.KeepAspectRatio,
-                    Qt.TransformationMode.SmoothTransformation,
-                )
-                x = (watched.width() - scaled.width()) // 2
-                y = (watched.height() - scaled.height()) // 2
-
-                painter.drawPixmap(x, y, scaled)
-            return result
+            if watched is self.widget.viewport() and event.type() == QEvent.Type.Paint:
+                model = self.widget.model()
+                
+                # si el widget está vacío...
+                if model is None or model.rowCount() == 0:
+                    painter = QPainter(self.widget.viewport())
+                    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+                    painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
+                    
+                    layout = self._calculate_layout(painter)
+                    
+                    # dibuja la imagen
+                    self._svg_renderer.render(painter, layout["icon_rect"])
+                    
+                    # escribe el texto
+                    self._draw_text(painter, layout)
+                    
+                    painter.end()
+        
         return super().eventFilter(watched, event)
+    
+    def _calculate_layout(self, painter:QPainter) -> dict[str, QRectF | QFont]:
+        """
+        Calcula todos los layouts del ícono, título y subtítulo dinámicamente 
+        a partir del espacio disponible, además (debido a que se requiere 
+        trabajar con tipografías para determinar el área que ocupará el texto) 
+        también devuelve las tipografías usadas.
+        
+        Parámetros
+        ----------
+        painter : QPainter
+            el painter usado para determinar los layouts
+        
+        retorna
+        -------
+        dict[str, QRectF | QFont]
+            diccionario{*"icon_rect"*: área del ícono, *"title_rect"*: área 
+            del título, *"subtitle_rect"*: área del subtítulo, 
+            *"title_font"*: font del título,
+            *"subtitle_font"*: font del subtítulo}
+        """
+        viewport_rect:QRect = self.widget.viewport().rect()
+        text_block_data:dict[str, float] # dict("altura título": ...,
+                                           # "font título": ...,
+                                           # "altura subtítulo": ...,
+                                           # "font subtítulo": ...,
+                                           # "altura texto": ...)
+        available_for_icon:float
+        icon_size:dict[str, float] # tamaño real del ícono: dict("ancho": ...,
+                                                               # "altura": ...)
+        total_block_height:float
+        block_top:float
+        icon_rect:QRectF
+        title_top:float
+        title_rect:QRectF
+        subtitle_top:float
+        subtitle_rect:QRectF
+        
+        # 1: mide la altura del texto (tamaño fijo, no depende del viewport)
+        text_block_data = self._get_text_block_data(
+            painter=painter,
+            viewport_rect=viewport_rect
+        )
+        
+        # 2: calcular espacio disponible para el ícono
+        available_for_icon = self._calculate_icon_available_size(
+            viewport_rect=viewport_rect,
+            text_height=text_block_data["text_height"]
+        )
+        
+        # 3: determinar tamaño del ícono (el menor entre lo "ideal" y lo disponible)
+        icon_size = self._get_icon_size(
+            viewport_rect=viewport_rect,
+            h_available_for_icon=available_for_icon
+        )
+        
+        # 4: posicionar todo el bloque (ícono + texto) centrado verticalmente
+        total_block_height = (icon_size["height"] + self.SPACING_ICON_TITLE 
+                              + text_block_data["text_height"])
+        block_top = viewport_rect.center().y() - total_block_height / 2
+        
+        icon_rect = QRectF(
+            viewport_rect.center().x() - icon_size["width"] / 2,
+            block_top,
+            icon_size["width"],
+            icon_size["height"]
+        )
+        
+        title_top = icon_rect.bottom() + self.SPACING_ICON_TITLE
+        title_rect = QRectF(
+            viewport_rect.left(),
+            title_top,
+            viewport_rect.width(),
+            text_block_data["title_height"]
+        )
+        
+        subtitle_top = title_rect.bottom() + self.SPACING_TITLE_SUBTITLE
+        subtitle_rect = QRectF(
+            viewport_rect.left(),
+            subtitle_top,
+            viewport_rect.width(),
+            text_block_data["subtitle_height"]
+        )
+        return {
+            "icon_rect": icon_rect,
+            "title_rect": title_rect,
+            "subtitle_rect": subtitle_rect,
+            "title_font": text_block_data["title_font"],
+            "subtitle_font": text_block_data["subtitle_font"]
+        }
+
+    def _get_text_block_data(self, painter:QPainter, viewport_rect:QRect) -> dict[str, float]:
+        """
+        Calcula la altura fija del bloque de texto (título y subtítulo) y 
+        determina la tipografía del título y subtítulo.
+        
+        Parámetros
+        ----------
+        painter : QPainter
+            el painter usado para dibujar el texto
+        viewport_rect : QRect
+            el área del viewport
+        
+        Retorna
+        -------
+        dict[str, float]
+            dict{*"title_height"*: altura de título, *"title_font"*: font 
+            del título, *"subtitle_height"*: altura de subtítulo, 
+            *"subtitle_font"*: font del subtítulo, *"text_height"*: altura de texto}
+        """
+        # título
+        title_font:QFont = painter.font()
+        title_font.setPointSize(17)
+        title_font.setBold(True)
+        
+        title_metrics:QFontMetricsF = QFontMetricsF(title_font)
+        title_height:float = title_metrics.boundingRect(
+            QRect(0, 0, viewport_rect.width(), 0),
+            Qt.AlignmentFlag.AlignHCenter | Qt.TextFlag.TextWordWrap,
+            self._title_text
+        ).height()
+        
+        # subtítulo
+        subtitle_font:QFont = painter.font()
+        subtitle_font.setPointSize(15)
+        subtitle_font.setBold(False)
+        
+        subtitle_metrics:QFontMetricsF = QFontMetricsF(subtitle_font)
+        subtitle_height:float = subtitle_metrics.boundingRect(
+            QRect(0, 0, viewport_rect.width(), 0),
+            Qt.AlignmentFlag.AlignHCenter | Qt.TextFlag.TextWordWrap,
+            self._subtitle_text
+        ).height()
+         
+        return {
+            "title_height": title_height,
+            "title_font": title_font,
+            "subtitle_height": subtitle_height,
+            "subtitle_font": subtitle_font,
+            "text_height": title_height + self.SPACING_TITLE_SUBTITLE + subtitle_height}
+    
+    def _calculate_icon_available_size(self, viewport_rect:QRect, text_height:float) -> float:
+        
+        """
+        Calcula la altura disponible para el ícono.
+        
+        Parámetros
+        ----------
+        viewport_rect : QRect
+            el área del viewport
+        text_height : float
+            el área ocupada por el bloque de texto
+        
+        Retorna
+        -------
+        float
+            el tamaño disponible para el ícono
+        """
+        available_for_icon:float = (
+            viewport_rect.height()
+            - text_height
+            - self.SPACING_ICON_TITLE)
+        
+        return max(available_for_icon, self.MIN_ICON_SIZE)
+
+    def _get_icon_size(self, viewport_rect:QRect, h_available_for_icon:float) -> dict[str, float]:
+        """
+        Determina el tamaño real del ícono a partir del espacio disponible.
+        
+        Parámetros
+        ----------
+        viewport_rect : QRect
+            el área del viewport
+        h_available_for_icon : float
+            la altura disponible para el ícono
+        
+        Retorna
+        -------
+        dict[str, float]
+            dict("width": ..., "height": ...) con el ancho y la altura del ícono
+
+        """
+        default_size:QSize
+        aspect:float
+        ideal_icon_h:float
+        icon_w:float
+        icon_h:float
+        max_icon_w:float
+        
+        default_size = self._svg_renderer.defaultSize()
+        aspect = (default_size.width() / default_size.height()
+                  if not default_size.isEmpty() else 1.0)
+        
+        ideal_icon_h = viewport_rect.height() * self.ICON_MAX_MARGIN_FACTOR
+        
+        # si el ideal no entra en el espacio disponible se reduce
+        icon_h = min(ideal_icon_h, h_available_for_icon)
+        icon_h = min(icon_h, self.MAX_ICON_SIZE)
+        icon_h = max(icon_h, self.MIN_ICON_SIZE) # pero nunca por debajo del mínimo
+        icon_w = icon_h * aspect
+        
+        # respetamos el ancho del viewport
+        max_icon_w = viewport_rect.width() * self.ICON_MAX_MARGIN_FACTOR
+        if icon_w > max_icon_w:
+            icon_w = max_icon_w
+            icon_h = icon_w / aspect
+        return {"width": icon_w, "height": icon_h}
+
+    def _draw_text(self, painter:QPainter, layout:dict[str, QRectF | float]) -> None:
+        """
+        Dibuja el texto debajo de la imagen.
+        **NOTA: Éste método tiene en consideración la tipografía usada en 
+        el programa para dibujar el texto.**
+        
+        Parámetros
+        ----------
+        painter : QPainter
+            el painter usado para dibujar el texto
+        layout : dict[str, QRectF | QFont]
+            las zonas donde dibujar el texto y sus tipografías
+        """
+        # título
+        painter.setPen(Qt.GlobalColor.gray)
+        
+        painter.setFont(layout["title_font"])
+        painter.drawText(
+            layout["title_rect"],
+            Qt.AlignmentFlag.AlignHCenter,
+            self._title_text
+        )
+        
+        # subtítulo
+        painter.setFont(layout["subtitle_font"])
+        painter.drawText(
+            layout["subtitle_rect"],
+            Qt.AlignmentFlag.AlignHCenter | Qt.TextFlag.TextWordWrap,
+            self._subtitle_text
+        )
+        return None
 
 
 class CategoryItemEventFilter(QObject):
