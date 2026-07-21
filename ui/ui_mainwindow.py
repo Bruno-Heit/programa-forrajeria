@@ -17,19 +17,19 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
 from PySide6.QtWidgets import (QAbstractItemView, QAbstractScrollArea, QAbstractSpinBox, QApplication,
-    QButtonGroup, QCheckBox, QComboBox, QDateEdit,
-    QDateTimeEdit, QFrame, QGridLayout, QHBoxLayout,
-    QHeaderView, QLabel, QLineEdit, QListView,
-    QListWidget, QListWidgetItem, QMainWindow, QProgressBar,
-    QPushButton, QSizePolicy, QSpacerItem, QTabWidget,
-    QTableView, QToolBox, QVBoxLayout, QWidget)
+    QComboBox, QDateEdit, QDateTimeEdit, QFrame,
+    QGridLayout, QHBoxLayout, QHeaderView, QLabel,
+    QLineEdit, QListView, QListWidget, QListWidgetItem,
+    QMainWindow, QProgressBar, QPushButton, QSizePolicy,
+    QSpacerItem, QTabWidget, QTableView, QToolBox,
+    QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1160, 605)
-        MainWindow.setMinimumSize(QSize(750, 500))
+        MainWindow.resize(840, 605)
+        MainWindow.setMinimumSize(QSize(840, 500))
 #if QT_CONFIG(tooltip)
         MainWindow.setToolTip(u"")
 #endif // QT_CONFIG(tooltip)
@@ -606,395 +606,6 @@ class Ui_MainWindow(object):
         self.verticalLayout.setSpacing(4)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(10, 10, 0, 5)
-        self.main_inventory_frame = QFrame(self.tab1_inventory)
-        self.main_inventory_frame.setObjectName(u"main_inventory_frame")
-        self.main_inventory_frame.setFrameShape(QFrame.Shape.NoFrame)
-        self.main_inventory_frame.setFrameShadow(QFrame.Shadow.Raised)
-        self.main_inventory_frame_Hlayout = QHBoxLayout(self.main_inventory_frame)
-        self.main_inventory_frame_Hlayout.setSpacing(0)
-        self.main_inventory_frame_Hlayout.setObjectName(u"main_inventory_frame_Hlayout")
-        self.main_inventory_frame_Hlayout.setContentsMargins(0, 0, 0, 0)
-        self.inventory_display = QFrame(self.main_inventory_frame)
-        self.inventory_display.setObjectName(u"inventory_display")
-        self.inventory_display.setFrameShape(QFrame.Shape.StyledPanel)
-        self.inventory_display.setFrameShadow(QFrame.Shadow.Raised)
-        self.inventory_display_Vlayout = QVBoxLayout(self.inventory_display)
-        self.inventory_display_Vlayout.setSpacing(6)
-        self.inventory_display_Vlayout.setObjectName(u"inventory_display_Vlayout")
-        self.inventory_display_Vlayout.setContentsMargins(0, 6, 10, 0)
-        self.inventory_header = QFrame(self.inventory_display)
-        self.inventory_header.setObjectName(u"inventory_header")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Preferred)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.inventory_header.sizePolicy().hasHeightForWidth())
-        self.inventory_header.setSizePolicy(sizePolicy3)
-        self.inventory_header.setMaximumSize(QSize(16777215, 16777215))
-        self.inventory_header.setFrameShape(QFrame.Shape.NoFrame)
-        self.inventory_header.setFrameShadow(QFrame.Shadow.Plain)
-        self.inventory_header_Hlayout = QHBoxLayout(self.inventory_header)
-        self.inventory_header_Hlayout.setSpacing(7)
-        self.inventory_header_Hlayout.setObjectName(u"inventory_header_Hlayout")
-        self.inventory_header_Hlayout.setContentsMargins(10, 5, 10, 20)
-        self.inventory_searchBar = QLineEdit(self.inventory_header)
-        self.inventory_searchBar.setObjectName(u"inventory_searchBar")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Fixed)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.inventory_searchBar.sizePolicy().hasHeightForWidth())
-        self.inventory_searchBar.setSizePolicy(sizePolicy4)
-        self.inventory_searchBar.setMinimumSize(QSize(150, 25))
-        self.inventory_searchBar.setMaximumSize(QSize(1000, 25))
-        self.inventory_searchBar.setBaseSize(QSize(0, 0))
-        self.inventory_searchBar.setAcceptDrops(False)
-#if QT_CONFIG(tooltip)
-        self.inventory_searchBar.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Buscar un producto en la tabla seg\u00fan su nombre, caracter\u00edsticas, palabras claves, etc.</span></p></body></html>")
-#endif // QT_CONFIG(tooltip)
-        self.inventory_searchBar.setText(u"")
-        self.inventory_searchBar.setMaxLength(255)
-        self.inventory_searchBar.setFrame(False)
-        self.inventory_searchBar.setEchoMode(QLineEdit.EchoMode.Normal)
-        self.inventory_searchBar.setAlignment(Qt.AlignmentFlag.AlignLeading|Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
-        self.inventory_searchBar.setPlaceholderText(u"Buscar productos por nombre, precio, stock...")
-        self.inventory_searchBar.setCursorMoveStyle(Qt.CursorMoveStyle.LogicalMoveStyle)
-        self.inventory_searchBar.setClearButtonEnabled(True)
-
-        self.inventory_header_Hlayout.addWidget(self.inventory_searchBar)
-
-        self.cb_inventory_colsFilter = QComboBox(self.inventory_header)
-        self.cb_inventory_colsFilter.addItem(u"Todas")
-        self.cb_inventory_colsFilter.addItem(u"Categor\u00eda")
-        self.cb_inventory_colsFilter.addItem(u"Nombre de producto")
-        self.cb_inventory_colsFilter.addItem(u"Descripci\u00f3n")
-        self.cb_inventory_colsFilter.addItem(u"Stock")
-        self.cb_inventory_colsFilter.addItem(u"Precio normal")
-        self.cb_inventory_colsFilter.addItem(u"Precio comercial")
-        self.cb_inventory_colsFilter.setObjectName(u"cb_inventory_colsFilter")
-        sizePolicy4.setHeightForWidth(self.cb_inventory_colsFilter.sizePolicy().hasHeightForWidth())
-        self.cb_inventory_colsFilter.setSizePolicy(sizePolicy4)
-        self.cb_inventory_colsFilter.setMinimumSize(QSize(60, 26))
-        self.cb_inventory_colsFilter.setMaximumSize(QSize(350, 26))
-#if QT_CONFIG(tooltip)
-        self.cb_inventory_colsFilter.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Permite seleccionar qu\u00e9 columna filtrar.</span></p></body></html>")
-#endif // QT_CONFIG(tooltip)
-        self.cb_inventory_colsFilter.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
-        self.cb_inventory_colsFilter.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToContents)
-        self.cb_inventory_colsFilter.setIconSize(QSize(24, 24))
-        self.cb_inventory_colsFilter.setFrame(False)
-
-        self.inventory_header_Hlayout.addWidget(self.cb_inventory_colsFilter, 0, Qt.AlignmentFlag.AlignLeft)
-
-        self.inventory_header_Hlayout.setStretch(0, 3)
-        self.inventory_header_Hlayout.setStretch(1, 1)
-
-        self.inventory_display_Vlayout.addWidget(self.inventory_header)
-
-        self.inventory_progressbar = QProgressBar(self.inventory_display)
-        self.inventory_progressbar.setObjectName(u"inventory_progressbar")
-        self.inventory_progressbar.setMinimumSize(QSize(0, 12))
-        self.inventory_progressbar.setMaximumSize(QSize(16777215, 12))
-        self.inventory_progressbar.setValue(24)
-        self.inventory_progressbar.setTextVisible(False)
-        self.inventory_progressbar.setFormat(u"%p%")
-
-        self.inventory_display_Vlayout.addWidget(self.inventory_progressbar)
-
-        self.tv_inventory_data = QTableView(self.inventory_display)
-        self.tv_inventory_data.setObjectName(u"tv_inventory_data")
-#if QT_CONFIG(tooltip)
-        self.tv_inventory_data.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Para </span><span style=\" font-size:12pt; text-decoration: underline;\">modificar</span><span style=\" font-size:12pt;\"> las </span><span style=\" font-size:12pt; text-decoration: underline;\">caracter\u00edsticas</span><span style=\" font-size:12pt;\"> de un producto, simplemente hacer </span><span style=\" font-size:12pt; font-style:italic;\">doble click</span><span style=\" font-size:12pt;\"> sobre la celda que se quiere modificar e ingresar el nuevo valor.</span></p></body></html>")
-#endif // QT_CONFIG(tooltip)
-        self.tv_inventory_data.setFrameShape(QFrame.Shape.NoFrame)
-        self.tv_inventory_data.setFrameShadow(QFrame.Shadow.Plain)
-        self.tv_inventory_data.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.tv_inventory_data.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
-        self.tv_inventory_data.setEditTriggers(QAbstractItemView.EditTrigger.DoubleClicked)
-        self.tv_inventory_data.setProperty("showDropIndicator", False)
-        self.tv_inventory_data.setDragDropOverwriteMode(False)
-        self.tv_inventory_data.setAlternatingRowColors(True)
-        self.tv_inventory_data.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
-        self.tv_inventory_data.setTextElideMode(Qt.TextElideMode.ElideMiddle)
-        self.tv_inventory_data.setGridStyle(Qt.PenStyle.SolidLine)
-        self.tv_inventory_data.setSortingEnabled(False)
-        self.tv_inventory_data.setWordWrap(True)
-        self.tv_inventory_data.setCornerButtonEnabled(False)
-        self.tv_inventory_data.horizontalHeader().setMinimumSectionSize(50)
-        self.tv_inventory_data.verticalHeader().setVisible(False)
-
-        self.inventory_display_Vlayout.addWidget(self.tv_inventory_data)
-
-        self.label_feedbackInventory = QLabel(self.inventory_display)
-        self.label_feedbackInventory.setObjectName(u"label_feedbackInventory")
-        self.label_feedbackInventory.setText(u"")
-        self.label_feedbackInventory.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.label_feedbackInventory.setWordWrap(True)
-        self.label_feedbackInventory.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
-
-        self.inventory_display_Vlayout.addWidget(self.label_feedbackInventory)
-
-        self.tab1_buttons_2 = QFrame(self.inventory_display)
-        self.tab1_buttons_2.setObjectName(u"tab1_buttons_2")
-        self.tab1_buttons_2.setFrameShape(QFrame.Shape.StyledPanel)
-        self.tab1_buttons_2.setFrameShadow(QFrame.Shadow.Raised)
-        self.tab1_buttons_Hlayout = QHBoxLayout(self.tab1_buttons_2)
-        self.tab1_buttons_Hlayout.setObjectName(u"tab1_buttons_Hlayout")
-        self.tab1_buttons_Hlayout.setContentsMargins(0, 0, 0, 0)
-        self.btn_add_product_inventory = QPushButton(self.tab1_buttons_2)
-        self.btn_add_product_inventory.setObjectName(u"btn_add_product_inventory")
-        self.btn_add_product_inventory.setMinimumSize(QSize(180, 25))
-        self.btn_add_product_inventory.setMaximumSize(QSize(250, 25))
-#if QT_CONFIG(tooltip)
-        self.btn_add_product_inventory.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">A\u00f1adir un producto nuevo a la lista de productos actual (</span><span style=\" font-size:12pt; font-style:italic;\">+</span><span style=\" font-size:12pt;\">). </span></p></body></html>")
-#endif // QT_CONFIG(tooltip)
-        self.btn_add_product_inventory.setText(u"Nuevo producto")
-        self.btn_add_product_inventory.setIconSize(QSize(24, 24))
-#if QT_CONFIG(shortcut)
-        self.btn_add_product_inventory.setShortcut(u"+")
-#endif // QT_CONFIG(shortcut)
-        self.btn_add_product_inventory.setCheckable(True)
-
-        self.tab1_buttons_Hlayout.addWidget(self.btn_add_product_inventory)
-
-        self.btn_delete_product_inventory = QPushButton(self.tab1_buttons_2)
-        self.btn_delete_product_inventory.setObjectName(u"btn_delete_product_inventory")
-        self.btn_delete_product_inventory.setEnabled(False)
-        self.btn_delete_product_inventory.setMinimumSize(QSize(180, 23))
-        self.btn_delete_product_inventory.setMaximumSize(QSize(250, 23))
-#if QT_CONFIG(tooltip)
-        self.btn_delete_product_inventory.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">Borra el producto actualmente seleccionado (</span><span style=\" font-size:12pt; font-style:italic;\">supr</span><span style=\" font-size:12pt;\">).</span></p><p><span style=\" font-size:12pt;\">\u00c9sta acci\u00f3n elimina la </span><span style=\" font-size:12pt; text-decoration: underline;\">referencia al producto</span><span style=\" font-size:12pt;\">, no el producto como tal.</span></p><p><span style=\" font-size:12pt; font-weight:600; text-decoration: underline;\">IMPORTANTE</span><span style=\" font-size:12pt; font-weight:600;\">: esta acci\u00f3n no se puede deshacer, debe estar seguro de querer eliminar un producto.</span></p></body></html>")
-#endif // QT_CONFIG(tooltip)
-        self.btn_delete_product_inventory.setStyleSheet(u"")
-        self.btn_delete_product_inventory.setText(u"Eliminar producto")
-        self.btn_delete_product_inventory.setIconSize(QSize(24, 24))
-#if QT_CONFIG(shortcut)
-        self.btn_delete_product_inventory.setShortcut(u"Del")
-#endif // QT_CONFIG(shortcut)
-        self.btn_delete_product_inventory.setCheckable(True)
-
-        self.tab1_buttons_Hlayout.addWidget(self.btn_delete_product_inventory)
-
-
-        self.inventory_display_Vlayout.addWidget(self.tab1_buttons_2)
-
-
-        self.main_inventory_frame_Hlayout.addWidget(self.inventory_display)
-
-        self.inventory_sideBar = QFrame(self.main_inventory_frame)
-        self.inventory_sideBar.setObjectName(u"inventory_sideBar")
-        self.inventory_sideBar.setEnabled(True)
-        sizePolicy.setHeightForWidth(self.inventory_sideBar.sizePolicy().hasHeightForWidth())
-        self.inventory_sideBar.setSizePolicy(sizePolicy)
-        self.inventory_sideBar.setMinimumSize(QSize(40, 0))
-        self.inventory_sideBar.setMaximumSize(QSize(40, 16777215))
-#if QT_CONFIG(tooltip)
-        self.inventory_sideBar.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt;\">\u00c9ste men\u00fa lateral permite cambiar precios usando porcentajes, para eso se sigue el siguiente procedimiento (es necesario mantener el men\u00fa lateral abierta durante el proceso):</span></p><p><span style=\" font-size:12pt; font-weight:700;\">1)</span><span style=\" font-size:12pt;\"> Seleccionar el </span><span style=\" font-size:12pt; font-weight:700;\">tipo de precio</span><span style=\" font-size:12pt;\"> que se desea modificar dentro del men\u00fa</span></p><p><span style=\" font-size:12pt; font-weight:700;\">2)</span><span style=\" font-size:12pt;\"> Seleccionar los </span><span style=\" font-size:12pt; font-weight:700;\">productos</span><span style=\" font-size:12pt;\"> a modificar en la tabla</span></p><p><span style=\" font-size:12pt; font-weight:700;\">3)</span><span style=\" font-size:12pt;\"> Escribir el </span><span style=\" font-size:12pt; font-weight:700;\">porcentaje de cambio</span><span style=\" font-size:12pt;\"> en la barra in"
-                        "ferior del men\u00fa y presionar </span><span style=\" font-size:12pt; font-style:italic;\">Enter</span></p><p><br/></p><p><span style=\" font-size:12pt;\">De esa forma se cambia el precio elegido de todos los </span><span style=\" font-size:12pt; font-weight:700;\">productos seleccionados </span><span style=\" font-size:12pt;\">y tambi\u00e9n se actualizan las </span><span style=\" font-size:12pt; font-weight:700;\">cuentas corrientes</span><span style=\" font-size:12pt;\"> con los nuevos valores.</span></p></body></html>")
-#endif // QT_CONFIG(tooltip)
-        self.inventory_sideBar.setStyleSheet(u"* {\n"
-"	background-color: #0d1b2a;\n"
-"	color: #e0e1dd;\n"
-"}\n"
-"\n"
-"\n"
-"QToolTip {\n"
-"	background-color: #fff;\n"
-"	color: #0d1b2a;\n"
-"}\n"
-"\n"
-"\n"
-"#inventory_sideBar {\n"
-"	border-bottom-left-radius: 20px;\n"
-"}\n"
-"\n"
-"QScrollBar {\n"
-"	background-color: white;\n"
-"}\n"
-"\n"
-"\n"
-"/* botones */\n"
-"QPushButton {\n"
-"	border: none;\n"
-"}\n"
-"QPushButton:hover {\n"
-"	border: 2px solid #38a3a5;\n"
-"	border-radius: 3px;\n"
-"	border-bottom-right-radius: 10px;\n"
-"	padding-right: 2px;\n"
-"	padding-bottom: 3px;\n"
-"}\n"
-"\n"
-"\n"
-"/* labels */\n"
-"QLabel {\n"
-"	font-family: \"Arial\", \"Calibri\", \"Sans-Serif\";\n"
-"	font-size: 18px;\n"
-"	font-weight: 600px;\n"
-"	margin-bottom: 5px;\n"
-"}\n"
-"\n"
-"\n"
-"#percentage_label {\n"
-"	margin-top: 25px;\n"
-"	margin-bottom: 0;\n"
-"}\n"
-"\n"
-"\n"
-"/* lineedit */\n"
-"QLineEdit {\n"
-"	background-color: #e0e1dd;\n"
-"	color: #0d1b2a;\n"
-"	border: none;\n"
-"	border-top: 1px solid;\n"
-"	border-bottom: 1px solid;\n"
-"	border-color: #0b7e7f;\n"
-"	border-radius: 10px;\n"
-""
-                        "	height: 24px;\n"
-"}\n"
-"QLineEdit:focus {\n"
-"	background-color: #3b66ab;\n"
-"	color: #fff;\n"
-"	border: 1px solid;\n"
-"	border-color: #0b7e7f;\n"
-"	font-size: 18px;\n"
-"}\n"
-"QLineEdit:disabled {\n"
-"	background-color: #bbb;\n"
-"	color: #555;\n"
-"}\n"
-"\n"
-"\n"
-"/* checkbuttons */\n"
-"")
-        self.inventory_sideBar.setFrameShape(QFrame.Shape.NoFrame)
-        self.inventory_sideBar.setFrameShadow(QFrame.Shadow.Raised)
-        self.inventory_sideBar_Vlayout = QVBoxLayout(self.inventory_sideBar)
-        self.inventory_sideBar_Vlayout.setSpacing(15)
-        self.inventory_sideBar_Vlayout.setObjectName(u"inventory_sideBar_Vlayout")
-        self.inventory_sideBar_Vlayout.setContentsMargins(0, 5, 0, 18)
-        self.btn_inventory_sideBarToggle = QPushButton(self.inventory_sideBar)
-        self.btn_inventory_sideBarToggle.setObjectName(u"btn_inventory_sideBarToggle")
-        sizePolicy1.setHeightForWidth(self.btn_inventory_sideBarToggle.sizePolicy().hasHeightForWidth())
-        self.btn_inventory_sideBarToggle.setSizePolicy(sizePolicy1)
-        self.btn_inventory_sideBarToggle.setMinimumSize(QSize(0, 0))
-        self.btn_inventory_sideBarToggle.setMaximumSize(QSize(16777215, 16777215))
-        self.btn_inventory_sideBarToggle.setIconSize(QSize(32, 32))
-        self.btn_inventory_sideBarToggle.setCheckable(True)
-
-        self.inventory_sideBar_Vlayout.addWidget(self.btn_inventory_sideBarToggle, 0, Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignTop)
-
-        self.inventory_side_bar_body = QFrame(self.inventory_sideBar)
-        self.inventory_side_bar_body.setObjectName(u"inventory_side_bar_body")
-        self.inventory_side_bar_body.setMinimumSize(QSize(0, 0))
-        self.inventory_side_bar_body.setFrameShape(QFrame.Shape.NoFrame)
-        self.inventory_side_bar_body.setFrameShadow(QFrame.Shadow.Plain)
-        self.inventory_side_bar_body_Vlayout = QVBoxLayout(self.inventory_side_bar_body)
-        self.inventory_side_bar_body_Vlayout.setSpacing(35)
-        self.inventory_side_bar_body_Vlayout.setObjectName(u"inventory_side_bar_body_Vlayout")
-        self.inventory_side_bar_body_Vlayout.setContentsMargins(8, 5, 8, 0)
-        self.inventory_sideBar_label_changePrices = QLabel(self.inventory_side_bar_body)
-        self.inventory_sideBar_label_changePrices.setObjectName(u"inventory_sideBar_label_changePrices")
-        self.inventory_sideBar_label_changePrices.setText(u"Cambios porcentuales de precios")
-        self.inventory_sideBar_label_changePrices.setTextFormat(Qt.TextFormat.PlainText)
-        self.inventory_sideBar_label_changePrices.setScaledContents(False)
-        self.inventory_sideBar_label_changePrices.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.inventory_sideBar_label_changePrices.setWordWrap(True)
-        self.inventory_sideBar_label_changePrices.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
-
-        self.inventory_side_bar_body_Vlayout.addWidget(self.inventory_sideBar_label_changePrices)
-
-        self.change_percentage_frame = QFrame(self.inventory_side_bar_body)
-        self.change_percentage_frame.setObjectName(u"change_percentage_frame")
-        self.change_percentage_frame.setFrameShape(QFrame.Shape.NoFrame)
-        self.change_percentage_frame.setFrameShadow(QFrame.Shadow.Raised)
-        self.change_percentage_frame_Vlayout = QVBoxLayout(self.change_percentage_frame)
-        self.change_percentage_frame_Vlayout.setSpacing(25)
-        self.change_percentage_frame_Vlayout.setObjectName(u"change_percentage_frame_Vlayout")
-        self.change_percentage_frame_Vlayout.setContentsMargins(0, 5, 0, 5)
-        self.checkbox_unit_prices = QCheckBox(self.change_percentage_frame)
-        self.inventory_checkbuttons_buttonGroup = QButtonGroup(MainWindow)
-        self.inventory_checkbuttons_buttonGroup.setObjectName(u"inventory_checkbuttons_buttonGroup")
-        self.inventory_checkbuttons_buttonGroup.setExclusive(True)
-        self.inventory_checkbuttons_buttonGroup.addButton(self.checkbox_unit_prices)
-        self.checkbox_unit_prices.setObjectName(u"checkbox_unit_prices")
-#if QT_CONFIG(tooltip)
-        self.checkbox_unit_prices.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt; color:#000000;\">Cambia el </span><span style=\" font-size:12pt; text-decoration: underline; color:#000000;\">precio normal</span><span style=\" font-size:12pt; color:#000000;\"> de los productos seleccionados.</span></p></body></html>")
-#endif // QT_CONFIG(tooltip)
-        self.checkbox_unit_prices.setText(u"Precios normales")
-        self.checkbox_unit_prices.setIconSize(QSize(24, 24))
-
-        self.change_percentage_frame_Vlayout.addWidget(self.checkbox_unit_prices)
-
-        self.checkbox_comercial_prices = QCheckBox(self.change_percentage_frame)
-        self.inventory_checkbuttons_buttonGroup.addButton(self.checkbox_comercial_prices)
-        self.checkbox_comercial_prices.setObjectName(u"checkbox_comercial_prices")
-#if QT_CONFIG(tooltip)
-        self.checkbox_comercial_prices.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt; color:#000000;\">Cambia el </span><span style=\" font-size:12pt; text-decoration: underline; color:#000000;\">precio comercial</span><span style=\" font-size:12pt; color:#000000;\"> de los productos seleccionados.</span></p></body></html>")
-#endif // QT_CONFIG(tooltip)
-        self.checkbox_comercial_prices.setText(u"Precios comerciales")
-        self.checkbox_comercial_prices.setIconSize(QSize(24, 24))
-
-        self.change_percentage_frame_Vlayout.addWidget(self.checkbox_comercial_prices)
-
-        self.percentage_label = QLabel(self.change_percentage_frame)
-        self.percentage_label.setObjectName(u"percentage_label")
-#if QT_CONFIG(tooltip)
-        self.percentage_label.setToolTip(u"")
-#endif // QT_CONFIG(tooltip)
-        self.percentage_label.setText(u"Porcentaje")
-        self.percentage_label.setTextFormat(Qt.TextFormat.PlainText)
-        self.percentage_label.setAlignment(Qt.AlignmentFlag.AlignBottom|Qt.AlignmentFlag.AlignLeading|Qt.AlignmentFlag.AlignLeft)
-        self.percentage_label.setWordWrap(True)
-        self.percentage_label.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
-
-        self.change_percentage_frame_Vlayout.addWidget(self.percentage_label)
-
-        self.lineEdit_percentage_change = QLineEdit(self.change_percentage_frame)
-        self.lineEdit_percentage_change.setObjectName(u"lineEdit_percentage_change")
-        self.lineEdit_percentage_change.setEnabled(False)
-        self.lineEdit_percentage_change.setAcceptDrops(False)
-#if QT_CONFIG(tooltip)
-        self.lineEdit_percentage_change.setToolTip(u"<html><head/><body><p><span style=\" font-size:12pt; color:#000000;\">Aumenta o disminuye un cierto porcentaje los precios normales/comerciales seleccionados.</span></p><p><span style=\" font-size:12pt; font-weight:600; color:#000000;\">EJ.: </span><span style=\" font-size:12pt; color:#000000;\">Para aumentar un 25% un valor introducir &quot;25&quot;, para disminuir el precio un 25% introducir &quot;-25&quot;.</span></p></body></html>")
-#endif // QT_CONFIG(tooltip)
-        self.lineEdit_percentage_change.setStyleSheet(u"")
-        self.lineEdit_percentage_change.setText(u"")
-        self.lineEdit_percentage_change.setMaxLength(12)
-        self.lineEdit_percentage_change.setFrame(False)
-        self.lineEdit_percentage_change.setPlaceholderText(u"Ejemplo: 25")
-        self.lineEdit_percentage_change.setClearButtonEnabled(True)
-
-        self.change_percentage_frame_Vlayout.addWidget(self.lineEdit_percentage_change)
-
-        self.change_percentage_frame_Vlayout.setStretch(2, 1)
-        self.change_percentage_frame_Vlayout.setStretch(3, 1)
-
-        self.inventory_side_bar_body_Vlayout.addWidget(self.change_percentage_frame)
-
-        self.label_feedbackChangePercentage = QLabel(self.inventory_side_bar_body)
-        self.label_feedbackChangePercentage.setObjectName(u"label_feedbackChangePercentage")
-        self.label_feedbackChangePercentage.setStyleSheet(u"font-family: \"Verdana\";\n"
-"font-size: 16px;\n"
-"letter-spacing: 0px;\n"
-"word-spacing: 0px;\n"
-"color: #111;")
-        self.label_feedbackChangePercentage.setText(u"")
-        self.label_feedbackChangePercentage.setTextFormat(Qt.TextFormat.PlainText)
-        self.label_feedbackChangePercentage.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.label_feedbackChangePercentage.setWordWrap(True)
-
-        self.inventory_side_bar_body_Vlayout.addWidget(self.label_feedbackChangePercentage)
-
-
-        self.inventory_sideBar_Vlayout.addWidget(self.inventory_side_bar_body, 0, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTop)
-
-        self.inventory_sideBar_Vlayout.setStretch(1, 10)
-
-        self.main_inventory_frame_Hlayout.addWidget(self.inventory_sideBar)
-
-        self.main_inventory_frame_Hlayout.setStretch(0, 10)
-
-        self.verticalLayout.addWidget(self.main_inventory_frame)
-
         self.tabWidget.addTab(self.tab1_inventory, "")
 #if QT_CONFIG(tooltip)
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab1_inventory), u"<html><head/><body><p>Muestra el inventario de una tabla que haya sido seleccionada desde el men\u00fa lateral de la izquierda.</p></body></html>")
@@ -1147,11 +758,11 @@ class Ui_MainWindow(object):
 
         self.sales_input_list = QListWidget(self.frame_list)
         self.sales_input_list.setObjectName(u"sales_input_list")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        sizePolicy5.setHorizontalStretch(0)
-        sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(self.sales_input_list.sizePolicy().hasHeightForWidth())
-        self.sales_input_list.setSizePolicy(sizePolicy5)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.sales_input_list.sizePolicy().hasHeightForWidth())
+        self.sales_input_list.setSizePolicy(sizePolicy3)
         self.sales_input_list.setStyleSheet(u"")
         self.sales_input_list.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
         self.sales_input_list.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
@@ -1201,11 +812,11 @@ class Ui_MainWindow(object):
 
         self.label_total = QLabel(self.sale_info)
         self.label_total.setObjectName(u"label_total")
-        sizePolicy6 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
-        sizePolicy6.setHorizontalStretch(0)
-        sizePolicy6.setVerticalStretch(0)
-        sizePolicy6.setHeightForWidth(self.label_total.sizePolicy().hasHeightForWidth())
-        self.label_total.setSizePolicy(sizePolicy6)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.label_total.sizePolicy().hasHeightForWidth())
+        self.label_total.setSizePolicy(sizePolicy4)
         self.label_total.setMaximumSize(QSize(400, 16777215))
         self.label_total.setStyleSheet(u"font-weight: 500;\n"
 "background-color: #bbb;\n"
@@ -1283,7 +894,7 @@ class Ui_MainWindow(object):
         self.tab2_toolBox.addItem(self.box1_sales_form, u"Formulario de venta")
         self.box2_sales_table = QWidget()
         self.box2_sales_table.setObjectName(u"box2_sales_table")
-        self.box2_sales_table.setGeometry(QRect(0, 0, 1116, 507))
+        self.box2_sales_table.setGeometry(QRect(0, 0, 796, 507))
         self.box2_sales_table.setStyleSheet(u"#box2_sales_table {\n"
 "	background-color: #e0e1dd;\n"
 "}\n"
@@ -1300,8 +911,11 @@ class Ui_MainWindow(object):
         self.box2_sales_Vlayout.setContentsMargins(0, 6, 10, 0)
         self.sales_table_header = QFrame(self.box2_sales_table)
         self.sales_table_header.setObjectName(u"sales_table_header")
-        sizePolicy3.setHeightForWidth(self.sales_table_header.sizePolicy().hasHeightForWidth())
-        self.sales_table_header.setSizePolicy(sizePolicy3)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Preferred)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.sales_table_header.sizePolicy().hasHeightForWidth())
+        self.sales_table_header.setSizePolicy(sizePolicy5)
         self.sales_table_header.setFrameShape(QFrame.Shape.NoFrame)
         self.sales_table_header.setFrameShadow(QFrame.Shadow.Raised)
         self.horizontalLayout_2 = QHBoxLayout(self.sales_table_header)
@@ -1310,8 +924,11 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.setContentsMargins(10, 5, 10, 20)
         self.sales_searchBar = QLineEdit(self.sales_table_header)
         self.sales_searchBar.setObjectName(u"sales_searchBar")
-        sizePolicy4.setHeightForWidth(self.sales_searchBar.sizePolicy().hasHeightForWidth())
-        self.sales_searchBar.setSizePolicy(sizePolicy4)
+        sizePolicy6 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Fixed)
+        sizePolicy6.setHorizontalStretch(0)
+        sizePolicy6.setVerticalStretch(0)
+        sizePolicy6.setHeightForWidth(self.sales_searchBar.sizePolicy().hasHeightForWidth())
+        self.sales_searchBar.setSizePolicy(sizePolicy6)
         self.sales_searchBar.setMinimumSize(QSize(150, 25))
         self.sales_searchBar.setMaximumSize(QSize(1000, 25))
         self.sales_searchBar.setAcceptDrops(False)
@@ -1337,8 +954,8 @@ class Ui_MainWindow(object):
         self.cb_sales_colsFilter.addItem("")
         self.cb_sales_colsFilter.addItem("")
         self.cb_sales_colsFilter.setObjectName(u"cb_sales_colsFilter")
-        sizePolicy4.setHeightForWidth(self.cb_sales_colsFilter.sizePolicy().hasHeightForWidth())
-        self.cb_sales_colsFilter.setSizePolicy(sizePolicy4)
+        sizePolicy6.setHeightForWidth(self.cb_sales_colsFilter.sizePolicy().hasHeightForWidth())
+        self.cb_sales_colsFilter.setSizePolicy(sizePolicy6)
         self.cb_sales_colsFilter.setMinimumSize(QSize(60, 26))
         self.cb_sales_colsFilter.setMaximumSize(QSize(350, 26))
 #if QT_CONFIG(tooltip)
@@ -1353,8 +970,8 @@ class Ui_MainWindow(object):
 
         self.date_range_picker = QFrame(self.sales_table_header)
         self.date_range_picker.setObjectName(u"date_range_picker")
-        sizePolicy4.setHeightForWidth(self.date_range_picker.sizePolicy().hasHeightForWidth())
-        self.date_range_picker.setSizePolicy(sizePolicy4)
+        sizePolicy6.setHeightForWidth(self.date_range_picker.sizePolicy().hasHeightForWidth())
+        self.date_range_picker.setSizePolicy(sizePolicy6)
         self.date_range_picker.setMinimumSize(QSize(0, 0))
         self.date_range_picker.setFrameShape(QFrame.Shape.NoFrame)
         self.date_range_picker.setFrameShadow(QFrame.Shadow.Raised)
@@ -1364,17 +981,17 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.setContentsMargins(15, 0, 0, 0)
         self.label_from_date = QLabel(self.date_range_picker)
         self.label_from_date.setObjectName(u"label_from_date")
-        sizePolicy4.setHeightForWidth(self.label_from_date.sizePolicy().hasHeightForWidth())
-        self.label_from_date.setSizePolicy(sizePolicy4)
-        self.label_from_date.setMinimumSize(QSize(75, 0))
+        sizePolicy1.setHeightForWidth(self.label_from_date.sizePolicy().hasHeightForWidth())
+        self.label_from_date.setSizePolicy(sizePolicy1)
+        self.label_from_date.setMinimumSize(QSize(60, 0))
 
         self.horizontalLayout_3.addWidget(self.label_from_date, 0, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter)
 
         self.dateEdit_from_date = QDateEdit(self.date_range_picker)
         self.dateEdit_from_date.setObjectName(u"dateEdit_from_date")
-        sizePolicy4.setHeightForWidth(self.dateEdit_from_date.sizePolicy().hasHeightForWidth())
-        self.dateEdit_from_date.setSizePolicy(sizePolicy4)
-        self.dateEdit_from_date.setMinimumSize(QSize(140, 0))
+        sizePolicy6.setHeightForWidth(self.dateEdit_from_date.sizePolicy().hasHeightForWidth())
+        self.dateEdit_from_date.setSizePolicy(sizePolicy6)
+        self.dateEdit_from_date.setMinimumSize(QSize(120, 0))
         self.dateEdit_from_date.setMaximumSize(QSize(16777215, 16777215))
         self.dateEdit_from_date.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
         self.dateEdit_from_date.setAccelerated(True)
@@ -1387,17 +1004,17 @@ class Ui_MainWindow(object):
 
         self.label_to_date = QLabel(self.date_range_picker)
         self.label_to_date.setObjectName(u"label_to_date")
-        sizePolicy4.setHeightForWidth(self.label_to_date.sizePolicy().hasHeightForWidth())
-        self.label_to_date.setSizePolicy(sizePolicy4)
-        self.label_to_date.setMinimumSize(QSize(75, 0))
+        sizePolicy6.setHeightForWidth(self.label_to_date.sizePolicy().hasHeightForWidth())
+        self.label_to_date.setSizePolicy(sizePolicy6)
+        self.label_to_date.setMinimumSize(QSize(60, 0))
 
         self.horizontalLayout_3.addWidget(self.label_to_date, 0, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter)
 
         self.dateEdit_to_date = QDateEdit(self.date_range_picker)
         self.dateEdit_to_date.setObjectName(u"dateEdit_to_date")
-        sizePolicy4.setHeightForWidth(self.dateEdit_to_date.sizePolicy().hasHeightForWidth())
-        self.dateEdit_to_date.setSizePolicy(sizePolicy4)
-        self.dateEdit_to_date.setMinimumSize(QSize(140, 0))
+        sizePolicy6.setHeightForWidth(self.dateEdit_to_date.sizePolicy().hasHeightForWidth())
+        self.dateEdit_to_date.setSizePolicy(sizePolicy6)
+        self.dateEdit_to_date.setMinimumSize(QSize(120, 0))
         self.dateEdit_to_date.setMaximumSize(QSize(16777215, 16777215))
         self.dateEdit_to_date.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
         self.dateEdit_to_date.setAccelerated(True)
@@ -1567,7 +1184,7 @@ class Ui_MainWindow(object):
         self.tab3_debts_Vlayout.setContentsMargins(0, 0, 0, 5)
         self.debts_info = QFrame(self.tab3_debts)
         self.debts_info.setObjectName(u"debts_info")
-        self.debts_info.setFrameShape(QFrame.Shape.StyledPanel)
+        self.debts_info.setFrameShape(QFrame.Shape.NoFrame)
         self.debts_info.setFrameShadow(QFrame.Shadow.Raised)
         self.debts_info_Vlayout = QVBoxLayout(self.debts_info)
         self.debts_info_Vlayout.setSpacing(6)
@@ -1575,8 +1192,8 @@ class Ui_MainWindow(object):
         self.debts_info_Vlayout.setContentsMargins(0, 8, 0, 0)
         self.debts_header = QFrame(self.debts_info)
         self.debts_header.setObjectName(u"debts_header")
-        sizePolicy3.setHeightForWidth(self.debts_header.sizePolicy().hasHeightForWidth())
-        self.debts_header.setSizePolicy(sizePolicy3)
+        sizePolicy5.setHeightForWidth(self.debts_header.sizePolicy().hasHeightForWidth())
+        self.debts_header.setSizePolicy(sizePolicy5)
         self.debts_header.setFrameShape(QFrame.Shape.NoFrame)
         self.debts_header.setFrameShadow(QFrame.Shadow.Raised)
         self.horizontalLayout_4 = QHBoxLayout(self.debts_header)
@@ -1585,8 +1202,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4.setContentsMargins(10, 5, 10, 20)
         self.debts_searchBar = QLineEdit(self.debts_header)
         self.debts_searchBar.setObjectName(u"debts_searchBar")
-        sizePolicy4.setHeightForWidth(self.debts_searchBar.sizePolicy().hasHeightForWidth())
-        self.debts_searchBar.setSizePolicy(sizePolicy4)
+        sizePolicy6.setHeightForWidth(self.debts_searchBar.sizePolicy().hasHeightForWidth())
+        self.debts_searchBar.setSizePolicy(sizePolicy6)
         self.debts_searchBar.setMinimumSize(QSize(150, 25))
         self.debts_searchBar.setMaximumSize(QSize(1000, 25))
         font1 = QFont()
@@ -1616,8 +1233,8 @@ class Ui_MainWindow(object):
         self.cb_debts_colsFilter.addItem("")
         self.cb_debts_colsFilter.addItem("")
         self.cb_debts_colsFilter.setObjectName(u"cb_debts_colsFilter")
-        sizePolicy4.setHeightForWidth(self.cb_debts_colsFilter.sizePolicy().hasHeightForWidth())
-        self.cb_debts_colsFilter.setSizePolicy(sizePolicy4)
+        sizePolicy6.setHeightForWidth(self.cb_debts_colsFilter.sizePolicy().hasHeightForWidth())
+        self.cb_debts_colsFilter.setSizePolicy(sizePolicy6)
         self.cb_debts_colsFilter.setMinimumSize(QSize(60, 26))
         self.cb_debts_colsFilter.setMaximumSize(QSize(350, 26))
 #if QT_CONFIG(tooltip)
@@ -1736,17 +1353,9 @@ class Ui_MainWindow(object):
         self.centralwidget_HLayout.addWidget(self.main_body)
 
         MainWindow.setCentralWidget(self.centralwidget)
-        QWidget.setTabOrder(self.tabWidget, self.cb_inventory_colsFilter)
-        QWidget.setTabOrder(self.cb_inventory_colsFilter, self.tv_inventory_data)
-        QWidget.setTabOrder(self.tv_inventory_data, self.btn_add_product_inventory)
-        QWidget.setTabOrder(self.btn_add_product_inventory, self.btn_delete_product_inventory)
-        QWidget.setTabOrder(self.btn_delete_product_inventory, self.btn_side_barToggle)
+        QWidget.setTabOrder(self.tabWidget, self.btn_side_barToggle)
         QWidget.setTabOrder(self.btn_side_barToggle, self.tables_ListWidget)
-        QWidget.setTabOrder(self.tables_ListWidget, self.btn_inventory_sideBarToggle)
-        QWidget.setTabOrder(self.btn_inventory_sideBarToggle, self.checkbox_unit_prices)
-        QWidget.setTabOrder(self.checkbox_unit_prices, self.checkbox_comercial_prices)
-        QWidget.setTabOrder(self.checkbox_comercial_prices, self.lineEdit_percentage_change)
-        QWidget.setTabOrder(self.lineEdit_percentage_change, self.btn_add_product)
+        QWidget.setTabOrder(self.tables_ListWidget, self.btn_add_product)
         QWidget.setTabOrder(self.btn_add_product, self.sales_input_list)
         QWidget.setTabOrder(self.sales_input_list, self.dateTimeEdit_sale)
         QWidget.setTabOrder(self.dateTimeEdit_sale, self.lineEdit_paid)
@@ -1761,7 +1370,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.tabWidget.setCurrentIndex(1)
-        self.tab2_toolBox.setCurrentIndex(0)
+        self.tab2_toolBox.setCurrentIndex(1)
         self.tab2_toolBox.layout().setSpacing(4)
 
 
@@ -1786,8 +1395,6 @@ class Ui_MainWindow(object):
         self.btn_sidebar_list_delete_item.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:11pt;\">Elimina la categor\u00eda seleccionada.</span></p><p><span style=\" font-size:11pt;\">Los productos pertenecientes a una categor\u00eda borrada pasan a ser de la categor\u00eda &quot;varios&quot;.</span></p><p><span style=\" font-size:11pt; font-weight:700;\">Nota: </span><span style=\" font-size:11pt;\">esta acci\u00f3n es </span><span style=\" font-size:11pt; font-weight:700;\">permanente</span><span style=\" font-size:11pt;\"> e </span><span style=\" font-size:11pt; font-weight:700;\">irreversible</span><span style=\" font-size:11pt;\">, debe estar seguro de querer eliminar una categor\u00eda.</span></p></body></html>", None))
 #endif // QT_CONFIG(tooltip)
         self.btn_sidebar_list_delete_item.setText(QCoreApplication.translate("MainWindow", u"Borrar categor\u00eda", None))
-
-        self.btn_inventory_sideBarToggle.setText("")
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab1_inventory), QCoreApplication.translate("MainWindow", u"Inventario", None))
         self.btn_add_product.setText(QCoreApplication.translate("MainWindow", u"Agregar producto", None))
         self.label_paid.setText(QCoreApplication.translate("MainWindow", u"ABONA", None))
