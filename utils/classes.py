@@ -66,7 +66,7 @@ from common.enumclasses import (
     DateAndTimeFormat,
 )
 from current_account.data_model import ProductsBalanceModel
-from utils.proxy_models import ProductsBalanceProxyModel
+from current_account.proxy_model import ProductsBalanceProxyModel
 from utils.productbalancedelegate import ProductsBalanceDelegate
 from common.customvalidators import (
     SearchBarValidator,

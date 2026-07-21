@@ -61,7 +61,9 @@ from common.enumclasses import (
     DateTimeRanges,
     WorkerPriority,
 )
-from utils.proxy_models import InventoryProxyModel, SalesProxyModel, DebtsProxyModel
+from inventory.proxy_model import InventoryProxyModel
+from sales.proxy_model import SalesProxyModel
+from current_account.proxy_model import DebtsProxyModel
 from common.eventfilters import (
     BackgroundEventFilter,
     CategoryItemEventFilter,
