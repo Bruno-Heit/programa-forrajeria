@@ -6,12 +6,12 @@ pasadas correctamente entre ellos sin errores.
 
 from PySide6.QtCore import QSortFilterProxyModel, Qt, QModelIndex, Signal, QDateTime
 
-from utils.model_classes import (
-    InventoryTableModel,
-    SalesTableModel,
+from current_account.data_model import (
     DebtsTableModel,
     ProductsBalanceModel,
 )
+from sales.data_model import SalesTableModel
+from inventory.data_model import InventoryTableModel
 from common.enumclasses import (
     InvModelCols,
     SalesModelCols,

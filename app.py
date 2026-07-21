@@ -39,7 +39,8 @@ from common.messageboxes import AskBeforeDeletion, WarnAccountHasBalance
 from ui.ui_mainwindow import Ui_MainWindow
 from ui.customCalendars import CustomCalendar
 from common.functionutils import *
-from utils.model_classes import InventoryTableModel, SalesTableModel, DebtsTableModel
+from current_account.data_model import DebtsTableModel
+from sales.data_model import SalesTableModel
 from common.delegates import InventoryDelegate, SalesDelegate, DebtsDelegate
 from utils.workerclasses import WorkerManager, WorkerSelect, WorkerDelete
 from database.dboperations import DatabaseRepository, ensureDateTimeISOformat

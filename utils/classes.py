@@ -65,7 +65,7 @@ from common.enumclasses import (
     SaleDialogDimensions,
     DateAndTimeFormat,
 )
-from utils.model_classes import ProductsBalanceModel
+from current_account.data_model import ProductsBalanceModel
 from utils.proxy_models import ProductsBalanceProxyModel
 from utils.productbalancedelegate import ProductsBalanceDelegate
 from common.customvalidators import (
