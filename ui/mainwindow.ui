@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>840</width>
+    <width>870</width>
     <height>605</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>840</width>
+    <width>870</width>
     <height>500</height>
    </size>
   </property>
@@ -844,7 +844,7 @@ QDateEdit::drop-down {
            <item>
             <widget class="QToolBox" name="tab2_toolBox">
              <property name="currentIndex">
-              <number>1</number>
+              <number>0</number>
              </property>
              <property name="tabSpacing">
               <number>4</number>
@@ -854,7 +854,7 @@ QDateEdit::drop-down {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>1116</width>
+                <width>826</width>
                 <height>507</height>
                </rect>
               </property>
@@ -1312,7 +1312,7 @@ border-right: 1px solid #111;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>796</width>
+                <width>826</width>
                 <height>507</height>
                </rect>
               </property>
@@ -1569,7 +1569,7 @@ border-right: 1px solid #111;</string>
                        </property>
                        <property name="minimumSize">
                         <size>
-                         <width>120</width>
+                         <width>140</width>
                          <height>0</height>
                         </size>
                        </property>
@@ -1631,7 +1631,7 @@ border-right: 1px solid #111;</string>
                        </property>
                        <property name="minimumSize">
                         <size>
-                         <width>120</width>
+                         <width>140</width>
                          <height>0</height>
                         </size>
                        </property>

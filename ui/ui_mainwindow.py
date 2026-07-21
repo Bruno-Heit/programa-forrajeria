@@ -28,8 +28,8 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(840, 605)
-        MainWindow.setMinimumSize(QSize(840, 500))
+        MainWindow.resize(870, 605)
+        MainWindow.setMinimumSize(QSize(870, 500))
 #if QT_CONFIG(tooltip)
         MainWindow.setToolTip(u"")
 #endif // QT_CONFIG(tooltip)
@@ -661,7 +661,7 @@ class Ui_MainWindow(object):
         self.tab2_toolBox.setObjectName(u"tab2_toolBox")
         self.box1_sales_form = QWidget()
         self.box1_sales_form.setObjectName(u"box1_sales_form")
-        self.box1_sales_form.setGeometry(QRect(0, 0, 1116, 507))
+        self.box1_sales_form.setGeometry(QRect(0, 0, 826, 507))
         self.box1_sales_form.setStyleSheet(u"#box1_sales_form {\n"
 "	background-color: #e0e1dd;\n"
 "}\n"
@@ -894,7 +894,7 @@ class Ui_MainWindow(object):
         self.tab2_toolBox.addItem(self.box1_sales_form, u"Formulario de venta")
         self.box2_sales_table = QWidget()
         self.box2_sales_table.setObjectName(u"box2_sales_table")
-        self.box2_sales_table.setGeometry(QRect(0, 0, 796, 507))
+        self.box2_sales_table.setGeometry(QRect(0, 0, 826, 507))
         self.box2_sales_table.setStyleSheet(u"#box2_sales_table {\n"
 "	background-color: #e0e1dd;\n"
 "}\n"
@@ -991,7 +991,7 @@ class Ui_MainWindow(object):
         self.dateEdit_from_date.setObjectName(u"dateEdit_from_date")
         sizePolicy6.setHeightForWidth(self.dateEdit_from_date.sizePolicy().hasHeightForWidth())
         self.dateEdit_from_date.setSizePolicy(sizePolicy6)
-        self.dateEdit_from_date.setMinimumSize(QSize(120, 0))
+        self.dateEdit_from_date.setMinimumSize(QSize(140, 0))
         self.dateEdit_from_date.setMaximumSize(QSize(16777215, 16777215))
         self.dateEdit_from_date.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
         self.dateEdit_from_date.setAccelerated(True)
@@ -1014,7 +1014,7 @@ class Ui_MainWindow(object):
         self.dateEdit_to_date.setObjectName(u"dateEdit_to_date")
         sizePolicy6.setHeightForWidth(self.dateEdit_to_date.sizePolicy().hasHeightForWidth())
         self.dateEdit_to_date.setSizePolicy(sizePolicy6)
-        self.dateEdit_to_date.setMinimumSize(QSize(120, 0))
+        self.dateEdit_to_date.setMinimumSize(QSize(140, 0))
         self.dateEdit_to_date.setMaximumSize(QSize(16777215, 16777215))
         self.dateEdit_to_date.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
         self.dateEdit_to_date.setAccelerated(True)
@@ -1370,7 +1370,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.tabWidget.setCurrentIndex(1)
-        self.tab2_toolBox.setCurrentIndex(1)
+        self.tab2_toolBox.setCurrentIndex(0)
         self.tab2_toolBox.layout().setSpacing(4)
 
 
