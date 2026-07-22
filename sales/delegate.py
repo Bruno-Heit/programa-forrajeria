@@ -1,0 +1,226 @@
+
+from PySide6.QtWidgets import (
+    QWidget,
+    QStyledItemDelegate,
+    QStyleOptionViewItem,
+    QComboBox,
+    QLineEdit,
+    QDateTimeEdit,
+)
+from PySide6.QtCore import (
+    Qt,
+    QModelIndex,
+    QSize,
+    QPersistentModelIndex,
+    QAbstractItemModel,
+    Signal,
+    Slot,
+    QDateTime,
+)
+
+from common.enumclasses import (
+    TableViewId,
+    SalesViewCols,
+    Regex,
+    WidgetStyle,
+)
+from common.functionutils import getProductNames
+from common.customvalidators import (
+    SaleDetailsValidator,
+    SaleQuantityValidator,
+    SaleTotalCostValidator,
+    SalePaidValidator,
+)
+from ui.customCalendars import CustomCalendar
+
+from re import compile, IGNORECASE, search, sub
+
+
+class SalesDelegate(QStyledItemDelegate):
+    """Clase DELEGADO que se encarga de personalizar/editar celdas del QTableView de ventas,
+    además, normalmente, el método 'setModelData' se encarga de validar datos, pero en este
+    caso no es necesario ya que cada editor (dependiendo de la columna) tiene un validador."""
+
+    fieldIsValid: Signal = Signal(
+        object
+    )  # extensión de 'validator.validationSucceeded',
+    # emite hacia MainWindow un TableViewId.
+    fieldIsInvalid: Signal = Signal(
+        object
+    )  # extensión de 'validator.validationFailed',
+    # emite hacia MainWindow tuple(TableViewId,
+    # feedback como str).
+
+    # * columnas: 0: detalle de venta |
+    # * 1: cantidad (+ unidad de medida) | 2: producto |
+    # * 3: costo total | 4: abonado | 5: fecha y hora
+
+    def __init__(self, LOCAL_DATETIME_FORMAT: str) -> None:
+        super(SalesDelegate, self).__init__()
+        self._datetime_format = LOCAL_DATETIME_FORMAT
+
+    def createEditor(
+        self,
+        parent: QWidget,
+        option: QStyleOptionViewItem,
+        index: QModelIndex | QPersistentModelIndex,
+    ) -> QWidget:
+        editor: QWidget
+        validator = None
+
+        match index.column():
+            case SalesViewCols.SALES_DETAIL.value:  # detalle de venta
+                editor = QLineEdit(parent)
+                validator = SaleDetailsValidator(parent)
+                validator.validationSucceeded.connect(self.__onValidField)
+                validator.validationFailed.connect(self.__onInvalidField)
+                editor.setValidator(validator)
+
+            case SalesViewCols.SALES_QUANTITY.value:  # cantidad
+                editor = QLineEdit(parent)
+                validator = SaleQuantityValidator(parent)
+                validator.validationSucceeded.connect(self.__onValidField)
+                validator.validationFailed.connect(self.__onInvalidField)
+                editor.setValidator(validator)
+
+            case SalesViewCols.SALES_PRODUCT_NAME.value:  # producto
+                editor = QComboBox(parent)
+                editor.setEditable(False)
+                editor.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
+                editor.setFrame(False)
+                editor.addItems(getProductNames())
+                editor.setStyleSheet(WidgetStyle.DEF_COMBOBOX_ARROW_ICON.value)
+                editor.setPlaceholderText("Seleccionar un producto...")
+
+            case SalesViewCols.SALES_TOTAL_COST.value:  # costo total
+                editor = QLineEdit(parent)
+                validator = SaleTotalCostValidator(parent)
+                validator.validationSucceeded.connect(self.__onValidField)
+                validator.validationFailed.connect(self.__onInvalidField)
+                editor.setValidator(validator)
+
+            case SalesViewCols.SALES_TOTAL_PAID.value:  # abonado
+                editor = QLineEdit(parent)
+                validator = SalePaidValidator(parent)
+                validator.validationSucceeded.connect(self.__onValidField)
+                validator.validationFailed.connect(self.__onInvalidField)
+
+            case SalesViewCols.SALES_DATETIME.value:  # fecha y hora
+                editor = QDateTimeEdit(parent)
+                editor.setDisplayFormat(self._datetime_format)
+                editor.setCalendarPopup(True)
+                editor.setCalendarWidget(CustomCalendar(editor))
+                editor.setStyleSheet(WidgetStyle.DEF_DATETIMEEDIT_ARROW_ICON.value)
+        return editor
+
+    @Slot()
+    def __onValidField(self):
+        """
+        Emite la señal 'fieldIsValid' hacia MainWindow. Funciona principalmente
+        como una extensión de la señal 'validator.validationSucceeded'.
+        """
+        self.fieldIsValid.emit(TableViewId.SALES_TABLE_VIEW)
+        return None
+
+    @Slot(str)
+    def __onInvalidField(self, feedback_text: str):
+        """
+        Emite la señal 'fieldIsValid' hacia MainWindow. Funciona principalmente
+        como una extensión de la señal 'validator.validationSucceeded'.
+
+        Parámetros
+        ----------
+        feedback_text: str
+            Texto con feedback para mostrar al usuario
+        """
+        self.fieldIsInvalid.emit((TableViewId.SALES_TABLE_VIEW, feedback_text))
+        return None
+
+    def setEditorData(
+        self, editor: QComboBox | QLineEdit, index: QModelIndex | QPersistentModelIndex
+    ) -> None:
+        if isinstance(editor, QComboBox):  # columna de producto
+            editor.setCurrentText(index.data(Qt.ItemDataRole.DisplayRole))
+
+        elif isinstance(
+            editor, QLineEdit
+        ):  # columnas de: detalle de venta | cantidad |
+            # costo total | abonado
+            match index.column():
+                case 1:  # cantidad
+                    editor.setText(
+                        str(index.data(Qt.ItemDataRole.DisplayRole)).split(" ", 1)[0]
+                    )
+
+                case _:  # detalle de venta | costo total | abonado
+                    editor.setText(index.data(Qt.ItemDataRole.DisplayRole))
+
+        elif isinstance(editor, QDateTimeEdit):  # columna de fecha y hora
+            cell_datetime = QDateTime.fromString(
+                index.data(Qt.ItemDataRole.DisplayRole), self._datetime_format
+            )
+            editor.setDateTime(cell_datetime)
+
+        return None
+
+    def setModelData(
+        self,
+        editor: QComboBox | QLineEdit | QDateTimeEdit,
+        model: QAbstractItemModel,
+        index: QModelIndex | QPersistentModelIndex,
+    ) -> None:
+        col: int = index.column()
+
+        # * formateo de datos
+        if isinstance(editor, QComboBox):  # producto
+            value = editor.currentText()
+
+        elif isinstance(
+            editor, QLineEdit
+        ):  # detalle de venta | cantidad | costo total | abonado
+            value = editor.text().strip()
+            match col:
+                case 0:  # detalle de venta
+                    pattern = compile(Regex.SALES_DETAILS_PRICE_TYPE.value, IGNORECASE)
+                    # busca en el valor el patrón de (P. NORMAL) ó (P. COMERCIAL)
+                    price_type = search(pattern, value)
+
+                    # verifica si alguno de esos strings está, sino lo coloca al final
+                    if not search(pattern, value):
+                        price_type = search(
+                            pattern, model.data(index, Qt.ItemDataRole.DisplayRole)
+                        )
+                        price_type = str(price_type.group()).upper()
+
+                        value = f"{value} {price_type}"
+
+                    # si SÍ ESTÁ lo reemplaza...
+                    else:
+                        price_type = str(price_type.group()).upper().replace(" ", "")
+                        value = sub(pattern, price_type, value)
+
+                case 1 | 3 | 4:  # cantidad | costo total | abonado
+                    if value.split(" ")[0].endswith((",", ".")):
+                        value = value.rstrip(",.")
+
+            editor.setText(value)
+
+        elif isinstance(editor, QDateTimeEdit):  # fecha y hora
+            value = editor.text()
+
+        model.setData(index, value, Qt.ItemDataRole.EditRole)
+        return None
+
+    def updateEditorGeometry(
+        self,
+        editor: QComboBox | QLineEdit,
+        option: QStyleOptionViewItem,
+        index: QModelIndex | QPersistentModelIndex,
+    ) -> None:
+        editor.setGeometry(option.rect)
+        return None
+
+    def sizeHint(self, option: QStyleOptionViewItem, index: QModelIndex) -> QSize:
+        return super().sizeHint(option, index)
+
+

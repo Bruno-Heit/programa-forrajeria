@@ -41,7 +41,9 @@ from ui.customCalendars import CustomCalendar
 from common.functionutils import *
 from current_account.data_model import DebtsTableModel
 from sales.data_model import SalesTableModel
-from common.delegates import InventoryDelegate, SalesDelegate, DebtsDelegate
+from inventory.delegate import InventoryDelegate
+from sales.delegate import SalesDelegate
+from current_account.delegate import DebtsDelegate
 from utils.workerclasses import WorkerManager, WorkerSelect, WorkerDelete
 from database.dboperations import DatabaseRepository, ensureDateTimeISOformat
 from common.customvalidators import SalePaidValidator, CategoryNameValidator
